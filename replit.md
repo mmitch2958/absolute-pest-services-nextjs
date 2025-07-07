@@ -106,6 +106,7 @@ Changelog:
 - July 07, 2025. Implemented complete customer portal with authentication system including user registration, login, and session management using express-session and bcrypt for password hashing
 - July 07, 2025. Built customer dashboard with service request management, inspection tracking, payment history, and profile management features
 - July 07, 2025. Added service request creation system allowing authenticated users to submit detailed pest control requests with priority levels and status tracking
+- July 07, 2025. Created dedicated service pages for all professional services including Wildlife Control (with humane non-kill extraction methods), Bed Bug Treatment, Termite Treatment, and Bat Removal with detailed information, processes, and call-to-action sections
 
 ## User Preferences
 

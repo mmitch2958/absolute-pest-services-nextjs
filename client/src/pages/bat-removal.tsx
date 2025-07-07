@@ -1,0 +1,296 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Phone, Calendar, ArrowLeft, Shield, Moon, Clock, CheckCircle, AlertTriangle, Eye } from "lucide-react";
+import { AbsoluteLogoSimple } from "@/components/absolute-logo";
+import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
+
+export default function BatRemoval() {
+  return (
+    <div className="min-h-screen bg-[hsl(0,0%,98%)]">
+      {/* Header */}
+      <header className="bg-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
+              <AbsoluteLogoSimple />
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="outline"
+                onClick={() => window.location.href = '/'}
+                className="flex items-center"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Home
+              </Button>
+              <div className="hidden lg:flex flex-col text-right">
+                <span className="text-sm text-[hsl(210,13%,28%)]">24/7 Emergency Service</span>
+                <span className="text-lg font-semibold text-[hsl(132,48%,35%)]">610-869-3000</span>
+              </div>
+              <ScheduleInspectionModal>
+                <Button className="bg-[hsl(36,100%,47%)] text-white hover:bg-[hsl(36,100%,37%)] font-medium">
+                  Get Quote
+                </Button>
+              </ScheduleInspectionModal>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-red-600 to-red-700 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-5xl font-bold text-white mb-6">
+            Safe & Humane Bat Removal
+          </h1>
+          <p className="text-xl text-red-100 mb-8 max-w-3xl mx-auto">
+            Professional bat removal services with exclusion methods to prevent future infestations. 
+            We follow all legal requirements and humane practices for safe bat removal.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button className="bg-white text-red-600 px-8 py-4 text-lg font-semibold hover:bg-gray-100">
+              <Phone className="mr-2 h-5 w-5" />
+              Call Now: 610-869-3000
+            </Button>
+            <ScheduleInspectionModal>
+              <Button className="bg-[hsl(36,100%,47%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(36,100%,37%)]">
+                <Calendar className="mr-2 h-5 w-5" />
+                Schedule Inspection
+              </Button>
+            </ScheduleInspectionModal>
+          </div>
+        </div>
+      </section>
+
+      {/* Service Overview */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-4xl font-bold text-[hsl(210,13%,28%)] mb-6">
+                Professional Bat Exclusion Services
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Bats are protected wildlife that require specialized knowledge and techniques for safe, 
+                legal removal. Our certified technicians understand bat behavior, roosting patterns, 
+                and the legal requirements for humane bat exclusion.
+              </p>
+              <p className="text-lg text-gray-600 mb-8">
+                We use one-way exclusion devices that allow bats to leave naturally but prevent their 
+                return. Our methods comply with federal and state regulations while effectively solving 
+                your bat problem without harming these beneficial animals.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-3">
+                    <Shield className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-[hsl(210,13%,28%)] font-medium">Humane Methods</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-3">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-[hsl(210,13%,28%)] font-medium">Legal Compliance</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-3">
+                    <Clock className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-[hsl(210,13%,28%)] font-medium">Seasonal Timing</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-3">
+                    <Eye className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-[hsl(210,13%,28%)] font-medium">Expert Assessment</span>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <img 
+                src="https://images.unsplash.com/photo-1604768277415-b2e3c3cb7e08?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                alt="Bat hanging in attic" 
+                className="rounded-xl shadow-lg w-full h-auto"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Bats Are Problematic */}
+      <section className="py-20 bg-[hsl(0,0%,98%)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-[hsl(210,13%,28%)] mb-4">
+              Why Bats Need Professional Removal
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              While bats are beneficial for pest control, they can create serious problems when they roost in homes.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Health Risks",
+                description: "Bats can carry rabies and histoplasmosis. Their droppings (guano) can cause respiratory issues and disease transmission.",
+                color: "bg-red-600"
+              },
+              {
+                title: "Property Damage",
+                description: "Accumulated guano and urine can damage insulation, ceiling tiles, and create persistent odors throughout the home.",
+                color: "bg-[hsl(36,100%,47%)]"
+              },
+              {
+                title: "Noise Disturbance",
+                description: "Bats are active at night, creating scratching, chittering, and flapping sounds that disturb sleep and peace.",
+                color: "bg-purple-600"
+              },
+              {
+                title: "Rapid Reproduction",
+                description: "Bat colonies can grow quickly, with females returning to the same roost annually to give birth to pups.",
+                color: "bg-[hsl(132,48%,35%)]"
+              },
+              {
+                title: "Difficult Access",
+                description: "Bats roost in hard-to-reach areas like attics, wall voids, and soffits, requiring specialized equipment and expertise.",
+                color: "bg-[hsl(207,73%,44%)]"
+              },
+              {
+                title: "Legal Protection",
+                description: "Many bat species are protected by law, requiring specific timing and methods for removal that only professionals know.",
+                color: "bg-teal-600"
+              }
+            ].map((issue, index) => (
+              <Card key={index} className="bg-white hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className={`w-12 h-12 ${issue.color} rounded-full flex items-center justify-center mb-4`}>
+                    <AlertTriangle className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-[hsl(210,13%,28%)] mb-3">
+                    {issue.title}
+                  </h3>
+                  <p className="text-gray-600">
+                    {issue.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Our Exclusion Process */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-[hsl(210,13%,28%)] mb-4">
+              Our Humane Bat Exclusion Process
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              We follow a proven process that ensures complete bat removal while complying with all legal requirements.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                step: "1",
+                title: "Inspection",
+                description: "Thorough assessment to identify entry points, roost locations, and bat species for proper timing and approach.",
+                color: "bg-red-600"
+              },
+              {
+                step: "2",
+                title: "Exclusion Setup",
+                description: "Installation of one-way devices that allow bats to leave but prevent re-entry, timed according to bat lifecycle.",
+                color: "bg-[hsl(36,100%,47%)]"
+              },
+              {
+                step: "3",
+                title: "Monitoring",
+                description: "Careful observation to ensure all bats have left the structure before sealing entry points permanently.",
+                color: "bg-[hsl(132,48%,35%)]"
+              },
+              {
+                step: "4",
+                title: "Sealing & Cleanup",
+                description: "Complete sealing of entry points and professional cleanup of guano and contaminated materials.",
+                color: "bg-[hsl(207,73%,44%)]"
+              }
+            ].map((process, index) => (
+              <Card key={index} className="bg-[hsl(0,0%,98%)] text-center">
+                <CardContent className="p-6">
+                  <div className={`w-16 h-16 ${process.color} rounded-full flex items-center justify-center mx-auto mb-4`}>
+                    <span className="text-2xl font-bold text-white">{process.step}</span>
+                  </div>
+                  <h3 className="text-xl font-semibold text-[hsl(210,13%,28%)] mb-3">
+                    {process.title}
+                  </h3>
+                  <p className="text-gray-600">
+                    {process.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Important Information */}
+      <section className="py-20 bg-yellow-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-yellow-100 rounded-xl p-8 border-l-4 border-yellow-400">
+            <div className="flex items-center mb-4">
+              <AlertTriangle className="w-8 h-8 text-yellow-600 mr-4" />
+              <h3 className="text-2xl font-bold text-yellow-800">Important Legal Information</h3>
+            </div>
+            <div className="text-yellow-700 space-y-4">
+              <p className="text-lg">
+                <strong>Maternity Season:</strong> Bat exclusion cannot be performed during maternity season (typically May-August) 
+                when flightless pups are present. This protects both the bats and ensures legal compliance.
+              </p>
+              <p className="text-lg">
+                <strong>Protected Species:</strong> Many bat species are protected by federal and state laws. Only licensed 
+                professionals should handle bat removal to ensure compliance with wildlife protection regulations.
+              </p>
+              <p className="text-lg">
+                <strong>Health Precautions:</strong> Never attempt to handle bats yourself. Professional equipment and safety 
+                protocols are essential due to potential disease transmission risks.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-red-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Need Professional Bat Removal?
+          </h2>
+          <p className="text-xl text-red-100 mb-8 max-w-3xl mx-auto">
+            Don't risk your health or legal complications. Our certified bat removal specialists 
+            will handle your bat problem safely, humanely, and legally.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button className="bg-white text-red-600 px-8 py-4 text-lg font-semibold hover:bg-gray-100">
+              <Phone className="mr-2 h-5 w-5" />
+              Call Now: 610-869-3000
+            </Button>
+            <ScheduleInspectionModal>
+              <Button className="bg-[hsl(36,100%,47%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(36,100%,37%)]">
+                <Calendar className="mr-2 h-5 w-5" />
+                Schedule Free Inspection
+              </Button>
+            </ScheduleInspectionModal>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}

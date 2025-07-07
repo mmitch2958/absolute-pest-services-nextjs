@@ -17,7 +17,8 @@ export default function Home() {
       description: "Professional wildlife removal and exclusion services to protect your property from unwanted animals.",
       color: "bg-[hsl(132,48%,35%)]",
       textColor: "text-[hsl(132,48%,35%)]",
-      hoverColor: "hover:text-[hsl(132,48%,25%)]"
+      hoverColor: "hover:text-[hsl(132,48%,25%)]",
+      route: "/wildlife-control"
     },
     {
       icon: <Bed className="w-8 h-8 text-white" />,
@@ -25,7 +26,8 @@ export default function Home() {
       description: "Complete bed bug elimination using proven methods. Get back to peaceful sleep with our effective treatments.",
       color: "bg-[hsl(207,73%,44%)]",
       textColor: "text-[hsl(207,73%,44%)]",
-      hoverColor: "hover:text-[hsl(207,73%,34%)]"
+      hoverColor: "hover:text-[hsl(207,73%,34%)]",
+      route: "/bed-bug-treatment"
     },
     {
       icon: <HomeIcon className="w-8 h-8 text-white" />,
@@ -33,7 +35,8 @@ export default function Home() {
       description: "Protect your investment with comprehensive termite inspections, treatments, and baiting systems.",
       color: "bg-[hsl(36,100%,47%)]",
       textColor: "text-[hsl(36,100%,47%)]",
-      hoverColor: "hover:text-[hsl(36,100%,37%)]"
+      hoverColor: "hover:text-[hsl(36,100%,37%)]",
+      route: "/termite-treatment"
     },
     {
       icon: <Crown className="w-8 h-8 text-white" />,
@@ -41,7 +44,8 @@ export default function Home() {
       description: "Safe and humane bat removal services with exclusion methods to prevent future infestations.",
       color: "bg-red-600",
       textColor: "text-red-600",
-      hoverColor: "hover:text-red-700"
+      hoverColor: "hover:text-red-700",
+      route: "/bat-removal"
     }
   ];
 
@@ -175,7 +179,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {services.map((service, index) => (
-              <Card key={index} className="bg-[hsl(0,0%,98%)] hover:shadow-lg transition-shadow">
+              <Card key={index} className="bg-[hsl(0,0%,98%)] hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = service.route}>
                 <CardContent className="p-8 text-center">
                   <div className={`w-16 h-16 ${service.color} rounded-full flex items-center justify-center mx-auto mb-6`}>
                     {service.icon}

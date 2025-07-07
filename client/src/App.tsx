@@ -8,6 +8,10 @@ import Auth from "@/pages/auth";
 import Dashboard from "@/pages/dashboard";
 import RequestService from "@/pages/request-service";
 import LogoShowcase from "@/pages/logo-showcase";
+import WildlifeControl from "@/pages/wildlife-control";
+import BedBugTreatment from "@/pages/bed-bug-treatment";
+import TermiteTreatment from "@/pages/termite-treatment";
+import BatRemoval from "@/pages/bat-removal";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +22,10 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/request-service" component={RequestService} />
       <Route path="/logos" component={LogoShowcase} />
+      <Route path="/wildlife-control" component={WildlifeControl} />
+      <Route path="/bed-bug-treatment" component={BedBugTreatment} />
+      <Route path="/termite-treatment" component={TermiteTreatment} />
+      <Route path="/bat-removal" component={BatRemoval} />
       <Route component={NotFound} />
     </Switch>
   );
