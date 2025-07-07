@@ -103,6 +103,9 @@ This is a full-stack web application for a pest control service company built wi
 Changelog:
 - July 07, 2025. Initial setup
 - July 07, 2025. Added comprehensive inspection scheduling system with modal form, date/time selection, and backend integration
+- July 07, 2025. Implemented complete customer portal with authentication system including user registration, login, and session management using express-session and bcrypt for password hashing
+- July 07, 2025. Built customer dashboard with service request management, inspection tracking, payment history, and profile management features
+- July 07, 2025. Added service request creation system allowing authenticated users to submit detailed pest control requests with priority levels and status tracking
 
 ## User Preferences
 

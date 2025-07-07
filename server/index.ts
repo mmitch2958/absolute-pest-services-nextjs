@@ -2,6 +2,13 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Extend session type to include userId
+declare module 'express-session' {
+  interface SessionData {
+    userId: number;
+  }
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

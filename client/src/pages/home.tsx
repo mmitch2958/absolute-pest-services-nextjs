@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, Calendar, MapPin, Clock, Mail, Check, Bug, Bed, Home as HomeIcon, Crown, Facebook, Twitter, Instagram } from "lucide-react";
+import { Phone, Calendar, MapPin, Clock, Mail, Check, Bug, Bed, Home as HomeIcon, Crown, Facebook, Twitter, Instagram, User } from "lucide-react";
 import HeroSlider from "@/components/hero-slider";
 import ContactForm from "@/components/contact-form";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
@@ -152,6 +152,13 @@ export default function Home() {
                   Schedule Inspection
                 </Button>
               </ScheduleInspectionModal>
+              <Button 
+                className="bg-[hsl(207,73%,44%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(207,73%,34%)]"
+                onClick={() => window.location.href = '/auth'}
+              >
+                <User className="mr-2 h-5 w-5" />
+                Customer Portal
+              </Button>
             </div>
           </div>
         </div>

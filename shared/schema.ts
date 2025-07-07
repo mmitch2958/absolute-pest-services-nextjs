@@ -1,11 +1,17 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  phone: text("phone"),
+  address: text("address"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const contactSubmissions = pgTable("contact_submissions", {
@@ -21,6 +27,7 @@ export const contactSubmissions = pgTable("contact_submissions", {
 
 export const inspectionSchedules = pgTable("inspection_schedules", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   phone: text("phone").notNull(),
@@ -35,9 +42,42 @@ export const inspectionSchedules = pgTable("inspection_schedules", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const serviceRequests = pgTable("service_requests", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  serviceType: text("service_type").notNull(),
+  description: text("description").notNull(),
+  address: text("address").notNull(),
+  priority: text("priority").notNull().default("medium"),
+  status: text("status").notNull().default("pending"),
+  scheduledDate: timestamp("scheduled_date"),
+  completedDate: timestamp("completed_date"),
+  estimatedCost: decimal("estimated_cost", { precision: 10, scale: 2 }),
+  finalCost: decimal("final_cost", { precision: 10, scale: 2 }),
+  technicianNotes: text("technician_notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  serviceRequestId: integer("service_request_id").references(() => serviceRequests.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").notNull().default("pending"),
+  paymentMethod: text("payment_method"),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
+  email: true,
   password: true,
+  firstName: true,
+  lastName: true,
+  phone: true,
+  address: true,
 });
 
 export const insertContactSchema = createInsertSchema(contactSubmissions).omit({
@@ -51,9 +91,40 @@ export const insertInspectionSchema = createInsertSchema(inspectionSchedules).om
   status: true,
 });
 
+export const insertServiceRequestSchema = createInsertSchema(serviceRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  status: true,
+});
+
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  createdAt: true,
+  paidAt: true,
+});
+
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
+export const registerSchema = insertUserSchema.extend({
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertContact = z.infer<typeof insertContactSchema>;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
 export type InsertInspection = z.infer<typeof insertInspectionSchema>;
 export type InspectionSchedule = typeof inspectionSchedules.$inferSelect;
+export type InsertServiceRequest = z.infer<typeof insertServiceRequestSchema>;
+export type ServiceRequest = typeof serviceRequests.$inferSelect;
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = typeof payments.$inferSelect;
+export type LoginData = z.infer<typeof loginSchema>;
+export type RegisterData = z.infer<typeof registerSchema>;
