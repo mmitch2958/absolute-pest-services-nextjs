@@ -1,4 +1,4 @@
-import { users, contactSubmissions, type User, type InsertUser, type ContactSubmission, type InsertContact } from "@shared/schema";
+import { users, contactSubmissions, inspectionSchedules, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection } from "@shared/schema";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -6,19 +6,25 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   createContactSubmission(contact: InsertContact): Promise<ContactSubmission>;
   getContactSubmissions(): Promise<ContactSubmission[]>;
+  createInspectionSchedule(inspection: InsertInspection): Promise<InspectionSchedule>;
+  getInspectionSchedules(): Promise<InspectionSchedule[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private contactSubmissions: Map<number, ContactSubmission>;
+  private inspectionSchedules: Map<number, InspectionSchedule>;
   private currentUserId: number;
   private currentContactId: number;
+  private currentInspectionId: number;
 
   constructor() {
     this.users = new Map();
     this.contactSubmissions = new Map();
+    this.inspectionSchedules = new Map();
     this.currentUserId = 1;
     this.currentContactId = 1;
+    this.currentInspectionId = 1;
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -51,6 +57,23 @@ export class MemStorage implements IStorage {
 
   async getContactSubmissions(): Promise<ContactSubmission[]> {
     return Array.from(this.contactSubmissions.values());
+  }
+
+  async createInspectionSchedule(insertInspection: InsertInspection): Promise<InspectionSchedule> {
+    const id = this.currentInspectionId++;
+    const inspection: InspectionSchedule = {
+      ...insertInspection,
+      id,
+      status: "pending",
+      createdAt: new Date(),
+      message: insertInspection.message || null,
+    };
+    this.inspectionSchedules.set(id, inspection);
+    return inspection;
+  }
+
+  async getInspectionSchedules(): Promise<InspectionSchedule[]> {
+    return Array.from(this.inspectionSchedules.values());
   }
 }
 

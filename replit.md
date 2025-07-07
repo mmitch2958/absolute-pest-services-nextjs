@@ -102,6 +102,7 @@ This is a full-stack web application for a pest control service company built wi
 
 Changelog:
 - July 07, 2025. Initial setup
+- July 07, 2025. Added comprehensive inspection scheduling system with modal form, date/time selection, and backend integration
 
 ## User Preferences
 

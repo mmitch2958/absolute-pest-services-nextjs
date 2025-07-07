@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 
 const images = [
-  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080',
-  'https://images.unsplash.com/photo-1504472478235-9bc48ba4d60f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080',
-  'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080'
+  'https://ossireland.ie/wp-content/uploads/2019/10/Pest-Control-Banner.jpg',
+  'https://i.postimg.cc/kGYDtvzw/Pest-Control-4.jpg',
+  'https://precisionteachingresource.net/wp-content/uploads/2025/02/side-view-of-pest-control-worker-spraying-pesticid-2024-11-17-14-09-44-utc-1.jpg'
 ];
 
 export default function HeroSlider() {

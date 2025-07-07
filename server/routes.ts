@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema } from "@shared/schema";
+import { insertContactSchema, insertInspectionSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -44,6 +44,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(submissions);
     } catch (error) {
       console.error("Error fetching contact submissions:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Schedule inspection endpoint
+  app.post("/api/inspection", async (req, res) => {
+    try {
+      const validatedData = insertInspectionSchema.parse(req.body);
+      const inspection = await storage.createInspectionSchedule(validatedData);
+      
+      // In a real application, you would send email notifications here
+      // For now, we'll just log the inspection request
+      console.log("New inspection scheduled:", inspection);
+      
+      res.json({ 
+        success: true, 
+        message: "Inspection scheduled successfully",
+        id: inspection.id 
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Invalid inspection data", 
+          errors: error.errors 
+        });
+      } else {
+        console.error("Error scheduling inspection:", error);
+        res.status(500).json({ 
+          success: false, 
+          message: "Internal server error" 
+        });
+      }
+    }
+  });
+
+  // Get all inspection schedules (for admin purposes)
+  app.get("/api/inspection", async (req, res) => {
+    try {
+      const inspections = await storage.getInspectionSchedules();
+      res.json(inspections);
+    } catch (error) {
+      console.error("Error fetching inspection schedules:", error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 

@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Calendar, MapPin, Clock, Mail, Check, Bug, Bed, Home as HomeIcon, Crown, Facebook, Twitter, Instagram } from "lucide-react";
 import HeroSlider from "@/components/hero-slider";
 import ContactForm from "@/components/contact-form";
+import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -107,9 +108,11 @@ export default function Home() {
                 <span className="text-sm text-[hsl(210,13%,28%)]">24/7 Emergency Service</span>
                 <span className="text-lg font-semibold text-[hsl(132,48%,35%)]">610-869-3000</span>
               </div>
-              <Button className="bg-[hsl(36,100%,47%)] text-white hover:bg-[hsl(36,100%,37%)] font-medium">
-                Get Quote
-              </Button>
+              <ScheduleInspectionModal>
+                <Button className="bg-[hsl(36,100%,47%)] text-white hover:bg-[hsl(36,100%,37%)] font-medium">
+                  Get Quote
+                </Button>
+              </ScheduleInspectionModal>
             </div>
 
             <button 
@@ -143,10 +146,12 @@ export default function Home() {
                 <Phone className="mr-2 h-5 w-5" />
                 Call Now: 610-869-3000
               </Button>
-              <Button className="bg-[hsl(36,100%,47%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(36,100%,37%)]">
-                <Calendar className="mr-2 h-5 w-5" />
-                Schedule Inspection
-              </Button>
+              <ScheduleInspectionModal>
+                <Button className="bg-[hsl(36,100%,47%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(36,100%,37%)]">
+                  <Calendar className="mr-2 h-5 w-5" />
+                  Schedule Inspection
+                </Button>
+              </ScheduleInspectionModal>
             </div>
           </div>
         </div>
@@ -218,7 +223,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <img 
-                src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" 
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuaebBNkLVdPkKj_YBNlVfc86zb3bORHEkyw&s" 
                 alt="Professional pest control team" 
                 className="rounded-xl shadow-lg w-full h-auto"
               />
