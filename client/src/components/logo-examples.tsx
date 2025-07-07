@@ -1,4 +1,5 @@
 import { Shield, Bug, Home, Zap, Target, CheckCircle } from "lucide-react";
+import { AbsoluteLogo } from "./absolute-logo";
 
 // Logo Option 1: Shield with Bug (Security & Protection Theme)
 export const LogoOption1 = ({ className = "h-10 w-auto" }: { className?: string }) => (
@@ -168,6 +169,14 @@ export const LogoExamples = () => {
       <h2 className="text-2xl font-bold text-center mb-8">Logo Design Options</h2>
       
       <div className="grid gap-8">
+        <div className="bg-white p-6 rounded-lg shadow-sm border-4 border-[hsl(132,48%,35%)]">
+          <h3 className="text-lg font-semibold mb-4 text-[hsl(132,48%,35%)]">⭐ NEW: Circular Badge Style (Based on Your Reference)</h3>
+          <div className="flex justify-center mb-4">
+            <AbsoluteLogo size="large" />
+          </div>
+          <p className="text-sm text-gray-600 mt-2">Circular badge design with pest silhouettes and curved text, inspired by your reference image</p>
+        </div>
+
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h3 className="text-lg font-semibold mb-4">Option 1: Shield Protection</h3>
           <LogoOption1 className="h-16" />

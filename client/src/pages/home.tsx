@@ -5,6 +5,7 @@ import { Phone, Calendar, MapPin, Clock, Mail, Check, Bug, Bed, Home as HomeIcon
 import HeroSlider from "@/components/hero-slider";
 import ContactForm from "@/components/contact-form";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
+import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -89,10 +90,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <div className="text-2xl font-bold text-[hsl(132,48%,35%)]">
-                <Bug className="inline mr-2" />
-                Absolute Pest Services
-              </div>
+              <AbsoluteLogoSimple />
             </div>
             
             <nav className="hidden md:flex space-x-8">
