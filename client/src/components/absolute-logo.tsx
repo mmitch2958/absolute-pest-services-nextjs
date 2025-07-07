@@ -26,7 +26,7 @@ export const AbsoluteLogo = ({ className = "", size = 'medium' }: LogoProps) => 
       <circle 
         cx={center} 
         cy={center} 
-        r={width * 0.48} 
+        r={width * 0.5 
         fill="none" 
         stroke="hsl(132,48%,35%)" 
         strokeWidth={strokeWidth}
@@ -39,7 +39,7 @@ export const AbsoluteLogo = ({ className = "", size = 'medium' }: LogoProps) => 
         r={radius} 
         fill="white" 
         stroke="hsl(132,48%,35%)" 
-        strokeWidth={strokeWidth * 0.8}
+        strokeWidth={strokeWidth * 1.5}
       />
 
       {/* Cross Lines */}
@@ -112,8 +112,8 @@ export const AbsoluteLogo = ({ className = "", size = 'medium' }: LogoProps) => 
 
       {/* Curved Text */}
       <defs>
-        <path id="topCurve" d={`M ${center - radius * 1.3} ${center} A ${radius * 1.3} ${radius * 1.3} 0 0 1 ${center + radius * 1.3} ${center}`}/>
-        <path id="bottomCurve" d={`M ${center + radius * 1.3} ${center} A ${radius * 1.3} ${radius * 1.3} 0 0 1 ${center - radius * 1.3} ${center}`}/>
+        <path id="topCurve" d={`M ${center - radius * 1} ${center} A ${radius * 1} ${radius * 1.1} 0 0 1 ${center + radius * 1} ${center}`}/>
+        <path id="bottomCurve" d={`M ${center + radius * 1.1} ${center} A ${radius * 1.1} ${radius * 1.1} 0 0 1 ${center - radius * 1.1} ${center}`}/>
       </defs>
       
       <text fontSize={fontSize} fontWeight="bold" fontFamily="Arial, sans-serif" fill="hsl(132,48%,35%)">
