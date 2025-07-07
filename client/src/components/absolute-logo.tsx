@@ -26,7 +26,7 @@ export const AbsoluteLogo = ({ className = "", size = 'medium' }: LogoProps) => 
       <circle 
         cx={center} 
         cy={center} 
-        r={width * 0.5 
+        r={width * 0.5} 
         fill="none" 
         stroke="hsl(132,48%,35%)" 
         strokeWidth={strokeWidth}
