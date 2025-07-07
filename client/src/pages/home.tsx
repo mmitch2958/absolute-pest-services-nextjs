@@ -158,17 +158,6 @@ export default function Home() {
                 Customer Portal
               </Button>
             </div>
-            
-            {/* Logo Options Button */}
-            <div className="mt-6 text-center">
-              <Button 
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-[hsl(210,13%,28%)] px-6 py-2"
-                onClick={() => window.location.href = '/logos'}
-              >
-                View Logo Design Options
-              </Button>
-            </div>
           </div>
         </div>
       </section>
