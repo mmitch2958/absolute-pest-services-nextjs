@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import Auth from "@/pages/auth";
 import Dashboard from "@/pages/dashboard";
 import RequestService from "@/pages/request-service";
+import LogoShowcase from "@/pages/logo-showcase";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/auth" component={Auth} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/request-service" component={RequestService} />
+      <Route path="/logos" component={LogoShowcase} />
       <Route component={NotFound} />
     </Switch>
   );
