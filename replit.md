@@ -47,7 +47,7 @@ This is a full-stack web application for a pest control service company built wi
 
 ### Storage Implementation
 - **Interface-based Design**: `IStorage` interface for flexible data access
-- **Memory Storage**: Development fallback using in-memory storage
+- **Database Storage**: PostgreSQL with Drizzle ORM for data persistence
 - **Production Ready**: Configured for PostgreSQL with connection pooling
 
 ## Data Flow

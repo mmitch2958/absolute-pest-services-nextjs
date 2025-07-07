@@ -1,4 +1,6 @@
 import { users, contactSubmissions, inspectionSchedules, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -10,71 +12,48 @@ export interface IStorage {
   getInspectionSchedules(): Promise<InspectionSchedule[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private contactSubmissions: Map<number, ContactSubmission>;
-  private inspectionSchedules: Map<number, InspectionSchedule>;
-  private currentUserId: number;
-  private currentContactId: number;
-  private currentInspectionId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.contactSubmissions = new Map();
-    this.inspectionSchedules = new Map();
-    this.currentUserId = 1;
-    this.currentContactId = 1;
-    this.currentInspectionId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
 
   async createContactSubmission(insertContact: InsertContact): Promise<ContactSubmission> {
-    const id = this.currentContactId++;
-    const contact: ContactSubmission = {
-      ...insertContact,
-      id,
-      createdAt: new Date(),
-    };
-    this.contactSubmissions.set(id, contact);
+    const [contact] = await db
+      .insert(contactSubmissions)
+      .values(insertContact)
+      .returning();
     return contact;
   }
 
   async getContactSubmissions(): Promise<ContactSubmission[]> {
-    return Array.from(this.contactSubmissions.values());
+    return await db.select().from(contactSubmissions);
   }
 
   async createInspectionSchedule(insertInspection: InsertInspection): Promise<InspectionSchedule> {
-    const id = this.currentInspectionId++;
-    const inspection: InspectionSchedule = {
-      ...insertInspection,
-      id,
-      status: "pending",
-      createdAt: new Date(),
-      message: insertInspection.message || null,
-    };
-    this.inspectionSchedules.set(id, inspection);
+    const [inspection] = await db
+      .insert(inspectionSchedules)
+      .values(insertInspection)
+      .returning();
     return inspection;
   }
 
   async getInspectionSchedules(): Promise<InspectionSchedule[]> {
-    return Array.from(this.inspectionSchedules.values());
+    return await db.select().from(inspectionSchedules);
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
