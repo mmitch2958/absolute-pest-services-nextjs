@@ -155,7 +155,7 @@ export default function Home() {
                 onClick={() => window.location.href = '/auth'}
               >
                 <User className="mr-2 h-5 w-5" />
-                Customer Portal
+                Client Login
               </Button>
             </div>
           </div>
