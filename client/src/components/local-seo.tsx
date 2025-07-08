@@ -42,8 +42,10 @@ export default function LocalSEO({
     },
     "url": "https://absolutepestservices.com",
     "sameAs": [
+      "https://www.google.com/maps/place/Absolute+Pest+Services",
       "https://www.facebook.com/absolutepestservices",
-      "https://www.google.com/maps/place/Absolute+Pest+Services"
+      "https://www.yelp.com/biz/absolute-pest-services",
+      "https://www.bbb.org/absolute-pest-services"
     ],
     "priceRange": "$$",
     "paymentAccepted": "Cash, Credit Card, Check",

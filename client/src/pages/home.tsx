@@ -7,6 +7,8 @@ import ContactForm from "@/components/contact-form";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import LocalSEO from "@/components/local-seo";
+import GoogleBusinessIntegration from "@/components/google-business-integration";
+import GoogleReviewRequest from "@/components/google-review-request";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -333,6 +335,16 @@ export default function Home() {
                       <p className="text-gray-600">info@absolutepestservices.com</p>
                     </div>
                   </div>
+                </div>
+                
+                {/* Google Business Integration */}
+                <div className="mt-8">
+                  <GoogleBusinessIntegration />
+                </div>
+                
+                {/* Google Review Request */}
+                <div className="mt-6">
+                  <GoogleReviewRequest />
                 </div>
               </CardContent>
             </Card>

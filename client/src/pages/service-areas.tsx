@@ -4,6 +4,8 @@ import { Phone, MapPin, Clock, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import ScheduleInspectionModal from '@/components/schedule-inspection-modal';
+import GoogleBusinessIntegration from '@/components/google-business-integration';
+import GoogleReviewRequest from '@/components/google-review-request';
 
 export default function ServiceAreas() {
   const serviceAreas = [
@@ -100,6 +102,11 @@ export default function ServiceAreas() {
           ))}
         </div>
 
+        {/* Google Business Integration */}
+        <div className="mb-12">
+          <GoogleBusinessIntegration />
+        </div>
+
         {/* Business Hours & Contact */}
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           <Card className="bg-white dark:bg-gray-800 shadow-lg">
@@ -183,6 +190,11 @@ export default function ServiceAreas() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Google Review Request */}
+        <div className="mb-12">
+          <GoogleReviewRequest />
+        </div>
 
         {/* CTA Section */}
         <div className="text-center">
