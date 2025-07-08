@@ -9,6 +9,28 @@ mailService.setApiKey(process.env.SENDGRID_API_KEY);
 
 const FROM_EMAIL = 'noreply@absolutepestservices.com';
 const TO_EMAIL = 'info@absolutepestservices.com';
+const ADDITIONAL_EMAIL = 'letshiremikemitchell@gmail.com';
+
+// Helper function to send notifications to both business emails
+async function sendBusinessNotifications(subject: string, html: string, text: string): Promise<boolean> {
+  const businessEmailSent = await sendEmail({
+    to: TO_EMAIL,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text
+  });
+
+  const additionalEmailSent = await sendEmail({
+    to: ADDITIONAL_EMAIL,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text
+  });
+
+  return businessEmailSent && additionalEmailSent;
+}
 
 interface EmailParams {
   to: string;
@@ -97,14 +119,8 @@ export async function sendContactFormEmail(data: {
     The Absolute Pest Services Team
   `;
 
-  // Send both emails
-  const businessEmailSent = await sendEmail({
-    to: TO_EMAIL,
-    from: FROM_EMAIL,
-    subject: businessSubject,
-    html: businessHtml,
-    text: businessText
-  });
+  // Send business notification emails
+  const businessEmailsSent = await sendBusinessNotifications(businessSubject, businessHtml, businessText);
 
   const customerEmailSent = await sendEmail({
     to: data.email,
@@ -114,7 +130,7 @@ export async function sendContactFormEmail(data: {
     text: customerText
   });
 
-  return businessEmailSent && customerEmailSent;
+  return businessEmailsSent && customerEmailSent;
 }
 
 // Inspection scheduling email
@@ -206,14 +222,8 @@ export async function sendInspectionScheduleEmail(data: {
     The Absolute Pest Services Team
   `;
 
-  // Send both emails
-  const businessEmailSent = await sendEmail({
-    to: TO_EMAIL,
-    from: FROM_EMAIL,
-    subject: businessSubject,
-    html: businessHtml,
-    text: businessText
-  });
+  // Send business notification emails
+  const businessEmailsSent = await sendBusinessNotifications(businessSubject, businessHtml, businessText);
 
   const customerEmailSent = await sendEmail({
     to: data.email,
@@ -223,7 +233,7 @@ export async function sendInspectionScheduleEmail(data: {
     text: customerText
   });
 
-  return businessEmailSent && customerEmailSent;
+  return businessEmailsSent && customerEmailSent;
 }
 
 // Service request email
@@ -301,14 +311,8 @@ export async function sendServiceRequestEmail(data: {
     The Absolute Pest Services Team
   `;
 
-  // Send both emails
-  const businessEmailSent = await sendEmail({
-    to: TO_EMAIL,
-    from: FROM_EMAIL,
-    subject: businessSubject,
-    html: businessHtml,
-    text: businessText
-  });
+  // Send business notification emails
+  const businessEmailsSent = await sendBusinessNotifications(businessSubject, businessHtml, businessText);
 
   const customerEmailSent = await sendEmail({
     to: data.customerEmail,
@@ -318,5 +322,5 @@ export async function sendServiceRequestEmail(data: {
     text: customerText
   });
 
-  return businessEmailSent && customerEmailSent;
+  return businessEmailsSent && customerEmailSent;
 }

@@ -107,7 +107,7 @@ Changelog:
 - July 07, 2025. Built customer dashboard with service request management, inspection tracking, payment history, and profile management features
 - July 07, 2025. Added service request creation system allowing authenticated users to submit detailed pest control requests with priority levels and status tracking
 - July 07, 2025. Created dedicated service pages for all professional services including Wildlife Control (with humane non-kill extraction methods), Bed Bug Treatment, Termite Treatment, and Bat Removal with detailed information, processes, and call-to-action sections
-- July 08, 2025. Implemented comprehensive dual email notification system using SendGrid for all forms: sends confirmation emails to customers and notification emails to info@absolutepestservices.com with descriptive subjects (Contact Form Submission, Inspection Schedule Request, Service Request)
+- July 08, 2025. Implemented comprehensive dual email notification system using SendGrid for all forms: sends confirmation emails to customers and notification emails to both info@absolutepestservices.com and letshiremikemitchell@gmail.com with descriptive subjects (Contact Form Submission, Inspection Schedule Request, Service Request)
 - July 08, 2025. Updated company logo to show "A P S" in circular design with full "Absolute Pest Services" text on the right, made logo clickable to return to homepage across all pages
 
 ## User Preferences
