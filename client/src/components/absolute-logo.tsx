@@ -116,15 +116,9 @@ export const AbsoluteLogo = ({ className = "", size = 'medium' }: LogoProps) => 
         <path id="bottomCurve" d={`M ${center + radius * 1.1} ${center} A ${radius * 1.1} ${radius * 1.1} 0 0 1 ${center - radius * 1.1} ${center}`}/>
       </defs>
       
-      <text fontSize={fontSize} fontWeight="bold" fontFamily="Arial, sans-serif" fill="hsl(132,48%,35%)">
+      <text fontSize={fontSize * 1.2} fontWeight="bold" fontFamily="Arial, sans-serif" fill="hsl(132,48%,35%)">
         <textPath href="#topCurve" startOffset="50%" textAnchor="middle">
-          ABSOLUTE
-        </textPath>
-      </text>
-      
-      <text fontSize={fontSize} fontWeight="bold" fontFamily="Arial, sans-serif" fill="hsl(132,48%,35%)">
-        <textPath href="#bottomCurve" startOffset="50%" textAnchor="middle">
-          PEST SERVICES
+          A P S
         </textPath>
       </text>
     </svg>
@@ -135,10 +129,9 @@ export const AbsoluteLogo = ({ className = "", size = 'medium' }: LogoProps) => 
 export const AbsoluteLogoSimple = ({ className = "" }: { className?: string }) => (
   <div className={`flex items-center space-x-3 ${className}`}>
     <AbsoluteLogo size="small" />
-    <div className="flex items-center space-x-2">
-      <span className="text-xl font-bold text-[hsl(210,13%,28%)]">A</span>
-      <span className="text-xl font-bold text-[hsl(132,48%,35%)]">P</span>
-      <span className="text-xl font-bold text-[hsl(210,13%,28%)]">S</span>
+    <div className="flex flex-col">
+      <span className="text-lg font-bold text-[hsl(210,13%,28%)]">Absolute</span>
+      <span className="text-sm font-semibold text-[hsl(132,48%,35%)]">Pest Services</span>
     </div>
   </div>
 );
