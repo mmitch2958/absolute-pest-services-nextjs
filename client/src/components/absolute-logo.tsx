@@ -130,7 +130,7 @@ export const AbsoluteLogoSimple = ({ className = "" }: { className?: string }) =
   <div className={`flex items-center space-x-3 ${className}`}>
     <AbsoluteLogo size="small" />
     <div className="flex flex-col">
-      <span className="text-lg font-bold text-[hsl(210,13%,28%)]">Absolute</span>
+      <span className="text-lg font-bold text-[hsl(210,13%,28%)]">ABSOLUTE</span>
       <span className="text-sm font-semibold text-[hsl(132,48%,35%)]">Pest Services</span>
     </div>
   </div>
