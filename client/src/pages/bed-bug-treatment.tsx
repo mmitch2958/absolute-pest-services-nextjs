@@ -3,10 +3,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Calendar, ArrowLeft, Shield, Bed, Clock, CheckCircle, Bug, Zap } from "lucide-react";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
+import LocalSEO from "@/components/local-seo";
 
 export default function BedBugTreatment() {
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
+      <LocalSEO 
+        title="Professional Bed Bug Treatment & Extermination Services"
+        description="Expert bed bug treatment and extermination services in PA, DE, MD. Comprehensive inspections, heat treatments, and effective elimination of bed bugs. Licensed professionals with proven results."
+        serviceName="Bed Bug Treatment"
+        serviceArea="Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE"
+      />
       {/* Header */}
       <header className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

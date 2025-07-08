@@ -108,6 +108,7 @@ export default function Home() {
               <button onClick={() => scrollToSection('home')} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">Home</button>
               <button onClick={() => scrollToSection('services')} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">Services</button>
               <button onClick={() => scrollToSection('areas')} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">Service Areas</button>
+              <button onClick={() => window.location.href = '/service-areas'} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">Coverage Areas</button>
               <button onClick={() => scrollToSection('about')} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">About</button>
               <button onClick={() => scrollToSection('contact')} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">Contact</button>
             </nav>

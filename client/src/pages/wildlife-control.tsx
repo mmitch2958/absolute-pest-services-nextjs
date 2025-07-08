@@ -3,10 +3,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Calendar, ArrowLeft, Shield, Heart, Clock, CheckCircle } from "lucide-react";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
+import LocalSEO from "@/components/local-seo";
 
 export default function WildlifeControl() {
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
+      <LocalSEO 
+        title="Humane Wildlife Control Services - Non-Kill Extraction"
+        description="Professional humane wildlife control and removal services in PA, DE, MD. Non-kill extraction methods for raccoons, squirrels, opossums, skunks, and other wildlife. Safe, effective, and ethical wildlife management solutions."
+        serviceName="Wildlife Control"
+        serviceArea="Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE"
+      />
       {/* Header */}
       <header className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

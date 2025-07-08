@@ -3,10 +3,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Calendar, ArrowLeft, Shield, Moon, Clock, CheckCircle, AlertTriangle, Eye } from "lucide-react";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
+import LocalSEO from "@/components/local-seo";
 
 export default function BatRemoval() {
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
+      <LocalSEO 
+        title="Professional Bat Removal Services - Safe & Humane"
+        description="Professional bat removal and exclusion services in PA, DE, MD. Safe, humane bat removal with proper exclusion techniques. Protect your home from bats with licensed wildlife control specialists."
+        serviceName="Bat Removal"
+        serviceArea="Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE"
+      />
       {/* Header */}
       <header className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

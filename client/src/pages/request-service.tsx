@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, Bug, Home, Shield, Zap } from "lucide-react";
 import { useLocation } from "wouter";
+import LocalSEO from "@/components/local-seo";
 
 export default function RequestService() {
   const [, setLocation] = useLocation();
@@ -92,6 +93,12 @@ export default function RequestService() {
 
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
+      <LocalSEO 
+        title="Request Pest Control Service - Professional Extermination"
+        description="Request professional pest control services in PA, DE, MD. Fast response times, licensed technicians, and comprehensive pest management solutions. Get a free quote today."
+        serviceName="Pest Control Service Request"
+        serviceArea="Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE"
+      />
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

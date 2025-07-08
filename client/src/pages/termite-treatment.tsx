@@ -3,10 +3,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Calendar, ArrowLeft, Shield, Home, Clock, CheckCircle, AlertTriangle, Search } from "lucide-react";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
+import LocalSEO from "@/components/local-seo";
 
 export default function TermiteTreatment() {
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
+      <LocalSEO 
+        title="Termite Inspection & Treatment Services - Licensed Professionals"
+        description="Professional termite inspection, treatment, and prevention services in PA, DE, MD. Protect your home from termite damage with comprehensive solutions and ongoing monitoring. Licensed and experienced technicians."
+        serviceName="Termite Treatment"
+        serviceArea="Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE"
+      />
       {/* Header */}
       <header className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
