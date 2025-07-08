@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
+import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail } from "./email";
 
 // Extend session type to include userId
 declare module 'express-session' {
@@ -192,6 +193,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const serviceRequest = await storage.createServiceRequest(validatedData);
       
+      // Get user information for email
+      const user = await storage.getUser(req.session.userId!);
+      
+      if (user) {
+        // Send email notification
+        const emailSent = await sendServiceRequestEmail({
+          serviceType: validatedData.serviceType,
+          description: validatedData.description,
+          address: validatedData.address,
+          priority: validatedData.priority,
+          customerName: `${user.firstName} ${user.lastName}`,
+          customerEmail: user.email,
+          customerPhone: user.phone
+        });
+        
+        if (!emailSent) {
+          console.error("Failed to send service request email");
+        }
+      }
+      
       res.json({
         success: true,
         message: "Service request created successfully",
@@ -271,9 +292,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertContactSchema.parse(req.body);
       const contact = await storage.createContactSubmission(validatedData);
       
-      // In a real application, you would send an email here
-      // For now, we'll just log the submission
-      console.log("New contact submission:", contact);
+      // Send email notification
+      const emailSent = await sendContactFormEmail({
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        phone: validatedData.phone,
+        email: validatedData.email,
+        serviceType: validatedData.serviceType,
+        message: validatedData.message
+      });
+      
+      if (!emailSent) {
+        console.error("Failed to send contact form email");
+      }
       
       res.json({ 
         success: true, 
@@ -314,12 +345,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Schedule inspection endpoint
   app.post("/api/inspection", async (req, res) => {
     try {
-      const validatedData = insertInspectionSchema.parse(req.body);
+      // Parse the preferredDate string to Date object
+      const requestData = {
+        ...req.body,
+        preferredDate: new Date(req.body.preferredDate)
+      };
+      
+      const validatedData = insertInspectionSchema.parse(requestData);
       const inspection = await storage.createInspectionSchedule(validatedData);
       
-      // In a real application, you would send email notifications here
-      // For now, we'll just log the inspection request
-      console.log("New inspection scheduled:", inspection);
+      // Send email notification
+      const emailSent = await sendInspectionScheduleEmail({
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        phone: validatedData.phone,
+        email: validatedData.email,
+        address: validatedData.address,
+        serviceType: validatedData.serviceType,
+        preferredDate: validatedData.preferredDate,
+        preferredTime: validatedData.preferredTime,
+        urgency: validatedData.urgency,
+        message: validatedData.message
+      });
+      
+      if (!emailSent) {
+        console.error("Failed to send inspection schedule email");
+      }
       
       res.json({ 
         success: true, 
