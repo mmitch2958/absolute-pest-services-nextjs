@@ -135,9 +135,10 @@ export const AbsoluteLogo = ({ className = "", size = 'medium' }: LogoProps) => 
 export const AbsoluteLogoSimple = ({ className = "" }: { className?: string }) => (
   <div className={`flex items-center space-x-3 ${className}`}>
     <AbsoluteLogo size="small" />
-    <div className="flex flex-col">
-      <span className="text-lg font-bold text-[hsl(210,13%,28%)]">ABSOLUTE</span>
-      <span className="text-sm font-semibold text-[hsl(132,48%,35%)]">PEST SERVICES</span>
+    <div className="flex items-center space-x-2">
+      <span className="text-xl font-bold text-[hsl(210,13%,28%)]">A</span>
+      <span className="text-xl font-bold text-[hsl(132,48%,35%)]">P</span>
+      <span className="text-xl font-bold text-[hsl(210,13%,28%)]">S</span>
     </div>
   </div>
 );
