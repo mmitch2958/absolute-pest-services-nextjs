@@ -12,6 +12,7 @@ import WildlifeControl from "@/pages/wildlife-control";
 import BedBugTreatment from "@/pages/bed-bug-treatment";
 import TermiteTreatment from "@/pages/termite-treatment";
 import BatRemoval from "@/pages/bat-removal";
+import ServiceAreas from "@/pages/service-areas";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/bed-bug-treatment" component={BedBugTreatment} />
       <Route path="/termite-treatment" component={TermiteTreatment} />
       <Route path="/bat-removal" component={BatRemoval} />
+      <Route path="/service-areas" component={ServiceAreas} />
       <Route component={NotFound} />
     </Switch>
   );

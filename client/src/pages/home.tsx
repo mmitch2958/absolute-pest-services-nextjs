@@ -6,6 +6,7 @@ import HeroSlider from "@/components/hero-slider";
 import ContactForm from "@/components/contact-form";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
+import LocalSEO from "@/components/local-seo";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -89,6 +90,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
+      <LocalSEO 
+        title="Professional Pest Control Services in PA, DE, MD"
+        description="Expert pest control services in Chester County, Delaware County, Montgomery County PA, New Castle County DE, and Northeast MD. Humane wildlife control, bed bug treatment, termite control, and bat removal. Licensed and insured with 24/7 emergency service."
+        serviceName="Pest Control Services"
+        serviceArea="Pennsylvania, Delaware, Maryland"
+      />
       {/* Header */}
       <header className="bg-white shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
