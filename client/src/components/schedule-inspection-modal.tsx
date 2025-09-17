@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useToast } from '@/hooks/use-toast';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { trackEvent } from '@/lib/analytics';
 import { Calendar as CalendarIcon, Clock, MapPin, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -56,6 +57,9 @@ export default function ScheduleInspectionModal({ children }: ScheduleInspection
       return response.json();
     },
     onSuccess: () => {
+      // Track inspection scheduling conversion for Google Ads
+      trackEvent('form_submit', 'inspection', 'inspection_schedule_submit');
+      
       toast({
         title: "Inspection Scheduled Successfully",
         description: "We'll contact you within 24 hours to confirm your appointment!",

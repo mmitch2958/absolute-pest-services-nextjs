@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Send } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 
 interface ContactFormData {
   firstName: string;
@@ -36,6 +37,9 @@ export default function ContactForm() {
       return response.json();
     },
     onSuccess: () => {
+      // Track contact form conversion for Google Ads
+      trackEvent('form_submit', 'contact', 'contact_form_submit');
+      
       toast({
         title: "Message Sent Successfully",
         description: "We'll get back to you within 24 hours!",
