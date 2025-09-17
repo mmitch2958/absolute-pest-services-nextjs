@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 export default function GoogleReviewRequest() {
   const handleReviewClick = () => {
     // This would be your actual Google Business Profile review URL
-    const reviewUrl = "https://www.google.com/maps/place/Absolute+Pest+Services/@39.8221,-75.8274,17z/data=!4m8!3m7!1s0x0:0x0!8m2!3d39.8221!4d-75.8274!9m1!1b1!16s%2Fg%2F11abc123def?hl=en";
+    const reviewUrl = "https://search.google.com/local/writereview?placeid=ChIJAAAAAAAAAAARN46yHZs0fVk";
     window.open(reviewUrl, '_blank');
   };
 

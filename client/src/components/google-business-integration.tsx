@@ -10,7 +10,7 @@ export default function GoogleBusinessIntegration() {
     rating: 4.8,
     reviewCount: 156,
     googleMapsUrl: "https://maps.google.com/maps?q=21+Sheffield+Dr,+West+Grove,+PA+19390",
-    googleBusinessUrl: "https://g.co/kgs/4KuaC2E",
+    googleBusinessUrl: "https://search.google.com/local/writereview?placeid=ChIJAAAAAAAAAAARN46yHZs0fVk",
     hours: [
       { day: "Monday - Friday", time: "8:00 AM - 5:00 PM" },
       { day: "Saturday", time: "8:00 AM - 12:00 PM" },
