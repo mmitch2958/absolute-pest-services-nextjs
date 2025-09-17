@@ -1,0 +1,51 @@
+HOW TO GET COMPLETE ZIP CODE LIST FOR 30-MILE RADIUS OF 19390
+================================================================
+
+I've created a starter CSV file (zip_codes_30_mile_radius_19390.csv) with 65+ zip codes I found in the area, but for the COMPLETE list, use these free tools:
+
+OPTION 1: FreeMapTools (Recommended - Easiest)
+---------------------------------------------
+1. Go to: https://www.freemaptools.com/find-zip-codes-inside-radius.htm
+2. Set radius to "30" and select "miles"
+3. In the location field, enter "19390"
+4. Click "Draw Radius"
+5. Wait for results to load (may take 30-60 seconds)
+6. Scroll down to "CSV Output" section
+7. Copy all zip codes from the text box
+8. Paste into a spreadsheet or text file
+
+OPTION 2: CDX Technologies (Most Comprehensive)
+----------------------------------------------
+1. Go to: https://www.cdxtech.com/tools/radiusreport/
+2. Enter ZIP code: 19390
+3. Set distance: 30 miles
+4. Click "Generate Report"
+5. Click the dropdown arrow next to "Generate Report" 
+6. Select "Download CSV"
+7. Save the file - includes distance, lat/long data
+
+OPTION 3: IncomeByZipCode Tool
+-----------------------------
+1. Go to: https://www.incomebyzipcode.com/zip-code-radius-tool
+2. Enter "19390" in the ZIP code field
+3. Set radius to 30 miles
+4. Generate the map
+5. Export or copy the zip code list
+
+WHAT YOU'LL GET:
+- Complete list of all ZIP codes within exactly 30 miles
+- Coverage across PA, DE, and MD as needed
+- Distance from center point (19390)
+- City and state information
+- Latitude/longitude coordinates (with some tools)
+
+ESTIMATED RESULTS:
+You should get approximately 150-200+ zip codes covering:
+- Chester County, PA (your primary area)
+- Delaware County, PA
+- Parts of Montgomery County, PA
+- Parts of Philadelphia County, PA
+- Northern Delaware (New Castle County)
+- Northeast Maryland (Cecil County area)
+
+The starter CSV I created has 65+ confirmed zip codes, but the complete radius will have many more!
