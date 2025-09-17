@@ -244,7 +244,8 @@ export default function Home() {
               <img 
                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuaebBNkLVdPkKj_YBNlVfc86zb3bORHEkyw&s" 
                 alt="Professional pest control team" 
-                className="rounded-xl shadow-lg w-full h-auto"
+                className="rounded-xl shadow-lg object-cover"
+                style={{ width: '600px', height: '400px', minWidth: '600px', flexShrink: 0 }}
               />
             </div>
             
