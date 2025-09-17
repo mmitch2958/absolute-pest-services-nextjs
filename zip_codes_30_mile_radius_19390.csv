@@ -26,10 +26,6 @@ ZIP_CODE,CITY,STATE,COUNTY,DISTANCE_MILES
 19808,Wilmington,DE,New Castle,17.9
 19809,Wilmington,DE,New Castle,16.8
 19810,Wilmington,DE,New Castle,15.2
-21014,Bel Air,MD,Harford,28.5
-21015,Bel Air,MD,Harford,29.2
-21921,Elkton,MD,Cecil,25.8
-21922,Elkton,MD,Cecil,26.4
 19363,Parkesburg,PA,Chester,12.6
 19365,Paoli,PA,Chester,19.4
 19320,Coatesville,PA,Chester,18.9
@@ -54,11 +50,7 @@ ZIP_CODE,CITY,STATE,COUNTY,DISTANCE_MILES
 19029,Linwood,PA,Delaware,18.9
 19078,Ridley Park,PA,Delaware,19.4
 19079,Ridley Park,PA,Delaware,19.6
-19018,Clifton Heights,PA,Delaware,17.8
-19023,Darby,PA,Delaware,20.3
 19032,Haverford,PA,Delaware,15.8
 19041,Havertown,PA,Delaware,16.4
 19083,Havertown,PA,Delaware,16.7
 19096,Wynnewood,PA,Montgomery,19.8
-19151,Philadelphia,PA,Philadelphia,23.4
-19153,Philadelphia,PA,Philadelphia,25.6
