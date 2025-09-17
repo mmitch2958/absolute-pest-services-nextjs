@@ -9,6 +9,7 @@ import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import LocalSEO from "@/components/local-seo";
 import GoogleBusinessIntegration from "@/components/google-business-integration";
 import GoogleReviewRequest from "@/components/google-review-request";
+import pestControlTeamImage from "@assets/istockphoto-594474798-612x612_1758123737181.jpg";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -242,7 +243,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <img 
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuaebBNkLVdPkKj_YBNlVfc86zb3bORHEkyw&s" 
+                src={pestControlTeamImage} 
                 alt="Professional pest control team" 
                 className="rounded-xl shadow-lg object-cover"
                 style={{ width: '600px', height: '400px', minWidth: '600px', flexShrink: 0 }}
