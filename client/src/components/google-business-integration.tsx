@@ -6,7 +6,7 @@ export default function GoogleBusinessIntegration() {
   const businessInfo = {
     name: "Absolute Pest Services",
     address: "21 Sheffield Dr, West Grove, PA 19390",
-    phone: "610-325-4000",
+    phone: "484-",
     rating: 4.8,
     reviewCount: 156,
     googleMapsUrl: "https://maps.google.com/maps?q=21+Sheffield+Dr,+West+Grove,+PA+19390",
