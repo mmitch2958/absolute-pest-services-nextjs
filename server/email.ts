@@ -95,7 +95,7 @@ export async function sendContactFormEmail(data: {
     <p><strong>Your submitted information:</strong></p>
     <p><strong>Service Type:</strong> ${data.serviceType}</p>
     <p><strong>Message:</strong> ${data.message}</p>
-    <p>In the meantime, if you have any urgent questions, please call us at <strong>(555) 123-4567</strong>.</p>
+    <p>In the meantime, if you have any urgent questions, please call us at <strong>(484) 643-2225</strong>.</p>
     <p>Thank you for choosing Absolute Pest Services!</p>
     <p>Best regards,<br>The Absolute Pest Services Team</p>
   `;
@@ -111,7 +111,7 @@ export async function sendContactFormEmail(data: {
     Service Type: ${data.serviceType}
     Message: ${data.message}
     
-    In the meantime, if you have any urgent questions, please call us at (555) 123-4567.
+    In the meantime, if you have any urgent questions, please call us at (484) 643-2225.
     
     Thank you for choosing Absolute Pest Services!
     
