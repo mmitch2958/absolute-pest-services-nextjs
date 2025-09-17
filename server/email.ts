@@ -8,7 +8,7 @@ const mailService = new MailService();
 mailService.setApiKey(process.env.SENDGRID_API_KEY);
 
 const FROM_EMAIL = 'noreply@absolutepestservices.com';
-const TO_EMAIL = 'info@absolutepestservices.com';
+const TO_EMAIL = 'rmitch21@gmail.com';
 const ADDITIONAL_EMAIL = 'letshiremikemitchell@gmail.com';
 
 // Helper function to send notifications to both business emails
