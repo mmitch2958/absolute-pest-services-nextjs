@@ -194,7 +194,7 @@ export async function sendInspectionScheduleEmail(data: {
     <p><strong>Preferred Time:</strong> ${data.preferredTime}</p>
     <p><strong>Urgency:</strong> ${data.urgency}</p>
     ${data.message ? `<p><strong>Additional Notes:</strong> ${data.message}</p>` : ''}
-    <p>We will contact you within 24 hours to confirm the inspection appointment. If you have any questions or need to make changes, please call us at <strong>(555) 123-4567</strong>.</p>
+    <p>We will contact you within 24 hours to confirm the inspection appointment. If you have any questions or need to make changes, please call us at <strong>(484)643-2225</strong>.</p>
     <p>Thank you for choosing Absolute Pest Services!</p>
     <p>Best regards,<br>The Absolute Pest Services Team</p>
   `;
@@ -214,7 +214,7 @@ export async function sendInspectionScheduleEmail(data: {
     Urgency: ${data.urgency}
     ${data.message ? `Additional Notes: ${data.message}` : ''}
     
-    We will contact you within 24 hours to confirm the inspection appointment. If you have any questions or need to make changes, please call us at (555) 123-4567.
+    We will contact you within 24 hours to confirm the inspection appointment. If you have any questions or need to make changes, please call us at (484)643-2225.
     
     Thank you for choosing Absolute Pest Services!
     
@@ -282,7 +282,7 @@ export async function sendServiceRequestEmail(data: {
     <p><strong>Address:</strong> ${data.address}</p>
     <p><strong>Priority:</strong> ${data.priority}</p>
     <p><strong>Description:</strong> ${data.description}</p>
-    <p>Our team will review your request and contact you within 24 hours to schedule service. For urgent matters, please call us at <strong>(555) 123-4567</strong>.</p>
+    <p>Our team will review your request and contact you within 24 hours to schedule service. For urgent matters, please call us at <strong>(484)643-2225</strong>.</p>
     <p>You can track the status of your request by logging into your customer portal on our website.</p>
     <p>Thank you for choosing Absolute Pest Services!</p>
     <p>Best regards,<br>The Absolute Pest Services Team</p>
@@ -301,7 +301,7 @@ export async function sendServiceRequestEmail(data: {
     Priority: ${data.priority}
     Description: ${data.description}
     
-    Our team will review your request and contact you within 24 hours to schedule service. For urgent matters, please call us at (555) 123-4567.
+    Our team will review your request and contact you within 24 hours to schedule service. For urgent matters, please call us at (484)643-2225.
     
     You can track the status of your request by logging into your customer portal on our website.
     
