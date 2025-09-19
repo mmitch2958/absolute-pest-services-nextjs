@@ -246,7 +246,7 @@ export default function Home() {
                 src={pestControlTeamImage} 
                 alt="Professional pest control team" 
                 className="rounded-xl shadow-lg object-cover"
-                style={{ width: '600px', height: '400px', minWidth: '600px', flexShrink: 0 }}
+                style={{ width: '300px', height: '400px', minWidth: '100px', flexShrink: 0 }}
               />
             </div>
             
