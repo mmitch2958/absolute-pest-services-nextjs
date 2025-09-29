@@ -1,4 +1,4 @@
-import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment } from "@shared/schema";
+import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -28,6 +28,37 @@ export interface IStorage {
   createPayment(payment: InsertPayment): Promise<Payment>;
   getPaymentsByUser(userId: number): Promise<Payment[]>;
   updatePaymentStatus(id: number, status: string): Promise<Payment>;
+  
+  // Client operations
+  createClient(client: InsertClient): Promise<Client>;
+  getClients(): Promise<Client[]>;
+  getClient(id: number): Promise<Client | undefined>;
+  updateClient(id: number, updates: Partial<InsertClient>): Promise<Client>;
+  deleteClient(id: number): Promise<void>;
+  
+  // Project operations
+  createProject(project: InsertProject): Promise<Project>;
+  getProjects(): Promise<Project[]>;
+  getProject(id: number): Promise<Project | undefined>;
+  getProjectsByClient(clientId: number): Promise<Project[]>;
+  updateProject(id: number, updates: Partial<InsertProject>): Promise<Project>;
+  deleteProject(id: number): Promise<void>;
+  
+  // Milestone operations
+  createMilestone(milestone: InsertMilestone): Promise<Milestone>;
+  getMilestones(): Promise<Milestone[]>;
+  getMilestone(id: number): Promise<Milestone | undefined>;
+  getMilestonesByProject(projectId: number): Promise<Milestone[]>;
+  updateMilestone(id: number, updates: Partial<InsertMilestone>): Promise<Milestone>;
+  deleteMilestone(id: number): Promise<void>;
+  
+  // Dashboard operations
+  createDashboard(dashboard: InsertDashboard): Promise<Dashboard>;
+  getDashboards(): Promise<Dashboard[]>;
+  getDashboard(id: number): Promise<Dashboard | undefined>;
+  getDashboardsByProject(projectId: number): Promise<Dashboard[]>;
+  updateDashboard(id: number, updates: Partial<InsertDashboard>): Promise<Dashboard>;
+  deleteDashboard(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -147,6 +178,154 @@ export class DatabaseStorage implements IStorage {
       .where(eq(payments.id, id))
       .returning();
     return payment;
+  }
+
+  // Client operations
+  async createClient(insertClient: InsertClient): Promise<Client> {
+    const [client] = await db
+      .insert(clients)
+      .values(insertClient)
+      .returning();
+    return client;
+  }
+
+  async getClients(): Promise<Client[]> {
+    return await db.select().from(clients);
+  }
+
+  async getClient(id: number): Promise<Client | undefined> {
+    const [client] = await db.select().from(clients).where(eq(clients.id, id));
+    return client || undefined;
+  }
+
+  async updateClient(id: number, updates: Partial<InsertClient>): Promise<Client> {
+    const [client] = await db
+      .update(clients)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(clients.id, id))
+      .returning();
+    return client;
+  }
+
+  async deleteClient(id: number): Promise<void> {
+    await db.delete(clients).where(eq(clients.id, id));
+  }
+
+  // Project operations
+  async createProject(insertProject: InsertProject): Promise<Project> {
+    const [project] = await db
+      .insert(projects)
+      .values(insertProject)
+      .returning();
+    return project;
+  }
+
+  async getProjects(): Promise<Project[]> {
+    return await db.select().from(projects);
+  }
+
+  async getProject(id: number): Promise<Project | undefined> {
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project || undefined;
+  }
+
+  async getProjectsByClient(clientId: number): Promise<Project[]> {
+    return await db.select().from(projects).where(eq(projects.clientId, clientId));
+  }
+
+  async updateProject(id: number, updates: Partial<InsertProject>): Promise<Project> {
+    const [project] = await db
+      .update(projects)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(projects.id, id))
+      .returning();
+    return project;
+  }
+
+  async deleteProject(id: number): Promise<void> {
+    await db.delete(projects).where(eq(projects.id, id));
+  }
+
+  // Milestone operations
+  async createMilestone(insertMilestone: InsertMilestone): Promise<Milestone> {
+    const [milestone] = await db
+      .insert(milestones)
+      .values(insertMilestone)
+      .returning();
+    return milestone;
+  }
+
+  async getMilestones(): Promise<Milestone[]> {
+    return await db.select().from(milestones);
+  }
+
+  async getMilestone(id: number): Promise<Milestone | undefined> {
+    const [milestone] = await db.select().from(milestones).where(eq(milestones.id, id));
+    return milestone || undefined;
+  }
+
+  async getMilestonesByProject(projectId: number): Promise<Milestone[]> {
+    return await db.select().from(milestones).where(eq(milestones.projectId, projectId));
+  }
+
+  async updateMilestone(id: number, updates: Partial<InsertMilestone>): Promise<Milestone> {
+    const [milestone] = await db
+      .update(milestones)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(milestones.id, id))
+      .returning();
+    return milestone;
+  }
+
+  async deleteMilestone(id: number): Promise<void> {
+    await db.delete(milestones).where(eq(milestones.id, id));
+  }
+
+  // Dashboard operations
+  async createDashboard(insertDashboard: InsertDashboard): Promise<Dashboard> {
+    const [dashboard] = await db
+      .insert(dashboards)
+      .values(insertDashboard)
+      .returning();
+    return dashboard;
+  }
+
+  async getDashboards(): Promise<Dashboard[]> {
+    return await db.select().from(dashboards);
+  }
+
+  async getDashboard(id: number): Promise<Dashboard | undefined> {
+    const [dashboard] = await db.select().from(dashboards).where(eq(dashboards.id, id));
+    return dashboard || undefined;
+  }
+
+  async getDashboardsByProject(projectId: number): Promise<Dashboard[]> {
+    return await db.select().from(dashboards).where(eq(dashboards.projectId, projectId));
+  }
+
+  async updateDashboard(id: number, updates: Partial<InsertDashboard>): Promise<Dashboard> {
+    const [dashboard] = await db
+      .update(dashboards)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(dashboards.id, id))
+      .returning();
+    return dashboard;
+  }
+
+  async deleteDashboard(id: number): Promise<void> {
+    await db.delete(dashboards).where(eq(dashboards.id, id));
   }
 }
 
