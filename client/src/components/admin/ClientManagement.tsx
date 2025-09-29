@@ -151,9 +151,15 @@ export function ClientManagement() {
   };
 
   const handleDialogClose = () => {
-    setIsDialogOpen(false);
     setSelectedClient(null);
     form.reset();
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      handleDialogClose();
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -185,7 +191,7 @@ export function ClientManagement() {
         </Button>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>
@@ -244,6 +250,7 @@ export function ClientManagement() {
                       <FormControl>
                         <Input 
                           {...field} 
+                          value={field.value || ""}
                           placeholder="Enter phone number"
                           data-testid="input-client-phone"
                         />
@@ -261,6 +268,7 @@ export function ClientManagement() {
                       <FormControl>
                         <Input 
                           {...field} 
+                          value={field.value || ""}
                           placeholder="Enter contact person name"
                           data-testid="input-client-contact"
                         />
@@ -300,6 +308,7 @@ export function ClientManagement() {
                       <FormControl>
                         <Textarea 
                           {...field} 
+                          value={field.value || ""}
                           placeholder="Enter address"
                           data-testid="textarea-client-address"
                         />
@@ -317,6 +326,7 @@ export function ClientManagement() {
                       <FormControl>
                         <Textarea 
                           {...field} 
+                          value={field.value || ""}
                           placeholder="Enter additional notes"
                           data-testid="textarea-client-notes"
                         />
@@ -329,7 +339,7 @@ export function ClientManagement() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={handleDialogClose}
+                    onClick={() => handleDialogOpenChange(false)}
                     data-testid="button-cancel-client"
                   >
                     Cancel

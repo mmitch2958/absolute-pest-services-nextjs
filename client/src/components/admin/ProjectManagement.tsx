@@ -184,9 +184,15 @@ export function ProjectManagement() {
   };
 
   const handleDialogClose = () => {
-    setIsDialogOpen(false);
     setSelectedProject(null);
     form.reset();
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      handleDialogClose();
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -235,7 +241,7 @@ export function ProjectManagement() {
         </Button>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
@@ -489,7 +495,7 @@ export function ProjectManagement() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={handleDialogClose}
+                    onClick={() => handleDialogOpenChange(false)}
                     data-testid="button-cancel-project"
                   >
                     Cancel

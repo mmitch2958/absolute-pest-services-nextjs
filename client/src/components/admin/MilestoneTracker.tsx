@@ -188,9 +188,15 @@ export function MilestoneTracker() {
   };
 
   const handleDialogClose = () => {
-    setIsDialogOpen(false);
     setSelectedMilestone(null);
     form.reset();
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      handleDialogClose();
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -266,7 +272,7 @@ export function MilestoneTracker() {
         </div>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>
@@ -446,7 +452,7 @@ export function MilestoneTracker() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={handleDialogClose}
+                      onClick={() => handleDialogOpenChange(false)}
                       data-testid="button-cancel-milestone"
                     >
                       Cancel
@@ -595,6 +601,5 @@ export function MilestoneTracker() {
         </CardContent>
       </Card>
     </div>
-    </>
   );
 }

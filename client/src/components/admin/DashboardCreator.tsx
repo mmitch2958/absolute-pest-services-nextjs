@@ -154,9 +154,15 @@ export function DashboardCreator() {
   };
 
   const handleDialogClose = () => {
-    setIsDialogOpen(false);
     setSelectedDashboard(null);
     form.reset();
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      handleDialogClose();
+    }
   };
 
   const getTypeBadge = (type: string) => {
@@ -203,7 +209,7 @@ export function DashboardCreator() {
         </Button>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>
@@ -331,7 +337,7 @@ export function DashboardCreator() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={handleDialogClose}
+                    onClick={() => handleDialogOpenChange(false)}
                     data-testid="button-cancel-dashboard"
                   >
                     Cancel
@@ -353,7 +359,6 @@ export function DashboardCreator() {
             </Form>
           </DialogContent>
         </Dialog>
-      </div>
 
       <Card>
         <CardHeader>
