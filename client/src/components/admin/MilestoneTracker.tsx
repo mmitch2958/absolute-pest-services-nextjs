@@ -230,6 +230,7 @@ export function MilestoneTracker() {
   const completionRate = totalMilestones > 0 ? Math.round((completedMilestones / totalMilestones) * 100) : 0;
 
   return (
+    <>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -255,16 +256,17 @@ export function MilestoneTracker() {
               ))}
             </SelectContent>
           </Select>
-          <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-            <DialogTrigger asChild>
-              <Button 
-                onClick={() => setIsDialogOpen(true)}
-                data-testid="button-create-milestone"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Milestone
-              </Button>
-            </DialogTrigger>
+          <Button 
+            onClick={() => setIsDialogOpen(true)}
+            data-testid="button-create-milestone"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Milestone
+          </Button>
+        </div>
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>
@@ -467,7 +469,6 @@ export function MilestoneTracker() {
             </DialogContent>
           </Dialog>
         </div>
-      </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -594,5 +595,6 @@ export function MilestoneTracker() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }

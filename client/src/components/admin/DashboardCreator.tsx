@@ -194,16 +194,16 @@ export function DashboardCreator() {
             Create and manage analytics dashboards for your projects
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-          <DialogTrigger asChild>
-            <Button 
-              onClick={() => setIsDialogOpen(true)}
-              data-testid="button-create-dashboard"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Dashboard
-            </Button>
-          </DialogTrigger>
+        <Button 
+          onClick={() => setIsDialogOpen(true)}
+          data-testid="button-create-dashboard"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Dashboard
+        </Button>
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>

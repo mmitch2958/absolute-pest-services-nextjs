@@ -176,16 +176,16 @@ export function ClientManagement() {
             Manage your client portfolio and relationships
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-          <DialogTrigger asChild>
-            <Button 
-              onClick={() => setIsDialogOpen(true)}
-              data-testid="button-create-client"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Client
-            </Button>
-          </DialogTrigger>
+        <Button 
+          onClick={() => setIsDialogOpen(true)}
+          data-testid="button-create-client"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Client
+        </Button>
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>
@@ -351,7 +351,6 @@ export function ClientManagement() {
             </Form>
           </DialogContent>
         </Dialog>
-      </div>
 
       <Card>
         <CardHeader>

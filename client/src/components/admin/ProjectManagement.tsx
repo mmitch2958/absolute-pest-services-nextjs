@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 
-import type { Project, InsertProject, Client, User } from "@shared/schema";
+import type { Project, InsertProject, Client } from "@shared/schema";
 import { insertProjectSchema } from "@shared/schema";
 
 const projectFormSchema = insertProjectSchema.extend({
@@ -226,16 +226,16 @@ export function ProjectManagement() {
             Manage and track your client projects
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-          <DialogTrigger asChild>
-            <Button 
-              onClick={() => setIsDialogOpen(true)}
-              data-testid="button-create-project"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Project
-            </Button>
-          </DialogTrigger>
+        <Button 
+          onClick={() => setIsDialogOpen(true)}
+          data-testid="button-create-project"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Project
+        </Button>
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
@@ -511,7 +511,6 @@ export function ProjectManagement() {
             </Form>
           </DialogContent>
         </Dialog>
-      </div>
 
       <Card>
         <CardHeader>
