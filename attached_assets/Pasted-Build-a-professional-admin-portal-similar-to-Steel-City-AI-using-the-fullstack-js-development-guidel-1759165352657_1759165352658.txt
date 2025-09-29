@@ -1,0 +1,46 @@
+Build a professional admin portal similar to Steel City AI using the fullstack_js development guidelines. Create a comprehensive client management system with these core features:
+
+**ARCHITECTURE REQUIREMENTS:**
+- Full-stack TypeScript with React frontend + Express backend
+- PostgreSQL database with Drizzle ORM
+- Shadcn/ui component library with professional design
+- TanStack Query for API state management
+- Authentication system with protected routes
+
+**CORE ENTITIES & SCHEMA:**
+1. **Clients** - Company information (name, contact details, status)
+2. **Projects** - Client projects with status, budget, timeline
+3. **Milestones** - Project milestones with completion tracking
+4. **Dashboards** - Analytics dashboards linked to projects
+5. **Users** - Admin authentication system
+
+**ESSENTIAL FEATURES:**
+- Client portfolio management (CRUD operations)
+- Project milestone tracking with status updates
+- Dashboard creation and viewing system
+- Professional login/logout functionality
+- File upload capability for project documents
+- Responsive design with dark/light mode
+
+**CRITICAL UI REQUIREMENTS:**
+- Use data-testid attributes on all interactive elements
+- Follow pattern: `{action}-{target}` (e.g., "button-create-client")
+- Professional color scheme with proper contrast
+- Consistent spacing and typography
+- Loading states for all async operations
+
+**TECHNICAL IMPLEMENTATION:**
+- Start with shared/schema.ts for data modeling
+- Use storage interface pattern in server/storage.ts
+- Keep API routes thin - business logic in storage layer
+- Use React Hook Form with Zod validation
+- Implement proper error handling and toast notifications
+
+**SUCCESS CRITERIA:**
+- Admin can create/edit/delete clients and projects
+- Milestone tracking with visual progress indicators
+- Dashboard system that displays project analytics
+- Fully functional authentication flow
+- Professional presentation-ready interface
+
+Follow the fullstack_js guidelines strictly, particularly around database setup, component patterns, and routing structure.
