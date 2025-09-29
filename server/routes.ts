@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema } from "@shared/schema";
+import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
 import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail } from "./email";
@@ -32,6 +32,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ success: false, message: "Authentication required" });
     }
     next();
+  };
+
+  // Admin middleware - check if user is admin
+  const requireAdmin = async (req: any, res: any, next: any) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ success: false, message: "Authentication required" });
+    }
+    
+    try {
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: "Admin access required" });
+      }
+      next();
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      return res.status(500).json({ success: false, message: "Internal server error" });
+    }
   };
 
   // Authentication routes
@@ -405,6 +423,284 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false, 
         message: "Internal server error" 
       });
+    }
+  });
+
+  // Admin Portal Routes
+  
+  // Client routes
+  app.get("/api/clients", requireAdmin, async (req, res) => {
+    try {
+      const clients = await storage.getClients();
+      res.json({ success: true, clients });
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/clients/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const client = await storage.getClient(id);
+      if (!client) {
+        return res.status(404).json({ success: false, message: "Client not found" });
+      }
+      res.json({ success: true, client });
+    } catch (error) {
+      console.error("Error fetching client:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/clients", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertClientSchema.parse(req.body);
+      const client = await storage.createClient(validatedData);
+      res.json({ success: true, message: "Client created successfully", client });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid client data", errors: error.errors });
+      } else {
+        console.error("Error creating client:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.put("/api/clients/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertClientSchema.partial().parse(req.body);
+      const client = await storage.updateClient(id, validatedData);
+      res.json({ success: true, message: "Client updated successfully", client });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid client data", errors: error.errors });
+      } else {
+        console.error("Error updating client:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.delete("/api/clients/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteClient(id);
+      res.json({ success: true, message: "Client deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Project routes
+  app.get("/api/projects", requireAdmin, async (req, res) => {
+    try {
+      const projects = await storage.getProjects();
+      res.json({ success: true, projects });
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/projects/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const project = await storage.getProject(id);
+      if (!project) {
+        return res.status(404).json({ success: false, message: "Project not found" });
+      }
+      res.json({ success: true, project });
+    } catch (error) {
+      console.error("Error fetching project:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/clients/:clientId/projects", requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const projects = await storage.getProjectsByClient(clientId);
+      res.json({ success: true, projects });
+    } catch (error) {
+      console.error("Error fetching projects by client:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/projects", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertProjectSchema.parse(req.body);
+      const project = await storage.createProject(validatedData);
+      res.json({ success: true, message: "Project created successfully", project });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid project data", errors: error.errors });
+      } else {
+        console.error("Error creating project:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.put("/api/projects/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertProjectSchema.partial().parse(req.body);
+      const project = await storage.updateProject(id, validatedData);
+      res.json({ success: true, message: "Project updated successfully", project });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid project data", errors: error.errors });
+      } else {
+        console.error("Error updating project:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.delete("/api/projects/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteProject(id);
+      res.json({ success: true, message: "Project deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Milestone routes
+  app.get("/api/milestones", requireAdmin, async (req, res) => {
+    try {
+      const milestones = await storage.getMilestones();
+      res.json({ success: true, milestones });
+    } catch (error) {
+      console.error("Error fetching milestones:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/projects/:projectId/milestones", requireAdmin, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const milestones = await storage.getMilestonesByProject(projectId);
+      res.json({ success: true, milestones });
+    } catch (error) {
+      console.error("Error fetching milestones by project:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/milestones", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertMilestoneSchema.parse(req.body);
+      const milestone = await storage.createMilestone(validatedData);
+      res.json({ success: true, message: "Milestone created successfully", milestone });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid milestone data", errors: error.errors });
+      } else {
+        console.error("Error creating milestone:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.put("/api/milestones/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertMilestoneSchema.partial().parse(req.body);
+      const milestone = await storage.updateMilestone(id, validatedData);
+      res.json({ success: true, message: "Milestone updated successfully", milestone });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid milestone data", errors: error.errors });
+      } else {
+        console.error("Error updating milestone:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.delete("/api/milestones/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteMilestone(id);
+      res.json({ success: true, message: "Milestone deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting milestone:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Dashboard routes
+  app.get("/api/dashboards", requireAdmin, async (req, res) => {
+    try {
+      const dashboards = await storage.getDashboards();
+      res.json({ success: true, dashboards });
+    } catch (error) {
+      console.error("Error fetching dashboards:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/projects/:projectId/dashboards", requireAdmin, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const dashboards = await storage.getDashboardsByProject(projectId);
+      res.json({ success: true, dashboards });
+    } catch (error) {
+      console.error("Error fetching dashboards by project:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/dashboards", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertDashboardSchema.parse({
+        ...req.body,
+        createdBy: req.session.userId,
+      });
+      const dashboard = await storage.createDashboard(validatedData);
+      res.json({ success: true, message: "Dashboard created successfully", dashboard });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid dashboard data", errors: error.errors });
+      } else {
+        console.error("Error creating dashboard:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.put("/api/dashboards/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertDashboardSchema.partial().parse(req.body);
+      const dashboard = await storage.updateDashboard(id, validatedData);
+      res.json({ success: true, message: "Dashboard updated successfully", dashboard });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid dashboard data", errors: error.errors });
+      } else {
+        console.error("Error updating dashboard:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.delete("/api/dashboards/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteDashboard(id);
+      res.json({ success: true, message: "Dashboard deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting dashboard:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
     }
   });
 
