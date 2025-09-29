@@ -220,10 +220,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           serviceType: validatedData.serviceType,
           description: validatedData.description,
           address: validatedData.address,
-          priority: validatedData.priority,
+          priority: validatedData.priority || "medium",
           customerName: `${user.firstName} ${user.lastName}`,
           customerEmail: user.email,
-          customerPhone: user.phone
+          customerPhone: user.phone || ""
         });
         
         if (!emailSent) {
@@ -383,7 +383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         preferredDate: validatedData.preferredDate,
         preferredTime: validatedData.preferredTime,
         urgency: validatedData.urgency,
-        message: validatedData.message
+        message: validatedData.message || ""
       });
       
       if (!emailSent) {

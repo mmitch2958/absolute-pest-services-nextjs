@@ -17,6 +17,11 @@ import TermiteTreatment from "@/pages/termite-treatment";
 import BatRemoval from "@/pages/bat-removal";
 import ServiceAreas from "@/pages/service-areas";
 import NotFound from "@/pages/not-found";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import { AdminClients } from "@/pages/admin/AdminClients";
+import { AdminProjects } from "@/pages/admin/AdminProjects";
+import { AdminMilestones } from "@/pages/admin/AdminMilestones";
+import { AdminDashboards } from "@/pages/admin/AdminDashboards";
 
 function Router() {
   // Track page views when routes change - Google Analytics integration
@@ -34,6 +39,29 @@ function Router() {
       <Route path="/termite-treatment" component={TermiteTreatment} />
       <Route path="/bat-removal" component={BatRemoval} />
       <Route path="/service-areas" component={ServiceAreas} />
+      
+      {/* Admin Portal Routes */}
+      <Route path="/admin/clients">
+        <AdminLayout>
+          <AdminClients />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/projects">
+        <AdminLayout>
+          <AdminProjects />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/milestones">
+        <AdminLayout>
+          <AdminMilestones />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/dashboards">
+        <AdminLayout>
+          <AdminDashboards />
+        </AdminLayout>
+      </Route>
+      
       <Route component={NotFound} />
     </Switch>
   );
