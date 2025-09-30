@@ -236,7 +236,6 @@ export function MilestoneTracker() {
   const completionRate = totalMilestones > 0 ? Math.round((completedMilestones / totalMilestones) * 100) : 0;
 
   return (
-    <>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -474,7 +473,6 @@ export function MilestoneTracker() {
               </Form>
             </DialogContent>
           </Dialog>
-        </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
