@@ -33,8 +33,10 @@ export interface IStorage {
   createClient(client: InsertClient): Promise<Client>;
   getClients(): Promise<Client[]>;
   getClient(id: number): Promise<Client | undefined>;
+  getClientByEmail(email: string): Promise<Client | undefined>;
   updateClient(id: number, updates: Partial<InsertClient>): Promise<Client>;
   deleteClient(id: number): Promise<void>;
+  createOrUpdateProspect(data: { name: string; email: string; phone?: string; address?: string; serviceType?: string; notes?: string }): Promise<Client>;
   
   // Project operations
   createProject(project: InsertProject): Promise<Project>;
@@ -212,6 +214,39 @@ export class DatabaseStorage implements IStorage {
 
   async deleteClient(id: number): Promise<void> {
     await db.delete(clients).where(eq(clients.id, id));
+  }
+
+  async getClientByEmail(email: string): Promise<Client | undefined> {
+    const [client] = await db.select().from(clients).where(eq(clients.email, email));
+    return client || undefined;
+  }
+
+  async createOrUpdateProspect(data: { name: string; email: string; phone?: string; address?: string; serviceType?: string; notes?: string }): Promise<Client> {
+    const existing = await this.getClientByEmail(data.email);
+    
+    if (existing) {
+      // Update existing prospect with new information
+      const updatedNotes = data.notes 
+        ? `${existing.notes || ''}\n\n[${new Date().toLocaleDateString()}] ${data.notes}`.trim()
+        : existing.notes;
+      
+      return await this.updateClient(existing.id, {
+        phone: data.phone || existing.phone,
+        address: data.address || existing.address,
+        notes: updatedNotes,
+      });
+    }
+    
+    // Create new prospect
+    return await this.createClient({
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+      clientType: "prospect",
+      status: "active",
+      notes: data.notes,
+    });
   }
 
   // Project operations

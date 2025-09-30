@@ -215,6 +215,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(req.session.userId!);
       
       if (user) {
+        // Create or update prospect in admin portal
+        try {
+          await storage.createOrUpdateProspect({
+            name: `${user.firstName} ${user.lastName}`,
+            email: user.email,
+            phone: user.phone || undefined,
+            address: validatedData.address,
+            notes: `Service Request (Portal) - Service: ${validatedData.serviceType}\nPriority: ${validatedData.priority}\nDescription: ${validatedData.description}`,
+            serviceType: validatedData.serviceType,
+          });
+        } catch (prospectError) {
+          console.error("Failed to create/update prospect:", prospectError);
+        }
+        
         // Send email notification
         const emailSent = await sendServiceRequestEmail({
           serviceType: validatedData.serviceType,
@@ -310,6 +324,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertContactSchema.parse(req.body);
       const contact = await storage.createContactSubmission(validatedData);
       
+      // Create or update prospect in admin portal
+      try {
+        await storage.createOrUpdateProspect({
+          name: `${validatedData.firstName} ${validatedData.lastName}`,
+          email: validatedData.email,
+          phone: validatedData.phone,
+          notes: `Contact Form - Service: ${validatedData.serviceType}\nMessage: ${validatedData.message}`,
+          serviceType: validatedData.serviceType,
+        });
+      } catch (prospectError) {
+        console.error("Failed to create/update prospect:", prospectError);
+      }
+      
       // Send email notification
       const emailSent = await sendContactFormEmail({
         firstName: validatedData.firstName,
@@ -371,6 +398,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const validatedData = insertInspectionSchema.parse(requestData);
       const inspection = await storage.createInspectionSchedule(validatedData);
+      
+      // Create or update prospect in admin portal
+      try {
+        await storage.createOrUpdateProspect({
+          name: `${validatedData.firstName} ${validatedData.lastName}`,
+          email: validatedData.email,
+          phone: validatedData.phone,
+          address: validatedData.address,
+          notes: `Inspection Request - Service: ${validatedData.serviceType}\nPreferred: ${validatedData.preferredDate.toLocaleDateString()} ${validatedData.preferredTime}\nUrgency: ${validatedData.urgency}${validatedData.message ? `\nMessage: ${validatedData.message}` : ''}`,
+          serviceType: validatedData.serviceType,
+        });
+      } catch (prospectError) {
+        console.error("Failed to create/update prospect:", prospectError);
+      }
       
       // Send email notification
       const emailSent = await sendInspectionScheduleEmail({
