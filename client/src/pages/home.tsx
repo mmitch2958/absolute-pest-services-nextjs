@@ -62,7 +62,7 @@ export default function Home() {
     {
       title: "Delaware County, PA",
       color: "bg-[hsl(207,73%,44%)]",
-      locations: ["Glenn Mills", "Landenberg", "Lincoln University", "And surrounding areas"]
+      locations: ["Media", "Newtown Square", "And surrounding areas"]
     },
     {
       title: "Montgomery County, PA",

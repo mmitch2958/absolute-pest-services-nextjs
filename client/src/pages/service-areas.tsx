@@ -13,7 +13,7 @@ export default function ServiceAreas() {
       state: 'Pennsylvania',
       phone: '610-325-4000 or 484-643-2225',
       counties: ['Chester County', 'Delaware County', 'Montgomery County'],
-      cities: ['West Grove', 'Oxford', 'Kennett Square', 'Avondale', 'Toughkenamon', 'Media', 'Chester', 'Aston', 'Brookhaven', 'Norristown', 'King of Prussia', 'Collegeville', 'Pottstown']
+      cities: ['West Grove', 'Oxford', 'Kennett Square', 'Avondale', 'Toughkenamon', 'Media', 'Chester', 'Aston', 'Brookhaven', 'Norristown', 'King of Prussia', 'Collegeville', 'Pottstown', 'Newtown Square']
     },
     {
       state: 'Delaware',
