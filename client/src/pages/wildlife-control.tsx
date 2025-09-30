@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Calendar, ArrowLeft, Shield, Heart, Clock, CheckCircle } from "lucide-react";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
+import QuoteRequestModal from "@/components/quote-request-modal";
 import LocalSEO from "@/components/local-seo";
 
 export default function WildlifeControl() {
@@ -35,11 +36,11 @@ export default function WildlifeControl() {
                 <span className="text-sm text-[hsl(210,13%,28%)]">24/7 Emergency Service</span>
                 <span className="text-lg font-semibold text-[hsl(132,48%,35%)]">610-869-3000</span>
               </div>
-              <ScheduleInspectionModal>
+              <QuoteRequestModal>
                 <Button className="bg-[hsl(36,100%,47%)] text-white hover:bg-[hsl(36,100%,37%)] font-medium">
                   Get Quote
                 </Button>
-              </ScheduleInspectionModal>
+              </QuoteRequestModal>
             </div>
           </div>
         </div>

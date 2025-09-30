@@ -5,6 +5,7 @@ import { Phone, Calendar, MapPin, Clock, Mail, Check, Bug, Bed, Home as HomeIcon
 import HeroSlider from "@/components/hero-slider";
 import ContactForm from "@/components/contact-form";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
+import QuoteRequestModal from "@/components/quote-request-modal";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import LocalSEO from "@/components/local-seo";
 import GoogleBusinessIntegration from "@/components/google-business-integration";
@@ -121,11 +122,11 @@ export default function Home() {
                 <span className="text-sm text-[hsl(210,13%,28%)]">24/7 Emergency Service</span>
                 <span className="text-lg font-semibold text-[hsl(132,48%,35%)]">484-643-2225</span>
               </div>
-              <ScheduleInspectionModal>
+              <QuoteRequestModal>
                 <Button className="bg-[hsl(36,100%,47%)] text-white hover:bg-[hsl(36,100%,37%)] font-medium">
                   Get Quote
                 </Button>
-              </ScheduleInspectionModal>
+              </QuoteRequestModal>
             </div>
 
             <button 
