@@ -62,7 +62,7 @@ export default function Home() {
     {
       title: "Delaware County, PA",
       color: "bg-[hsl(207,73%,44%)]",
-      locations: ["Media", "Newtown Square", "And surrounding areas"]
+      locations: ["Glenn Mills", "Media", "Newtown Square", "And surrounding areas"]
     },
     {
       title: "Montgomery County, PA",
@@ -77,7 +77,7 @@ export default function Home() {
   ];
 
   const phoneNumbers = [
-    { number: "610-869-3000", label: "Main Office" },
+    { number: "484-643-2225", label: "Main Office" },
     { number: "610-325-4000", label: "Secondary" },
     { number: "302-235-1975", label: "Delaware" },
     { number: "484-643-2225", label: "Montgomery" }
@@ -95,7 +95,7 @@ export default function Home() {
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
       <LocalSEO 
         title="Professional Pest Control Services in PA, DE, MD"
-        description="Expert pest control services in Chester County, Delaware County, Montgomery County PA, New Castle County DE, and Northeast MD. Humane wildlife control, bed bug treatment, termite control, and bat removal. Licensed and insured with 24/7 emergency service."
+        description="Expert pest control services in Chester County, Delaware County, Montgomery County PA, New Castle County DE, and Northeast MD. Humane wildlife control, bed bug treatment, termite control, and bat removal. Licensed and insured with emergency service."
         serviceName="Pest Control Services"
         serviceArea="Pennsylvania, Delaware, Maryland"
       />
@@ -119,7 +119,7 @@ export default function Home() {
             <div className="flex items-center space-x-4">
               <div className="hidden lg:flex flex-col text-right">
                 <span className="text-sm text-[hsl(210,13%,28%)]">24/7 Emergency Service</span>
-                <span className="text-lg font-semibold text-[hsl(132,48%,35%)]">610-869-3000</span>
+                <span className="text-lg font-semibold text-[hsl(132,48%,35%)]">484-643-2225</span>
               </div>
               <ScheduleInspectionModal>
                 <Button className="bg-[hsl(36,100%,47%)] text-white hover:bg-[hsl(36,100%,37%)] font-medium">
