@@ -152,12 +152,12 @@ export default function Home() {
             </h1>
             <p className="text-xl lg:text-2xl mb-8 leading-relaxed">
               Serving Pennsylvania and Delaware with expert pest control services. 
-              Available 24/7 for all your pest control needs.
+              Available for all your pest control needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button className="bg-[hsl(132,48%,35%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(132,48%,25%)]">
                 <Phone className="mr-2 h-5 w-5" />
-                Call Now: 610-869-3000
+                Call Now: 484-643-2225
               </Button>
               <ScheduleInspectionModal>
                 <Button className="bg-[hsl(36,100%,47%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(36,100%,37%)]">
@@ -258,7 +258,7 @@ export default function Home() {
                 Absolute Pest Service offers the best in professional pest control service to southeastern Pennsylvania and northern Delaware. Our staff's many years of experience ensures that your pest problems will be taken care of quickly and efficiently.
               </p>
               <p className="text-lg text-gray-600 mb-8">
-                Whether you're dealing with wasp problems, ant infestations, bed bug issues, or any other pest concerns, our experienced team is available 24/7 throughout our service area to provide immediate assistance.
+                Whether you're dealing with wasp problems, ant infestations, bed bug issues, or any other pest concerns, our experienced team is available throughout our service area to provide immediate assistance.
               </p>
               
               <div className="space-y-4">
@@ -288,7 +288,7 @@ export default function Home() {
             <h2 className="text-4xl font-bold text-white mb-4">Contact Us Today</h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Don't wait! Get professional pest control service when you need it most. 
-              We're available 24/7 for emergency service calls.
+              We're available for emergency service calls.
             </p>
           </div>
 
@@ -304,7 +304,7 @@ export default function Home() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-[hsl(210,13%,28%)]">Main Office</h4>
-                      <p className="text-gray-600">610-869-3000</p>
+                      <p className="text-gray-600">484-643-2225</p>
                     </div>
                   </div>
                   
@@ -324,7 +324,7 @@ export default function Home() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-[hsl(210,13%,28%)]">Emergency Service</h4>
-                      <p className="text-gray-600">Available 24/7</p>
+                      <p className="text-gray-600">Available Same Day</p>
                     </div>
                   </div>
                   
@@ -334,7 +334,7 @@ export default function Home() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-[hsl(210,13%,28%)]">Email</h4>
-                      <p className="text-gray-600">info@absolutepestservices.com</p>
+                      <p className="text-gray-600">rob@absolutepestservices.com</p>
                     </div>
                   </div>
                 </div>
@@ -367,7 +367,7 @@ export default function Home() {
               </div>
               <p className="text-gray-400 mb-4">
                 Professional pest control service to southeastern Pennsylvania and northern Delaware. 
-                Our experienced team is available 24/7 for all your pest control needs.
+                Our experienced team is available for all your pest control needs.
               </p>
               <div className="flex space-x-4">
                 <a href="#" className="text-gray-400 hover:text-white transition-colors">
