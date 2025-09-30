@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2, UserCheck, Filter } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +29,7 @@ type ClientFormData = z.infer<typeof clientFormSchema>;
 export function ClientManagement() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [filterType, setFilterType] = useState<"all" | "prospect" | "client">("all");
   const { toast } = useToast();
 
   const form = useForm<ClientFormData>({
@@ -39,6 +40,7 @@ export function ClientManagement() {
       phone: "",
       address: "",
       contactPerson: "",
+      clientType: "prospect",
       status: "active",
       notes: "",
     },
@@ -121,6 +123,28 @@ export function ClientManagement() {
     },
   });
 
+  // Convert to client mutation
+  const convertToClientMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("PUT", `/api/clients/${id}`, { clientType: "client" });
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({
+        title: "Success",
+        description: "Prospect converted to client successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to convert prospect",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: ClientFormData) => {
     if (selectedClient) {
       updateClientMutation.mutate({ ...data, id: selectedClient.id });
@@ -138,10 +162,17 @@ export function ClientManagement() {
       phone: client.phone ?? "",
       address: client.address ?? "",
       contactPerson: client.contactPerson ?? "",
+      clientType: client.clientType,
       status: client.status,
       notes: client.notes ?? "",
     });
     setIsDialogOpen(true);
+  };
+
+  const handleConvertToClient = (id: number) => {
+    if (confirm("Convert this prospect to a client?")) {
+      convertToClientMutation.mutate(id);
+    }
   };
 
   const handleDelete = (id: number) => {
@@ -166,12 +197,25 @@ export function ClientManagement() {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       active: "default",
       inactive: "secondary",
-      prospective: "outline",
     };
     return <Badge variant={variants[status] || "default"}>{status}</Badge>;
   };
 
-  const clients = clientsResponse || [];
+  const getClientTypeBadge = (clientType: string) => {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      prospect: "outline",
+      client: "default",
+    };
+    return <Badge variant={variants[clientType] || "default"}>{clientType}</Badge>;
+  };
+
+  const allClients = clientsResponse || [];
+  const clients = filterType === "all" 
+    ? allClients 
+    : allClients.filter(c => c.clientType === filterType);
+
+  const prospectCount = allClients.filter(c => c.clientType === "prospect").length;
+  const clientCount = allClients.filter(c => c.clientType === "client").length;
 
   return (
     <div className="space-y-6">
@@ -190,6 +234,47 @@ export function ClientManagement() {
           Add Client
         </Button>
       </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5" />
+                Filter Clients
+              </CardTitle>
+              <CardDescription>
+                {prospectCount} prospects, {clientCount} clients
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <Button
+              variant={filterType === "all" ? "default" : "outline"}
+              onClick={() => setFilterType("all")}
+              data-testid="button-filter-all"
+            >
+              All ({allClients.length})
+            </Button>
+            <Button
+              variant={filterType === "prospect" ? "default" : "outline"}
+              onClick={() => setFilterType("prospect")}
+              data-testid="button-filter-prospects"
+            >
+              Prospects ({prospectCount})
+            </Button>
+            <Button
+              variant={filterType === "client" ? "default" : "outline"}
+              onClick={() => setFilterType("client")}
+              data-testid="button-filter-clients"
+            >
+              Clients ({clientCount})
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogContent className="max-w-md">
@@ -389,9 +474,10 @@ export function ClientManagement() {
                   <TableRow>
                     <TableHead>Company</TableHead>
                     <TableHead>Contact</TableHead>
+                    <TableHead>Type</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Phone</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
+                    <TableHead className="w-[150px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -410,6 +496,9 @@ export function ClientManagement() {
                       <TableCell data-testid={`text-client-contact-${client.id}`}>
                         {client.contactPerson || "—"}
                       </TableCell>
+                      <TableCell data-testid={`badge-client-type-${client.id}`}>
+                        {getClientTypeBadge(client.clientType)}
+                      </TableCell>
                       <TableCell data-testid={`badge-client-status-${client.id}`}>
                         {getStatusBadge(client.status)}
                       </TableCell>
@@ -418,6 +507,18 @@ export function ClientManagement() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
+                          {client.clientType === "prospect" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleConvertToClient(client.id)}
+                              disabled={convertToClientMutation.isPending}
+                              data-testid={`button-convert-client-${client.id}`}
+                              title="Convert to Client"
+                            >
+                              <UserCheck className="w-4 h-4" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="sm"

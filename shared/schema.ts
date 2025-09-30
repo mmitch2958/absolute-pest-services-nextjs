@@ -80,7 +80,8 @@ export const clients = pgTable("clients", {
   phone: text("phone"),
   address: text("address"),
   contactPerson: text("contact_person"),
-  status: text("status").notNull().default("active"), // active, inactive, prospective
+  clientType: text("client_type").notNull().default("prospect"), // prospect, client
+  status: text("status").notNull().default("active"), // active, inactive
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
