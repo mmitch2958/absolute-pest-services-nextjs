@@ -1,4 +1,4 @@
-import { Building2, FolderOpen, Target, BarChart3, Settings, LogOut } from "lucide-react";
+import { Building2, FolderOpen, Target, BarChart3, Settings, LogOut, Home } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -106,7 +106,17 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </nav>
 
             {/* Footer */}
-            <div className="border-t p-4">
+            <div className="border-t p-4 space-y-2">
+              <Link href="/dashboard">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  data-testid="button-customer-portal"
+                >
+                  <Home className="w-4 h-4 mr-2" />
+                  Customer Portal
+                </Button>
+              </Link>
               <Button
                 variant="outline"
                 onClick={handleLogout}

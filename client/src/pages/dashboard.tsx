@@ -18,7 +18,8 @@ import {
   DollarSign,
   Home as HomeIcon,
   LogOut,
-  User
+  User,
+  Settings
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
@@ -180,6 +181,16 @@ export default function Dashboard() {
                   {user?.firstName} {user?.lastName}
                 </span>
               </div>
+              {user?.role === 'admin' && (
+                <Button 
+                  variant="default" 
+                  onClick={() => setLocation('/admin/clients')}
+                  className="bg-[hsl(132,48%,35%)] hover:bg-[hsl(132,48%,25%)]"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Admin Portal
+                </Button>
+              )}
               <Button variant="outline" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
