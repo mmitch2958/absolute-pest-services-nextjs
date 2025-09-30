@@ -308,7 +308,8 @@ export function ProjectManagement() {
                       <FormLabel>Description</FormLabel>
                       <FormControl>
                         <Textarea 
-                          {...field} 
+                          {...field}
+                          value={field.value ?? ""}
                           placeholder="Enter project description"
                           data-testid="textarea-project-description"
                         />
@@ -376,7 +377,8 @@ export function ProjectManagement() {
                         <FormLabel>Budget</FormLabel>
                         <FormControl>
                           <Input 
-                            {...field} 
+                            {...field}
+                            value={field.value ?? ""}
                             type="number"
                             step="0.01"
                             placeholder="0.00"
@@ -395,7 +397,8 @@ export function ProjectManagement() {
                         <FormLabel>Actual Cost</FormLabel>
                         <FormControl>
                           <Input 
-                            {...field} 
+                            {...field}
+                            value={field.value ?? ""}
                             type="number"
                             step="0.01"
                             placeholder="0.00"

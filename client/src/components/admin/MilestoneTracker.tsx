@@ -65,9 +65,6 @@ export function MilestoneTracker() {
   // Fetch milestones for selected project
   const { data: projectMilestonesResponse } = useQuery({
     queryKey: ["/api/projects", selectedProjectId, "milestones"],
-    queryFn: selectedProjectId 
-      ? () => apiRequest(`/api/projects/${selectedProjectId}/milestones`)
-      : undefined,
     enabled: !!selectedProjectId,
     select: (data: any) => data.milestones as Milestone[],
   });
@@ -335,7 +332,8 @@ export function MilestoneTracker() {
                         <FormLabel>Description</FormLabel>
                         <FormControl>
                           <Textarea 
-                            {...field} 
+                            {...field}
+                            value={field.value ?? ""}
                             placeholder="Enter milestone description"
                             data-testid="textarea-milestone-description"
                           />
@@ -376,7 +374,8 @@ export function MilestoneTracker() {
                           <FormLabel>Progress (%)</FormLabel>
                           <FormControl>
                             <Input 
-                              {...field} 
+                              {...field}
+                              value={field.value ?? 0}
                               type="number"
                               min="0"
                               max="100"
@@ -438,7 +437,8 @@ export function MilestoneTracker() {
                         <FormLabel>Notes</FormLabel>
                         <FormControl>
                           <Textarea 
-                            {...field} 
+                            {...field}
+                            value={field.value ?? ""}
                             placeholder="Enter additional notes"
                             data-testid="textarea-milestone-notes"
                           />
