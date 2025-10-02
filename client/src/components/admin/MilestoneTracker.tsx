@@ -25,10 +25,16 @@ import { cn } from "@/lib/utils";
 import type { Milestone, InsertMilestone, Project } from "@shared/schema";
 import { insertMilestoneSchema } from "@shared/schema";
 
-const milestoneFormSchema = insertMilestoneSchema.extend({
+const milestoneFormSchema = z.object({
   id: z.number().optional(),
-  dueDate: z.date().optional(),
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  status: z.string(),
+  progress: z.number().min(0).max(100).optional(),
+  notes: z.string().optional(),
   projectId: z.number().min(1, "Please select a project"),
+  dueDate: z.date().optional(),
+  completedDate: z.date().optional(),
 });
 
 type MilestoneFormData = z.infer<typeof milestoneFormSchema>;
@@ -72,8 +78,13 @@ export function MilestoneTracker() {
 
   // Create milestone mutation
   const createMilestoneMutation = useMutation({
-    mutationFn: async (data: InsertMilestone) => {
-      const response = await apiRequest("POST", "/api/milestones", data);
+    mutationFn: async (data: any) => {
+      const requestData = {
+        ...data,
+        dueDate: data.dueDate ? data.dueDate.toISOString() : undefined,
+        completedDate: data.completedDate ? data.completedDate.toISOString() : undefined,
+      };
+      const response = await apiRequest("POST", "/api/milestones", requestData);
       return await response.json();
     },
     onSuccess: () => {
@@ -99,8 +110,13 @@ export function MilestoneTracker() {
 
   // Update milestone mutation
   const updateMilestoneMutation = useMutation({
-    mutationFn: async ({ id, ...data }: MilestoneFormData) => {
-      const response = await apiRequest("PUT", `/api/milestones/${id}`, data);
+    mutationFn: async ({ id, ...data }: any) => {
+      const requestData = {
+        ...data,
+        dueDate: data.dueDate ? data.dueDate.toISOString() : undefined,
+        completedDate: data.completedDate ? data.completedDate.toISOString() : undefined,
+      };
+      const response = await apiRequest("PUT", `/api/milestones/${id}`, requestData);
       return await response.json();
     },
     onSuccess: () => {

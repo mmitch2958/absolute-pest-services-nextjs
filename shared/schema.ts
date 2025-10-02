@@ -191,6 +191,11 @@ export const insertMilestoneSchema = createInsertSchema(milestones).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  dueDate: true,
+  completedDate: true,
+}).extend({
+  dueDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional().nullable(),
+  completedDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional().nullable(),
 });
 
 export const insertDashboardSchema = createInsertSchema(dashboards).omit({

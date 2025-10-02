@@ -643,11 +643,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/milestones", requireAdmin, async (req, res) => {
     try {
+      console.log("Creating milestone with data:", JSON.stringify(req.body, null, 2));
       const validatedData = insertMilestoneSchema.parse(req.body);
       const milestone = await storage.createMilestone(validatedData);
       res.json({ success: true, message: "Milestone created successfully", milestone });
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("Zod validation errors:", JSON.stringify(error.errors, null, 2));
         res.status(400).json({ success: false, message: "Invalid milestone data", errors: error.errors });
       } else {
         console.error("Error creating milestone:", error);
