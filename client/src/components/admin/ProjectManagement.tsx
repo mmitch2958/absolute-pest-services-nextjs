@@ -28,6 +28,7 @@ const projectFormSchema = insertProjectSchema.extend({
   id: z.number().optional(),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
+  clientId: z.number().min(1, "Please select a client"),
 });
 
 type ProjectFormData = z.infer<typeof projectFormSchema>;

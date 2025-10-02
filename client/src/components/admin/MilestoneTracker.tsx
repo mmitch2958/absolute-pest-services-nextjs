@@ -28,6 +28,7 @@ import { insertMilestoneSchema } from "@shared/schema";
 const milestoneFormSchema = insertMilestoneSchema.extend({
   id: z.number().optional(),
   dueDate: z.date().optional(),
+  projectId: z.number().min(1, "Please select a project"),
 });
 
 type MilestoneFormData = z.infer<typeof milestoneFormSchema>;
