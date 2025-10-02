@@ -24,11 +24,19 @@ import { cn } from "@/lib/utils";
 import type { Project, InsertProject, Client } from "@shared/schema";
 import { insertProjectSchema } from "@shared/schema";
 
-const projectFormSchema = insertProjectSchema.extend({
+const projectFormSchema = z.object({
   id: z.number().optional(),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  status: z.string(),
+  priority: z.string(),
+  budget: z.string().optional(),
+  actualCost: z.string().optional(),
+  clientId: z.number().min(1, "Please select a client"),
+  assignedTo: z.number().optional(),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
-  clientId: z.number().min(1, "Please select a client"),
+  completedDate: z.date().optional(),
 });
 
 type ProjectFormData = z.infer<typeof projectFormSchema>;
@@ -66,11 +74,13 @@ export function ProjectManagement() {
 
   // Create project mutation
   const createProjectMutation = useMutation({
-    mutationFn: async (data: InsertProject) => {
+    mutationFn: async (data: any) => {
       const requestData = {
         ...data,
         budget: data.budget ? parseFloat(data.budget) : undefined,
         actualCost: data.actualCost ? parseFloat(data.actualCost) : undefined,
+        startDate: data.startDate ? data.startDate.toISOString() : undefined,
+        endDate: data.endDate ? data.endDate.toISOString() : undefined,
       };
       const response = await apiRequest("POST", "/api/projects", requestData);
       return await response.json();
@@ -95,11 +105,13 @@ export function ProjectManagement() {
 
   // Update project mutation
   const updateProjectMutation = useMutation({
-    mutationFn: async ({ id, ...data }: ProjectFormData) => {
+    mutationFn: async ({ id, ...data }: any) => {
       const requestData = {
         ...data,
         budget: data.budget ? parseFloat(data.budget as string) : undefined,
         actualCost: data.actualCost ? parseFloat(data.actualCost as string) : undefined,
+        startDate: data.startDate ? data.startDate.toISOString() : undefined,
+        endDate: data.endDate ? data.endDate.toISOString() : undefined,
       };
       const response = await apiRequest("PUT", `/api/projects/${id}`, requestData);
       return await response.json();

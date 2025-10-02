@@ -174,12 +174,17 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  budget: true,
+  actualCost: true,
+  startDate: true,
+  endDate: true,
+  completedDate: true,
 }).extend({
-  budget: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
-  actualCost: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
-  startDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional(),
-  endDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional(),
-  completedDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional(),
+  budget: z.union([z.string(), z.number()]).transform(val => String(val)).optional().nullable(),
+  actualCost: z.union([z.string(), z.number()]).transform(val => String(val)).optional().nullable(),
+  startDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional().nullable(),
+  endDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional().nullable(),
+  completedDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional().nullable(),
 });
 
 export const insertMilestoneSchema = createInsertSchema(milestones).omit({
