@@ -38,11 +38,12 @@ export default function Auth() {
     const result = await login(loginForm.email, loginForm.password);
     
     if (result.success) {
+      const isAdmin = result.user?.role === 'admin';
       toast({
         title: "Login Successful",
-        description: "Welcome back! Redirecting to dashboard...",
+        description: isAdmin ? "Welcome admin! Redirecting to admin portal..." : "Welcome back! Redirecting to dashboard...",
       });
-      setLocation('/dashboard');
+      setLocation(isAdmin ? '/admin/clients' : '/dashboard');
     } else {
       toast({
         title: "Login Failed",

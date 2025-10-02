@@ -8,6 +8,7 @@ interface User {
   lastName: string;
   phone?: string;
   address?: string;
+  role?: string;
 }
 
 interface AuthState {
@@ -65,7 +66,7 @@ export function useAuth() {
           isLoading: false,
           isAuthenticated: true,
         });
-        return { success: true, message: data.message };
+        return { success: true, message: data.message, user: data.user };
       } else {
         return { success: false, message: data.message };
       }

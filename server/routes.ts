@@ -87,6 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName: user.lastName,
           phone: user.phone,
           address: user.address,
+          role: user.role,
         }
       });
     } catch (error) {
@@ -130,6 +131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName: user.lastName,
           phone: user.phone,
           address: user.address,
+          role: user.role,
         }
       });
     } catch (error) {
@@ -190,6 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastName: user.lastName,
           phone: user.phone,
           address: user.address,
+          role: user.role,
         }
       });
     } catch (error) {
