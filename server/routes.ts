@@ -574,11 +574,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/projects", requireAdmin, async (req, res) => {
     try {
+      console.log("Creating project with data:", JSON.stringify(req.body, null, 2));
       const validatedData = insertProjectSchema.parse(req.body);
       const project = await storage.createProject(validatedData);
       res.json({ success: true, message: "Project created successfully", project });
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("Zod validation errors:", JSON.stringify(error.errors, null, 2));
         res.status(400).json({ success: false, message: "Invalid project data", errors: error.errors });
       } else {
         console.error("Error creating project:", error);
