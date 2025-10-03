@@ -5,6 +5,7 @@ import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema
 import { z } from "zod";
 import session from "express-session";
 import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate } from "./email";
+import Parser from "rss-parser";
 
 // Extend session type to include userId
 declare module 'express-session' {
@@ -930,6 +931,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting blog post:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // RSS Syndication endpoint
+  app.post("/api/admin/blog/syndicate", requireAdmin, async (req, res) => {
+    try {
+      const { feedUrl } = req.body;
+      
+      if (!feedUrl) {
+        return res.status(400).json({ success: false, message: "Feed URL is required" });
+      }
+
+      const parser = new Parser({
+        customFields: {
+          item: [
+            ['content:encoded', 'contentEncoded'],
+            ['dc:creator', 'creator']
+          ]
+        }
+      });
+
+      const feed = await parser.parseURL(feedUrl);
+      
+      const results = {
+        imported: 0,
+        skipped: 0,
+        errors: 0,
+        details: [] as any[]
+      };
+
+      for (const item of feed.items) {
+        try {
+          // Generate slug from title
+          const slug = item.title
+            ?.toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim() || '';
+
+          // Check if post already exists by slug
+          const existingPost = await storage.getBlogPostBySlug(slug);
+          if (existingPost) {
+            results.skipped++;
+            results.details.push({ title: item.title, status: 'skipped', reason: 'Already exists' });
+            continue;
+          }
+
+          // Extract first image from content if available
+          const contentHtml = item.contentEncoded || item.content || '';
+          const imgMatch = contentHtml.match(/<img[^>]+src="([^">]+)"/);
+          const featuredImage = imgMatch ? imgMatch[1] : null;
+
+          // Clean HTML content and extract plain text for excerpt
+          const plainText = contentHtml
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          const excerpt = plainText.substring(0, 300) + (plainText.length > 300 ? '...' : '');
+
+          // Extract categories/tags
+          const tags = item.categories || [];
+
+          // Create blog post
+          await storage.createBlogPost({
+            title: item.title || 'Untitled',
+            slug,
+            content: contentHtml,
+            excerpt: item.contentSnippet || excerpt,
+            author: item.creator || item.author || 'Guest Author',
+            featuredImage,
+            tags,
+            metaTitle: item.title || 'Untitled',
+            metaDescription: (item.contentSnippet || excerpt).substring(0, 160),
+            isPublished: true,
+            publishedAt: item.pubDate ? new Date(item.pubDate) : new Date()
+          });
+
+          results.imported++;
+          results.details.push({ title: item.title, status: 'imported' });
+        } catch (error) {
+          results.errors++;
+          results.details.push({ 
+            title: item.title, 
+            status: 'error', 
+            error: error instanceof Error ? error.message : 'Unknown error' 
+          });
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: `Syndication complete: ${results.imported} imported, ${results.skipped} skipped, ${results.errors} errors`,
+        results 
+      });
+    } catch (error) {
+      console.error("Error syndicating RSS feed:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: error instanceof Error ? error.message : "Failed to syndicate RSS feed" 
+      });
     }
   });
 
