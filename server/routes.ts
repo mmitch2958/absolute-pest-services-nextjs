@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
-import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail } from "./email";
+import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate } from "./email";
 
 // Extend session type to include userId
 declare module 'express-session' {
@@ -308,7 +308,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
+      
+      // Get the current service request to check status change
+      const currentRequest = await storage.getServiceRequestsByUser(req.body.userId || 0);
+      const current = currentRequest.find(r => r.id === id);
+      const oldStatus = current?.status || 'pending';
+      
+      // Update the service request
       const serviceRequest = await storage.updateServiceRequest(id, updates);
+      
+      // If status changed, send email notification
+      if (updates.status && updates.status !== oldStatus) {
+        const user = await storage.getUser(serviceRequest.userId);
+        if (user) {
+          await sendServiceRequestStatusUpdate({
+            customerName: `${user.firstName} ${user.lastName}`,
+            customerEmail: user.email,
+            serviceType: serviceRequest.serviceType,
+            oldStatus,
+            newStatus: updates.status,
+            address: serviceRequest.address,
+            scheduledDate: serviceRequest.scheduledDate || undefined,
+            technicianNotes: serviceRequest.technicianNotes || undefined
+          });
+        }
+      }
+      
       res.json({
         success: true,
         message: "Service request updated successfully",

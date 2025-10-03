@@ -324,3 +324,89 @@ export async function sendServiceRequestEmail(data: {
 
   return businessEmailsSent && customerEmailSent;
 }
+
+export async function sendServiceRequestStatusUpdate(data: {
+  customerName: string;
+  customerEmail: string;
+  serviceType: string;
+  oldStatus: string;
+  newStatus: string;
+  address: string;
+  scheduledDate?: Date;
+  technicianNotes?: string;
+}) {
+  const statusMessages: Record<string, {title: string; message: string}> = {
+    scheduled: {
+      title: 'Service Scheduled',
+      message: `Your ${data.serviceType} service has been scheduled${data.scheduledDate ? ` for ${data.scheduledDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}` : ''}.`
+    },
+    'in-progress': {
+      title: 'Service In Progress',
+      message: `Our technician is currently working on your ${data.serviceType} service at ${data.address}.`
+    },
+    completed: {
+      title: 'Service Completed',
+      message: `Your ${data.serviceType} service has been completed successfully! We hope you're satisfied with our work.`
+    },
+    cancelled: {
+      title: 'Service Cancelled',
+      message: `Your ${data.serviceType} service request has been cancelled.`
+    }
+  };
+
+  const statusInfo = statusMessages[data.newStatus] || {
+    title: 'Service Status Update',
+    message: `Your service request status has been updated to: ${data.newStatus}`
+  };
+
+  const subject = `${statusInfo.title} - Absolute Pest Services`;
+  const html = `
+    <h2>${statusInfo.title}</h2>
+    <p>Dear ${data.customerName},</p>
+    <p>${statusInfo.message}</p>
+    <p><strong>Service Details:</strong></p>
+    <p><strong>Service Type:</strong> ${data.serviceType}</p>
+    <p><strong>Address:</strong> ${data.address}</p>
+    <p><strong>Previous Status:</strong> ${data.oldStatus}</p>
+    <p><strong>Current Status:</strong> ${data.newStatus}</p>
+    ${data.technicianNotes ? `<p><strong>Technician Notes:</strong></p><p>${data.technicianNotes}</p>` : ''}
+    ${data.newStatus === 'completed' ? `
+      <p>We'd love to hear about your experience! Please consider leaving us a review on <a href="https://g.page/r/CXh2r5bK1ZCXEBM/review">Google</a>.</p>
+      <p>If you have any questions or concerns about the service, please don't hesitate to contact us at <strong>(484)643-2225</strong>.</p>
+    ` : `<p>You can track your request status by logging into your customer portal on our website.</p>`}
+    <p>Thank you for choosing Absolute Pest Services!</p>
+    <p>Best regards,<br>The Absolute Pest Services Team</p>
+  `;
+
+  const text = `
+    ${statusInfo.title}
+    
+    Dear ${data.customerName},
+    
+    ${statusInfo.message}
+    
+    Service Details:
+    Service Type: ${data.serviceType}
+    Address: ${data.address}
+    Previous Status: ${data.oldStatus}
+    Current Status: ${data.newStatus}
+    ${data.technicianNotes ? `Technician Notes: ${data.technicianNotes}` : ''}
+    
+    ${data.newStatus === 'completed' ? `We'd love to hear about your experience! Please consider leaving us a review on Google at: https://g.page/r/CXh2r5bK1ZCXEBM/review
+    
+If you have any questions or concerns about the service, please don't hesitate to contact us at (484)643-2225.` : 'You can track your request status by logging into your customer portal on our website.'}
+    
+    Thank you for choosing Absolute Pest Services!
+    
+    Best regards,
+    The Absolute Pest Services Team
+  `;
+
+  return await sendEmail({
+    to: data.customerEmail,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text
+  });
+}
