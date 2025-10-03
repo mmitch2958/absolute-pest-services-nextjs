@@ -906,11 +906,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const validatedData = insertBlogPostSchema.partial().parse(req.body);
       
-      // Set publishedAt when publishing
-      if (validatedData.isPublished && !validatedData.publishedAt) {
-        validatedData.publishedAt = new Date();
-      }
-      
       const post = await storage.updateBlogPost(id, validatedData);
       res.json({ success: true, message: "Blog post updated successfully", post });
     } catch (error) {
@@ -995,20 +990,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const tags = item.categories || [];
           const category = tags.length > 0 ? tags[0] : 'General';
 
+          // Extract author safely
+          const authorName = (item as any).creator || (item as any)['dc:creator'] || 'Guest Author';
+
           // Create blog post
           await storage.createBlogPost({
             title: item.title || 'Untitled',
             slug,
             content: contentHtml,
             excerpt: item.contentSnippet || excerpt,
-            author: item.creator || item.author || 'Guest Author',
+            author: authorName,
             featuredImage,
             category,
             tags,
             metaTitle: item.title || 'Untitled',
             metaDescription: (item.contentSnippet || excerpt).substring(0, 160),
-            isPublished: true,
-            publishedAt: item.pubDate ? new Date(item.pubDate) : new Date()
+            isPublished: true
           });
 
           results.imported++;
