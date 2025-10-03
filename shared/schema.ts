@@ -29,6 +29,7 @@ export const contactSubmissions = pgTable("contact_submissions", {
 export const inspectionSchedules = pgTable("inspection_schedules", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
+  clientId: integer("client_id").references(() => clients.id),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   phone: text("phone").notNull(),
@@ -46,6 +47,7 @@ export const inspectionSchedules = pgTable("inspection_schedules", {
 export const serviceRequests = pgTable("service_requests", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
+  clientId: integer("client_id").references(() => clients.id),
   serviceType: text("service_type").notNull(),
   description: text("description").notNull(),
   address: text("address").notNull(),
