@@ -493,7 +493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all inspection schedules (for admin purposes)
-  app.get("/api/inspection", async (req, res) => {
+  app.get("/api/inspection", requireAdmin, async (req, res) => {
     try {
       const inspections = await storage.getInspectionSchedules();
       res.json(inspections);
