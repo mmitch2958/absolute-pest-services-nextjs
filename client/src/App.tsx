@@ -18,6 +18,7 @@ import BatRemoval from "@/pages/bat-removal";
 import ServiceAreas from "@/pages/service-areas";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
+import CostCalculator from "@/pages/CostCalculator";
 import NotFound from "@/pages/not-found";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminClients } from "@/pages/admin/AdminClients";
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/service-areas" component={ServiceAreas} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
+      <Route path="/cost-calculator" component={CostCalculator} />
       
       {/* Admin Portal Routes */}
       <Route path="/admin/clients">
