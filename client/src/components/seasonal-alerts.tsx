@@ -84,17 +84,23 @@ export default function SeasonalAlerts() {
               {currentAlert.message}
             </p>
             <div className="flex flex-wrap gap-2">
-              <Link href="/cost-calculator">
-                <Button variant="outline" size="sm" data-testid="button-calculator">
-                  <Bug className="w-4 h-4 mr-1" />
-                  Get Estimate
-                </Button>
-              </Link>
-              <Link href="/contact">
-                <Button size="sm" className="bg-green-600 hover:bg-green-700" data-testid="button-schedule">
-                  Schedule Inspection
-                </Button>
-              </Link>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                data-testid="button-calculator"
+                onClick={() => window.location.href = '/#contact'}
+              >
+                <Bug className="w-4 h-4 mr-1" />
+                Get Estimate
+              </Button>
+              <Button 
+                size="sm" 
+                className="bg-green-600 hover:bg-green-700" 
+                data-testid="button-schedule"
+                onClick={() => window.location.href = '/#contact'}
+              >
+                Schedule Inspection
+              </Button>
             </div>
           </div>
         </div>
