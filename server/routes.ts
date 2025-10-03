@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema } from "@shared/schema";
+import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
 import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate } from "./email";
@@ -829,6 +829,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: "Dashboard deleted successfully" });
     } catch (error) {
       console.error("Error deleting dashboard:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Blog routes - Public
+  app.get("/api/blog/posts", async (req, res) => {
+    try {
+      const posts = await storage.getPublishedBlogPosts();
+      res.json({ success: true, posts });
+    } catch (error) {
+      console.error("Error fetching blog posts:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/blog/posts/:slug", async (req, res) => {
+    try {
+      const slug = req.params.slug;
+      const post = await storage.getBlogPostBySlug(slug);
+      if (!post || !post.isPublished) {
+        res.status(404).json({ success: false, message: "Blog post not found" });
+        return;
+      }
+      res.json({ success: true, post });
+    } catch (error) {
+      console.error("Error fetching blog post:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Blog routes - Admin
+  app.get("/api/admin/blog/posts", requireAdmin, async (req, res) => {
+    try {
+      const posts = await storage.getBlogPosts();
+      res.json({ success: true, posts });
+    } catch (error) {
+      console.error("Error fetching all blog posts:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/blog/posts/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const post = await storage.getBlogPost(id);
+      if (!post) {
+        res.status(404).json({ success: false, message: "Blog post not found" });
+        return;
+      }
+      res.json({ success: true, post });
+    } catch (error) {
+      console.error("Error fetching blog post:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/blog/posts", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertBlogPostSchema.parse(req.body);
+      const post = await storage.createBlogPost(validatedData);
+      res.json({ success: true, message: "Blog post created successfully", post });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid blog post data", errors: error.errors });
+      } else {
+        console.error("Error creating blog post:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.put("/api/admin/blog/posts/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertBlogPostSchema.partial().parse(req.body);
+      
+      // Set publishedAt when publishing
+      if (validatedData.isPublished && !validatedData.publishedAt) {
+        validatedData.publishedAt = new Date();
+      }
+      
+      const post = await storage.updateBlogPost(id, validatedData);
+      res.json({ success: true, message: "Blog post updated successfully", post });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid blog post data", errors: error.errors });
+      } else {
+        console.error("Error updating blog post:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.delete("/api/admin/blog/posts/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteBlogPost(id);
+      res.json({ success: true, message: "Blog post deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting blog post:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });
