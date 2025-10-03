@@ -37,7 +37,6 @@ export function DashboardCreator() {
     defaultValues: {
       title: "",
       type: "project",
-      config: "",
       isPublic: false,
       projectId: undefined,
     },
@@ -176,9 +175,9 @@ export function DashboardCreator() {
 
   const getVisibilityIcon = (isPublic: boolean) => {
     return isPublic ? (
-      <Globe className="w-4 h-4 text-green-600" title="Public" />
+      <Globe className="w-4 h-4 text-green-600" />
     ) : (
-      <Lock className="w-4 h-4 text-gray-600" title="Private" />
+      <Lock className="w-4 h-4 text-gray-600" />
     );
   };
 
@@ -293,26 +292,6 @@ export function DashboardCreator() {
                     )}
                   />
                 </div>
-                <FormField
-                  control={form.control}
-                  name="config"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Configuration (JSON)</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          {...field}
-                          value={field.value ?? ""}
-                          placeholder='{"layout": "grid", "widgets": []}'
-                          className="font-mono text-sm"
-                          rows={4}
-                          data-testid="textarea-dashboard-config"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={form.control}
                   name="isPublic"
