@@ -1015,10 +1015,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           results.details.push({ title: item.title, status: 'imported' });
         } catch (error) {
           results.errors++;
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`Error importing post "${item.title}":`, errorMessage, error);
           results.details.push({ 
             title: item.title, 
             status: 'error', 
-            error: error instanceof Error ? error.message : 'Unknown error' 
+            error: errorMessage
           });
         }
       }
