@@ -151,11 +151,14 @@ export default function BlogPost() {
             <p className="text-gray-700 mb-4" data-testid="text-cta-description">
               Our expert team is ready to help protect your home from pests. Get a free consultation today!
             </p>
-            <Link href="/contact">
-              <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-contact-us">
-                Contact Us Today
-              </Button>
-            </Link>
+            <Button 
+              size="lg" 
+              className="bg-green-600 hover:bg-green-700" 
+              data-testid="button-contact-us"
+              onClick={() => window.location.href = '/#contact'}
+            >
+              Contact Us Today
+            </Button>
           </div>
         </article>
       </div>
