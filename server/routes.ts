@@ -929,6 +929,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bulk delete blog posts
+  app.post("/api/admin/blog/posts/bulk-delete", requireAdmin, async (req, res) => {
+    try {
+      const { ids } = req.body;
+      
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ success: false, message: "Invalid ids array" });
+      }
+
+      // Delete all posts
+      for (const id of ids) {
+        await storage.deleteBlogPost(id);
+      }
+
+      res.json({ success: true, message: `${ids.length} blog posts deleted successfully` });
+    } catch (error) {
+      console.error("Error bulk deleting blog posts:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // RSS Syndication endpoint
   app.post("/api/admin/blog/syndicate", requireAdmin, async (req, res) => {
     try {

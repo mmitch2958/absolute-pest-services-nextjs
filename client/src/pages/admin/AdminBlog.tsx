@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import type { BlogPost, InsertBlogPost } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -18,6 +19,7 @@ export function AdminBlog() {
   const [isSyndicateOpen, setIsSyndicateOpen] = useState(false);
   const [feedUrl, setFeedUrl] = useState("https://pestmgt.com/feed/");
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const [selectedPosts, setSelectedPosts] = useState<number[]>([]);
   const [formData, setFormData] = useState<InsertBlogPost>({
     title: "",
     slug: "",
@@ -81,6 +83,21 @@ export function AdminBlog() {
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to delete blog post", variant: "destructive" });
+    },
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      const response = await apiRequest('POST', '/api/admin/blog/posts/bulk-delete', { ids });
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/blog/posts'] });
+      toast({ title: "Success", description: `${selectedPosts.length} blog posts deleted successfully` });
+      setSelectedPosts([]);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete blog posts", variant: "destructive" });
     },
   });
 
@@ -189,6 +206,29 @@ export function AdminBlog() {
     setFormData(prev => ({ ...prev, tags: tagsArray }));
   };
 
+  const togglePostSelection = (postId: number) => {
+    setSelectedPosts(prev => 
+      prev.includes(postId) 
+        ? prev.filter(id => id !== postId)
+        : [...prev, postId]
+    );
+  };
+
+  const toggleAllPosts = () => {
+    if (selectedPosts.length === posts.length) {
+      setSelectedPosts([]);
+    } else {
+      setSelectedPosts(posts.map(p => p.id));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedPosts.length === 0) return;
+    if (confirm(`Are you sure you want to delete ${selectedPosts.length} blog post(s)?`)) {
+      bulkDeleteMutation.mutate(selectedPosts);
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -197,6 +237,17 @@ export function AdminBlog() {
           <p className="text-gray-600" data-testid="text-page-subtitle">Create and manage blog posts for SEO</p>
         </div>
         <div className="flex gap-2">
+          {selectedPosts.length > 0 && (
+            <Button 
+              variant="destructive" 
+              onClick={handleBulkDelete}
+              disabled={bulkDeleteMutation.isPending}
+              data-testid="button-bulk-delete"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Selected ({selectedPosts.length})
+            </Button>
+          )}
           <Dialog open={isSyndicateOpen} onOpenChange={setIsSyndicateOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" data-testid="button-syndicate">
@@ -415,20 +466,38 @@ export function AdminBlog() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {posts.map((post) => (
-            <Card key={post.id} data-testid={`card-post-${post.id}`}>
-              <CardHeader>
-                <div className="flex items-center justify-between mb-2">
-                  <Badge variant={post.isPublished ? "default" : "secondary"} data-testid={`badge-status-${post.id}`}>
-                    {post.isPublished ? (
-                      <><Eye className="w-3 h-3 mr-1" /> Published</>
-                    ) : (
-                      <><EyeOff className="w-3 h-3 mr-1" /> Draft</>
-                    )}
-                  </Badge>
-                  <Badge variant="outline" data-testid={`badge-category-${post.id}`}>{post.category}</Badge>
-                </div>
+        <>
+          <div className="mb-4 flex items-center gap-2">
+            <Checkbox
+              checked={selectedPosts.length === posts.length}
+              onCheckedChange={toggleAllPosts}
+              data-testid="checkbox-select-all"
+            />
+            <Label className="cursor-pointer" onClick={toggleAllPosts}>
+              Select All ({posts.length} posts)
+            </Label>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {posts.map((post) => (
+              <Card key={post.id} data-testid={`card-post-${post.id}`} className={selectedPosts.includes(post.id) ? "border-blue-500 border-2" : ""}>
+                <CardHeader>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Checkbox
+                      checked={selectedPosts.includes(post.id)}
+                      onCheckedChange={() => togglePostSelection(post.id)}
+                      data-testid={`checkbox-post-${post.id}`}
+                    />
+                    <div className="flex items-center justify-between flex-1">
+                      <Badge variant={post.isPublished ? "default" : "secondary"} data-testid={`badge-status-${post.id}`}>
+                        {post.isPublished ? (
+                          <><Eye className="w-3 h-3 mr-1" /> Published</>
+                        ) : (
+                          <><EyeOff className="w-3 h-3 mr-1" /> Draft</>
+                        )}
+                      </Badge>
+                      <Badge variant="outline" data-testid={`badge-category-${post.id}`}>{post.category}</Badge>
+                    </div>
+                  </div>
                 <CardTitle className="line-clamp-2" data-testid={`text-title-${post.id}`}>{post.title}</CardTitle>
                 <CardDescription className="line-clamp-2" data-testid={`text-excerpt-${post.id}`}>
                   {post.excerpt}
@@ -465,6 +534,7 @@ export function AdminBlog() {
             </Card>
           ))}
         </div>
+        </>
       )}
     </div>
   );
