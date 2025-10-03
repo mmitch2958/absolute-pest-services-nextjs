@@ -138,7 +138,19 @@ export function AdminBlog() {
       const response = await apiRequest('POST', '/api/admin/newsletter/send', data);
       return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      // Track newsletter send as Google Ads conversion
+      if (typeof window !== 'undefined' && (window as any).dataLayer) {
+        (window as any).dataLayer.push({
+          event: 'newsletter_sent',
+          event_category: 'Newsletter',
+          event_label: 'Admin Newsletter Send',
+          value: selectedPosts.length,
+          recipient_email: variables.recipientEmail,
+          posts_count: selectedPosts.length
+        });
+      }
+      
       toast({ 
         title: "Newsletter Sent", 
         description: "Newsletter email sent successfully"
