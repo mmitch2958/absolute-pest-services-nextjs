@@ -41,7 +41,7 @@ export function AdminBlog() {
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertBlogPost) => {
-      return await apiRequest('/api/admin/blog/posts', 'POST', data);
+      return await apiRequest('POST', '/api/admin/blog/posts', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/blog/posts'] });
@@ -56,7 +56,7 @@ export function AdminBlog() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<InsertBlogPost> }) => {
-      return await apiRequest(`/api/admin/blog/posts/${id}`, 'PUT', data);
+      return await apiRequest('PUT', `/api/admin/blog/posts/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/blog/posts'] });
@@ -71,7 +71,7 @@ export function AdminBlog() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/admin/blog/posts/${id}`, 'DELETE');
+      return await apiRequest('DELETE', `/api/admin/blog/posts/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/blog/posts'] });
@@ -84,7 +84,7 @@ export function AdminBlog() {
 
   const syndicateMutation = useMutation({
     mutationFn: async (feedUrl: string) => {
-      return await apiRequest('/api/admin/blog/syndicate', 'POST', { feedUrl });
+      return await apiRequest('POST', '/api/admin/blog/syndicate', { feedUrl });
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/blog/posts'] });
