@@ -16,6 +16,8 @@ import BedBugTreatment from "@/pages/bed-bug-treatment";
 import TermiteTreatment from "@/pages/termite-treatment";
 import BatRemoval from "@/pages/bat-removal";
 import ServiceAreas from "@/pages/service-areas";
+import Blog from "@/pages/Blog";
+import BlogPost from "@/pages/BlogPost";
 import NotFound from "@/pages/not-found";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminClients } from "@/pages/admin/AdminClients";
@@ -39,6 +41,8 @@ function Router() {
       <Route path="/termite-treatment" component={TermiteTreatment} />
       <Route path="/bat-removal" component={BatRemoval} />
       <Route path="/service-areas" component={ServiceAreas} />
+      <Route path="/blog" component={Blog} />
+      <Route path="/blog/:slug" component={BlogPost} />
       
       {/* Admin Portal Routes */}
       <Route path="/admin/clients">
