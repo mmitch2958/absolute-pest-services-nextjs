@@ -301,7 +301,8 @@ export function DashboardCreator() {
                       <FormLabel>Configuration (JSON)</FormLabel>
                       <FormControl>
                         <Textarea 
-                          {...field} 
+                          {...field}
+                          value={field.value ?? ""}
                           placeholder='{"layout": "grid", "widgets": []}'
                           className="font-mono text-sm"
                           rows={4}
