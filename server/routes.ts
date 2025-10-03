@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
-import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate } from "./email";
+import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail } from "./email";
 import Parser from "rss-parser";
 
 // Extend session type to include userId
@@ -1053,6 +1053,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: error instanceof Error ? error.message : "Failed to syndicate RSS feed" 
+      });
+    }
+  });
+
+  // Send newsletter email
+  app.post("/api/admin/newsletter/send", requireAdmin, async (req, res) => {
+    try {
+      const { postIds, recipientEmail, subject } = req.body;
+      
+      if (!Array.isArray(postIds) || postIds.length === 0) {
+        return res.status(400).json({ success: false, message: "At least one post must be selected" });
+      }
+      
+      if (!recipientEmail || !recipientEmail.trim()) {
+        return res.status(400).json({ success: false, message: "Recipient email is required" });
+      }
+      
+      if (!subject || !subject.trim()) {
+        return res.status(400).json({ success: false, message: "Subject is required" });
+      }
+
+      // Fetch selected posts
+      const allPosts = await storage.getAllBlogPosts();
+      const selectedPosts = allPosts.filter(post => postIds.includes(post.id));
+      
+      if (selectedPosts.length === 0) {
+        return res.status(404).json({ success: false, message: "No valid posts found" });
+      }
+
+      // Send newsletter email
+      const emailSent = await sendNewsletterEmail({
+        recipientEmail: recipientEmail.trim(),
+        subject: subject.trim(),
+        posts: selectedPosts.map(post => ({
+          title: post.title,
+          excerpt: post.excerpt,
+          slug: post.slug,
+          featuredImage: post.featuredImage,
+          category: post.category
+        }))
+      });
+
+      if (!emailSent) {
+        return res.status(500).json({ success: false, message: "Failed to send newsletter email" });
+      }
+
+      res.json({ success: true, message: "Newsletter sent successfully" });
+    } catch (error) {
+      console.error("Error sending newsletter:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: error instanceof Error ? error.message : "Failed to send newsletter" 
       });
     }
   });

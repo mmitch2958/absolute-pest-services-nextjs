@@ -410,3 +410,102 @@ If you have any questions or concerns about the service, please don't hesitate t
     text
   });
 }
+
+export async function sendNewsletterEmail(data: {
+  recipientEmail: string;
+  subject: string;
+  posts: Array<{
+    title: string;
+    excerpt: string;
+    slug: string;
+    featuredImage?: string | null;
+    category: string;
+  }>;
+}) {
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+    ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+    : 'http://localhost:5000';
+
+  const postsHtml = data.posts.map(post => `
+    <div style="margin-bottom: 30px; border-bottom: 1px solid #e5e7eb; padding-bottom: 20px;">
+      ${post.featuredImage ? `
+        <img src="${post.featuredImage}" alt="${post.title}" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px; margin-bottom: 15px;" />
+      ` : ''}
+      <h3 style="color: #1f2937; margin: 0 0 10px 0; font-size: 20px;">
+        <a href="${baseUrl}/blog/${post.slug}" style="color: #1f2937; text-decoration: none;">${post.title}</a>
+      </h3>
+      <p style="color: #6b7280; margin: 0 0 10px 0; font-size: 14px;">
+        <span style="background-color: #f3f4f6; padding: 4px 12px; border-radius: 4px;">${post.category}</span>
+      </p>
+      <p style="color: #4b5563; margin: 0 0 15px 0; line-height: 1.6;">${post.excerpt}</p>
+      <a href="${baseUrl}/blog/${post.slug}" style="display: inline-block; background-color: #eab308; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: 500;">Read More</a>
+    </div>
+  `).join('');
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${data.subject}</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f9fafb;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);">
+        <div style="background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); padding: 40px 20px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">Absolute Pest Services</h1>
+          <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px;">${data.subject}</p>
+        </div>
+        <div style="padding: 40px 30px;">
+          <p style="color: #4b5563; margin: 0 0 30px 0; font-size: 16px; line-height: 1.6;">
+            Hello! We've curated some helpful pest control tips and updates just for you.
+          </p>
+          ${postsHtml}
+          <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #e5e7eb; text-align: center;">
+            <p style="color: #6b7280; margin: 0 0 15px 0; font-size: 14px;">
+              Need pest control services? We're here to help!
+            </p>
+            <a href="${baseUrl}/#contact" style="display: inline-block; background-color: #1f2937; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 500; margin-bottom: 20px;">Contact Us</a>
+            <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+              Absolute Pest Services<br>
+              Phone: (484) 643-2225<br>
+              <a href="${baseUrl}" style="color: #eab308; text-decoration: none;">Visit Our Website</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const postsText = data.posts.map(post => `
+${post.title}
+Category: ${post.category}
+${post.excerpt}
+Read more: ${baseUrl}/blog/${post.slug}
+---
+  `).join('\n');
+
+  const text = `
+${data.subject}
+
+Hello! We've curated some helpful pest control tips and updates just for you.
+
+${postsText}
+
+Need pest control services? We're here to help!
+Contact us at: ${baseUrl}/#contact
+
+Absolute Pest Services
+Phone: (484) 643-2225
+Website: ${baseUrl}
+  `;
+
+  return await sendEmail({
+    to: data.recipientEmail,
+    from: FROM_EMAIL,
+    subject: data.subject,
+    html,
+    text
+  });
+}
