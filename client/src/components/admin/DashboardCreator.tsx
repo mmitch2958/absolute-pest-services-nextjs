@@ -21,9 +21,11 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Dashboard, InsertDashboard, Project } from "@shared/schema";
 import { insertDashboardSchema } from "@shared/schema";
 
-const dashboardFormSchema = insertDashboardSchema.extend({
-  id: z.number().optional(),
-});
+const dashboardFormSchema = insertDashboardSchema
+  .omit({ createdBy: true })
+  .extend({
+    id: z.number().optional(),
+  });
 
 type DashboardFormData = z.infer<typeof dashboardFormSchema>;
 
@@ -139,7 +141,6 @@ export function DashboardCreator() {
     form.reset({
       title: dashboard.title,
       type: dashboard.type,
-      config: dashboard.config ?? "",
       isPublic: dashboard.isPublic,
       projectId: dashboard.projectId || undefined,
     });
@@ -247,7 +248,7 @@ export function DashboardCreator() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger data-testid="select-dashboard-type">
                               <SelectValue placeholder="Select type" />
