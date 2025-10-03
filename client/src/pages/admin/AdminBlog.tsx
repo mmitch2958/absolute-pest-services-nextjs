@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Rss } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
@@ -15,6 +15,8 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 
 export function AdminBlog() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isSyndicateOpen, setIsSyndicateOpen] = useState(false);
+  const [feedUrl, setFeedUrl] = useState("https://pestmgt.com/feed/");
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [formData, setFormData] = useState<InsertBlogPost>({
     title: "",
@@ -77,6 +79,29 @@ export function AdminBlog() {
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to delete blog post", variant: "destructive" });
+    },
+  });
+
+  const syndicateMutation = useMutation({
+    mutationFn: async (feedUrl: string) => {
+      const response = await apiRequest('/api/admin/blog/syndicate', 'POST', { feedUrl });
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/blog/posts'] });
+      const { results } = data;
+      toast({ 
+        title: "Syndication Complete", 
+        description: `${results.imported} posts imported, ${results.skipped} skipped, ${results.errors} errors`
+      });
+      setIsSyndicateOpen(false);
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to syndicate RSS feed", 
+        variant: "destructive" 
+      });
     },
   });
 
@@ -163,13 +188,50 @@ export function AdminBlog() {
           <h1 className="text-3xl font-bold" data-testid="text-page-title">Blog Management</h1>
           <p className="text-gray-600" data-testid="text-page-subtitle">Create and manage blog posts for SEO</p>
         </div>
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm} data-testid="button-create-post">
-              <Plus className="w-4 h-4 mr-2" />
-              New Post
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Dialog open={isSyndicateOpen} onOpenChange={setIsSyndicateOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" data-testid="button-syndicate">
+                <Rss className="w-4 h-4 mr-2" />
+                Syndicate RSS
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Syndicate RSS Feed</DialogTitle>
+                <DialogDescription>
+                  Import blog posts from an external RSS feed
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="feedUrl">RSS Feed URL</Label>
+                  <Input
+                    id="feedUrl"
+                    value={feedUrl}
+                    onChange={(e) => setFeedUrl(e.target.value)}
+                    placeholder="https://example.com/feed/"
+                    data-testid="input-feed-url"
+                  />
+                </div>
+                <Button 
+                  onClick={() => syndicateMutation.mutate(feedUrl)} 
+                  disabled={syndicateMutation.isPending}
+                  className="w-full"
+                  data-testid="button-import"
+                >
+                  {syndicateMutation.isPending ? "Importing..." : "Import Posts"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm} data-testid="button-create-post">
+                <Plus className="w-4 h-4 mr-2" />
+                New Post
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle data-testid="text-dialog-title">
