@@ -121,6 +121,8 @@ Changelog:
 - October 03, 2025. Built AdminService component with tabbed interface for managing service requests and inspection schedules, allowing admins to link customer submissions to client records
 - October 03, 2025. Implemented RSS feed syndication system using rss-parser library to import blog posts from external feeds (pestmgt.com/feed/), with automatic slug generation, duplicate detection, featured image extraction, and metadata parsing. Admin UI includes "Syndicate RSS" button with customizable feed URL input.
 - October 03, 2025. Added public blog navigation link to main site header, enabling visitors to access blog posts at /blog. Implemented full blog functionality with listing page showing all published posts in grid layout, and individual post pages displaying full content with featured images, categories, tags, author info, and call-to-action sections.
+- October 03, 2025. Added bulk delete functionality to admin blog with checkboxes for individual post selection, "Select All" option, and confirmation dialog before deletion.
+- October 03, 2025. Implemented newsletter email feature in admin blog allowing admins to select multiple blog posts via checkboxes and send them as a professionally formatted HTML email newsletter using SendGrid. Newsletter includes company branding, featured images, excerpts, read-more links, and contact call-to-action. Admins can customize email subject and recipient address.
 
 ## User Preferences
 
