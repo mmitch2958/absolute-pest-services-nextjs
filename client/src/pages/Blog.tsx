@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Header from "@/components/Header";
 import type { BlogPost } from "@shared/schema";
 
 export default function Blog() {
@@ -24,6 +25,8 @@ export default function Blog() {
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
+        <Header />
+        
         <div className="bg-gradient-to-r from-green-700 to-green-600 text-white py-16">
           <div className="container mx-auto px-4">
             <h1 className="text-4xl md:text-5xl font-bold mb-4" data-testid="text-blog-title">

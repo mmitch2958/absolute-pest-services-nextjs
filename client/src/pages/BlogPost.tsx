@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { Calendar, ArrowLeft, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Header from "@/components/Header";
 import type { BlogPost } from "@shared/schema";
 
 export default function BlogPost() {
@@ -19,16 +20,19 @@ export default function BlogPost() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
-            <div className="h-96 bg-gray-200 rounded mb-8"></div>
-            <div className="space-y-4">
-              <div className="h-4 bg-gray-200 rounded"></div>
-              <div className="h-4 bg-gray-200 rounded"></div>
-              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="py-12">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+              <div className="h-96 bg-gray-200 rounded mb-8"></div>
+              <div className="space-y-4">
+                <div className="h-4 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -38,15 +42,18 @@ export default function BlogPost() {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container mx-auto px-4 max-w-4xl text-center">
-          <h1 className="text-3xl font-bold mb-4" data-testid="text-not-found">Blog post not found</h1>
-          <Link href="/blog">
-            <Button data-testid="button-back-to-blog">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Blog
-            </Button>
-          </Link>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="py-12">
+          <div className="container mx-auto px-4 max-w-4xl text-center">
+            <h1 className="text-3xl font-bold mb-4" data-testid="text-not-found">Blog post not found</h1>
+            <Link href="/blog">
+              <Button data-testid="button-back-to-blog">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Blog
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -66,6 +73,8 @@ export default function BlogPost() {
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
+        <Header />
+        
         <div className="bg-gradient-to-r from-green-700 to-green-600 text-white py-8">
           <div className="container mx-auto px-4 max-w-4xl">
             <Link href="/blog">
