@@ -92,6 +92,12 @@ export function AdminBlog() {
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/blog/posts'] });
       const { results } = data;
+      
+      // Log detailed errors to console
+      if (results.errors > 0) {
+        console.log("RSS Import Errors:", results.details.filter((d: any) => d.status === 'error'));
+      }
+      
       toast({ 
         title: "Syndication Complete", 
         description: `${results.imported} posts imported, ${results.skipped} skipped, ${results.errors} errors`
