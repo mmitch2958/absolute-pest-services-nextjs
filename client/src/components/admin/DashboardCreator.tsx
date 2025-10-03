@@ -271,8 +271,8 @@ export function DashboardCreator() {
                       <FormItem>
                         <FormLabel>Project (Optional)</FormLabel>
                         <Select 
-                          onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} 
-                          value={field.value?.toString() || ""}
+                          onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))} 
+                          value={field.value?.toString() || "none"}
                         >
                           <FormControl>
                             <SelectTrigger data-testid="select-dashboard-project">
@@ -280,7 +280,7 @@ export function DashboardCreator() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">None</SelectItem>
+                            <SelectItem value="none">None</SelectItem>
                             {projects.map((project) => (
                               <SelectItem key={project.id} value={project.id.toString()}>
                                 {project.name}
