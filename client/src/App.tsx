@@ -24,6 +24,7 @@ import { AdminClients } from "@/pages/admin/AdminClients";
 import { AdminService } from "@/pages/admin/AdminService";
 import { AdminMilestones } from "@/pages/admin/AdminMilestones";
 import { AdminDashboards } from "@/pages/admin/AdminDashboards";
+import { AdminBlog } from "@/pages/admin/AdminBlog";
 
 function Router() {
   // Track page views when routes change - Google Analytics integration
@@ -63,6 +64,11 @@ function Router() {
       <Route path="/admin/dashboards">
         <AdminLayout>
           <AdminDashboards />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/blog">
+        <AdminLayout>
+          <AdminBlog />
         </AdminLayout>
       </Route>
       
