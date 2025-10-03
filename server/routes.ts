@@ -993,6 +993,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Extract categories/tags
           const tags = item.categories || [];
+          const category = tags.length > 0 ? tags[0] : 'General';
 
           // Create blog post
           await storage.createBlogPost({
@@ -1002,6 +1003,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             excerpt: item.contentSnippet || excerpt,
             author: item.creator || item.author || 'Guest Author',
             featuredImage,
+            category,
             tags,
             metaTitle: item.title || 'Untitled',
             metaDescription: (item.contentSnippet || excerpt).substring(0, 160),
