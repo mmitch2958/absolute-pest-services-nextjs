@@ -115,6 +115,10 @@ Changelog:
 - July 08, 2025. Updated company logo to show "A P S" in circular design with full "Absolute Pest Services" text on the right, made logo clickable to return to homepage across all pages
 - July 08, 2025. Implemented comprehensive local SEO optimization including structured data schema markup, local business information, service area pages, geo-targeted meta tags, and Open Graph/Twitter cards for all service pages covering PA, DE, and MD service areas
 - July 08, 2025. Added Google Business Profile integration with direct links to Google Maps, business listings, review requests, and social proof elements to boost local SEO performance and encourage customer reviews
+- October 03, 2025. Renamed admin portal "Projects" section to "Service" and implemented Service Management system displaying both service requests and inspection schedules with client linking capabilities
+- October 03, 2025. Added clientId foreign key fields to service_requests and inspection_schedules tables to support client relationship tracking in admin portal
+- October 03, 2025. Created admin API endpoints (requireAdmin protected) for fetching and updating service requests and inspection schedules with client associations
+- October 03, 2025. Built AdminService component with tabbed interface for managing service requests and inspection schedules, allowing admins to link customer submissions to client records
 
 ## User Preferences
 
