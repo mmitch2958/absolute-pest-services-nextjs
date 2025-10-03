@@ -43,8 +43,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       icon: Building2,
     },
     {
-      title: "Projects", 
-      href: "/admin/projects",
+      title: "Service", 
+      href: "/admin/service",
       icon: FolderOpen,
     },
     {

@@ -19,7 +19,7 @@ import ServiceAreas from "@/pages/service-areas";
 import NotFound from "@/pages/not-found";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminClients } from "@/pages/admin/AdminClients";
-import { AdminProjects } from "@/pages/admin/AdminProjects";
+import { AdminService } from "@/pages/admin/AdminService";
 import { AdminMilestones } from "@/pages/admin/AdminMilestones";
 import { AdminDashboards } from "@/pages/admin/AdminDashboards";
 
@@ -46,9 +46,9 @@ function Router() {
           <AdminClients />
         </AdminLayout>
       </Route>
-      <Route path="/admin/projects">
+      <Route path="/admin/service">
         <AdminLayout>
-          <AdminProjects />
+          <AdminService />
         </AdminLayout>
       </Route>
       <Route path="/admin/milestones">
