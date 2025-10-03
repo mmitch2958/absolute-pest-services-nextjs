@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, Edit, Trash2, Eye, EyeOff, Rss } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Rss, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
@@ -17,7 +17,10 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 export function AdminBlog() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSyndicateOpen, setIsSyndicateOpen] = useState(false);
+  const [isNewsletterOpen, setIsNewsletterOpen] = useState(false);
   const [feedUrl, setFeedUrl] = useState("https://pestmgt.com/feed/");
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterSubject, setNewsletterSubject] = useState("Latest Pest Control Tips & Updates");
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [selectedPosts, setSelectedPosts] = useState<number[]>([]);
   const [formData, setFormData] = useState<InsertBlogPost>({
@@ -130,6 +133,30 @@ export function AdminBlog() {
     },
   });
 
+  const newsletterMutation = useMutation({
+    mutationFn: async (data: { postIds: number[]; recipientEmail: string; subject: string }) => {
+      const response = await apiRequest('POST', '/api/admin/newsletter/send', data);
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({ 
+        title: "Newsletter Sent", 
+        description: "Newsletter email sent successfully"
+      });
+      setIsNewsletterOpen(false);
+      setNewsletterEmail("");
+      setNewsletterSubject("Latest Pest Control Tips & Updates");
+      setSelectedPosts([]);
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to send newsletter", 
+        variant: "destructive" 
+      });
+    },
+  });
+
   const resetForm = () => {
     setFormData({
       title: "",
@@ -229,6 +256,30 @@ export function AdminBlog() {
     }
   };
 
+  const handleSendNewsletter = () => {
+    if (!newsletterEmail.trim()) {
+      toast({ 
+        title: "Error", 
+        description: "Please enter a recipient email address", 
+        variant: "destructive" 
+      });
+      return;
+    }
+    if (selectedPosts.length === 0) {
+      toast({ 
+        title: "Error", 
+        description: "Please select at least one blog post", 
+        variant: "destructive" 
+      });
+      return;
+    }
+    newsletterMutation.mutate({
+      postIds: selectedPosts,
+      recipientEmail: newsletterEmail,
+      subject: newsletterSubject
+    });
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -238,15 +289,26 @@ export function AdminBlog() {
         </div>
         <div className="flex gap-2">
           {selectedPosts.length > 0 && (
-            <Button 
-              variant="destructive" 
-              onClick={handleBulkDelete}
-              disabled={bulkDeleteMutation.isPending}
-              data-testid="button-bulk-delete"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete Selected ({selectedPosts.length})
-            </Button>
+            <>
+              <Button 
+                variant="default" 
+                onClick={() => setIsNewsletterOpen(true)}
+                disabled={newsletterMutation.isPending}
+                data-testid="button-create-newsletter"
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                Create Newsletter ({selectedPosts.length})
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleBulkDelete}
+                disabled={bulkDeleteMutation.isPending}
+                data-testid="button-bulk-delete"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Selected ({selectedPosts.length})
+              </Button>
+            </>
           )}
           <Dialog open={isSyndicateOpen} onOpenChange={setIsSyndicateOpen}>
             <DialogTrigger asChild>
@@ -280,6 +342,60 @@ export function AdminBlog() {
                   data-testid="button-import"
                 >
                   {syndicateMutation.isPending ? "Importing..." : "Import Posts"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isNewsletterOpen} onOpenChange={setIsNewsletterOpen}>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Create Newsletter Email</DialogTitle>
+                <DialogDescription>
+                  Send selected blog posts as an email newsletter
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="newsletterSubject">Email Subject *</Label>
+                  <Input
+                    id="newsletterSubject"
+                    value={newsletterSubject}
+                    onChange={(e) => setNewsletterSubject(e.target.value)}
+                    placeholder="Latest Pest Control Tips & Updates"
+                    data-testid="input-newsletter-subject"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="newsletterEmail">Recipient Email *</Label>
+                  <Input
+                    id="newsletterEmail"
+                    type="email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    placeholder="customer@example.com"
+                    data-testid="input-newsletter-email"
+                  />
+                </div>
+                <div>
+                  <Label>Selected Posts ({selectedPosts.length})</Label>
+                  <div className="mt-2 space-y-2 max-h-64 overflow-y-auto border rounded-md p-3">
+                    {posts.filter(p => selectedPosts.includes(p.id)).map(post => (
+                      <div key={post.id} className="flex items-start gap-2 p-2 bg-gray-50 rounded">
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{post.title}</p>
+                          <p className="text-xs text-gray-600 line-clamp-1">{post.excerpt}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleSendNewsletter}
+                  disabled={newsletterMutation.isPending}
+                  className="w-full"
+                  data-testid="button-send-newsletter"
+                >
+                  {newsletterMutation.isPending ? "Sending..." : "Send Newsletter"}
                 </Button>
               </div>
             </DialogContent>
