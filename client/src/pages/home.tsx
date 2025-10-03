@@ -10,6 +10,7 @@ import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import LocalSEO from "@/components/local-seo";
 import GoogleBusinessIntegration from "@/components/google-business-integration";
 import GoogleReviewRequest from "@/components/google-review-request";
+import SeasonalAlerts from "@/components/seasonal-alerts";
 import pestControlTeamImage from "@assets/istockphoto-594474798-612x612_1758123737181.jpg";
 
 export default function Home() {
@@ -181,6 +182,7 @@ export default function Home() {
       {/* Services Section */}
       <section id="services" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SeasonalAlerts />
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-[hsl(210,13%,28%)] mb-4">Our Professional Services</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
