@@ -18,10 +18,13 @@ export interface IStorage {
   createInspectionSchedule(inspection: InsertInspection): Promise<InspectionSchedule>;
   getInspectionSchedules(): Promise<InspectionSchedule[]>;
   getInspectionSchedulesByUser(userId: number): Promise<InspectionSchedule[]>;
+  updateInspectionSchedule(id: number, updates: Partial<InspectionSchedule>): Promise<InspectionSchedule>;
   
   // Service request operations
   createServiceRequest(serviceRequest: InsertServiceRequest): Promise<ServiceRequest>;
+  getServiceRequests(): Promise<ServiceRequest[]>;
   getServiceRequestsByUser(userId: number): Promise<ServiceRequest[]>;
+  updateServiceRequest(id: number, updates: Partial<ServiceRequest>): Promise<ServiceRequest>;
   updateServiceRequestStatus(id: number, status: string, updates?: Partial<ServiceRequest>): Promise<ServiceRequest>;
   
   // Payment operations
@@ -131,6 +134,15 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(inspectionSchedules).where(eq(inspectionSchedules.userId, userId));
   }
 
+  async updateInspectionSchedule(id: number, updates: Partial<InspectionSchedule>): Promise<InspectionSchedule> {
+    const [inspection] = await db
+      .update(inspectionSchedules)
+      .set(updates)
+      .where(eq(inspectionSchedules.id, id))
+      .returning();
+    return inspection;
+  }
+
   // Service request operations
   async createServiceRequest(insertServiceRequest: InsertServiceRequest): Promise<ServiceRequest> {
     const [serviceRequest] = await db
@@ -140,8 +152,24 @@ export class DatabaseStorage implements IStorage {
     return serviceRequest;
   }
 
+  async getServiceRequests(): Promise<ServiceRequest[]> {
+    return await db.select().from(serviceRequests);
+  }
+
   async getServiceRequestsByUser(userId: number): Promise<ServiceRequest[]> {
     return await db.select().from(serviceRequests).where(eq(serviceRequests.userId, userId));
+  }
+
+  async updateServiceRequest(id: number, updates: Partial<ServiceRequest>): Promise<ServiceRequest> {
+    const [serviceRequest] = await db
+      .update(serviceRequests)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(serviceRequests.id, id))
+      .returning();
+    return serviceRequest;
   }
 
   async updateServiceRequestStatus(id: number, status: string, updates?: Partial<ServiceRequest>): Promise<ServiceRequest> {

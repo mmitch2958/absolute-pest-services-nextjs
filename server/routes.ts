@@ -287,6 +287,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin endpoints for service requests
+  app.get("/api/admin/service-requests", requireAdmin, async (req, res) => {
+    try {
+      const serviceRequests = await storage.getServiceRequests();
+      res.json({
+        success: true,
+        serviceRequests
+      });
+    } catch (error) {
+      console.error("Error fetching all service requests:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
+    }
+  });
+
+  app.put("/api/admin/service-requests/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const serviceRequest = await storage.updateServiceRequest(id, updates);
+      res.json({
+        success: true,
+        message: "Service request updated successfully",
+        serviceRequest
+      });
+    } catch (error) {
+      console.error("Error updating service request:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
+    }
+  });
+
   app.get("/api/inspections/my", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;
@@ -466,6 +502,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "Internal server error" 
+      });
+    }
+  });
+
+  // Admin endpoint to update inspection schedule
+  app.put("/api/admin/inspections/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const inspection = await storage.updateInspectionSchedule(id, updates);
+      res.json({
+        success: true,
+        message: "Inspection schedule updated successfully",
+        inspection
+      });
+    } catch (error) {
+      console.error("Error updating inspection schedule:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
       });
     }
   });
