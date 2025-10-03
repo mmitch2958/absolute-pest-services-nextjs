@@ -1075,7 +1075,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Fetch selected posts
-      const allPosts = await storage.getAllBlogPosts();
+      const allPosts = await storage.getBlogPosts();
       const selectedPosts = allPosts.filter(post => postIds.includes(post.id));
       
       if (selectedPosts.length === 0) {
