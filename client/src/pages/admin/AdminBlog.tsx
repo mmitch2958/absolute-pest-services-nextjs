@@ -84,8 +84,7 @@ export function AdminBlog() {
 
   const syndicateMutation = useMutation({
     mutationFn: async (feedUrl: string) => {
-      const response = await apiRequest('/api/admin/blog/syndicate', 'POST', { feedUrl });
-      return response.json();
+      return await apiRequest('/api/admin/blog/syndicate', 'POST', { feedUrl });
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/blog/posts'] });
@@ -232,7 +231,7 @@ export function AdminBlog() {
                 New Post
               </Button>
             </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle data-testid="text-dialog-title">
                 {editingPost ? 'Edit Blog Post' : 'Create New Blog Post'}
@@ -384,8 +383,9 @@ export function AdminBlog() {
                 </Button>
               </div>
             </form>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {isLoading ? (

@@ -119,6 +119,7 @@ Changelog:
 - October 03, 2025. Added clientId foreign key fields to service_requests and inspection_schedules tables to support client relationship tracking in admin portal
 - October 03, 2025. Created admin API endpoints (requireAdmin protected) for fetching and updating service requests and inspection schedules with client associations
 - October 03, 2025. Built AdminService component with tabbed interface for managing service requests and inspection schedules, allowing admins to link customer submissions to client records
+- October 03, 2025. Implemented RSS feed syndication system using rss-parser library to import blog posts from external feeds (pestmgt.com/feed/), with automatic slug generation, duplicate detection, featured image extraction, and metadata parsing. Admin UI includes "Syndicate RSS" button with customizable feed URL input.
 
 ## User Preferences
 
