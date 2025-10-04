@@ -58,9 +58,9 @@ export default function LocalSEO({
           "@type": "State",
           "name": "Pennsylvania"
         }
-      },AdministrativeArea
+      },
       {
-        "@type": "",
+        "@type": "AdministrativeArea",
         "name": "Chester County",
         "containedInPlace": {
           "@type": "State",
