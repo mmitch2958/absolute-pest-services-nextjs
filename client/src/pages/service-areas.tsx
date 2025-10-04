@@ -6,6 +6,7 @@ import { Link } from 'wouter';
 import ScheduleInspectionModal from '@/components/schedule-inspection-modal';
 import GoogleBusinessIntegration from '@/components/google-business-integration';
 import GoogleReviewRequest from '@/components/google-review-request';
+import Header from '@/components/Header';
 
 export default function ServiceAreas() {
   const serviceAreas = [
@@ -46,6 +47,8 @@ export default function ServiceAreas() {
         description="Absolute Pest Services provides professional pest control throughout Chester County, Delaware County, Montgomery County PA, New Castle County DE, and Northeast MD. Local phone numbers and emergency services available."
         serviceArea="Pennsylvania, Delaware, Maryland"
       />
+      
+      <Header />
       
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">

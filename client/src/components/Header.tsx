@@ -29,8 +29,7 @@ export default function Header() {
           <nav className="hidden md:flex space-x-8">
             <button onClick={() => scrollToSection('home')} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">Home</button>
             <button onClick={() => scrollToSection('services')} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">Services</button>
-            <button onClick={() => scrollToSection('areas')} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">Service Areas</button>
-            <button onClick={() => window.location.href = '/service-areas'} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">Coverage Areas</button>
+            <button onClick={() => window.location.href = '/service-areas'} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">Service Areas</button>
             <button onClick={() => window.location.href = '/blog'} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">Blog</button>
             <button onClick={() => scrollToSection('about')} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">About</button>
             <button onClick={() => scrollToSection('contact')} className="text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium">Contact</button>
@@ -64,8 +63,7 @@ export default function Header() {
           <div className="px-4 py-4 space-y-3">
             <button onClick={() => scrollToSection('home')} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">Home</button>
             <button onClick={() => scrollToSection('services')} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">Services</button>
-            <button onClick={() => scrollToSection('areas')} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">Service Areas</button>
-            <button onClick={() => window.location.href = '/service-areas'} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">Coverage Areas</button>
+            <button onClick={() => window.location.href = '/service-areas'} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">Service Areas</button>
             <button onClick={() => window.location.href = '/blog'} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">Blog</button>
             <button onClick={() => scrollToSection('about')} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">About</button>
             <button onClick={() => scrollToSection('contact')} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">Contact</button>
