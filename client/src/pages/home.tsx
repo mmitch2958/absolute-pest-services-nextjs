@@ -267,7 +267,7 @@ export default function Home() {
               <div className="space-y-4">
                 {[
                   "Licensed & Insured Professionals",
-                  "24/7 Emergency Service Available",
+                  "Emergency Service Available",
                   "Safe & Effective Treatment Methods",
                   "Satisfaction Guarantee"
                 ].map((feature, index) => (
