@@ -70,7 +70,7 @@ export default function GoogleReviewRequest() {
               <MessageCircle className="h-4 w-4" />
               <span className="text-sm font-medium">Support</span>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">24/7 Emergency</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">7 Day Emergency Support</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 text-yellow-600">
