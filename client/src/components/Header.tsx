@@ -37,7 +37,7 @@ export default function Header() {
 
           <div className="flex items-center space-x-4">
             <div className="hidden lg:flex flex-col text-right">
-              <span className="text-sm text-[hsl(210,13%,28%)]">24/7 Emergency Service</span>
+              <span className="text-sm text-[hsl(210,13%,28%)]">Emergency Service</span>
               <span className="text-lg font-semibold text-[hsl(132,48%,35%)]">484-643-2225</span>
             </div>
             <QuoteRequestModal>
