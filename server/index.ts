@@ -13,6 +13,30 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Health check endpoints - must be before any middleware or route registration
+// Deployment health checks hit these endpoints and expect fast 200 responses
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+app.get("/api/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+// Fast response for root path health checks
+// Replit's autoscale deployment health checks hit / and expect a quick 200
+// Health checks don't send Accept: text/html header, so we can distinguish them
+app.use((req, res, next) => {
+  if (req.method === 'GET' && req.path === '/') {
+    const acceptHeader = req.headers['accept'] || '';
+    // If this doesn't look like a browser request (no text/html), treat as health check
+    if (!acceptHeader.includes('text/html')) {
+      return res.status(200).send('OK');
+    }
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
