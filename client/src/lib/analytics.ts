@@ -52,6 +52,18 @@ export const trackEvent = (
   label?: string, 
   value?: number
 ) => {
+  // Push to dataLayer for Google Tag Manager (for Google Ads conversion tracking)
+  if (typeof window !== 'undefined') {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: action,
+      event_category: category,
+      event_label: label,
+      value: value
+    });
+  }
+  
+  // Also track in Google Analytics
   if (typeof window === 'undefined' || !window.gtag) return;
   
   window.gtag('event', action, {
