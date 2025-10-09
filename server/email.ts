@@ -238,19 +238,22 @@ export async function sendInspectionScheduleEmail(data: {
 
 // Service request email
 export async function sendServiceRequestEmail(data: {
+  firstName: string;
+  lastName: string;
   serviceType: string;
   description: string;
   address: string;
   priority: string;
-  customerName: string;
   customerEmail: string;
   customerPhone?: string;
 }) {
+  const customerName = `${data.firstName} ${data.lastName}`;
+  
   // Send notification to business
   const businessSubject = `Service Request - ${data.serviceType}`;
   const businessHtml = `
     <h2>New Service Request</h2>
-    <p><strong>Customer:</strong> ${data.customerName}</p>
+    <p><strong>Customer:</strong> ${customerName}</p>
     <p><strong>Email:</strong> ${data.customerEmail}</p>
     ${data.customerPhone ? `<p><strong>Phone:</strong> ${data.customerPhone}</p>` : ''}
     <p><strong>Service Type:</strong> ${data.serviceType}</p>
@@ -262,7 +265,7 @@ export async function sendServiceRequestEmail(data: {
   
   const businessText = `
     New Service Request
-    Customer: ${data.customerName}
+    Customer: ${customerName}
     Email: ${data.customerEmail}
     ${data.customerPhone ? `Phone: ${data.customerPhone}` : ''}
     Service Type: ${data.serviceType}
@@ -275,7 +278,7 @@ export async function sendServiceRequestEmail(data: {
   const customerSubject = `Service Request Confirmation - Absolute Pest Services`;
   const customerHtml = `
     <h2>Service Request Confirmed!</h2>
-    <p>Dear ${data.customerName},</p>
+    <p>Dear ${customerName},</p>
     <p>Thank you for submitting a service request. We have received your request for <strong>${data.serviceType}</strong> service.</p>
     <p><strong>Service Details:</strong></p>
     <p><strong>Service Type:</strong> ${data.serviceType}</p>
@@ -291,7 +294,7 @@ export async function sendServiceRequestEmail(data: {
   const customerText = `
     Service Request Confirmed!
     
-    Dear ${data.customerName},
+    Dear ${customerName},
     
     Thank you for submitting a service request. We have received your request for ${data.serviceType} service.
     
