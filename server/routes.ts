@@ -222,7 +222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Create or update prospect in admin portal
         try {
           await storage.createOrUpdateProspect({
-            name: `${user.firstName} ${user.lastName}`,
+            name: `${validatedData.firstName} ${validatedData.lastName}`,
             email: user.email,
             phone: user.phone || undefined,
             address: validatedData.address,
@@ -235,11 +235,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Send email notification
         const emailSent = await sendServiceRequestEmail({
+          firstName: validatedData.firstName,
+          lastName: validatedData.lastName,
           serviceType: validatedData.serviceType,
           description: validatedData.description,
           address: validatedData.address,
           priority: validatedData.priority || "medium",
-          customerName: `${user.firstName} ${user.lastName}`,
           customerEmail: user.email,
           customerPhone: user.phone || ""
         });
