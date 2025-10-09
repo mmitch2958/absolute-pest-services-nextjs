@@ -48,6 +48,8 @@ export const serviceRequests = pgTable("service_requests", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
   clientId: integer("client_id").references(() => clients.id),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
   serviceType: text("service_type").notNull(),
   description: text("description").notNull(),
   address: text("address").notNull(),
