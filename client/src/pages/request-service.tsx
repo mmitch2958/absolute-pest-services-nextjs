@@ -19,6 +19,8 @@ export default function RequestService() {
   const [submitting, setSubmitting] = useState(false);
 
   const [serviceForm, setServiceForm] = useState({
+    firstName: '',
+    lastName: '',
     serviceType: '',
     description: '',
     address: '',
@@ -132,6 +134,38 @@ export default function RequestService() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="firstName" className="text-base font-medium">
+                    First Name <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="firstName"
+                    data-testid="input-firstName"
+                    value={serviceForm.firstName}
+                    onChange={(e) => setServiceForm({ ...serviceForm, firstName: e.target.value })}
+                    placeholder="Enter your first name"
+                    className="mt-2"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="lastName" className="text-base font-medium">
+                    Last Name <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="lastName"
+                    data-testid="input-lastName"
+                    value={serviceForm.lastName}
+                    onChange={(e) => setServiceForm({ ...serviceForm, lastName: e.target.value })}
+                    placeholder="Enter your last name"
+                    className="mt-2"
+                    required
+                  />
+                </div>
+              </div>
+
               <div>
                 <Label htmlFor="serviceType" className="text-base font-medium">
                   Service Type <span className="text-red-500">*</span>
