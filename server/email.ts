@@ -62,6 +62,7 @@ export async function sendContactFormEmail(data: {
   lastName: string;
   phone: string;
   email: string;
+  city: string;
   serviceType: string;
   message: string;
 }) {
@@ -72,6 +73,7 @@ export async function sendContactFormEmail(data: {
     <p><strong>Name:</strong> ${data.firstName} ${data.lastName}</p>
     <p><strong>Phone:</strong> ${data.phone}</p>
     <p><strong>Email:</strong> ${data.email}</p>
+    <p><strong>City:</strong> ${data.city}</p>
     <p><strong>Service Type:</strong> ${data.serviceType}</p>
     <p><strong>Message:</strong></p>
     <p>${data.message}</p>
@@ -82,6 +84,7 @@ export async function sendContactFormEmail(data: {
     Name: ${data.firstName} ${data.lastName}
     Phone: ${data.phone}
     Email: ${data.email}
+    City: ${data.city}
     Service Type: ${data.serviceType}
     Message: ${data.message}
   `;
@@ -140,6 +143,7 @@ export async function sendInspectionScheduleEmail(data: {
   phone: string;
   email: string;
   address: string;
+  city: string;
   serviceType: string;
   preferredDate: Date;
   preferredTime: string;
@@ -161,6 +165,7 @@ export async function sendInspectionScheduleEmail(data: {
     <p><strong>Phone:</strong> ${data.phone}</p>
     <p><strong>Email:</strong> ${data.email}</p>
     <p><strong>Address:</strong> ${data.address}</p>
+    <p><strong>City:</strong> ${data.city}</p>
     <p><strong>Service Type:</strong> ${data.serviceType}</p>
     <p><strong>Preferred Date:</strong> ${formattedDate}</p>
     <p><strong>Preferred Time:</strong> ${data.preferredTime}</p>
@@ -174,6 +179,7 @@ export async function sendInspectionScheduleEmail(data: {
     Phone: ${data.phone}
     Email: ${data.email}
     Address: ${data.address}
+    City: ${data.city}
     Service Type: ${data.serviceType}
     Preferred Date: ${formattedDate}
     Preferred Time: ${data.preferredTime}
@@ -189,6 +195,7 @@ export async function sendInspectionScheduleEmail(data: {
     <p>Thank you for scheduling an inspection with Absolute Pest Services. We have received your request for <strong>${data.serviceType}</strong> inspection.</p>
     <p><strong>Inspection Details:</strong></p>
     <p><strong>Address:</strong> ${data.address}</p>
+    <p><strong>City:</strong> ${data.city}</p>
     <p><strong>Service Type:</strong> ${data.serviceType}</p>
     <p><strong>Preferred Date:</strong> ${formattedDate}</p>
     <p><strong>Preferred Time:</strong> ${data.preferredTime}</p>
@@ -208,6 +215,7 @@ export async function sendInspectionScheduleEmail(data: {
     
     Inspection Details:
     Address: ${data.address}
+    City: ${data.city}
     Service Type: ${data.serviceType}
     Preferred Date: ${formattedDate}
     Preferred Time: ${data.preferredTime}
@@ -243,6 +251,7 @@ export async function sendServiceRequestEmail(data: {
   serviceType: string;
   description: string;
   address: string;
+  city: string;
   priority: string;
   customerEmail: string;
   customerPhone?: string;
@@ -258,6 +267,7 @@ export async function sendServiceRequestEmail(data: {
     ${data.customerPhone ? `<p><strong>Phone:</strong> ${data.customerPhone}</p>` : ''}
     <p><strong>Service Type:</strong> ${data.serviceType}</p>
     <p><strong>Address:</strong> ${data.address}</p>
+    <p><strong>City:</strong> ${data.city}</p>
     <p><strong>Priority:</strong> ${data.priority}</p>
     <p><strong>Description:</strong></p>
     <p>${data.description}</p>
@@ -270,6 +280,7 @@ export async function sendServiceRequestEmail(data: {
     ${data.customerPhone ? `Phone: ${data.customerPhone}` : ''}
     Service Type: ${data.serviceType}
     Address: ${data.address}
+    City: ${data.city}
     Priority: ${data.priority}
     Description: ${data.description}
   `;
@@ -283,6 +294,7 @@ export async function sendServiceRequestEmail(data: {
     <p><strong>Service Details:</strong></p>
     <p><strong>Service Type:</strong> ${data.serviceType}</p>
     <p><strong>Address:</strong> ${data.address}</p>
+    <p><strong>City:</strong> ${data.city}</p>
     <p><strong>Priority:</strong> ${data.priority}</p>
     <p><strong>Description:</strong> ${data.description}</p>
     <p>Our team will review your request and contact you within 24 hours to schedule service. For urgent matters, please call us at <strong>(484)643-2225</strong>.</p>
@@ -301,6 +313,7 @@ export async function sendServiceRequestEmail(data: {
     Service Details:
     Service Type: ${data.serviceType}
     Address: ${data.address}
+    City: ${data.city}
     Priority: ${data.priority}
     Description: ${data.description}
     
