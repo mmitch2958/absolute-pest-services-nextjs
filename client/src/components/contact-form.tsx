@@ -16,6 +16,7 @@ interface ContactFormData {
   lastName: string;
   phone: string;
   email: string;
+  city: string;
   serviceType: string;
   message: string;
 }
@@ -27,6 +28,7 @@ export default function ContactForm() {
     lastName: '',
     phone: '',
     email: '',
+    city: '',
     serviceType: '',
     message: ''
   });
@@ -49,6 +51,7 @@ export default function ContactForm() {
         lastName: '',
         phone: '',
         email: '',
+        city: '',
         serviceType: '',
         message: ''
       });
@@ -123,6 +126,20 @@ export default function ContactForm() {
               onChange={(e) => handleChange('email', e.target.value)}
               className="mt-2"
               required
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="city" className="text-sm font-medium text-[hsl(210,13%,28%)]">City</Label>
+            <Input
+              id="city"
+              type="text"
+              value={formData.city}
+              onChange={(e) => handleChange('city', e.target.value)}
+              className="mt-2"
+              placeholder="e.g., Philadelphia, Wilmington"
+              required
+              data-testid="input-city"
             />
           </div>
           
