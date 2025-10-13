@@ -20,6 +20,7 @@ interface InspectionFormData {
   phone: string;
   email: string;
   address: string;
+  city: string;
   serviceType: string;
   preferredDate: Date | null;
   preferredTime: string;
@@ -40,6 +41,7 @@ export default function ScheduleInspectionModal({ children }: ScheduleInspection
     phone: '',
     email: '',
     address: '',
+    city: '',
     serviceType: '',
     preferredDate: null,
     preferredTime: '',
@@ -70,6 +72,7 @@ export default function ScheduleInspectionModal({ children }: ScheduleInspection
         phone: '',
         email: '',
         address: '',
+        city: '',
         serviceType: '',
         preferredDate: null,
         preferredTime: '',
@@ -201,8 +204,24 @@ export default function ScheduleInspectionModal({ children }: ScheduleInspection
               value={formData.address}
               onChange={(e) => handleChange('address', e.target.value)}
               className="mt-1"
-              placeholder="123 Main St, City, State, ZIP"
+              placeholder="123 Main St, State, ZIP"
               required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="city" className="text-sm font-medium text-[hsl(210,13%,28%)]">
+              City *
+            </Label>
+            <Input
+              id="city"
+              type="text"
+              value={formData.city}
+              onChange={(e) => handleChange('city', e.target.value)}
+              className="mt-1"
+              placeholder="e.g., Philadelphia, Wilmington"
+              required
+              data-testid="input-inspection-city"
             />
           </div>
 
