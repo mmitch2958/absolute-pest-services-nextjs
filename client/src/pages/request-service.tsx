@@ -24,6 +24,7 @@ export default function RequestService() {
     serviceType: '',
     description: '',
     address: '',
+    city: '',
     priority: 'medium'
   });
 
@@ -199,7 +200,22 @@ export default function RequestService() {
                   id="address"
                   value={serviceForm.address}
                   onChange={(e) => setServiceForm({ ...serviceForm, address: e.target.value })}
-                  placeholder="Enter the complete address where service is needed"
+                  placeholder="Enter the street address where service is needed"
+                  className="mt-2"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="city" className="text-base font-medium">
+                  City <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="city"
+                  data-testid="input-service-city"
+                  value={serviceForm.city}
+                  onChange={(e) => setServiceForm({ ...serviceForm, city: e.target.value })}
+                  placeholder="e.g., Philadelphia, Wilmington"
                   className="mt-2"
                   required
                 />
