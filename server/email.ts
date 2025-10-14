@@ -7,7 +7,7 @@ if (!process.env.SENDGRID_API_KEY) {
 const mailService = new MailService();
 mailService.setApiKey(process.env.SENDGRID_API_KEY);
 
-const FROM_EMAIL = 'noreply@absolutepestservices.com';
+const FROM_EMAIL = 'rob@absolutepestservices.com';
 const TO_EMAIL = 'rob@absolutepestservices.com';
 const ADDITIONAL_EMAIL = 'mike@steelcity-ai.com';
 
