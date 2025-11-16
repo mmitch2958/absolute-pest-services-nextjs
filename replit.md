@@ -123,6 +123,28 @@ Changelog:
 - October 03, 2025. Added public blog navigation link to main site header, enabling visitors to access blog posts at /blog. Implemented full blog functionality with listing page showing all published posts in grid layout, and individual post pages displaying full content with featured images, categories, tags, author info, and call-to-action sections.
 - October 03, 2025. Added bulk delete functionality to admin blog with checkboxes for individual post selection, "Select All" option, and confirmation dialog before deletion.
 - October 03, 2025. Implemented newsletter email feature in admin blog allowing admins to select multiple blog posts via checkboxes and send them as a professionally formatted HTML email newsletter using SendGrid. Newsletter includes company branding, featured images, excerpts, read-more links, and contact call-to-action. Admins can customize email subject and recipient address.
+- November 16, 2025. Added mandatory city field to all three forms (contact, inspection, service request) with client-side validation and database schema updates. Updated all email templates to include city information in both business notifications and customer confirmations.
+- November 16, 2025. Changed email sender address from noreply@absolutepestservices.com to rob@absolutepestservices.com for all form notifications and customer confirmations to improve deliverability and enable direct replies.
+- November 16, 2025. Added rmitch21@gmail.com as third recipient for all form email notifications. Business notifications now sent to: rob@absolutepestservices.com, mike@steelcity-ai.com, and rmitch21@gmail.com.
+
+## Email Configuration
+
+### SendGrid Integration
+- **Service**: SendGrid (Twilio) for transactional emails
+- **Sender Address**: rob@absolutepestservices.com
+- **Business Recipients**: 
+  - rob@absolutepestservices.com
+  - mike@steelcity-ai.com
+  - rmitch21@gmail.com
+- **Email Types**: Contact form submissions, inspection scheduling requests, service requests, newsletter emails
+
+### Email Authentication Requirements
+To prevent emails from going to spam (especially Microsoft 365/Outlook), the following DNS records must be configured in Cloudflare:
+- **SPF Record**: Authorizes SendGrid to send emails from absolutepestservices.com domain
+- **DKIM Records**: Cryptographic email signatures provided by SendGrid domain authentication
+- **DMARC Record**: Policy for handling authentication failures
+
+**Action Required**: Complete SendGrid domain authentication and add DNS records to Cloudflare to improve email deliverability with Microsoft 365 and other providers.
 
 ## User Preferences
 

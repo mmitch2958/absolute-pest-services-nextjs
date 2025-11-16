@@ -10,8 +10,9 @@ mailService.setApiKey(process.env.SENDGRID_API_KEY);
 const FROM_EMAIL = 'rob@absolutepestservices.com';
 const TO_EMAIL = 'rob@absolutepestservices.com';
 const ADDITIONAL_EMAIL = 'mike@steelcity-ai.com';
+const THIRD_EMAIL = 'rmitch21@gmail.com';
 
-// Helper function to send notifications to both business emails
+// Helper function to send notifications to all business emails
 async function sendBusinessNotifications(subject: string, html: string, text: string): Promise<boolean> {
   const businessEmailSent = await sendEmail({
     to: TO_EMAIL,
@@ -29,7 +30,15 @@ async function sendBusinessNotifications(subject: string, html: string, text: st
     text
   });
 
-  return businessEmailSent && additionalEmailSent;
+  const thirdEmailSent = await sendEmail({
+    to: THIRD_EMAIL,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text
+  });
+
+  return businessEmailSent && additionalEmailSent && thirdEmailSent;
 }
 
 interface EmailParams {
