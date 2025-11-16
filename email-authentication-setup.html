@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Authentication Setup Guide - Fix Microsoft 365 Spam Issues</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #1a1a1a;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            border-bottom: 4px solid #f4c430;
+            padding-bottom: 15px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 5px solid #f4c430;
+        }
+        
+        h3 {
+            color: #34495e;
+            font-size: 1.3em;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        
+        .intro {
+            background: #fff3cd;
+            border-left: 5px solid #f4c430;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .warning {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .step {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #f4c430;
+            color: #1a1a1a;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #c7254e;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: #f4c430;
+            color: #1a1a1a;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: #f4c430;
+            color: #1a1a1a;
+            padding: 12px 24px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #d4a929;
+            text-decoration: none;
+        }
+        
+        .checklist {
+            list-style: none;
+            margin: 20px 0;
+        }
+        
+        .checklist li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-left: 3px solid #28a745;
+            border-radius: 3px;
+        }
+        
+        .checklist li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Email Authentication Setup Guide</h1>
+        <p style="color: #666; font-size: 1.1em; margin-top: 10px;">
+            Fix Microsoft 365 Spam Issues for Absolute Pest Services
+        </p>
+
+        <div class="intro">
+            <h3>🎯 What This Guide Fixes</h3>
+            <p>Your emails from forms (contact, inspection, service requests) are going to Microsoft 365 junk folders because your domain <code>absolutepestservices.com</code> is not authenticated with SendGrid.</p>
+            <p style="margin-top: 10px;"><strong>This guide will walk you through:</strong></p>
+            <ul>
+                <li>Setting up SendGrid domain authentication</li>
+                <li>Adding DNS records to Cloudflare</li>
+                <li>Configuring SPF, DKIM, and DMARC</li>
+                <li>Testing your email deliverability</li>
+            </ul>
+            <p style="margin-top: 10px;"><strong>Time Required:</strong> 20-30 minutes | <strong>DNS Propagation:</strong> 24-48 hours</p>
+        </div>
+
+        <h2>🔐 Step 1: Access Your SendGrid Account</h2>
+        
+        <div class="step">
+            <h3><span class="step-number">1</span>Find Your SendGrid Login</h3>
+            <p>You need to log into the SendGrid account that was originally set up. Try these options:</p>
+            
+            <h4>Option A: Password Reset (Recommended)</h4>
+            <ol>
+                <li>Go to <a href="https://app.sendgrid.com" target="_blank">https://app.sendgrid.com</a></li>
+                <li>Click <strong>"Forgot Password?"</strong></li>
+                <li>Try these email addresses:
+                    <ul>
+                        <li><code>rob@absolutepestservices.com</code></li>
+                        <li><code>mike@steelcity-ai.com</code></li>
+                    </ul>
+                </li>
+                <li>Check your email for the password reset link</li>
+                <li>Create a new password and log in</li>
+            </ol>
+
+            <h4>Option B: Check Your Email</h4>
+            <p>Search your email inbox for:</p>
+            <ul>
+                <li>"SendGrid" or "Welcome to SendGrid"</li>
+                <li>"SENDGRID_API_KEY" or "API Key"</li>
+                <li>Any emails from <code>@sendgrid.com</code></li>
+            </ul>
+
+            <h4>Option C: Create New SendGrid Account</h4>
+            <p>If you can't access the existing account:</p>
+            <ol>
+                <li>Sign up for a new free account at <a href="https://signup.sendgrid.com" target="_blank">https://signup.sendgrid.com</a></li>
+                <li>Use <code>rob@absolutepestservices.com</code> as the login email</li>
+                <li>Free tier allows 100 emails/day (sufficient for your contact forms)</li>
+                <li>After setup, you'll need to update your API key in Replit (I can help with that)</li>
+            </ol>
+        </div>
+
+        <h2>📝 Step 2: SendGrid Domain Authentication</h2>
+
+        <div class="step">
+            <h3><span class="step-number">2</span>Authenticate Your Domain in SendGrid</h3>
+            
+            <p><strong>Once logged into SendGrid:</strong></p>
+            
+            <ol>
+                <li>Click <strong>"Settings"</strong> in the left sidebar</li>
+                <li>Click <strong>"Sender Authentication"</strong></li>
+                <li>Under "Domain Authentication", click <strong>"Authenticate Your Domain"</strong> (blue button)</li>
+                <li>You'll be asked a series of questions:
+                    <ul>
+                        <li><strong>"Which DNS host do you use?"</strong> Select <strong>"Other Host (Not Listed)"</strong></li>
+                        <li><strong>"Would you like to brand the links for this domain?"</strong> Select <strong>"Yes"</strong></li>
+                    </ul>
+                </li>
+                <li>Enter your domain: <code>absolutepestservices.com</code></li>
+                <li>Click <strong>"Next"</strong></li>
+                <li><strong>IMPORTANT:</strong> SendGrid will now display DNS records you need to add. Keep this page open!</li>
+            </ol>
+
+            <div class="info">
+                <strong>📋 What You'll See:</strong>
+                <p>SendGrid will generate 3-4 DNS records that look like this:</p>
+                <ul>
+                    <li>2 CNAME records for <strong>DKIM</strong> (email signing)</li>
+                    <li>1 CNAME record for <strong>mail subdomain</strong></li>
+                    <li>Sometimes 1 TXT record for <strong>SPF</strong></li>
+                </ul>
+                <p style="margin-top: 10px;"><strong>Do NOT click verify yet!</strong> First, add the records to Cloudflare.</p>
+            </div>
+        </div>
+
+        <h2>☁️ Step 3: Add DNS Records to Cloudflare</h2>
+
+        <div class="warning">
+            <strong>⚠️ CRITICAL:</strong> Add DNS records ONLY in Cloudflare, NOT in GoDaddy. Your domain's DNS is managed by Cloudflare.
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">3</span>Access Cloudflare DNS Settings</h3>
+            
+            <ol>
+                <li>Log into your Cloudflare account at <a href="https://dash.cloudflare.com" target="_blank">https://dash.cloudflare.com</a></li>
+                <li>Click on your domain: <strong>absolutepestservices.com</strong></li>
+                <li>In the left sidebar (or top menu), click <strong>"DNS"</strong> → <strong>"Records"</strong></li>
+                <li>You should see a list of existing DNS records</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">4</span>Add SendGrid DKIM Records</h3>
+            
+            <p>For each CNAME record that SendGrid provided (usually 2):</p>
+            
+            <ol>
+                <li>Click <strong>"Add record"</strong> button in Cloudflare</li>
+                <li>Fill in the details exactly as shown in SendGrid:
+                    <table>
+                        <tr>
+                            <th>Field</th>
+                            <th>What to Enter</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Type</strong></td>
+                            <td>CNAME</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Name</strong></td>
+                            <td>Copy from SendGrid (e.g., <code>s1._domainkey</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Target</strong></td>
+                            <td>Copy from SendGrid (e.g., <code>s1.domainkey.u12345.wl.sendgrid.net</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TTL</strong></td>
+                            <td>Auto</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Proxy status</strong></td>
+                            <td><strong>DNS only</strong> (gray cloud ☁️, NOT orange 🟠)</td>
+                        </tr>
+                    </table>
+                </li>
+                <li>Click <strong>"Save"</strong></li>
+                <li>Repeat for the second DKIM record</li>
+            </ol>
+
+            <div class="warning">
+                <strong>⚠️ IMPORTANT:</strong> The proxy status MUST be set to "DNS only" (gray cloud). If it's orange, click it to toggle to gray.
+            </div>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">5</span>Add Mail Subdomain CNAME (if provided)</h3>
+            
+            <p>If SendGrid gave you a third CNAME record for linking:</p>
+            
+            <ol>
+                <li>Click <strong>"Add record"</strong> again</li>
+                <li>Type: <strong>CNAME</strong></li>
+                <li>Name: Copy from SendGrid (often <code>em1234</code> or similar)</li>
+                <li>Target: Copy from SendGrid</li>
+                <li>TTL: <strong>Auto</strong></li>
+                <li>Proxy: <strong>DNS only</strong> (gray cloud)</li>
+                <li>Click <strong>"Save"</strong></li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">6</span>Add SPF Record</h3>
+            
+            <p>Check if you already have an SPF record:</p>
+            <ul>
+                <li>Search your Cloudflare DNS records for a TXT record with name <code>@</code></li>
+                <li>Look for a value starting with <code>v=spf1</code></li>
+            </ul>
+
+            <h4>If you DON'T have an SPF record:</h4>
+            <ol>
+                <li>Click <strong>"Add record"</strong></li>
+                <li>Fill in:
+                    <table>
+                        <tr>
+                            <th>Field</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Type</strong></td>
+                            <td>TXT</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Name</strong></td>
+                            <td>@</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Content</strong></td>
+                            <td><code>v=spf1 include:sendgrid.net ~all</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>TTL</strong></td>
+                            <td>Auto</td>
+                        </tr>
+                    </table>
+                </li>
+                <li>Click <strong>"Save"</strong></li>
+            </ol>
+
+            <h4>If you ALREADY have an SPF record:</h4>
+            <ol>
+                <li>Click <strong>"Edit"</strong> on the existing SPF record</li>
+                <li>Add <code>include:sendgrid.net</code> before the <code>~all</code> or <code>-all</code></li>
+                <li>Example: Change from <code>v=spf1 ~all</code> to <code>v=spf1 include:sendgrid.net ~all</code></li>
+                <li>Click <strong>"Save"</strong></li>
+            </ol>
+
+            <div class="info">
+                <strong>📌 What is SPF?</strong>
+                <p>SPF (Sender Policy Framework) tells email providers that SendGrid is authorized to send emails on behalf of your domain.</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">7</span>Add DMARC Record</h3>
+            
+            <p>DMARC is critical for Microsoft 365 deliverability:</p>
+            
+            <ol>
+                <li>Click <strong>"Add record"</strong></li>
+                <li>Fill in:
+                    <table>
+                        <tr>
+                            <th>Field</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Type</strong></td>
+                            <td>TXT</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Name</strong></td>
+                            <td>_dmarc</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Content</strong></td>
+                            <td><code>v=DMARC1; p=none; rua=mailto:rob@absolutepestservices.com; pct=100; adkim=r; aspf=r</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>TTL</strong></td>
+                            <td>Auto</td>
+                        </tr>
+                    </table>
+                </li>
+                <li>Click <strong>"Save"</strong></li>
+            </ol>
+
+            <div class="info">
+                <strong>📌 DMARC Policy Explanation:</strong>
+                <ul>
+                    <li><code>p=none</code> - Monitor mode (won't reject emails, just collects data)</li>
+                    <li><code>rua=mailto:rob@absolutepestservices.com</code> - You'll receive daily reports</li>
+                    <li><code>adkim=r; aspf=r</code> - Relaxed alignment (recommended for SendGrid)</li>
+                </ul>
+                <p style="margin-top: 10px;">After a few weeks of monitoring, you can change <code>p=none</code> to <code>p=quarantine</code> for stronger protection.</p>
+            </div>
+        </div>
+
+        <h2>✅ Step 4: Verify in SendGrid</h2>
+
+        <div class="step">
+            <h3><span class="step-number">8</span>Complete Verification</h3>
+            
+            <ol>
+                <li>Go back to the SendGrid tab you kept open</li>
+                <li>Wait <strong>5-10 minutes</strong> after adding DNS records (to allow initial propagation)</li>
+                <li>Click the <strong>"Verify"</strong> button in SendGrid</li>
+                <li>SendGrid will check your DNS records</li>
+            </ol>
+
+            <div class="success">
+                <strong>✓ Success:</strong> You should see green checkmarks next to each DNS record. Your domain is now authenticated!
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ If Verification Fails:</strong>
+                <ul>
+                    <li>Double-check you copied the DNS records exactly (no extra spaces)</li>
+                    <li>Verify Cloudflare proxy is set to "DNS only" (gray cloud) for CNAME records</li>
+                    <li>Wait 15-30 minutes and try verifying again</li>
+                    <li>DNS can take up to 48 hours to fully propagate globally</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>🧪 Step 5: Test Your Email Deliverability</h2>
+
+        <div class="step">
+            <h3><span class="step-number">9</span>Test with Mail-Tester.com</h3>
+            
+            <ol>
+                <li>Visit <a href="https://www.mail-tester.com" target="_blank">https://www.mail-tester.com</a></li>
+                <li>You'll see a unique email address like <code>test-abc123@mail-tester.com</code></li>
+                <li>Go to your website at <code>absolutepestservices.com</code></li>
+                <li>Fill out the contact form using that email address</li>
+                <li>Go back to mail-tester.com and click <strong>"Then check your score"</strong></li>
+                <li>You should see a score of <strong>8/10 or higher</strong> (10/10 is ideal)</li>
+            </ol>
+
+            <div class="info">
+                <strong>📊 Understanding Your Score:</strong>
+                <ul>
+                    <li><strong>10/10:</strong> Perfect! Excellent deliverability</li>
+                    <li><strong>8-9/10:</strong> Good! Should reach inbox</li>
+                    <li><strong>6-7/10:</strong> Okay, but may go to spam occasionally</li>
+                    <li><strong>Below 6:</strong> Authentication likely not working yet</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">10</span>Test with Microsoft 365</h3>
+            
+            <ol>
+                <li>Submit a contact form to an Outlook.com or Microsoft 365 email address</li>
+                <li>Check both the <strong>Inbox</strong> and <strong>Junk Email</strong> folder</li>
+                <li>If it lands in Inbox: <strong>Success!</strong> ✅</li>
+                <li>If still in Junk: Wait 24-48 hours for full DNS propagation and reputation building</li>
+            </ol>
+        </div>
+
+        <h2>📋 Complete Setup Checklist</h2>
+
+        <ul class="checklist">
+            <li>Accessed SendGrid account (or created new one)</li>
+            <li>Completed SendGrid domain authentication wizard</li>
+            <li>Added 2 DKIM CNAME records to Cloudflare</li>
+            <li>Added mail subdomain CNAME to Cloudflare (if provided)</li>
+            <li>Added or updated SPF TXT record in Cloudflare</li>
+            <li>Added DMARC TXT record to Cloudflare</li>
+            <li>Set all CNAME records to "DNS only" (gray cloud)</li>
+            <li>Verified domain in SendGrid (green checkmarks)</li>
+            <li>Tested with mail-tester.com (8+ score)</li>
+            <li>Tested with Microsoft 365 email address</li>
+        </ul>
+
+        <h2>⏱️ Timeline & Expectations</h2>
+
+        <table>
+            <tr>
+                <th>Time Frame</th>
+                <th>What to Expect</th>
+            </tr>
+            <tr>
+                <td><strong>Immediately</strong></td>
+                <td>DNS records added to Cloudflare</td>
+            </tr>
+            <tr>
+                <td><strong>5-15 minutes</strong></td>
+                <td>SendGrid can verify your domain</td>
+            </tr>
+            <tr>
+                <td><strong>1-2 hours</strong></td>
+                <td>Most email providers recognize authentication</td>
+            </tr>
+            <tr>
+                <td><strong>24-48 hours</strong></td>
+                <td>Full global DNS propagation complete</td>
+            </tr>
+            <tr>
+                <td><strong>3-7 days</strong></td>
+                <td>Microsoft 365 builds trust/reputation for your domain</td>
+            </tr>
+        </table>
+
+        <h2>🆘 Troubleshooting Common Issues</h2>
+
+        <div class="step">
+            <h3>Issue: SendGrid Verification Still Pending</h3>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Wait 15-30 minutes and try again</li>
+                <li>Check that you entered DNS records exactly as shown (no typos)</li>
+                <li>Verify CNAME records have proxy status "DNS only" in Cloudflare</li>
+                <li>Use this tool to check DNS propagation: <a href="https://www.whatsmydns.net" target="_blank">whatsmydns.net</a></li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>Issue: Emails Still Going to Spam After 48 Hours</h3>
+            <p><strong>Possible Causes:</strong></p>
+            <ul>
+                <li><strong>Reputation Building:</strong> Microsoft needs 3-7 days to trust your domain</li>
+                <li><strong>Content Issues:</strong> Avoid spam trigger words in subject lines (FREE, URGENT, !!!)</li>
+                <li><strong>Engagement:</strong> Ask recipients to mark your emails as "Not Junk" and add to contacts</li>
+                <li><strong>Shared IP Reputation:</strong> SendGrid's shared IPs can be affected by other users' spam</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>Issue: Mail-Tester Score Below 8</h3>
+            <p><strong>Check These:</strong></p>
+            <ul>
+                <li>SPF: Should show "PASS" (check your SPF record includes <code>sendgrid.net</code>)</li>
+                <li>DKIM: Should show "PASS" (verify DKIM CNAME records are correct)</li>
+                <li>DMARC: Should show "PASS" (check your DMARC TXT record)</li>
+                <li>Review the detailed report on mail-tester.com for specific issues</li>
+            </ul>
+        </div>
+
+        <h2>📧 Current Email Configuration</h2>
+
+        <div class="info">
+            <h3>Your Current Setup:</h3>
+            <table>
+                <tr>
+                    <th>Setting</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td><strong>Email Service</strong></td>
+                    <td>SendGrid (Twilio)</td>
+                </tr>
+                <tr>
+                    <td><strong>Sender Address</strong></td>
+                    <td>rob@absolutepestservices.com</td>
+                </tr>
+                <tr>
+                    <td><strong>Business Recipients</strong></td>
+                    <td>
+                        rob@absolutepestservices.com<br>
+                        mike@steelcity-ai.com<br>
+                        rmitch21@gmail.com
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Forms Sending Emails</strong></td>
+                    <td>
+                        Contact Form<br>
+                        Inspection Scheduling<br>
+                        Service Requests
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h2>🔗 Helpful Resources</h2>
+
+        <div class="step">
+            <h3>Documentation & Tools</h3>
+            <ul>
+                <li><strong>SendGrid Domain Authentication Guide:</strong> <a href="https://www.twilio.com/docs/sendgrid/ui/account-and-settings/how-to-set-up-domain-authentication" target="_blank">Official Documentation</a></li>
+                <li><strong>DMARC Setup Guide:</strong> <a href="https://www.twilio.com/docs/sendgrid/ui/sending-email/how-to-implement-dmarc" target="_blank">SendGrid DMARC Guide</a></li>
+                <li><strong>DNS Checker:</strong> <a href="https://www.whatsmydns.net" target="_blank">Check DNS Propagation</a></li>
+                <li><strong>Email Testing:</strong> <a href="https://www.mail-tester.com" target="_blank">Mail-Tester.com</a></li>
+                <li><strong>SPF Checker:</strong> <a href="https://mxtoolbox.com/spf.aspx" target="_blank">MXToolbox SPF Lookup</a></li>
+                <li><strong>DMARC Checker:</strong> <a href="https://mxtoolbox.com/dmarc.aspx" target="_blank">MXToolbox DMARC Lookup</a></li>
+            </ul>
+        </div>
+
+        <h2>✨ What Happens After Setup</h2>
+
+        <div class="success">
+            <h3>Immediate Benefits:</h3>
+            <ul>
+                <li>✅ Emails cryptographically signed with DKIM</li>
+                <li>✅ SPF authorizes SendGrid to send from your domain</li>
+                <li>✅ DMARC policy protects your domain from spoofing</li>
+                <li>✅ Microsoft 365 and other providers trust your emails</li>
+                <li>✅ Significantly improved inbox placement rate</li>
+                <li>✅ Professional email authentication (no more "via sendgrid.net")</li>
+            </ul>
+        </div>
+
+        <h2>📞 Need Help?</h2>
+
+        <div class="info">
+            <p>If you run into any issues during setup:</p>
+            <ol>
+                <li>Double-check each DNS record in Cloudflare matches exactly what SendGrid provided</li>
+                <li>Use the troubleshooting section above</li>
+                <li>Wait 24-48 hours for DNS propagation</li>
+                <li>Test with mail-tester.com to identify specific issues</li>
+            </ol>
+            <p style="margin-top: 15px;">Remember: DNS changes can take time to propagate globally. Be patient!</p>
+        </div>
+
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #f4c430; text-align: center; color: #666;">
+            <p><strong>Absolute Pest Services</strong> | Email Authentication Setup Guide</p>
+            <p>Last Updated: November 16, 2025</p>
+        </div>
+    </div>
+</body>
+</html>
