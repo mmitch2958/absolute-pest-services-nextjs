@@ -13,6 +13,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { trackEvent } from '@/lib/analytics';
 import { Calendar as CalendarIcon, Clock, MapPin, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 interface InspectionFormData {
   firstName: string;
@@ -26,6 +27,7 @@ interface InspectionFormData {
   preferredTime: string;
   urgency: string;
   message: string;
+  captchaToken?: string;
 }
 
 interface ScheduleInspectionModalProps {
@@ -35,6 +37,7 @@ interface ScheduleInspectionModalProps {
 export default function ScheduleInspectionModal({ children }: ScheduleInspectionModalProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string>('');
   const [formData, setFormData] = useState<InspectionFormData>({
     firstName: '',
     lastName: '',
@@ -79,6 +82,7 @@ export default function ScheduleInspectionModal({ children }: ScheduleInspection
         urgency: '',
         message: ''
       });
+      setCaptchaToken('');
       setOpen(false);
     },
     onError: (error) => {
@@ -100,7 +104,16 @@ export default function ScheduleInspectionModal({ children }: ScheduleInspection
       });
       return;
     }
-    submitMutation.mutate(formData);
+    // Only require CAPTCHA if it's configured
+    if (import.meta.env.VITE_TURNSTILE_SITE_KEY && !captchaToken) {
+      toast({
+        title: "Verification Required",
+        description: "Please complete the CAPTCHA verification.",
+        variant: "destructive"
+      });
+      return;
+    }
+    submitMutation.mutate({ ...formData, captchaToken });
   };
 
   const handleChange = (field: keyof InspectionFormData, value: string | Date | null) => {
@@ -325,6 +338,17 @@ export default function ScheduleInspectionModal({ children }: ScheduleInspection
             />
           </div>
 
+          {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
+            <div className="flex justify-center">
+              <Turnstile
+                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                onSuccess={(token) => setCaptchaToken(token)}
+                onError={() => setCaptchaToken('')}
+                onExpire={() => setCaptchaToken('')}
+              />
+            </div>
+          )}
+
           <div className="flex gap-3 pt-4">
             <Button
               type="button"
@@ -338,6 +362,7 @@ export default function ScheduleInspectionModal({ children }: ScheduleInspection
               type="submit"
               className="flex-1 bg-[hsl(132,48%,35%)] text-white hover:bg-[hsl(132,48%,25%)] font-semibold"
               disabled={submitMutation.isPending}
+              data-testid="button-submit-inspection"
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
               {submitMutation.isPending ? 'Scheduling...' : 'Schedule Inspection'}

@@ -6,6 +6,7 @@ import { z } from "zod";
 import session from "express-session";
 import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail } from "./email";
 import Parser from "rss-parser";
+import { verifyTurnstile } from "./turnstile";
 
 // Extend session type to include userId
 declare module 'express-session' {
@@ -208,6 +209,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Service request routes
   app.post("/api/service-requests", requireAuth, async (req, res) => {
     try {
+      // Verify CAPTCHA token
+      const captchaToken = req.body.captchaToken;
+      const captchaValid = await verifyTurnstile(captchaToken);
+      
+      if (!captchaValid) {
+        return res.status(400).json({
+          success: false,
+          message: "CAPTCHA verification failed. Please try again."
+        });
+      }
+      
       const validatedData = insertServiceRequestSchema.parse({
         ...req.body,
         userId: req.session.userId,
@@ -240,6 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           serviceType: validatedData.serviceType,
           description: validatedData.description,
           address: validatedData.address,
+          city: validatedData.city,
           priority: validatedData.priority || "medium",
           customerEmail: user.email,
           customerPhone: user.phone || ""
@@ -387,6 +400,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {
     try {
+      // Verify CAPTCHA token
+      const captchaToken = req.body.captchaToken;
+      const captchaValid = await verifyTurnstile(captchaToken);
+      
+      if (!captchaValid) {
+        return res.status(400).json({
+          success: false,
+          message: "CAPTCHA verification failed. Please try again."
+        });
+      }
+      
       const validatedData = insertContactSchema.parse(req.body);
       const contact = await storage.createContactSubmission(validatedData);
       
@@ -409,6 +433,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName: validatedData.lastName,
         phone: validatedData.phone,
         email: validatedData.email,
+        city: validatedData.city,
         serviceType: validatedData.serviceType,
         message: validatedData.message
       });
@@ -456,6 +481,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Schedule inspection endpoint
   app.post("/api/inspection", async (req, res) => {
     try {
+      // Verify CAPTCHA token
+      const captchaToken = req.body.captchaToken;
+      const captchaValid = await verifyTurnstile(captchaToken);
+      
+      if (!captchaValid) {
+        return res.status(400).json({
+          success: false,
+          message: "CAPTCHA verification failed. Please try again."
+        });
+      }
+      
       // Parse the preferredDate string to Date object
       const requestData = {
         ...req.body,
@@ -486,6 +522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phone: validatedData.phone,
         email: validatedData.email,
         address: validatedData.address,
+        city: validatedData.city,
         serviceType: validatedData.serviceType,
         preferredDate: validatedData.preferredDate,
         preferredTime: validatedData.preferredTime,

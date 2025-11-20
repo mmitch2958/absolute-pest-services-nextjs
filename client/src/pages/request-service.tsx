@@ -11,12 +11,14 @@ import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, Bug, Home, Shield, Zap } from "lucide-react";
 import { useLocation } from "wouter";
 import LocalSEO from "@/components/local-seo";
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function RequestService() {
   const [, setLocation] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string>('');
 
   const [serviceForm, setServiceForm] = useState({
     firstName: '',
@@ -56,10 +58,21 @@ export default function RequestService() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Only require CAPTCHA if it's configured
+    if (import.meta.env.VITE_TURNSTILE_SITE_KEY && !captchaToken) {
+      toast({
+        title: "Verification Required",
+        description: "Please complete the CAPTCHA verification.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setSubmitting(true);
 
     try {
-      const response = await apiRequest('POST', '/api/service-requests', serviceForm);
+      const response = await apiRequest('POST', '/api/service-requests', { ...serviceForm, captchaToken });
       const data = await response.json();
 
       if (data.success) {
@@ -67,6 +80,7 @@ export default function RequestService() {
           title: "Service Request Submitted",
           description: "Your service request has been created successfully. We'll contact you soon to schedule the service.",
         });
+        setCaptchaToken('');
         setLocation('/dashboard');
       } else {
         toast({
@@ -271,6 +285,17 @@ export default function RequestService() {
                 </ul>
               </div>
 
+              {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
+                <div className="flex justify-center">
+                  <Turnstile
+                    siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onError={() => setCaptchaToken('')}
+                    onExpire={() => setCaptchaToken('')}
+                  />
+                </div>
+              )}
+
               <div className="flex gap-4">
                 <Button 
                   type="button" 
@@ -284,6 +309,7 @@ export default function RequestService() {
                   type="submit" 
                   disabled={submitting}
                   className="flex-1 bg-[hsl(132,48%,35%)] hover:bg-[hsl(132,48%,25%)]"
+                  data-testid="button-submit-service"
                 >
                   {submitting ? "Submitting..." : "Submit Service Request"}
                 </Button>

@@ -10,6 +10,7 @@ import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Send } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 interface ContactFormData {
   firstName: string;
@@ -19,10 +20,12 @@ interface ContactFormData {
   city: string;
   serviceType: string;
   message: string;
+  captchaToken?: string;
 }
 
 export default function ContactForm() {
   const { toast } = useToast();
+  const [captchaToken, setCaptchaToken] = useState<string>('');
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: '',
     lastName: '',
@@ -55,6 +58,7 @@ export default function ContactForm() {
         serviceType: '',
         message: ''
       });
+      setCaptchaToken('');
     },
     onError: (error) => {
       toast({
@@ -67,7 +71,18 @@ export default function ContactForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    submitMutation.mutate(formData);
+    
+    // Only require CAPTCHA if it's configured
+    if (import.meta.env.VITE_TURNSTILE_SITE_KEY && !captchaToken) {
+      toast({
+        title: "Verification Required",
+        description: "Please complete the CAPTCHA verification.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    submitMutation.mutate({ ...formData, captchaToken });
   };
 
   const handleChange = (field: keyof ContactFormData, value: string) => {
@@ -172,10 +187,22 @@ export default function ContactForm() {
             />
           </div>
           
+          {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
+            <div className="flex justify-center">
+              <Turnstile
+                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                onSuccess={(token) => setCaptchaToken(token)}
+                onError={() => setCaptchaToken('')}
+                onExpire={() => setCaptchaToken('')}
+              />
+            </div>
+          )}
+          
           <Button
             type="submit"
             className="w-full bg-[hsl(132,48%,35%)] text-white hover:bg-[hsl(132,48%,25%)] font-semibold"
             disabled={submitMutation.isPending}
+            data-testid="button-submit-contact"
           >
             <Send className="mr-2 h-4 w-4" />
             {submitMutation.isPending ? 'Sending...' : 'Send Message'}

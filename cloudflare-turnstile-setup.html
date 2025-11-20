@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare Turnstile Setup Guide - Bot Protection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #1a1a1a;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            border-bottom: 4px solid #f4c430;
+            padding-bottom: 15px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 5px solid #f4c430;
+        }
+        
+        h3 {
+            color: #34495e;
+            font-size: 1.3em;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        
+        .intro {
+            background: #fff3cd;
+            border-left: 5px solid #f4c430;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .step {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #f4c430;
+            color: #1a1a1a;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #c7254e;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .key-box {
+            background: #f8f9fa;
+            border: 2px solid #f4c430;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+        
+        .comparison-table th {
+            background: #f4c430;
+            color: #1a1a1a;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .comparison-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Cloudflare Turnstile Setup Guide</h1>
+        <p style="color: #666; font-size: 1.1em; margin-top: 10px;">
+            Stop Bot Submissions on Your Forms
+        </p>
+
+        <div class="intro">
+            <h3>🎯 What This Guide Does</h3>
+            <p>This guide will help you set up Cloudflare Turnstile CAPTCHA protection to prevent bots from submitting your contact forms.</p>
+            <p style="margin-top: 10px;"><strong>Benefits:</strong></p>
+            <ul>
+                <li>✅ Completely free (unlimited verifications)</li>
+                <li>✅ Better privacy than Google reCAPTCHA</li>
+                <li>✅ Faster and less intrusive for users</li>
+                <li>✅ Works seamlessly with your Cloudflare account</li>
+                <li>✅ No API keys needed (just site keys)</li>
+            </ul>
+            <p style="margin-top: 10px;"><strong>Time Required:</strong> 5-10 minutes</p>
+        </div>
+
+        <h2>📊 Why Cloudflare Turnstile?</h2>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Cloudflare Turnstile</th>
+                    <th>Google reCAPTCHA</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Cost</strong></td>
+                    <td>✅ Free (unlimited)</td>
+                    <td>⚠️ Free up to 1M/month</td>
+                </tr>
+                <tr>
+                    <td><strong>Privacy</strong></td>
+                    <td>✅ Privacy-focused</td>
+                    <td>❌ Tracks users</td>
+                </tr>
+                <tr>
+                    <td><strong>User Experience</strong></td>
+                    <td>✅ Fast, invisible</td>
+                    <td>⚠️ Slower, more intrusive</td>
+                </tr>
+                <tr>
+                    <td><strong>Setup</strong></td>
+                    <td>✅ Simple</td>
+                    <td>⚠️ Requires Google account</td>
+                </tr>
+                <tr>
+                    <td><strong>Data Collection</strong></td>
+                    <td>✅ Minimal</td>
+                    <td>❌ Extensive tracking</td>
+                </tr>
+                <tr>
+                    <td><strong>Integration</strong></td>
+                    <td>✅ Works with Cloudflare</td>
+                    <td>➖ Standalone service</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>🚀 Step 1: Access Cloudflare Turnstile</h2>
+
+        <div class="step">
+            <h3><span class="step-number">1</span>Log into Cloudflare</h3>
+            
+            <ol>
+                <li>Go to <a href="https://dash.cloudflare.com" target="_blank">https://dash.cloudflare.com</a></li>
+                <li>Log in with your Cloudflare account credentials</li>
+                <li>You should see your domain: <code>absolutepestservices.com</code></li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">2</span>Navigate to Turnstile</h3>
+            
+            <ol>
+                <li>In the left sidebar, look for <strong>"Turnstile"</strong></li>
+                <li>If you don't see it in the sidebar, click your <strong>Account name</strong> in the top-left</li>
+                <li>Then find <strong>"Turnstile"</strong> in the products list</li>
+                <li>Or go directly to: <a href="https://dash.cloudflare.com/?to=/:account/turnstile" target="_blank">Cloudflare Turnstile Dashboard</a></li>
+            </ol>
+
+            <div class="info">
+                <strong>📌 Note:</strong> Turnstile is account-level, not domain-level. It appears under your account, not under a specific domain.
+            </div>
+        </div>
+
+        <h2>🔑 Step 2: Create Turnstile Site</h2>
+
+        <div class="step">
+            <h3><span class="step-number">3</span>Add a New Site</h3>
+            
+            <ol>
+                <li>Click <strong>"Add Site"</strong> or <strong>"Create Widget"</strong></li>
+                <li>Fill in the details:
+                    <ul>
+                        <li><strong>Site Name:</strong> <code>Absolute Pest Services</code> (or any name you prefer)</li>
+                        <li><strong>Domain:</strong> <code>absolutepestservices.com</code></li>
+                        <li><strong>Widget Mode:</strong> Select <strong>"Managed"</strong> (recommended)</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <div class="info">
+                <h4>Widget Mode Options:</h4>
+                <ul>
+                    <li><strong>Managed (Recommended):</strong> Cloudflare decides when to show a challenge based on visitor behavior</li>
+                    <li><strong>Non-Interactive:</strong> Never shows a challenge (invisible check)</li>
+                    <li><strong>Invisible:</strong> Always performs a check but never shows a challenge</li>
+                </ul>
+                <p><strong>Use "Managed"</strong> for best bot protection with good user experience.</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">4</span>Configure Advanced Settings (Optional)</h3>
+            
+            <p>You can leave these at default, but here are the options:</p>
+            
+            <ul>
+                <li><strong>Pre-Clearance Duration:</strong> How long a visitor can submit forms after passing (default: 15 minutes)</li>
+                <li><strong>Security Level:</strong> 
+                    <ul>
+                        <li><strong>Low:</strong> More permissive (fewer false positives)</li>
+                        <li><strong>Medium:</strong> Balanced (recommended)</li>
+                        <li><strong>High:</strong> Strictest (may challenge more legitimate users)</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <p style="margin-top: 15px;"><strong>Recommendation:</strong> Start with <strong>Medium security level</strong> and <strong>Managed mode</strong>.</p>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">5</span>Get Your Site Keys</h3>
+            
+            <ol>
+                <li>Click <strong>"Create"</strong> to create your Turnstile site</li>
+                <li>You'll now see two keys:
+                    <ul>
+                        <li><strong>Site Key:</strong> Public key (used in your website frontend)</li>
+                        <li><strong>Secret Key:</strong> Private key (used in your backend for verification)</li>
+                    </ul>
+                </li>
+                <li><strong>IMPORTANT:</strong> Copy both keys and save them somewhere safe</li>
+            </ol>
+
+            <div class="success">
+                <h4>✓ Keys Generated!</h4>
+                <p>You should now have:</p>
+                <div class="key-box">
+                    <strong>Site Key (Public):</strong> 0x4AAAAAAAxxxxxxxxxxxxx
+                </div>
+                <div class="key-box">
+                    <strong>Secret Key (Private):</strong> 0x4AAAAAAAxxxxxxxxxxxxx
+                </div>
+            </div>
+        </div>
+
+        <h2>🔧 Step 3: Add Keys to Your Website</h2>
+
+        <div class="step">
+            <h3><span class="step-number">6</span>Add Site Key to Environment Variables</h3>
+            
+            <p>Your website needs the Site Key (public key) to display the CAPTCHA widget:</p>
+            
+            <ol>
+                <li>In your Replit project, find the <strong>Secrets</strong> (environment variables)</li>
+                <li>Add a new secret:
+                    <ul>
+                        <li><strong>Key:</strong> <code>VITE_TURNSTILE_SITE_KEY</code></li>
+                        <li><strong>Value:</strong> Paste your Site Key from Cloudflare</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <div class="info">
+                <strong>📌 Why VITE_ prefix?</strong>
+                <p>Environment variables in React/Vite must be prefixed with <code>VITE_</code> to be accessible in the frontend.</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">7</span>Add Secret Key to Environment Variables</h3>
+            
+            <p>Your backend needs the Secret Key to verify CAPTCHA responses:</p>
+            
+            <ol>
+                <li>In Replit Secrets, add another secret:
+                    <ul>
+                        <li><strong>Key:</strong> <code>TURNSTILE_SECRET_KEY</code></li>
+                        <li><strong>Value:</strong> Paste your Secret Key from Cloudflare</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <div class="success">
+                <h4>✓ Environment Variables Set!</h4>
+                <p>You should now have these secrets in Replit:</p>
+                <ul>
+                    <li><code>VITE_TURNSTILE_SITE_KEY</code> - For frontend widget</li>
+                    <li><code>TURNSTILE_SECRET_KEY</code> - For backend verification</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>✅ Step 4: Implementation Complete</h2>
+
+        <div class="success">
+            <h3>🎉 Setup Complete!</h3>
+            <p>Once you've added both keys to your Replit secrets, the CAPTCHA will be automatically enabled on all your forms:</p>
+            <ul>
+                <li>✅ Contact Form</li>
+                <li>✅ Inspection Scheduling</li>
+                <li>✅ Service Requests</li>
+            </ul>
+            <p style="margin-top: 15px;"><strong>The CAPTCHA widget will appear at the bottom of each form before the submit button.</strong></p>
+        </div>
+
+        <h2>🧪 Step 5: Test Your CAPTCHA</h2>
+
+        <div class="step">
+            <h3><span class="step-number">8</span>Test Form Submission</h3>
+            
+            <ol>
+                <li>Visit your website: <code>absolutepestservices.com</code></li>
+                <li>Go to any form (contact, inspection, or service request)</li>
+                <li>You should see the Cloudflare Turnstile widget</li>
+                <li>Fill out the form and submit</li>
+                <li>The CAPTCHA should automatically verify (unless suspicious activity detected)</li>
+            </ol>
+
+            <div class="info">
+                <h4>What You'll See:</h4>
+                <ul>
+                    <li><strong>Normal Users:</strong> Small widget that auto-completes with a checkmark ✓</li>
+                    <li><strong>Suspicious Activity:</strong> May show an interactive challenge</li>
+                    <li><strong>Bots:</strong> Will be blocked from submitting the form</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">9</span>Monitor in Cloudflare Dashboard</h3>
+            
+            <p>Track bot submissions and challenges:</p>
+            
+            <ol>
+                <li>Go back to <strong>Cloudflare Dashboard</strong> → <strong>Turnstile</strong></li>
+                <li>Click on your <strong>"Absolute Pest Services"</strong> site</li>
+                <li>View analytics:
+                    <ul>
+                        <li>Total verification requests</li>
+                        <li>Pass rate</li>
+                        <li>Challenge rate</li>
+                        <li>Solve rate</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <div class="success">
+                <strong>✓ Analytics Available:</strong>
+                <p>You can see in real-time how many bot attempts were blocked and how many legitimate users passed verification.</p>
+            </div>
+        </div>
+
+        <h2>🔒 Security Best Practices</h2>
+
+        <div class="info">
+            <h3>Keep Your Secret Key Safe:</h3>
+            <ul>
+                <li>✅ Store in environment variables (Replit Secrets)</li>
+                <li>✅ Never commit to version control</li>
+                <li>✅ Never expose in frontend code</li>
+                <li>✅ Only use in backend verification</li>
+            </ul>
+
+            <h3 style="margin-top: 20px;">Site Key is Public:</h3>
+            <ul>
+                <li>✅ Safe to expose in frontend HTML/JavaScript</li>
+                <li>✅ Visible to anyone viewing your website</li>
+                <li>✅ Used to render the CAPTCHA widget</li>
+            </ul>
+        </div>
+
+        <h2>⚙️ Advanced Configuration</h2>
+
+        <div class="step">
+            <h3>Adjust Security Settings</h3>
+            
+            <p>If you're getting too many challenges (or not enough):</p>
+            
+            <ol>
+                <li>Go to Cloudflare Dashboard → Turnstile</li>
+                <li>Click on your site</li>
+                <li>Click <strong>"Settings"</strong></li>
+                <li>Adjust:
+                    <ul>
+                        <li><strong>Widget Mode:</strong> Try "Non-Interactive" for smoother UX</li>
+                        <li><strong>Security Level:</strong> Increase if still getting bots, decrease if users complain</li>
+                    </ul>
+                </li>
+                <li>Click <strong>"Save"</strong></li>
+            </ol>
+
+            <div class="info">
+                <strong>💡 Tip:</strong> Start with "Managed" mode at "Medium" security, then adjust based on your analytics.
+            </div>
+        </div>
+
+        <h2>🆘 Troubleshooting</h2>
+
+        <div class="step">
+            <h3>Issue: CAPTCHA Widget Not Showing</h3>
+            <p><strong>Check:</strong></p>
+            <ul>
+                <li>Verify <code>VITE_TURNSTILE_SITE_KEY</code> is set in Replit Secrets</li>
+                <li>Make sure the key starts with <code>0x4</code></li>
+                <li>Restart your application after adding the secret</li>
+                <li>Check browser console for JavaScript errors</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>Issue: Form Submission Blocked Despite Passing CAPTCHA</h3>
+            <p><strong>Check:</strong></p>
+            <ul>
+                <li>Verify <code>TURNSTILE_SECRET_KEY</code> is set in Replit Secrets</li>
+                <li>Check backend logs for verification errors</li>
+                <li>Ensure domain in Cloudflare matches your actual domain</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>Issue: Too Many False Positives (Legitimate Users Blocked)</h3>
+            <p><strong>Solution:</strong></p>
+            <ul>
+                <li>Lower security level to "Low" in Cloudflare Turnstile settings</li>
+                <li>Change widget mode to "Non-Interactive"</li>
+                <li>Check analytics to see pass/fail rates</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>Issue: Still Getting Bot Submissions</h3>
+            <p><strong>Solution:</strong></p>
+            <ul>
+                <li>Increase security level to "High"</li>
+                <li>Verify backend is actually checking the CAPTCHA response</li>
+                <li>Check Turnstile analytics to see if bots are even attempting</li>
+                <li>Consider adding honeypot fields as additional protection</li>
+            </ul>
+        </div>
+
+        <h2>📊 Understanding Analytics</h2>
+
+        <div class="info">
+            <h3>Key Metrics in Cloudflare Dashboard:</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>What It Means</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Verification Requests</strong></td>
+                        <td>Total number of CAPTCHA checks attempted</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pass Rate</strong></td>
+                        <td>Percentage of users who passed without challenge</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Challenge Rate</strong></td>
+                        <td>Percentage of users shown an interactive challenge</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Solve Rate</strong></td>
+                        <td>Percentage of challenged users who successfully solved</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Blocked</strong></td>
+                        <td>Number of bot submissions prevented</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="margin-top: 15px;"><strong>Ideal Metrics:</strong></p>
+            <ul>
+                <li>Pass Rate: 95%+ (most legitimate users pass instantly)</li>
+                <li>Challenge Rate: &lt;5% (few users need interactive challenge)</li>
+                <li>Solve Rate: 90%+ (challenged users successfully complete)</li>
+            </ul>
+        </div>
+
+        <h2>🔗 Helpful Resources</h2>
+
+        <div class="step">
+            <ul>
+                <li><strong>Cloudflare Turnstile Dashboard:</strong> <a href="https://dash.cloudflare.com/?to=/:account/turnstile" target="_blank">Access Dashboard</a></li>
+                <li><strong>Turnstile Documentation:</strong> <a href="https://developers.cloudflare.com/turnstile/" target="_blank">Official Docs</a></li>
+                <li><strong>Widget Modes Explained:</strong> <a href="https://developers.cloudflare.com/turnstile/get-started/widget-types/" target="_blank">Widget Types</a></li>
+                <li><strong>API Reference:</strong> <a href="https://developers.cloudflare.com/turnstile/get-started/server-side-validation/" target="_blank">Server-Side Validation</a></li>
+            </ul>
+        </div>
+
+        <h2>📋 Quick Reference</h2>
+
+        <div class="success">
+            <h3>Environment Variables Needed:</h3>
+            <div class="key-box">
+                <strong>Frontend (Public):</strong><br>
+                VITE_TURNSTILE_SITE_KEY=0x4AAAAAAAxxxxxxxxxxxxx
+            </div>
+            <div class="key-box">
+                <strong>Backend (Private):</strong><br>
+                TURNSTILE_SECRET_KEY=0x4AAAAAAAxxxxxxxxxxxxx
+            </div>
+
+            <h3 style="margin-top: 20px;">Where to Get Keys:</h3>
+            <ol>
+                <li>Cloudflare Dashboard → Turnstile</li>
+                <li>Create or select your site</li>
+                <li>Copy both Site Key and Secret Key</li>
+                <li>Add to Replit Secrets</li>
+                <li>Restart application</li>
+            </ol>
+        </div>
+
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #f4c430; text-align: center; color: #666;">
+            <p><strong>Absolute Pest Services</strong> | Cloudflare Turnstile Setup Guide</p>
+            <p>Last Updated: November 16, 2025</p>
+        </div>
+    </div>
+</body>
+</html>
