@@ -10,15 +10,18 @@ import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { trackEvent } from '@/lib/analytics';
 import { FileText, MapPin } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 interface QuoteFormData {
   firstName: string;
   lastName: string;
   phone: string;
   email: string;
+  city: string;
   address: string;
   serviceType: string;
   message: string;
+  captchaToken?: string;
 }
 
 interface QuoteRequestModalProps {
@@ -28,11 +31,13 @@ interface QuoteRequestModalProps {
 export default function QuoteRequestModal({ children }: QuoteRequestModalProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string>('');
   const [formData, setFormData] = useState<QuoteFormData>({
     firstName: '',
     lastName: '',
     phone: '',
     email: '',
+    city: '',
     address: '',
     serviceType: '',
     message: ''
@@ -56,10 +61,12 @@ export default function QuoteRequestModal({ children }: QuoteRequestModalProps) 
         lastName: '',
         phone: '',
         email: '',
+        city: '',
         address: '',
         serviceType: '',
         message: ''
       });
+      setCaptchaToken('');
       setOpen(false);
     },
     onError: (error) => {
@@ -73,7 +80,18 @@ export default function QuoteRequestModal({ children }: QuoteRequestModalProps) 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    submitMutation.mutate(formData);
+    
+    // Only require CAPTCHA if it's configured
+    if (import.meta.env.VITE_TURNSTILE_SITE_KEY && !captchaToken) {
+      toast({
+        title: "Verification Required",
+        description: "Please complete the CAPTCHA verification.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    submitMutation.mutate({ ...formData, captchaToken });
   };
 
   const handleChange = (field: keyof QuoteFormData, value: string) => {
@@ -153,6 +171,21 @@ export default function QuoteRequestModal({ children }: QuoteRequestModalProps) 
           </div>
 
           <div>
+            <Label htmlFor="city" className="text-sm font-medium text-[hsl(210,13%,28%)]">
+              City *
+            </Label>
+            <Input
+              id="city"
+              type="text"
+              value={formData.city}
+              onChange={(e) => handleChange('city', e.target.value)}
+              className="mt-1"
+              placeholder="e.g., Philadelphia, Wilmington"
+              required
+            />
+          </div>
+
+          <div>
             <Label htmlFor="address" className="text-sm font-medium text-[hsl(210,13%,28%)] flex items-center">
               <MapPin className="mr-1 h-4 w-4" />
               Property Address *
@@ -163,7 +196,7 @@ export default function QuoteRequestModal({ children }: QuoteRequestModalProps) 
               value={formData.address}
               onChange={(e) => handleChange('address', e.target.value)}
               className="mt-1"
-              placeholder="123 Main St, City, State, ZIP"
+              placeholder="123 Main St, State, ZIP"
               required
             />
           </div>
@@ -202,6 +235,17 @@ export default function QuoteRequestModal({ children }: QuoteRequestModalProps) 
               placeholder="Please describe your pest control needs, property details, or any specific questions..."
             />
           </div>
+
+          {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
+            <div className="flex justify-center">
+              <Turnstile
+                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                onSuccess={(token) => setCaptchaToken(token)}
+                onError={() => setCaptchaToken('')}
+                onExpire={() => setCaptchaToken('')}
+              />
+            </div>
+          )}
 
           <div className="flex gap-3 pt-4">
             <Button
