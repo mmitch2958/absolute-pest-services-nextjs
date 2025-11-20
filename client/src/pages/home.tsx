@@ -337,7 +337,12 @@ export default function Home() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-[hsl(210,13%,28%)]">Email</h4>
-                      <p className="text-gray-600">rob@absolutepestservices.com</p>
+                      <a 
+                        href="mailto:rob@absolutepestservices.com" 
+                        className="text-gray-600 hover:text-[hsl(132,48%,35%)] transition-colors underline"
+                      >
+                        rob@absolutepestservices.com
+                      </a>
                     </div>
                   </div>
                 </div>
