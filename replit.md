@@ -126,6 +126,27 @@ Changelog:
 - November 16, 2025. Added mandatory city field to all three forms (contact, inspection, service request) with client-side validation and database schema updates. Updated all email templates to include city information in both business notifications and customer confirmations.
 - November 16, 2025. Changed email sender address from noreply@absolutepestservices.com to rob@absolutepestservices.com for all form notifications and customer confirmations to improve deliverability and enable direct replies.
 - November 16, 2025. Added rmitch21@gmail.com as third recipient for all form email notifications. Business notifications now sent to: rob@absolutepestservices.com, mike@steelcity-ai.com, and rmitch21@gmail.com.
+- November 20, 2025. Implemented Cloudflare Turnstile CAPTCHA protection on all three forms (contact, inspection, service request) to prevent bot submissions. CAPTCHA system includes graceful fallback - forms work with or without CAPTCHA configured. When enabled, Turnstile verifies both on frontend and backend before form processing.
+
+## CAPTCHA & Bot Protection
+
+### Cloudflare Turnstile Integration
+- **Service**: Cloudflare Turnstile (privacy-focused CAPTCHA alternative to reCAPTCHA)
+- **Implementation**: Integrated on all public-facing forms (contact, inspection, service request)
+- **Verification**: Frontend widget validation + backend token verification
+- **Fallback Behavior**: Forms function normally when CAPTCHA is not configured (graceful degradation)
+- **Required Environment Variables**:
+  - `VITE_TURNSTILE_SITE_KEY` - Frontend site key (optional, enables CAPTCHA when set)
+  - `CLOUDFLARE_TURNSTILE_SECRET_KEY` - Backend verification secret (optional)
+- **Setup Guide**: `cloudflare-turnstile-setup.html` - Step-by-step instructions for obtaining and configuring Turnstile keys
+- **Benefits**: Free unlimited usage, better privacy than reCAPTCHA, improved user experience with less intrusive verification
+
+### Files Modified
+- **Frontend**: contact-form.tsx, schedule-inspection-modal.tsx, request-service.tsx
+- **Backend**: server/turnstile.ts (verification utility), server/routes.ts (endpoint protection)
+- **Form Flow**: Widget displays → User completes → Token sent with form → Backend verifies → Form processes
+
+**Note**: CAPTCHA is optional. Forms work immediately without configuration. Add Turnstile keys when ready to enable bot protection.
 
 ## Email Configuration
 
