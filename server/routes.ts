@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema, insertJobLogPhotoSchema } from "@shared/schema";
+import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema, insertServiceContractSchema, insertJobLogPhotoSchema } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
 import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail, sendJobLogNotification } from "./email";
@@ -1533,7 +1533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/job-logs/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const allowed = ["siteLocation", "servicedArea", "workPerformed", "customerName", "jobDate"];
+      const allowed = ["siteLocation", "servicedArea", "workPerformed", "customerName", "jobDate", "status"];
       const updates: any = {};
       for (const key of allowed) {
         if (req.body[key] !== undefined) updates[key] = req.body[key];
@@ -1770,6 +1770,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteServicedArea(id);
       res.json({ success: true, message: "Area deleted" });
     } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Service Contract routes
+
+  // Calendar endpoint must be registered BEFORE /:id to avoid route shadowing
+  // GET /api/admin/service-contracts/calendar?from=<ISO>&to=<ISO>
+  app.get("/api/admin/service-contracts/calendar", requireAdmin, async (req, res) => {
+    try {
+      const fromParam = req.query.from as string;
+      const toParam = req.query.to as string;
+
+      if (!fromParam || !toParam) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required query parameters: 'from' and 'to' (ISO date strings)",
+        });
+      }
+
+      const from = new Date(fromParam);
+      const to = new Date(toParam);
+
+      if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid date format. Use ISO date strings (e.g., '2026-01-01')",
+        });
+      }
+
+      // Set to end of day for 'to' param so the full day is included
+      to.setHours(23, 59, 59, 999);
+
+      const contracts = await storage.getServiceContractsInDateRange(from, to);
+      res.json({ success: true, contracts });
+    } catch (error) {
+      console.error("Error fetching calendar contracts:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/service-contracts", requireAdmin, async (req, res) => {
+    try {
+      const customerId = req.query.customerId ? parseInt(req.query.customerId as string) : undefined;
+      const isActive = req.query.isActive !== undefined ? req.query.isActive === "true" : undefined;
+      const contracts = await storage.getServiceContracts({ customerId, isActive });
+      res.json({ success: true, contracts });
+    } catch (error) {
+      console.error("Error fetching service contracts:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/service-contracts/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const contract = await storage.getServiceContract(id);
+      if (!contract) {
+        return res.status(404).json({ success: false, message: "Service contract not found" });
+      }
+      res.json({ success: true, contract });
+    } catch (error) {
+      console.error("Error fetching service contract:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/service-contracts", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertServiceContractSchema.parse(req.body);
+      const contract = await storage.createServiceContract(validatedData);
+      res.json({ success: true, message: "Service contract created successfully", contract });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid contract data", errors: error.errors });
+      } else {
+        console.error("Error creating service contract:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.patch("/api/admin/service-contracts/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertServiceContractSchema.partial().parse(req.body);
+      const contract = await storage.updateServiceContract(id, validatedData);
+      res.json({ success: true, message: "Service contract updated successfully", contract });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid contract data", errors: error.errors });
+      } else {
+        console.error("Error updating service contract:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.delete("/api/admin/service-contracts/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteServiceContract(id);
+      res.json({ success: true, message: "Service contract deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting service contract:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Scheduled jobs endpoint (for calendar view)
+  app.get("/api/admin/scheduled-jobs", requireAdmin, async (req, res) => {
+    try {
+      const contracts = await storage.getServiceContracts({ isActive: true });
+      res.json({ success: true, scheduledJobs: contracts });
+    } catch (error) {
+      console.error("Error fetching scheduled jobs:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Generate job from contract - POST /api/admin/service-contracts/:id/generate-job
+  app.post("/api/admin/service-contracts/:id/generate-job", requireAdmin, async (req, res) => {
+    try {
+      const contractId = parseInt(req.params.id);
+      
+      const result = await storage.generateJobFromContract(contractId);
+      res.json({ 
+        success: true, 
+        message: "Job generated successfully",
+        jobLog: result.jobLog,
+        updatedContract: result.updatedContract 
+      });
+    } catch (error) {
+      console.error("Error generating job from contract:", error);
+      if (error instanceof Error && error.message === "Service contract not found") {
+        return res.status(404).json({ success: false, message: "Service contract not found" });
+      }
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });

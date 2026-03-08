@@ -1,4 +1,4 @@
-import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, jobLogPhotos, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type JobLogPhoto, type InsertJobLogPhoto } from "@shared/schema";
+import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gte, lte, ilike } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -84,7 +84,7 @@ export interface IStorage {
 
   // Job Log operations
   createJobLog(jobLog: InsertJobLog): Promise<JobLog>;
-  getJobLogs(filters?: { employeeId?: number; customerName?: string; clientId?: number; dateFrom?: Date; dateTo?: Date; siteLocation?: string; servicedArea?: string; status?: string }): Promise<JobLog[]>;
+  getJobLogs(filters?: { employeeId?: number; customerName?: string; clientId?: number; dateFrom?: Date; dateTo?: Date; siteLocation?: string; siteAddress?: string; servicedArea?: string; status?: string }): Promise<JobLog[]>;
   getJobLog(id: number): Promise<JobLog | undefined>;
   updateJobLog(id: number, updates: Partial<InsertJobLog>): Promise<JobLog>;
   deleteJobLog(id: number): Promise<void>;
@@ -112,6 +112,16 @@ export interface IStorage {
   createServicedArea(area: InsertServicedArea): Promise<ServicedArea>;
   updateServicedArea(id: number, updates: Partial<InsertServicedArea>): Promise<ServicedArea>;
   deleteServicedArea(id: number): Promise<void>;
+
+  // Service Contract operations
+  createServiceContract(contract: InsertServiceContract): Promise<ServiceContract>;
+  getServiceContracts(filters?: { customerId?: number; isActive?: boolean; assignedEmployeeId?: number }): Promise<ServiceContract[]>;
+  getServiceContract(id: number): Promise<ServiceContract | undefined>;
+  updateServiceContract(id: number, updates: Partial<InsertServiceContract>): Promise<ServiceContract>;
+  deleteServiceContract(id: number): Promise<void>;
+  getServiceContractsInDateRange(from: Date, to: Date): Promise<ServiceContract[]>;
+  getServiceContractsByDateRange(from: Date, to: Date): Promise<ServiceContract[]>;
+  generateJobFromContract(contractId: number): Promise<{ jobLog: JobLog; updatedContract: ServiceContract }>;
 
   // Job Log Photo operations
   createJobLogPhoto(data: InsertJobLogPhoto): Promise<JobLogPhoto>;
@@ -532,7 +542,7 @@ export class DatabaseStorage implements IStorage {
     return jobLog;
   }
 
-  async getJobLogs(filters?: { employeeId?: number; customerName?: string; clientId?: number; dateFrom?: Date; dateTo?: Date; siteLocation?: string; servicedArea?: string; status?: string }): Promise<JobLog[]> {
+  async getJobLogs(filters?: { employeeId?: number; customerName?: string; clientId?: number; dateFrom?: Date; dateTo?: Date; siteLocation?: string; siteAddress?: string; servicedArea?: string; status?: string }): Promise<JobLog[]> {
     const conditions = [];
     if (filters?.employeeId) conditions.push(eq(jobLogs.employeeId, filters.employeeId));
     if (filters?.customerName) conditions.push(eq(jobLogs.customerName, filters.customerName));
@@ -540,6 +550,7 @@ export class DatabaseStorage implements IStorage {
     if (filters?.dateFrom) conditions.push(gte(jobLogs.jobDate, filters.dateFrom));
     if (filters?.dateTo) conditions.push(lte(jobLogs.jobDate, filters.dateTo));
     if (filters?.siteLocation) conditions.push(eq(jobLogs.siteLocation, filters.siteLocation));
+    if (filters?.siteAddress) conditions.push(eq(jobLogs.siteAddress, filters.siteAddress));
     if (filters?.servicedArea) conditions.push(eq(jobLogs.servicedArea, filters.servicedArea));
     if (filters?.status) conditions.push(eq(jobLogs.status, filters.status));
 
@@ -637,6 +648,123 @@ export class DatabaseStorage implements IStorage {
 
   async deleteServicedArea(id: number): Promise<void> {
     await db.delete(servicedAreas).where(eq(servicedAreas.id, id));
+  }
+
+  // Service Contract operations
+  async createServiceContract(insertContract: InsertServiceContract): Promise<ServiceContract> {
+    if (!insertContract.nextScheduledDate) {
+      throw new Error("nextScheduledDate is required");
+    }
+    const [contract] = await db
+      .insert(serviceContracts)
+      .values(insertContract as typeof insertContract & { nextScheduledDate: Date })
+      .returning();
+    return contract;
+  }
+
+  async getServiceContracts(filters?: { customerId?: number; isActive?: boolean; assignedEmployeeId?: number }): Promise<ServiceContract[]> {
+    const conditions = [];
+    if (filters?.customerId) conditions.push(eq(serviceContracts.customerId, filters.customerId));
+    if (filters?.isActive !== undefined) conditions.push(eq(serviceContracts.isActive, filters.isActive));
+    if (filters?.assignedEmployeeId) conditions.push(eq(serviceContracts.assignedEmployeeId, filters.assignedEmployeeId));
+    
+    if (conditions.length > 0) {
+      return await db.select().from(serviceContracts).where(and(...conditions)).orderBy(serviceContracts.nextScheduledDate);
+    }
+    return await db.select().from(serviceContracts).orderBy(serviceContracts.nextScheduledDate);
+  }
+
+  async getServiceContract(id: number): Promise<ServiceContract | undefined> {
+    const [contract] = await db.select().from(serviceContracts).where(eq(serviceContracts.id, id));
+    return contract || undefined;
+  }
+
+  async getServiceContractsInDateRange(from: Date, to: Date): Promise<ServiceContract[]> {
+    return await db
+      .select()
+      .from(serviceContracts)
+      .where(
+        and(
+          gte(serviceContracts.nextScheduledDate, from),
+          lte(serviceContracts.nextScheduledDate, to)
+        )
+      )
+      .orderBy(serviceContracts.nextScheduledDate);
+  }
+
+  async getServiceContractsByDateRange(from: Date, to: Date): Promise<ServiceContract[]> {
+    return await db
+      .select()
+      .from(serviceContracts)
+      .where(
+        and(
+          gte(serviceContracts.startDate, from),
+          lte(serviceContracts.endDate, to)
+        )
+      )
+      .orderBy(serviceContracts.startDate);
+  }
+
+  async generateJobFromContract(contractId: number): Promise<{ jobLog: JobLog; updatedContract: ServiceContract }> {
+    const [contract] = await db
+      .select()
+      .from(serviceContracts)
+      .where(eq(serviceContracts.id, contractId));
+    
+    if (!contract) {
+      throw new Error("Service contract not found");
+    }
+
+    const jobLog = await db
+      .insert(jobLogs)
+      .values({
+        employeeId: contract.assignedEmployeeId || 1, // Default to employee 1 if not assigned
+        customerName: await this.getCustomerName(contract.customerId),
+        clientId: contract.customerId,
+        siteLocation: contract.siteLocation,
+        siteAddress: "",
+        servicedArea: contract.servicedArea,
+        workPerformed: contract.defaultWorkTemplate || "Scheduled service",
+        jobDate: contract.nextScheduledDate,
+        status: "completed",
+        createdAt: new Date(),
+      })
+      .returning();
+
+    const updatedContract = await db
+      .update(serviceContracts)
+      .set({
+        lastGeneratedJobDate: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(serviceContracts.id, contractId))
+      .returning();
+
+    return { jobLog: jobLog[0], updatedContract: updatedContract[0] };
+  }
+
+  async getCustomerName(clientId: number): Promise<string> {
+    const client = await this.getClient(clientId);
+    return client?.name || "Unknown Customer";
+  }
+
+  async updateServiceContract(id: number, updates: Partial<InsertServiceContract>): Promise<ServiceContract> {
+    // Strip null nextScheduledDate to avoid overwriting with null on a notNull column
+    const { nextScheduledDate, ...rest } = updates;
+    const setValues: Record<string, unknown> = { ...rest, updatedAt: new Date() };
+    if (nextScheduledDate != null) {
+      setValues.nextScheduledDate = nextScheduledDate;
+    }
+    const [contract] = await db
+      .update(serviceContracts)
+      .set(setValues as Parameters<typeof db.update>[0] extends infer T ? any : never)
+      .where(eq(serviceContracts.id, id))
+      .returning();
+    return contract;
+  }
+
+  async deleteServiceContract(id: number): Promise<void> {
+    await db.delete(serviceContracts).where(eq(serviceContracts.id, id));
   }
 
   // Job Log Photo operations

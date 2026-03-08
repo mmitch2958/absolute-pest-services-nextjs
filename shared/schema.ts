@@ -252,6 +252,7 @@ export const jobLogs = pgTable("job_logs", {
   customerName: text("customer_name").notNull(),
   clientId: integer("client_id").references(() => clients.id),
   siteLocation: text("site_location").notNull(),
+  siteAddress: text("site_address"),
   servicedArea: text("serviced_area").notNull(),
   workPerformed: text("work_performed").notNull(),
   jobDate: timestamp("job_date").notNull(),
@@ -308,6 +309,24 @@ export const servicedAreas = pgTable("serviced_areas", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const serviceContracts = pgTable("service_contracts", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull().references(() => clients.id),
+  frequency: text("frequency").notNull().default("monthly"), // weekly, monthly, quarterly
+  nextScheduledDate: timestamp("next_scheduled_date").notNull(),
+  siteLocation: text("site_location").notNull(),
+  servicedArea: text("serviced_area").notNull(),
+  defaultWorkTemplate: text("default_work_template"),
+  lastGeneratedJobDate: timestamp("last_generated_job_date"),
+  notes: text("notes"),
+  assignedEmployeeId: integer("assigned_employee_id").references(() => fieldEmployees.id),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const insertFieldEmployeeSchema = createInsertSchema(fieldEmployees).omit({
   id: true,
   createdAt: true,
@@ -336,6 +355,23 @@ export const insertSiteLocationSchema = createInsertSchema(siteLocations).omit({
 export const insertServicedAreaSchema = createInsertSchema(servicedAreas).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertServiceContractSchema = createInsertSchema(serviceContracts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  isActive: true,
+  lastGeneratedJobDate: true,
+  assignedEmployeeId: true,
+  startDate: true,
+  endDate: true,
+}).extend({
+  nextScheduledDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional().nullable(),
+  lastGeneratedJobDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional().nullable(),
+  assignedEmployeeId: z.number().int().optional().nullable(),
+  startDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional().nullable(),
+  endDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional().nullable(),
 });
 
 export const insertJobLogPhotoSchema = createInsertSchema(jobLogPhotos).omit({
@@ -396,5 +432,7 @@ export type InsertSiteLocation = z.infer<typeof insertSiteLocationSchema>;
 export type SiteLocation = typeof siteLocations.$inferSelect;
 export type InsertServicedArea = z.infer<typeof insertServicedAreaSchema>;
 export type ServicedArea = typeof servicedAreas.$inferSelect;
+export type InsertServiceContract = z.infer<typeof insertServiceContractSchema>;
+export type ServiceContract = typeof serviceContracts.$inferSelect;
 export type InsertJobLogPhoto = z.infer<typeof insertJobLogPhotoSchema>;
 export type JobLogPhoto = typeof jobLogPhotos.$inferSelect;
