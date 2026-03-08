@@ -259,3 +259,166 @@ export async function generateJobReport(options: ReportOptions) {
   const fileName = `APS_Report_${customerName.replace(/\s+/g, "_")}_${dateFrom}_to_${dateTo}.pdf`;
   doc.save(fileName);
 }
+
+// ─── Single Job Receipt Generator ─────────────────────────────────────────────
+
+export interface JobReceiptData {
+  id: number;
+  customerName: string;
+  siteLocation: string;
+  servicedArea: string;
+  workPerformed: string;
+  jobDate: string;
+  customFields?: Record<string, any>;
+  photos?: Array<{ id: number; url: string; caption: string | null }>;
+  employeeName: string;
+}
+
+export async function generateJobReceipt(data: JobReceiptData) {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 20;
+  let y = 20;
+
+  // Header
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(0, 100, 0); // Green
+  doc.text("Absolute Pest Services", pageWidth / 2, y, { align: "center" });
+  
+  y += 8;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(80, 80, 80);
+  doc.text("Professional Pest Control Solutions", pageWidth / 2, y, { align: "center" });
+
+  y += 6;
+  doc.setDrawColor(0, 100, 0);
+  doc.setLineWidth(0.5);
+  doc.line(margin, y, pageWidth - margin, y);
+
+  // Receipt title
+  y += 12;
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(0, 0, 0);
+  doc.text("SERVICE RECEIPT", pageWidth / 2, y, { align: "center" });
+
+  // Receipt details box
+  y += 15;
+  doc.setFillColor(248, 248, 248);
+  doc.rect(margin, y, pageWidth - (margin * 2), 50, "F");
+  
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.text("Date:", margin + 5, y + 10);
+  doc.setFont("helvetica", "normal");
+  doc.text(new Date(data.jobDate).toLocaleDateString(), margin + 25, y + 10);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Receipt #:", margin + 80, y + 10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`APS-${data.id.toString().padStart(5, "0")}`, margin + 108, y + 10);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Technician:", margin + 5, y + 20);
+  doc.setFont("helvetica", "normal");
+  doc.text(data.employeeName, margin + 30, y + 20);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Customer:", margin + 80, y + 20);
+  doc.setFont("helvetica", "normal");
+  doc.text(data.customerName, margin + 105, y + 20);
+
+  // Service details
+  y += 60;
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Service Details", margin, y);
+  doc.setLineWidth(0.3);
+  doc.line(margin, y + 2, pageWidth - margin, y + 2);
+
+  y += 10;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.text("Location:", margin, y);
+  doc.setFont("helvetica", "normal");
+  doc.text(data.siteLocation, margin + 25, y);
+
+  y += 7;
+  doc.setFont("helvetica", "bold");
+  doc.text("Area Serviced:", margin, y);
+  doc.setFont("helvetica", "normal");
+  doc.text(data.servicedArea, margin + 32, y);
+
+  y += 10;
+  doc.setFont("helvetica", "bold");
+  doc.text("Work Performed:", margin, y);
+  
+  y += 6;
+  doc.setFont("helvetica", "normal");
+  const workLines = doc.splitTextToSize(data.workPerformed, pageWidth - (margin * 2));
+  doc.text(workLines, margin, y);
+  y += workLines.length * 5 + 5;
+
+  // Custom fields
+  if (data.customFields && typeof data.customFields === "object" && Object.keys(data.customFields).length > 0) {
+    doc.setFont("helvetica", "bold");
+    doc.text("Additional Information:", margin, y);
+    y += 7;
+    doc.setFont("helvetica", "normal");
+    
+    for (const [key, value] of Object.entries(data.customFields)) {
+      const label = key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const display = typeof value === "boolean" ? (value ? "Yes" : "No") : String(value);
+      doc.text(`• ${label}: ${display}`, margin + 5, y);
+      y += 5;
+    }
+    y += 5;
+  }
+
+  // Photos (if any)
+  if (data.photos && data.photos.length > 0) {
+    y += 5;
+    doc.setFont("helvetica", "bold");
+    doc.text(`Photos Attached: ${data.photos.length}`, margin, y);
+    
+    // Add photo appendix page
+    doc.addPage();
+    doc.setFontSize(14);
+    doc.text("Photo Attachments", margin, 20);
+    doc.line(margin, 24, pageWidth - margin, 24);
+    
+    let photoY = 30;
+    for (const photo of data.photos) {
+      const base64 = await urlToBase64(photo.url);
+      if (base64 && photoY < 250) {
+        try {
+          const format = base64.startsWith("data:image/png") ? "PNG" : "JPEG";
+          // Scale to fit width
+          doc.addImage(base64, format, margin, photoY, 80, 60);
+          if (photo.caption) {
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            doc.text(photo.caption, margin, photoY + 65);
+          }
+          photoY += 75;
+        } catch {
+          // Skip failed images
+        }
+      }
+    }
+  }
+
+  // Footer
+  const footerY = doc.internal.pageSize.getHeight() - 20;
+  doc.setFontSize(8);
+  doc.setTextColor(100, 100, 100);
+  doc.text("Thank you for choosing Absolute Pest Services!", pageWidth / 2, footerY, { align: "center" });
+  doc.text("Phone: (484) 643-2225 | Email: rob@absolutepestservices.com", pageWidth / 2, footerY + 5, { align: "center" });
+  doc.text("www.absolutepestservices.com", pageWidth / 2, footerY + 10, { align: "center" });
+
+  // Save
+  const fileName = `APS_Receipt_${data.customerName.replace(/\s+/g, "_")}_${new Date(data.jobDate).toISOString().split("T")[0]}.pdf`;
+  doc.save(fileName);
+}

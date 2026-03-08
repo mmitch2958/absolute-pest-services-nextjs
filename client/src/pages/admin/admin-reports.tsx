@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { generateJobReport } from "@/lib/pdf-report";
+import { generateJobReport, generateJobReceipt } from "@/lib/pdf-report";
 import { FileDown, Search, Loader2, ClipboardList, Camera, ChevronDown, ChevronUp, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 // ─── Photo types ──────────────────────────────────────────────────────────────
@@ -273,6 +273,26 @@ export function AdminReports() {
     }
   };
 
+  const handleDownloadReceipt = async (log: any) => {
+    try {
+      await generateJobReceipt({
+        id: log.id,
+        customerName: log.customerName,
+        siteLocation: log.siteLocation,
+        servicedArea: log.servicedArea,
+        workPerformed: log.workPerformed,
+        jobDate: log.jobDate,
+        customFields: log.customFields,
+        photos: log.photos,
+        employeeName: employeeMap.get(log.employeeId) || "Unknown",
+      });
+      toast({ title: "Receipt Downloaded", description: "Receipt has been saved to your device" });
+    } catch (err) {
+      console.error("Receipt generation error:", err);
+      toast({ title: "Receipt Error", description: "Failed to generate receipt", variant: "destructive" });
+    }
+  };
+
   const employeeMap = new Map(employees.map((e: any) => [e.id, e.name]));
 
   return (
@@ -402,6 +422,7 @@ export function AdminReports() {
                       <TableHead>Location</TableHead>
                       <TableHead>Area</TableHead>
                       <TableHead>Work Performed</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -425,6 +446,17 @@ export function AdminReports() {
                             </div>
                           )}
                           <AdminPhotoRow logId={log.id} />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadReceipt(log)}
+                            title="Download Receipt"
+                          >
+                            <FileDown className="w-4 h-4 mr-1" />
+                            Receipt
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}

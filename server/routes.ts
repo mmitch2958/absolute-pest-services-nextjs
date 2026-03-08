@@ -1463,7 +1463,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const logs = await storage.getJobLogs(filters);
       const employees = await storage.getFieldEmployees();
-      res.json({ success: true, jobLogs: logs, employees });
+      
+      // Fetch photos for each log
+      const logsWithPhotos = await Promise.all(
+        logs.map(async (log) => {
+          const photos = await storage.getJobLogPhotos(log.id);
+          return { ...log, photos };
+        })
+      );
+      
+      res.json({ success: true, jobLogs: logsWithPhotos, employees });
     } catch (error) {
       console.error("Error fetching admin job logs:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
