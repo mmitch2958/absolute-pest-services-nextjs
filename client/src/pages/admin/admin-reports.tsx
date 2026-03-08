@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,12 @@ interface JobLogPhoto {
   caption: string | null;
   uploadedAt: string;
 }
+
+// ─── StatusBadge ──────────────────────────────────────────────────────────────
+function StatusBadge({ log }: { log: any; employees: any[] }) {
+  const { toast } = useToast();
+  const [isUpdating, setIsUpdating] = useState(false);
+  const status = log.status || "completed";
 
 // ─── Admin Lightbox ───────────────────────────────────────────────────────────
 interface AdminLightboxProps {
@@ -178,6 +184,62 @@ function AdminPhotoRow({ logId }: AdminPhotoRowProps) {
   );
 }
 
+  const queryClient = useQueryClient();
+
+  const handleStatusChange = async (newStatus: string) => {
+    setIsUpdating(true);
+    try {
+      const res = await fetch(`/api/admin/job-logs/${log.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+      
+      toast({ title: "Status Updated", description: "Job log status successfully updated." });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/job-logs"] });
+    } catch (err) {
+      toast({ title: "Update Failed", description: "Could not update status.", variant: "destructive" });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case "scheduled": return "bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-200";
+      case "in_progress": return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200";
+      case "completed": return "bg-green-100 text-green-800 hover:bg-green-200 border-green-200";
+      case "invoiced": return "bg-orange-100 text-orange-800 hover:bg-orange-200 border-orange-200";
+      case "paid": return "bg-purple-100 text-purple-800 hover:bg-purple-200 border-purple-200";
+      default: return "bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200";
+    }
+  };
+
+  const formatStatus = (s: string) => {
+    if (!s) return "Unknown";
+    return s.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  };
+
+  return (
+    <Select disabled={isUpdating} value={status} onValueChange={handleStatusChange}>
+      <SelectTrigger className={`h-8 text-xs border cursor-pointer border-0 bg-transparent ${getStatusBadgeVariant(status)} rounded-full px-3 py-1 font-medium transition-colors w-[130px]`}>
+        <div className="flex items-center gap-1.5">
+          {isUpdating && <Loader2 className="w-3 h-3 animate-spin inline mr-1" />}
+          <span className="truncate">{formatStatus(status)}</span>
+        </div>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="scheduled">Scheduled</SelectItem>
+        <SelectItem value="in_progress">In Progress</SelectItem>
+        <SelectItem value="completed">Completed</SelectItem>
+        <SelectItem value="invoiced">Invoiced</SelectItem>
+        <SelectItem value="paid">Paid</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
 export function AdminReports() {
   const { toast } = useToast();
   const [dateFrom, setDateFrom] = useState("");
@@ -186,6 +248,7 @@ export function AdminReports() {
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [searchTriggered, setSearchTriggered] = useState(false);
 
   const buildQuery = () => {
@@ -194,6 +257,7 @@ export function AdminReports() {
     if (selectedEmployee && selectedEmployee !== "all") params.set("employeeId", selectedEmployee);
     if (selectedLocation && selectedLocation !== "all") params.set("siteLocation", selectedLocation);
     if (selectedArea && selectedArea !== "all") params.set("servicedArea", selectedArea);
+    if (selectedStatus && selectedStatus !== "all") params.set("status", selectedStatus);
     if (dateFrom) params.set("dateFrom", dateFrom);
     if (dateTo) {
       const endDate = new Date(dateTo);
@@ -204,7 +268,7 @@ export function AdminReports() {
   };
 
   const { data, isLoading } = useQuery<{ success: boolean; jobLogs: any[]; employees: any[] }>({
-    queryKey: ["/api/admin/job-logs", dateFrom, dateTo, selectedCustomer, selectedEmployee, selectedLocation, selectedArea, searchTriggered],
+    queryKey: ["/api/admin/job-logs", dateFrom, dateTo, selectedCustomer, selectedEmployee, selectedLocation, selectedArea, selectedStatus, searchTriggered],
     queryFn: async () => {
       const query = buildQuery();
       const res = await fetch(`/api/admin/job-logs?${query}`, { credentials: "include" });
@@ -225,9 +289,9 @@ export function AdminReports() {
   const employees = data?.employees || allLogsQuery.data?.employees || [];
   const allLogs = allLogsQuery.data?.jobLogs || [];
 
-  const uniqueCustomers = [...new Set(allLogs.map((l: any) => l.customerName?.trim()).filter(Boolean))].sort();
-  const uniqueLocations = [...new Set(allLogs.map((l: any) => l.siteLocation?.trim()).filter(Boolean))].sort();
-  const uniqueAreas = [...new Set(allLogs.map((l: any) => l.servicedArea?.trim()).filter(Boolean))].sort();
+  const uniqueCustomers = Array.from(new Set(allLogs.map((l: any) => l.customerName?.trim()).filter(Boolean))).sort();
+  const uniqueLocations = Array.from(new Set(allLogs.map((l: any) => l.siteLocation?.trim()).filter(Boolean))).sort();
+  const uniqueAreas = Array.from(new Set(allLogs.map((l: any) => l.servicedArea?.trim()).filter(Boolean))).sort();
 
   const handleSearch = () => {
     setSearchTriggered(true);
@@ -294,6 +358,8 @@ export function AdminReports() {
   };
 
   const employeeMap = new Map(employees.map((e: any) => [e.id, e.name]));
+
+  const EmployeePhotoRow = AdminPhotoRow;
 
   return (
     <div>
@@ -367,6 +433,22 @@ export function AdminReports() {
               </Select>
             </div>
             <div>
+              <Label>Status <span className="text-muted-foreground text-xs">(optional)</span></Label>
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="scheduled">Scheduled</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="invoiced">Invoiced</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label>From Date</Label>
               <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="mt-1" />
             </div>
@@ -421,6 +503,7 @@ export function AdminReports() {
                       <TableHead>Customer</TableHead>
                       <TableHead>Location</TableHead>
                       <TableHead>Area</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead>Work Performed</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -433,6 +516,9 @@ export function AdminReports() {
                         <TableCell>{log.customerName}</TableCell>
                         <TableCell>{log.siteLocation}</TableCell>
                         <TableCell>{log.servicedArea}</TableCell>
+                        <TableCell>
+                          <StatusBadge log={log} employees={employees} />
+                        </TableCell>
                         <TableCell className="max-w-xs">
                           <div>{log.workPerformed}</div>
                           {log.customFields && typeof log.customFields === "object" && Object.keys(log.customFields).length > 0 && (
