@@ -26,6 +26,15 @@ import { AdminService } from "@/pages/admin/AdminService";
 import { AdminMilestones } from "@/pages/admin/AdminMilestones";
 import { AdminDashboards } from "@/pages/admin/AdminDashboards";
 import { AdminBlog } from "@/pages/admin/AdminBlog";
+import { AdminReports } from "@/pages/admin/admin-reports";
+import { AdminLogin } from "@/pages/admin/admin-login";
+import { AdminFieldData } from "@/pages/admin/admin-field-data";
+import FieldLogin from "@/pages/field-login";
+import FieldLog from "@/pages/field-log";
+import FieldHistory from "@/pages/field-history";
+import FieldEmployees from "@/pages/field-employees";
+import FieldReports from "@/pages/field-reports";
+import PitchDeck from "@/pages/pitch-deck";
 
 function Router() {
   // Track page views when routes change - Google Analytics integration
@@ -47,7 +56,19 @@ function Router() {
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/cost-calculator" component={CostCalculator} />
       
+      {/* Pitch Deck */}
+      <Route path="/jlpd" component={PitchDeck} />
+      
+      {/* Field Service Routes */}
+      <Route path="/field" component={FieldLogin} />
+      <Route path="/field/log" component={FieldLog} />
+      <Route path="/field/history" component={FieldHistory} />
+      <Route path="/field/employees" component={FieldEmployees} />
+      <Route path="/field/reports" component={FieldReports} />
+      
       {/* Admin Portal Routes */}
+      <Route path="/admin" component={AdminLogin} />
+      <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/clients">
         <AdminLayout>
           <AdminClients />
@@ -71,6 +92,16 @@ function Router() {
       <Route path="/admin/blog">
         <AdminLayout>
           <AdminBlog />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/reports">
+        <AdminLayout>
+          <AdminReports />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/field-data">
+        <AdminLayout>
+          <AdminFieldData />
         </AdminLayout>
       </Route>
       

@@ -1,17 +1,18 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema } from "@shared/schema";
+import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
-import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail } from "./email";
+import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail, sendJobLogNotification } from "./email";
 import Parser from "rss-parser";
 import { verifyTurnstile } from "./turnstile";
 
-// Extend session type to include userId
 declare module 'express-session' {
   interface SessionData {
     userId: number;
+    fieldEmployeeId: number;
+    fieldCanManage: boolean;
   }
 }
 
@@ -1147,6 +1148,647 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==========================================
+  // Field Service Routes
+  // ==========================================
+
+  const requireFieldAuth = (req: any, res: any, next: any) => {
+    if (!req.session.fieldEmployeeId) {
+      return res.status(401).json({ success: false, message: "Field authentication required" });
+    }
+    next();
+  };
+
+  const requireFieldManager = (req: any, res: any, next: any) => {
+    if (!req.session.fieldEmployeeId) {
+      return res.status(401).json({ success: false, message: "Field authentication required" });
+    }
+    if (!req.session.fieldCanManage) {
+      return res.status(403).json({ success: false, message: "Management access required" });
+    }
+    next();
+  };
+
+  // PIN authentication for field employees
+  app.post("/api/field/auth", async (req, res) => {
+    try {
+      const { pin } = req.body;
+      if (!pin) {
+        return res.status(400).json({ success: false, message: "PIN is required" });
+      }
+      const employee = await storage.getFieldEmployeeByPin(pin);
+      if (!employee) {
+        return res.status(401).json({ success: false, message: "Invalid PIN" });
+      }
+      req.session.fieldEmployeeId = employee.id;
+      req.session.fieldCanManage = employee.canManageEmployees;
+      res.json({
+        success: true,
+        employee: {
+          id: employee.id,
+          name: employee.name,
+          canManageEmployees: employee.canManageEmployees,
+        }
+      });
+    } catch (error) {
+      console.error("Error authenticating field employee:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/field/logout", (req, res) => {
+    req.session.fieldEmployeeId = undefined as any;
+    req.session.fieldCanManage = undefined as any;
+    res.json({ success: true, message: "Logged out" });
+  });
+
+  // Seed Frank as default employee if none exist
+  app.post("/api/field/seed", async (req, res) => {
+    try {
+      const employees = await storage.getFieldEmployees();
+      if (employees.length === 0) {
+        const frank = await storage.createFieldEmployee({
+          name: "Frank",
+          pin: "2121",
+          isActive: true,
+          canManageEmployees: true,
+        });
+        return res.json({ success: true, message: "Default employee created" });
+      }
+      res.json({ success: true, message: "Employees already exist" });
+    } catch (error) {
+      console.error("Error seeding employees:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Client list for field employees (requires field auth)
+  app.get("/api/field/clients", requireFieldAuth, async (req, res) => {
+    try {
+      const allClients = await storage.getClients();
+      res.json({
+        success: true,
+        clients: allClients.map(c => ({ id: c.id, name: c.name, address: c.address }))
+      });
+    } catch (error) {
+      console.error("Error fetching clients for field:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get unique values from past job logs for dropdown suggestions
+  app.get("/api/field/suggestions", requireFieldAuth, async (req, res) => {
+    try {
+      const allLogs = await storage.getJobLogs();
+      const standaloneLocs = await storage.getSiteLocations();
+      const standaloneAreas = await storage.getServicedAreas();
+      const fieldCusts = await storage.getFieldCustomers();
+
+      const dedup = (items: string[]) => {
+        const seen = new Map<string, string>();
+        for (const item of items) {
+          const key = item.toLowerCase();
+          if (!seen.has(key)) seen.set(key, item);
+        }
+        return [...seen.values()].sort((a, b) => a.localeCompare(b));
+      };
+
+      const customerNames = allLogs.map(l => l.customerName.trim()).filter(Boolean);
+      const locationCustomerNames = standaloneLocs.map(l => l.customerName?.trim()).filter(Boolean) as string[];
+      const fieldCustomerNames = fieldCusts.map(c => c.name.trim()).filter(Boolean);
+      const mergedCustomers = dedup([...customerNames, ...locationCustomerNames, ...fieldCustomerNames]);
+
+      const customerLocations: Record<string, string[]> = {};
+      const locationAreas: Record<string, string[]> = {};
+
+      for (const log of allLogs) {
+        const cust = log.customerName.trim();
+        const loc = log.siteLocation.trim();
+        const area = log.servicedArea.trim();
+        if (cust && loc) {
+          const custKey = cust.toLowerCase();
+          if (!customerLocations[custKey]) customerLocations[custKey] = [];
+          if (!customerLocations[custKey].some(l => l.toLowerCase() === loc.toLowerCase())) {
+            customerLocations[custKey].push(loc);
+          }
+        }
+        if (loc && area) {
+          const locKey = loc.toLowerCase();
+          if (!locationAreas[locKey]) locationAreas[locKey] = [];
+          if (!locationAreas[locKey].some(a => a.toLowerCase() === area.toLowerCase())) {
+            locationAreas[locKey].push(area);
+          }
+        }
+      }
+
+      for (const loc of standaloneLocs) {
+        const custKey = (loc.customerName || "").toLowerCase();
+        if (custKey && !customerLocations[custKey]) customerLocations[custKey] = [];
+        if (custKey && !customerLocations[custKey].some(l => l.toLowerCase() === loc.name.toLowerCase())) {
+          customerLocations[custKey].push(loc.name);
+        }
+      }
+
+      for (const area of standaloneAreas) {
+        const locKey = (area.siteLocationName || "").toLowerCase();
+        if (locKey && !locationAreas[locKey]) locationAreas[locKey] = [];
+        if (locKey && !locationAreas[locKey].some(a => a.toLowerCase() === area.name.toLowerCase())) {
+          locationAreas[locKey].push(area.name);
+        }
+      }
+
+      for (const key in customerLocations) {
+        customerLocations[key].sort((a, b) => a.localeCompare(b));
+      }
+      for (const key in locationAreas) {
+        locationAreas[key].sort((a, b) => a.localeCompare(b));
+      }
+
+      res.json({
+        success: true,
+        customers: mergedCustomers,
+        customerLocations,
+        locationAreas,
+        clients: [],
+      });
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Field employee management (requires canManageEmployees)
+  app.get("/api/field/employees", requireFieldManager, async (req, res) => {
+    try {
+      const employees = await storage.getFieldEmployees();
+      res.json({
+        success: true,
+        employees: employees.map(e => ({
+          id: e.id,
+          name: e.name,
+          isActive: e.isActive,
+          canManageEmployees: e.canManageEmployees,
+          pin: e.pin,
+        }))
+      });
+    } catch (error) {
+      console.error("Error fetching field employees:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/field/employees", requireFieldManager, async (req, res) => {
+    try {
+      const validatedData = insertFieldEmployeeSchema.parse(req.body);
+      const existing = await storage.getFieldEmployeeByPin(validatedData.pin);
+      if (existing) {
+        return res.status(400).json({ success: false, message: "An employee with this PIN already exists" });
+      }
+      const employee = await storage.createFieldEmployee(validatedData);
+      res.json({ success: true, message: "Employee created", employee });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid employee data", errors: error.errors });
+      } else {
+        console.error("Error creating field employee:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.patch("/api/field/employees/:id", requireFieldManager, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      if (updates.pin) {
+        const existing = await storage.getFieldEmployeeByPin(updates.pin);
+        if (existing && existing.id !== id) {
+          return res.status(400).json({ success: false, message: "An employee with this PIN already exists" });
+        }
+      }
+      const employee = await storage.updateFieldEmployee(id, updates);
+      res.json({ success: true, message: "Employee updated", employee });
+    } catch (error) {
+      console.error("Error updating field employee:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/field/employees/:id", requireFieldManager, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteFieldEmployee(id);
+      res.json({ success: true, message: "Employee deleted" });
+    } catch (error) {
+      console.error("Error deleting field employee:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Job Log routes
+  app.post("/api/field/job-logs", requireFieldAuth, async (req, res) => {
+    try {
+      const data = {
+        ...req.body,
+        employeeId: req.session.fieldEmployeeId,
+        jobDate: new Date(req.body.jobDate),
+        clientId: req.body.clientId || null,
+      };
+      const validatedData = insertJobLogSchema.parse(data);
+      const jobLog = await storage.createJobLog(validatedData);
+
+      const employee = await storage.getFieldEmployee(req.session.fieldEmployeeId!);
+      sendJobLogNotification({
+        employeeName: employee?.name || "Unknown",
+        customerName: jobLog.customerName,
+        siteLocation: jobLog.siteLocation,
+        servicedArea: jobLog.servicedArea,
+        workPerformed: jobLog.workPerformed,
+        jobDate: jobLog.jobDate.toString(),
+      }).catch(err => console.error("Error sending job log email:", err));
+
+      res.json({ success: true, message: "Job log created", jobLog });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid job log data", errors: error.errors });
+      } else {
+        console.error("Error creating job log:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.get("/api/field/job-logs", requireFieldAuth, async (req, res) => {
+    try {
+      const filters: any = { employeeId: req.session.fieldEmployeeId };
+      if (req.query.customerName) filters.customerName = req.query.customerName as string;
+      if (req.query.dateFrom) filters.dateFrom = new Date(req.query.dateFrom as string);
+      if (req.query.dateTo) filters.dateTo = new Date(req.query.dateTo as string);
+
+      const logs = await storage.getJobLogs(filters);
+      res.json({ success: true, jobLogs: logs });
+    } catch (error) {
+      console.error("Error fetching job logs:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/field/job-logs/:id", requireFieldAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const log = await storage.getJobLog(id);
+      if (!log || log.employeeId !== req.session.fieldEmployeeId) {
+        return res.status(403).json({ success: false, message: "Access denied" });
+      }
+      await storage.deleteJobLog(id);
+      res.json({ success: true, message: "Job log deleted" });
+    } catch (error) {
+      console.error("Error deleting job log:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Admin job logs endpoint
+  app.get("/api/admin/job-logs", requireAdmin, async (req, res) => {
+    try {
+      const filters: any = {};
+      if (req.query.employeeId) filters.employeeId = parseInt(req.query.employeeId as string);
+      if (req.query.customerName) filters.customerName = req.query.customerName as string;
+      if (req.query.clientId) filters.clientId = parseInt(req.query.clientId as string);
+      if (req.query.dateFrom) filters.dateFrom = new Date(req.query.dateFrom as string);
+      if (req.query.dateTo) filters.dateTo = new Date(req.query.dateTo as string);
+      if (req.query.siteLocation) filters.siteLocation = req.query.siteLocation as string;
+      if (req.query.servicedArea) filters.servicedArea = req.query.servicedArea as string;
+
+      const logs = await storage.getJobLogs(filters);
+      const employees = await storage.getFieldEmployees();
+      res.json({ success: true, jobLogs: logs, employees });
+    } catch (error) {
+      console.error("Error fetching admin job logs:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Admin: manage field employees
+  app.get("/api/admin/field-employees", requireAdmin, async (req, res) => {
+    try {
+      const employees = await storage.getFieldEmployees();
+      res.json({ success: true, employees });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/field-employees", requireAdmin, async (req, res) => {
+    try {
+      const data = insertFieldEmployeeSchema.parse(req.body);
+      const employee = await storage.createFieldEmployee(data);
+      res.json({ success: true, employee });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.patch("/api/admin/field-employees/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updateSchema = insertFieldEmployeeSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+      const employee = await storage.updateFieldEmployee(id, validatedData);
+      res.json({ success: true, employee });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.delete("/api/admin/field-employees/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteFieldEmployee(id);
+      res.json({ success: true, message: "Employee deleted" });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Admin: edit job logs
+  app.patch("/api/admin/job-logs/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const allowed = ["siteLocation", "servicedArea", "workPerformed", "customerName", "jobDate"];
+      const updates: any = {};
+      for (const key of allowed) {
+        if (req.body[key] !== undefined) updates[key] = req.body[key];
+      }
+      if (updates.jobDate && typeof updates.jobDate === "string") {
+        updates.jobDate = new Date(updates.jobDate);
+      }
+      const jobLog = await storage.updateJobLog(id, updates);
+      res.json({ success: true, jobLog });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/job-logs/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteJobLog(id);
+      res.json({ success: true, message: "Job log deleted" });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Admin: job log custom fields CRUD
+  app.get("/api/admin/custom-fields", requireAdmin, async (req, res) => {
+    try {
+      const fields = await storage.getJobLogCustomFields();
+      res.json({ success: true, fields });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/custom-fields", requireAdmin, async (req, res) => {
+    try {
+      const data = insertJobLogCustomFieldSchema.parse(req.body);
+      if (data.fieldType === "select" && (!data.options || data.options.trim() === "")) {
+        return res.status(400).json({ success: false, message: "Select fields require at least one option" });
+      }
+      const field = await storage.createJobLogCustomField(data);
+      res.json({ success: true, field });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.patch("/api/admin/custom-fields/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = insertJobLogCustomFieldSchema.partial().parse(req.body);
+      if (data.fieldType === "select" && data.options !== undefined && (!data.options || data.options.trim() === "")) {
+        return res.status(400).json({ success: false, message: "Select fields require at least one option" });
+      }
+      const field = await storage.updateJobLogCustomField(id, data);
+      res.json({ success: true, field });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.delete("/api/admin/custom-fields/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteJobLogCustomField(id);
+      res.json({ success: true, message: "Custom field deleted" });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Public endpoint for field employees to get active custom fields
+  app.get("/api/field/custom-fields", requireFieldAuth, async (req, res) => {
+    try {
+      const allFields = await storage.getJobLogCustomFields();
+      const activeFields = allFields.filter(f => f.isActive);
+      res.json({ success: true, fields: activeFields });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Admin: field customers CRUD
+  app.get("/api/admin/field-customers", requireAdmin, async (req, res) => {
+    try {
+      const customers = await storage.getFieldCustomers();
+      res.json({ success: true, customers });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/field-customers", requireAdmin, async (req, res) => {
+    try {
+      const data = insertFieldCustomerSchema.parse(req.body);
+      const customer = await storage.createFieldCustomer(data);
+      res.json({ success: true, customer });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.patch("/api/admin/field-customers/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updateSchema = insertFieldCustomerSchema.partial();
+      const data = updateSchema.parse(req.body);
+      const customer = await storage.updateFieldCustomer(id, data);
+      res.json({ success: true, customer });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.delete("/api/admin/field-customers/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteFieldCustomer(id);
+      res.json({ success: true, message: "Customer deleted" });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Admin: site locations CRUD
+  app.get("/api/admin/site-locations", requireAdmin, async (req, res) => {
+    try {
+      const locations = await storage.getSiteLocations();
+      res.json({ success: true, locations });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/site-locations", requireAdmin, async (req, res) => {
+    try {
+      const data = insertSiteLocationSchema.parse(req.body);
+      const location = await storage.createSiteLocation(data);
+      res.json({ success: true, location });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.patch("/api/admin/site-locations/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updateSchema = insertSiteLocationSchema.partial();
+      const data = updateSchema.parse(req.body);
+      const location = await storage.updateSiteLocation(id, data);
+      res.json({ success: true, location });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.delete("/api/admin/site-locations/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteSiteLocation(id);
+      res.json({ success: true, message: "Location deleted" });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Admin: serviced areas CRUD
+  app.get("/api/admin/serviced-areas", requireAdmin, async (req, res) => {
+    try {
+      const areas = await storage.getServicedAreas();
+      res.json({ success: true, areas });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/serviced-areas", requireAdmin, async (req, res) => {
+    try {
+      const data = insertServicedAreaSchema.parse(req.body);
+      const area = await storage.createServicedArea(data);
+      res.json({ success: true, area });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.patch("/api/admin/serviced-areas/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updateSchema = insertServicedAreaSchema.partial();
+      const data = updateSchema.parse(req.body);
+      const area = await storage.updateServicedArea(id, data);
+      res.json({ success: true, area });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      } else {
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  app.delete("/api/admin/serviced-areas/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteServicedArea(id);
+      res.json({ success: true, message: "Area deleted" });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  seedAdminUser();
+
   const httpServer = createServer(app);
   return httpServer;
+}
+
+async function seedAdminUser() {
+  try {
+    const existing = await storage.getUserByEmail("rob@absolutepestservices.com");
+    if (!existing) {
+      const existingAlt = await storage.getUserByEmail("Rob@absolutepestservices.com");
+      if (!existingAlt) {
+        await storage.createUser({
+          email: "rob@absolutepestservices.com",
+          password: "Sheffield2121",
+          firstName: "Rob",
+          lastName: "Admin",
+          phone: "",
+          address: "",
+          role: "admin",
+        });
+        console.log("Admin user seeded: rob@absolutepestservices.com");
+      }
+    }
+  } catch (error) {
+    console.error("Error seeding admin user:", error);
+  }
 }

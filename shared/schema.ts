@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, varchar, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -162,6 +162,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   lastName: true,
   phone: true,
   address: true,
+  role: true,
 });
 
 export const insertContactSchema = createInsertSchema(contactSubmissions).omit({
@@ -236,6 +237,95 @@ export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
   publishedAt: true,
 });
 
+export const fieldEmployees = pgTable("field_employees", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  pin: text("pin").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  canManageEmployees: boolean("can_manage_employees").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const jobLogs = pgTable("job_logs", {
+  id: serial("id").primaryKey(),
+  employeeId: integer("employee_id").notNull().references(() => fieldEmployees.id),
+  customerName: text("customer_name").notNull(),
+  clientId: integer("client_id").references(() => clients.id),
+  siteLocation: text("site_location").notNull(),
+  servicedArea: text("serviced_area").notNull(),
+  workPerformed: text("work_performed").notNull(),
+  jobDate: timestamp("job_date").notNull(),
+  customFields: jsonb("custom_fields"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const jobLogCustomFields = pgTable("job_log_custom_fields", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  label: text("label").notNull(),
+  fieldType: text("field_type").notNull().default("text"),
+  required: boolean("required").default(false).notNull(),
+  options: text("options"),
+  displayOrder: integer("display_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const fieldCustomers = pgTable("field_customers", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  address: text("address"),
+  phone: text("phone"),
+  email: text("email"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const siteLocations = pgTable("site_locations", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  customerId: integer("customer_id").references(() => clients.id),
+  customerName: text("customer_name"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const servicedAreas = pgTable("serviced_areas", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  siteLocationId: integer("site_location_id").references(() => siteLocations.id),
+  siteLocationName: text("site_location_name"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertFieldEmployeeSchema = createInsertSchema(fieldEmployees).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertJobLogSchema = createInsertSchema(jobLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertFieldCustomerSchema = createInsertSchema(fieldCustomers).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertJobLogCustomFieldSchema = createInsertSchema(jobLogCustomFields).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSiteLocationSchema = createInsertSchema(siteLocations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertServicedAreaSchema = createInsertSchema(servicedAreas).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
@@ -272,3 +362,17 @@ export type InsertDashboard = z.infer<typeof insertDashboardSchema>;
 export type Dashboard = typeof dashboards.$inferSelect;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type BlogPost = typeof blogPosts.$inferSelect;
+
+// Field Service Types
+export type InsertFieldEmployee = z.infer<typeof insertFieldEmployeeSchema>;
+export type FieldEmployee = typeof fieldEmployees.$inferSelect;
+export type InsertJobLog = z.infer<typeof insertJobLogSchema>;
+export type JobLog = typeof jobLogs.$inferSelect;
+export type InsertFieldCustomer = z.infer<typeof insertFieldCustomerSchema>;
+export type FieldCustomer = typeof fieldCustomers.$inferSelect;
+export type InsertJobLogCustomField = z.infer<typeof insertJobLogCustomFieldSchema>;
+export type JobLogCustomField = typeof jobLogCustomFields.$inferSelect;
+export type InsertSiteLocation = z.infer<typeof insertSiteLocationSchema>;
+export type SiteLocation = typeof siteLocations.$inferSelect;
+export type InsertServicedArea = z.infer<typeof insertServicedAreaSchema>;
+export type ServicedArea = typeof servicedAreas.$inferSelect;

@@ -1,6 +1,6 @@
-import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost } from "@shared/schema";
+import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, gte, lte, ilike } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -73,6 +73,45 @@ export interface IStorage {
   getBlogPostBySlug(slug: string): Promise<BlogPost | undefined>;
   updateBlogPost(id: number, updates: Partial<InsertBlogPost>): Promise<BlogPost>;
   deleteBlogPost(id: number): Promise<void>;
+
+  // Field Employee operations
+  createFieldEmployee(employee: InsertFieldEmployee): Promise<FieldEmployee>;
+  getFieldEmployees(): Promise<FieldEmployee[]>;
+  getFieldEmployee(id: number): Promise<FieldEmployee | undefined>;
+  getFieldEmployeeByPin(pin: string): Promise<FieldEmployee | undefined>;
+  updateFieldEmployee(id: number, updates: Partial<InsertFieldEmployee>): Promise<FieldEmployee>;
+  deleteFieldEmployee(id: number): Promise<void>;
+
+  // Job Log operations
+  createJobLog(jobLog: InsertJobLog): Promise<JobLog>;
+  getJobLogs(filters?: { employeeId?: number; customerName?: string; clientId?: number; dateFrom?: Date; dateTo?: Date; siteLocation?: string; servicedArea?: string }): Promise<JobLog[]>;
+  getJobLog(id: number): Promise<JobLog | undefined>;
+  updateJobLog(id: number, updates: Partial<InsertJobLog>): Promise<JobLog>;
+  deleteJobLog(id: number): Promise<void>;
+
+  // Custom Field operations
+  getJobLogCustomFields(): Promise<JobLogCustomField[]>;
+  createJobLogCustomField(field: InsertJobLogCustomField): Promise<JobLogCustomField>;
+  updateJobLogCustomField(id: number, updates: Partial<InsertJobLogCustomField>): Promise<JobLogCustomField>;
+  deleteJobLogCustomField(id: number): Promise<void>;
+
+  // Field Customer operations
+  getFieldCustomers(): Promise<FieldCustomer[]>;
+  createFieldCustomer(customer: InsertFieldCustomer): Promise<FieldCustomer>;
+  updateFieldCustomer(id: number, updates: Partial<InsertFieldCustomer>): Promise<FieldCustomer>;
+  deleteFieldCustomer(id: number): Promise<void>;
+
+  // Site Location operations
+  getSiteLocations(): Promise<SiteLocation[]>;
+  createSiteLocation(location: InsertSiteLocation): Promise<SiteLocation>;
+  updateSiteLocation(id: number, updates: Partial<InsertSiteLocation>): Promise<SiteLocation>;
+  deleteSiteLocation(id: number): Promise<void>;
+
+  // Serviced Area operations
+  getServicedAreas(): Promise<ServicedArea[]>;
+  createServicedArea(area: InsertServicedArea): Promise<ServicedArea>;
+  updateServicedArea(id: number, updates: Partial<InsertServicedArea>): Promise<ServicedArea>;
+  deleteServicedArea(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -83,7 +122,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    const [user] = await db.select().from(users).where(ilike(users.email, email));
     return user || undefined;
   }
 
@@ -441,6 +480,157 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBlogPost(id: number): Promise<void> {
     await db.delete(blogPosts).where(eq(blogPosts.id, id));
+  }
+
+  // Field Employee operations
+  async createFieldEmployee(insertEmployee: InsertFieldEmployee): Promise<FieldEmployee> {
+    const [employee] = await db
+      .insert(fieldEmployees)
+      .values(insertEmployee)
+      .returning();
+    return employee;
+  }
+
+  async getFieldEmployees(): Promise<FieldEmployee[]> {
+    return await db.select().from(fieldEmployees).orderBy(fieldEmployees.name);
+  }
+
+  async getFieldEmployee(id: number): Promise<FieldEmployee | undefined> {
+    const [employee] = await db.select().from(fieldEmployees).where(eq(fieldEmployees.id, id));
+    return employee || undefined;
+  }
+
+  async getFieldEmployeeByPin(pin: string): Promise<FieldEmployee | undefined> {
+    const [employee] = await db.select().from(fieldEmployees).where(and(eq(fieldEmployees.pin, pin), eq(fieldEmployees.isActive, true)));
+    return employee || undefined;
+  }
+
+  async updateFieldEmployee(id: number, updates: Partial<InsertFieldEmployee>): Promise<FieldEmployee> {
+    const [employee] = await db
+      .update(fieldEmployees)
+      .set(updates)
+      .where(eq(fieldEmployees.id, id))
+      .returning();
+    return employee;
+  }
+
+  async deleteFieldEmployee(id: number): Promise<void> {
+    await db.delete(fieldEmployees).where(eq(fieldEmployees.id, id));
+  }
+
+  // Job Log operations
+  async createJobLog(insertJobLog: InsertJobLog): Promise<JobLog> {
+    const [jobLog] = await db
+      .insert(jobLogs)
+      .values(insertJobLog)
+      .returning();
+    return jobLog;
+  }
+
+  async getJobLogs(filters?: { employeeId?: number; customerName?: string; clientId?: number; dateFrom?: Date; dateTo?: Date; siteLocation?: string; servicedArea?: string }): Promise<JobLog[]> {
+    const conditions = [];
+    if (filters?.employeeId) conditions.push(eq(jobLogs.employeeId, filters.employeeId));
+    if (filters?.customerName) conditions.push(eq(jobLogs.customerName, filters.customerName));
+    if (filters?.clientId) conditions.push(eq(jobLogs.clientId, filters.clientId));
+    if (filters?.dateFrom) conditions.push(gte(jobLogs.jobDate, filters.dateFrom));
+    if (filters?.dateTo) conditions.push(lte(jobLogs.jobDate, filters.dateTo));
+    if (filters?.siteLocation) conditions.push(eq(jobLogs.siteLocation, filters.siteLocation));
+    if (filters?.servicedArea) conditions.push(eq(jobLogs.servicedArea, filters.servicedArea));
+
+    if (conditions.length > 0) {
+      return await db.select().from(jobLogs).where(and(...conditions)).orderBy(desc(jobLogs.jobDate));
+    }
+    return await db.select().from(jobLogs).orderBy(desc(jobLogs.jobDate));
+  }
+
+  async getJobLog(id: number): Promise<JobLog | undefined> {
+    const [jobLog] = await db.select().from(jobLogs).where(eq(jobLogs.id, id));
+    return jobLog || undefined;
+  }
+
+  async updateJobLog(id: number, updates: Partial<InsertJobLog>): Promise<JobLog> {
+    const [jobLog] = await db
+      .update(jobLogs)
+      .set(updates)
+      .where(eq(jobLogs.id, id))
+      .returning();
+    return jobLog;
+  }
+
+  async deleteJobLog(id: number): Promise<void> {
+    await db.delete(jobLogs).where(eq(jobLogs.id, id));
+  }
+
+  async getJobLogCustomFields(): Promise<JobLogCustomField[]> {
+    return await db.select().from(jobLogCustomFields).orderBy(jobLogCustomFields.displayOrder);
+  }
+
+  async createJobLogCustomField(field: InsertJobLogCustomField): Promise<JobLogCustomField> {
+    const [f] = await db.insert(jobLogCustomFields).values(field).returning();
+    return f;
+  }
+
+  async updateJobLogCustomField(id: number, updates: Partial<InsertJobLogCustomField>): Promise<JobLogCustomField> {
+    const [f] = await db.update(jobLogCustomFields).set(updates).where(eq(jobLogCustomFields.id, id)).returning();
+    return f;
+  }
+
+  async deleteJobLogCustomField(id: number): Promise<void> {
+    await db.delete(jobLogCustomFields).where(eq(jobLogCustomFields.id, id));
+  }
+
+  async getFieldCustomers(): Promise<FieldCustomer[]> {
+    return await db.select().from(fieldCustomers).orderBy(fieldCustomers.name);
+  }
+
+  async createFieldCustomer(customer: InsertFieldCustomer): Promise<FieldCustomer> {
+    const [c] = await db.insert(fieldCustomers).values(customer).returning();
+    return c;
+  }
+
+  async updateFieldCustomer(id: number, updates: Partial<InsertFieldCustomer>): Promise<FieldCustomer> {
+    const [c] = await db.update(fieldCustomers).set(updates).where(eq(fieldCustomers.id, id)).returning();
+    return c;
+  }
+
+  async deleteFieldCustomer(id: number): Promise<void> {
+    await db.delete(fieldCustomers).where(eq(fieldCustomers.id, id));
+  }
+
+  async getSiteLocations(): Promise<SiteLocation[]> {
+    return await db.select().from(siteLocations).orderBy(siteLocations.name);
+  }
+
+  async createSiteLocation(location: InsertSiteLocation): Promise<SiteLocation> {
+    const [loc] = await db.insert(siteLocations).values(location).returning();
+    return loc;
+  }
+
+  async updateSiteLocation(id: number, updates: Partial<InsertSiteLocation>): Promise<SiteLocation> {
+    const [loc] = await db.update(siteLocations).set(updates).where(eq(siteLocations.id, id)).returning();
+    return loc;
+  }
+
+  async deleteSiteLocation(id: number): Promise<void> {
+    await db.delete(siteLocations).where(eq(siteLocations.id, id));
+  }
+
+  async getServicedAreas(): Promise<ServicedArea[]> {
+    return await db.select().from(servicedAreas).orderBy(servicedAreas.name);
+  }
+
+  async createServicedArea(area: InsertServicedArea): Promise<ServicedArea> {
+    const [a] = await db.insert(servicedAreas).values(area).returning();
+    return a;
+  }
+
+  async updateServicedArea(id: number, updates: Partial<InsertServicedArea>): Promise<ServicedArea> {
+    const [a] = await db.update(servicedAreas).set(updates).where(eq(servicedAreas.id, id)).returning();
+    return a;
+  }
+
+  async deleteServicedArea(id: number): Promise<void> {
+    await db.delete(servicedAreas).where(eq(servicedAreas.id, id));
   }
 }
 

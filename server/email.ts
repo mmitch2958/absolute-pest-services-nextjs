@@ -51,6 +51,7 @@ interface EmailParams {
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
+    console.log(`[Email] Sending to ${params.to} | Subject: ${params.subject}`);
     await mailService.send({
       to: params.to,
       from: params.from,
@@ -58,9 +59,10 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
       text: params.text || '',
       html: params.html || '',
     });
+    console.log(`[Email] Successfully sent to ${params.to}`);
     return true;
-  } catch (error) {
-    console.error('SendGrid email error:', error);
+  } catch (error: any) {
+    console.error(`[Email] Failed to send to ${params.to}:`, error?.response?.body || error?.message || error);
     return false;
   }
 }
@@ -434,6 +436,73 @@ If you have any questions or concerns about the service, please don't hesitate t
     html,
     text
   });
+}
+
+export async function sendJobLogNotification(data: {
+  employeeName: string;
+  customerName: string;
+  siteLocation: string;
+  servicedArea: string;
+  workPerformed: string;
+  jobDate: string;
+}) {
+  const formattedDate = new Date(data.jobDate).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  const subject = `Field Job Log - ${data.customerName} - ${formattedDate}`;
+  const html = `
+    <h2>New Field Job Log Entry</h2>
+    <p><strong>Technician:</strong> ${data.employeeName}</p>
+    <p><strong>Customer:</strong> ${data.customerName}</p>
+    <p><strong>Site Location:</strong> ${data.siteLocation}</p>
+    <p><strong>Serviced Area:</strong> ${data.servicedArea}</p>
+    <p><strong>Job Date:</strong> ${formattedDate}</p>
+    <p><strong>Work Performed:</strong></p>
+    <p>${data.workPerformed}</p>
+    <hr>
+    <p style="color: #666; font-size: 12px;">This is an automated notification from the Absolute Pest Services field logging system.</p>
+  `;
+
+  const text = `
+New Field Job Log Entry
+
+Technician: ${data.employeeName}
+Customer: ${data.customerName}
+Site Location: ${data.siteLocation}
+Serviced Area: ${data.servicedArea}
+Job Date: ${formattedDate}
+Work Performed: ${data.workPerformed}
+  `;
+
+  const robSent = await sendEmail({
+    to: TO_EMAIL,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text
+  });
+
+  const mikeSent = await sendEmail({
+    to: ADDITIONAL_EMAIL,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text
+  });
+
+  const rmitchSent = await sendEmail({
+    to: THIRD_EMAIL,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text
+  });
+
+  return robSent && mikeSent && rmitchSent;
 }
 
 export async function sendNewsletterEmail(data: {
