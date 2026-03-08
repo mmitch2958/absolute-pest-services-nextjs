@@ -255,6 +255,7 @@ export const jobLogs = pgTable("job_logs", {
   servicedArea: text("serviced_area").notNull(),
   workPerformed: text("work_performed").notNull(),
   jobDate: timestamp("job_date").notNull(),
+  status: text("status").notNull().default("completed"), // scheduled, in_progress, completed, invoiced, paid
   customFields: jsonb("custom_fields"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

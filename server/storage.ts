@@ -84,7 +84,7 @@ export interface IStorage {
 
   // Job Log operations
   createJobLog(jobLog: InsertJobLog): Promise<JobLog>;
-  getJobLogs(filters?: { employeeId?: number; customerName?: string; clientId?: number; dateFrom?: Date; dateTo?: Date; siteLocation?: string; servicedArea?: string }): Promise<JobLog[]>;
+  getJobLogs(filters?: { employeeId?: number; customerName?: string; clientId?: number; dateFrom?: Date; dateTo?: Date; siteLocation?: string; servicedArea?: string; status?: string }): Promise<JobLog[]>;
   getJobLog(id: number): Promise<JobLog | undefined>;
   updateJobLog(id: number, updates: Partial<InsertJobLog>): Promise<JobLog>;
   deleteJobLog(id: number): Promise<void>;
@@ -532,7 +532,7 @@ export class DatabaseStorage implements IStorage {
     return jobLog;
   }
 
-  async getJobLogs(filters?: { employeeId?: number; customerName?: string; clientId?: number; dateFrom?: Date; dateTo?: Date; siteLocation?: string; servicedArea?: string }): Promise<JobLog[]> {
+  async getJobLogs(filters?: { employeeId?: number; customerName?: string; clientId?: number; dateFrom?: Date; dateTo?: Date; siteLocation?: string; servicedArea?: string; status?: string }): Promise<JobLog[]> {
     const conditions = [];
     if (filters?.employeeId) conditions.push(eq(jobLogs.employeeId, filters.employeeId));
     if (filters?.customerName) conditions.push(eq(jobLogs.customerName, filters.customerName));
@@ -541,6 +541,7 @@ export class DatabaseStorage implements IStorage {
     if (filters?.dateTo) conditions.push(lte(jobLogs.jobDate, filters.dateTo));
     if (filters?.siteLocation) conditions.push(eq(jobLogs.siteLocation, filters.siteLocation));
     if (filters?.servicedArea) conditions.push(eq(jobLogs.servicedArea, filters.servicedArea));
+    if (filters?.status) conditions.push(eq(jobLogs.status, filters.status));
 
     if (conditions.length > 0) {
       return await db.select().from(jobLogs).where(and(...conditions)).orderBy(desc(jobLogs.jobDate));
