@@ -10,6 +10,7 @@ interface JobLogEntry {
   workPerformed: string;
   jobDate: string;
   customFields?: Record<string, any>;
+  photos?: Array<{ id: number; url: string; caption: string | null }>;
 }
 
 interface ReportOptions {
@@ -20,7 +21,134 @@ interface ReportOptions {
   employees: { id: number; name: string }[];
 }
 
-export function generateJobReport(options: ReportOptions) {
+// Convert a public image URL to a base64 data URI for jsPDF
+async function urlToBase64(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
+// Append a photo appendix page to the PDF document
+async function appendPhotoPage(
+  doc: jsPDF,
+  logsWithPhotos: JobLogEntry[],
+  employeeMap: Map<number, string>
+) {
+  const allPhotos: Array<{
+    photo: { id: number; url: string; caption: string | null };
+    logRef: string;
+  }> = [];
+
+  for (const log of logsWithPhotos) {
+    if (!log.photos?.length) continue;
+    const logRef = `${new Date(log.jobDate).toLocaleDateString()} — ${log.customerName} / ${log.siteLocation}`;
+    for (const photo of log.photos) {
+      allPhotos.push({ photo, logRef });
+    }
+  }
+
+  if (allPhotos.length === 0) return;
+
+  doc.addPage();
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 14;
+
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Photo Attachments", margin, 20);
+
+  doc.setDrawColor(0, 100, 0);
+  doc.setLineWidth(0.3);
+  doc.line(margin, 24, pageWidth - margin, 24);
+
+  const colW = 58;
+  const colH = 44;
+  const captionH = 10;
+  const colGap = 8;
+  const rowGap = 18;
+  const cols = 3;
+  let x = margin;
+  let y = 30;
+
+  for (let i = 0; i < allPhotos.length; i++) {
+    const { photo, logRef } = allPhotos[i];
+
+    // Fetch and embed image
+    const base64 = await urlToBase64(photo.url);
+    if (base64) {
+      try {
+        // Determine format from mime type or URL
+        const format = base64.startsWith("data:image/png") ? "PNG" : "JPEG";
+        doc.addImage(base64, format, x, y, colW, colH);
+      } catch {
+        // If image fails, draw a placeholder box
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(x, y, colW, colH);
+        doc.setFontSize(7);
+        doc.setFont("helvetica", "normal");
+        doc.text("Image unavailable", x + 2, y + colH / 2);
+      }
+    } else {
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(x, y, colW, colH);
+    }
+
+    // Caption below image
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(80, 80, 80);
+
+    if (photo.caption) {
+      const lines = doc.splitTextToSize(photo.caption, colW);
+      doc.text(lines.slice(0, 2), x, y + colH + 4);
+    }
+
+    // Log reference (tiny, below caption)
+    doc.setFontSize(6);
+    doc.setTextColor(150, 150, 150);
+    const refLines = doc.splitTextToSize(logRef, colW);
+    doc.text(refLines.slice(0, 1), x, y + colH + captionH);
+
+    doc.setTextColor(0, 0, 0);
+
+    // Advance grid position
+    const col = i % cols;
+    if (col < cols - 1) {
+      x += colW + colGap;
+    } else {
+      x = margin;
+      y += colH + captionH + rowGap;
+
+      // Add new page if needed
+      if (y + colH > pageHeight - margin) {
+        doc.addPage();
+        y = 20;
+
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("Photo Attachments (continued)", margin, y);
+        doc.setDrawColor(0, 100, 0);
+        doc.setLineWidth(0.3);
+        doc.line(margin, y + 4, pageWidth - margin, y + 4);
+        y += 14;
+      }
+    }
+  }
+}
+
+export async function generateJobReport(options: ReportOptions) {
   const { customerName, dateFrom, dateTo, logs, employees } = options;
   const doc = new jsPDF();
 
@@ -56,6 +184,9 @@ export function generateJobReport(options: ReportOptions) {
     doc.text(`Areas Serviced: ${uniqueAreas.join(", ")}`, 14, infoY + 24);
   }
 
+  const logsWithPhotos = logs.filter(l => l.photos && l.photos.length > 0);
+  const hasAnyPhotos = logsWithPhotos.length > 0;
+
   const tableData = logs.map(log => {
     let workText = log.workPerformed;
     if (log.customFields && typeof log.customFields === "object" && Object.keys(log.customFields).length > 0) {
@@ -67,6 +198,10 @@ export function generateJobReport(options: ReportOptions) {
         })
         .join("\n");
       workText += "\n" + extras;
+    }
+    // Per design spec: note photos in table, appendix page has the actual images
+    if (log.photos && log.photos.length > 0) {
+      workText += `\n[Photos: ${log.photos.length} — See Appendix]`;
     }
     return [
       new Date(log.jobDate).toLocaleDateString(),
@@ -114,6 +249,11 @@ export function generateJobReport(options: ReportOptions) {
     doc.text("Absolute Pest Services", pageWidth / 2, finalY + 16, { align: "center" });
     doc.text("Phone: (484) 643-2225 | Email: rob@absolutepestservices.com", pageWidth / 2, finalY + 21, { align: "center" });
     doc.text("www.absolutepestservices.com", pageWidth / 2, finalY + 26, { align: "center" });
+  }
+
+  // Append photo pages if any logs have photos
+  if (hasAnyPhotos) {
+    await appendPhotoPage(doc, logsWithPhotos, employeeMap);
   }
 
   const fileName = `APS_Report_${customerName.replace(/\s+/g, "_")}_${dateFrom}_to_${dateTo}.pdf`;

@@ -1,12 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema } from "@shared/schema";
+import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema, insertJobLogPhotoSchema } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
 import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail, sendJobLogNotification } from "./email";
 import Parser from "rss-parser";
 import { verifyTurnstile } from "./turnstile";
+import { cloudinary } from "./cloudinary";
 
 declare module 'express-session' {
   interface SessionData {
@@ -1760,6 +1761,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteServicedArea(id);
       res.json({ success: true, message: "Area deleted" });
     } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // ==========================================
+  // Photo Attachment Routes
+  // ==========================================
+
+  // POST /api/field/photos/sign — generate Cloudinary signed upload params
+  app.post("/api/field/photos/sign", requireFieldAuth, (req, res) => {
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+    if (!cloudName || !apiKey || !apiSecret) {
+      return res.status(503).json({ success: false, message: "Cloudinary is not configured" });
+    }
+
+    const timestamp = Math.round(Date.now() / 1000);
+    const folder = "aps-job-logs";
+
+    const paramsToSign: Record<string, string | number> = {
+      timestamp,
+      folder,
+      allowed_formats: "jpg,jpeg,png,webp,heic",
+      max_file_size: 5242880,
+    };
+
+    const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret);
+
+    res.json({
+      signature,
+      timestamp,
+      folder,
+      cloudName,
+      apiKey,
+    });
+  });
+
+  // GET /api/field/job-logs/:logId/photos — field employee fetches photos for their log
+  app.get("/api/field/job-logs/:logId/photos", requireFieldAuth, async (req, res) => {
+    try {
+      const logId = parseInt(req.params.logId);
+      if (isNaN(logId)) return res.status(400).json({ success: false, message: "Invalid log ID" });
+
+      const log = await storage.getJobLog(logId);
+      if (!log || log.employeeId !== req.session.fieldEmployeeId) {
+        return res.status(403).json({ success: false, message: "Forbidden" });
+      }
+
+      const photos = await storage.getJobLogPhotos(logId);
+      res.json({ success: true, photos });
+    } catch (error) {
+      console.error("Error fetching photos:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/field/job-logs/:logId/photos — save Cloudinary URL after direct upload
+  app.post("/api/field/job-logs/:logId/photos", requireFieldAuth, async (req, res) => {
+    try {
+      const logId = parseInt(req.params.logId);
+      if (isNaN(logId)) return res.status(400).json({ success: false, message: "Invalid log ID" });
+
+      const log = await storage.getJobLog(logId);
+      if (!log || log.employeeId !== req.session.fieldEmployeeId) {
+        return res.status(403).json({ success: false, message: "Forbidden" });
+      }
+
+      const parsed = insertJobLogPhotoSchema.safeParse({ ...req.body, jobLogId: logId });
+      if (!parsed.success) {
+        return res.status(400).json({ success: false, error: parsed.error.flatten() });
+      }
+
+      // Validate URL is from our Cloudinary account
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME!;
+      const urlObj = new URL(parsed.data.url);
+      if (
+        !urlObj.hostname.includes("cloudinary.com") ||
+        !urlObj.pathname.startsWith(`/${cloudName}`)
+      ) {
+        return res.status(400).json({ success: false, message: "Invalid image host" });
+      }
+
+      try {
+        const photo = await storage.createJobLogPhoto(parsed.data);
+        res.status(201).json({ success: true, photo });
+      } catch (err: any) {
+        if (err.message === "MAX_PHOTOS_EXCEEDED") {
+          return res.status(422).json({ success: false, message: "Maximum 5 photos per log" });
+        }
+        throw err;
+      }
+    } catch (error) {
+      console.error("Error saving photo:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // DELETE /api/field/job-logs/:logId/photos/:photoId — remove a photo record
+  app.delete("/api/field/job-logs/:logId/photos/:photoId", requireFieldAuth, async (req, res) => {
+    try {
+      const logId = parseInt(req.params.logId);
+      const photoId = parseInt(req.params.photoId);
+      if (isNaN(logId) || isNaN(photoId)) {
+        return res.status(400).json({ success: false, message: "Invalid ID" });
+      }
+
+      const log = await storage.getJobLog(logId);
+      if (!log || log.employeeId !== req.session.fieldEmployeeId) {
+        return res.status(403).json({ success: false, message: "Forbidden" });
+      }
+
+      await storage.deleteJobLogPhoto(photoId, logId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting photo:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/job-logs/:logId/photos — admin view photos for any log
+  app.get("/api/admin/job-logs/:logId/photos", requireAdmin, async (req, res) => {
+    try {
+      const logId = parseInt(req.params.logId);
+      if (isNaN(logId)) return res.status(400).json({ success: false, message: "Invalid log ID" });
+
+      const photos = await storage.getJobLogPhotos(logId);
+      res.json({ success: true, photos });
+    } catch (error) {
+      console.error("Error fetching admin photos:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });

@@ -3,11 +3,168 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { FieldNav } from "@/components/field-nav";
-import { MapPin, Calendar, Wrench, Building2, Loader2 } from "lucide-react";
+import { MapPin, Calendar, Wrench, Building2, Loader2, Camera, X, ChevronLeft, ChevronRight } from "lucide-react";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface JobLogPhoto {
+  id: number;
+  jobLogId: number;
+  url: string;
+  caption: string | null;
+  uploadedAt: string;
+}
+
+// ─── Lightbox ─────────────────────────────────────────────────────────────────
+interface LightboxProps {
+  photos: JobLogPhoto[];
+  initialIndex: number;
+  onClose: () => void;
+}
+
+function Lightbox({ photos, initialIndex, onClose }: LightboxProps) {
+  const [current, setCurrent] = useState(initialIndex);
+
+  const prev = () => setCurrent(i => (i - 1 + photos.length) % photos.length);
+  const next = () => setCurrent(i => (i + 1) % photos.length);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
+
+  const photo = photos[current];
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black flex flex-col"
+      role="dialog"
+      aria-label="Photo lightbox"
+      aria-modal="true"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3">
+        <span className="text-white/60 text-sm">{current + 1} / {photos.length}</span>
+        <button
+          onClick={onClose}
+          className="text-white p-2 rounded-full hover:bg-white/10 transition-colors"
+          aria-label="Close lightbox"
+        >
+          <X className="w-6 h-6" />
+        </button>
+      </div>
+
+      {/* Image */}
+      <div className="flex-1 flex items-center justify-center relative px-4 min-h-0">
+        {photos.length > 1 && (
+          <button
+            onClick={prev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 text-white p-2 rounded-full bg-black/40 hover:bg-black/60 transition-colors z-10"
+            aria-label="Previous photo"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        )}
+
+        <img
+          src={photo.url}
+          alt={photo.caption || `Photo ${current + 1}`}
+          className="max-w-full max-h-full object-contain rounded-lg"
+          style={{ maxHeight: "calc(100vh - 160px)" }}
+        />
+
+        {photos.length > 1 && (
+          <button
+            onClick={next}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-white p-2 rounded-full bg-black/40 hover:bg-black/60 transition-colors z-10"
+            aria-label="Next photo"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        )}
+      </div>
+
+      {/* Caption */}
+      {photo.caption && (
+        <div className="px-4 py-3 text-center">
+          <p className="text-white/80 text-sm">{photo.caption}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── PhotoThumbnailRow ────────────────────────────────────────────────────────
+interface PhotoThumbnailRowProps {
+  logId: number;
+  onOpenLightbox: (photos: JobLogPhoto[], index: number) => void;
+}
+
+function PhotoThumbnailRow({ logId, onOpenLightbox }: PhotoThumbnailRowProps) {
+  const { data, isLoading } = useQuery<{ success: boolean; photos: JobLogPhoto[] }>({
+    queryKey: ["/api/field/job-logs", logId, "photos"],
+    queryFn: async () => {
+      const res = await fetch(`/api/field/job-logs/${logId}/photos`, { credentials: "include" });
+      return res.json();
+    },
+  });
+
+  const photos = data?.photos || [];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border/50">
+        <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+        <span className="text-xs text-muted-foreground">Loading photos…</span>
+      </div>
+    );
+  }
+
+  if (photos.length === 0) return null;
+
+  return (
+    <div className="mt-2 pt-2 border-t border-border/50">
+      {/* Badge */}
+      <div className="flex items-center gap-1 mb-2">
+        <Camera className="w-3.5 h-3.5 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground font-medium">
+          {photos.length} Photo{photos.length !== 1 ? "s" : ""}
+        </span>
+      </div>
+
+      {/* 3-column thumbnail grid */}
+      <div className="grid grid-cols-3 gap-1.5">
+        {photos.map((photo, idx) => (
+          <button
+            key={photo.id}
+            type="button"
+            onClick={() => onOpenLightbox(photos, idx)}
+            className="relative rounded-md overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary"
+            style={{ aspectRatio: "1 / 1" }}
+            aria-label={photo.caption ? `View photo: ${photo.caption}` : `View photo ${idx + 1}`}
+          >
+            <img
+              src={photo.url}
+              alt={photo.caption || `Photo ${idx + 1}`}
+              className="w-full h-full object-cover"
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main FieldHistory Component ──────────────────────────────────────────────
 export default function FieldHistory() {
   const [, setLocation] = useLocation();
   const [employee, setEmployee] = useState<any>(null);
+  const [lightbox, setLightbox] = useState<{ photos: JobLogPhoto[]; index: number } | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("fieldEmployee");
@@ -77,6 +234,12 @@ export default function FieldHistory() {
                         ))}
                       </div>
                     )}
+
+                    {/* Photo thumbnail row — lazy-loaded per log card */}
+                    <PhotoThumbnailRow
+                      logId={log.id}
+                      onOpenLightbox={(photos, index) => setLightbox({ photos, index })}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -84,6 +247,16 @@ export default function FieldHistory() {
           </div>
         )}
       </div>
+
+      {/* Full-screen lightbox */}
+      {lightbox && (
+        <Lightbox
+          photos={lightbox.photos}
+          initialIndex={lightbox.index}
+          onClose={() => setLightbox(null)}
+        />
+      )}
+
       <FieldNav canManageEmployees={employee.canManageEmployees} />
     </div>
   );

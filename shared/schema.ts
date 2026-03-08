@@ -288,6 +288,17 @@ export const siteLocations = pgTable("site_locations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ─── Job Log Photos ───────────────────────────────────────────────────────────
+export const jobLogPhotos = pgTable("job_log_photos", {
+  id: serial("id").primaryKey(),
+  jobLogId: integer("job_log_id")
+    .notNull()
+    .references(() => jobLogs.id, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+  caption: text("caption"),
+  uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
+});
+
 export const servicedAreas = pgTable("serviced_areas", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -324,6 +335,14 @@ export const insertSiteLocationSchema = createInsertSchema(siteLocations).omit({
 export const insertServicedAreaSchema = createInsertSchema(servicedAreas).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertJobLogPhotoSchema = createInsertSchema(jobLogPhotos).omit({
+  id: true,
+  uploadedAt: true,
+}).extend({
+  url: z.string().url(),
+  caption: z.string().max(200).optional().nullable(),
 });
 
 export const loginSchema = z.object({
@@ -376,3 +395,5 @@ export type InsertSiteLocation = z.infer<typeof insertSiteLocationSchema>;
 export type SiteLocation = typeof siteLocations.$inferSelect;
 export type InsertServicedArea = z.infer<typeof insertServicedAreaSchema>;
 export type ServicedArea = typeof servicedAreas.$inferSelect;
+export type InsertJobLogPhoto = z.infer<typeof insertJobLogPhotoSchema>;
+export type JobLogPhoto = typeof jobLogPhotos.$inferSelect;

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=800, initial-scale=1.0">
+    <title>PDF Report Mockup - with Photos</title>
+    <style>
+        :root {
+            --brand-green: #22c55e;
+            --text-main: #333333;
+            --border-color: #dddddd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif; /* Standard PDF safe font */
+        }
+
+        body {
+            background-color: #f0f0f0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .pdf-page {
+            width: 8.5in;
+            height: 11in;
+            background: white;
+            padding: 0.75in;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+            color: var(--text-main);
+        }
+
+        /* Standard PDF Header */
+        .pdf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .pdf-title h1 {
+            font-size: 24px;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        
+        .pdf-title p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .divider {
+            height: 3px;
+            background-color: var(--brand-green);
+            margin-bottom: 30px;
+        }
+
+        /* Report Info */
+        .report-info {
+            margin-bottom: 30px;
+        }
+        .report-info h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #111;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 11px;
+        }
+        .info-row {
+            display: flex;
+        }
+        .info-label {
+            width: 100px;
+            font-weight: bold;
+        }
+
+        /* Data Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            margin-bottom: 40px;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            text-align: left;
+            padding: 8px;
+            border-bottom: 2px solid #ccc;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        .col-date { width: 12%; }
+        .col-tech { width: 12%; }
+        .col-loc { width: 20%; }
+        .col-work { width: 36%; }
+        .col-photos { width: 20%; }
+
+        /* PDF Photo Layout (Inline Table Approach) */
+        .pdf-thumbnail {
+            width: 100%;
+            height: 60px;
+            background: #eee;
+            border: 1px solid #ccc;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: #999;
+        }
+
+        .photo-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .photo-item p {
+            font-size: 8px;
+            line-height: 1.2;
+            color: #555;
+            font-style: italic;
+        }
+
+        /* Appendix / Separate Page Approach (Alternative) */
+        .appendix-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ccc;
+            page-break-before: auto; /* Demonstration purposes */
+        }
+
+        .appendix-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .appendix-photo {
+            border: 1px solid #ddd;
+            padding: 8px;
+            background: #fafafa;
+        }
+
+        .apx-img {
+            width: 100%;
+            height: 120px;
+            background: #eee;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .apx-caption {
+            font-size: 9px;
+            line-height: 1.3;
+        }
+        .apx-meta {
+            font-size: 8px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 0.75in;
+            left: 0.75in;
+            right: 0.75in;
+            text-align: center;
+            font-size: 9px;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="pdf-page">
+        
+        <div class="pdf-header">
+            <div class="pdf-title">
+                <h1>Absolute Pest Services</h1>
+                <p>Professional Pest Management & Prevention</p>
+            </div>
+            <div style="text-align: right; font-size: 12px; color: #666;">
+                Date Generated: Oct 16, 2026
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="report-info">
+            <h2>Service Report</h2>
+            <div class="info-grid">
+                <div class="info-row">
+                    <div class="info-label">Customer:</div>
+                    <div>Smith Residence</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Date Range:</div>
+                    <div>Oct 1, 2026 - Oct 15, 2026</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Total Visits:</div>
+                    <div>1</div>
+                </div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-date">Date</th>
+                    <th class="col-tech">Technician</th>
+                    <th class="col-loc">Location / Area</th>
+                    <th class="col-work">Work Performed</th>
+                    <th class="col-photos">Attached Photos</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>10/15/2026</td>
+                    <td>Frank</td>
+                    <td>Main House<br><span style="color:#666">Exterior, Kitchen</span></td>
+                    <td>
+                        Performed standard exterior perimeter spray and checked all interior bait stations. Found activity in station 3 and noted some water damage near the north foundation wall.
+                        <br><br>
+                        <strong>Chemical Used:</strong> Termidor SC<br>
+                        <strong>Stations Checked:</strong> 12
+                    </td>
+                    <td>
+                        <!-- Inline Thumbnail Approach -->
+                        <div class="photo-stack">
+                            <div class="photo-item">
+                                <div class="pdf-thumbnail">[Thumbnail 1]</div>
+                                <p>Water pooling near north wall</p>
+                            </div>
+                            <div class="photo-item">
+                                <div class="pdf-thumbnail">[Thumbnail 2]</div>
+                                <p>Bait station 3 hit</p>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Alternative: Appendix Section (Good if many photos) -->
+        <div class="appendix-title">Photo Appendix - Smith Residence (10/15/2026)</div>
+        <div class="appendix-grid">
+            <div class="appendix-photo">
+                <div class="apx-img">[High-Res Photo 1]</div>
+                <div class="apx-caption">Water pooling near north foundation wall</div>
+                <div class="apx-meta">Log ID: 402 • Taken by: Frank</div>
+            </div>
+            <div class="appendix-photo">
+                <div class="apx-img">[High-Res Photo 2]</div>
+                <div class="apx-caption">Bait station 3 showing signs of termite hit</div>
+                <div class="apx-meta">Log ID: 402 • Taken by: Frank</div>
+            </div>
+            <div class="appendix-photo">
+                <div class="apx-img">[High-Res Photo 3]</div>
+                <div class="apx-caption">Replaced bait cartridge with new unit</div>
+                <div class="apx-meta">Log ID: 402 • Taken by: Frank</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Absolute Pest Services • (555) 123-4567 • support@absolutepestservices.com • absolutepestservices.com
+        </div>
+
+    </div>
+
+</body>
+</html>

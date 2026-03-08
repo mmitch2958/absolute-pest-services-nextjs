@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { FieldNav } from "@/components/field-nav";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, Camera, ImagePlus, X, AlertCircle, RefreshCw } from "lucide-react";
 
 const NEW_OPTION = "__NEW__";
 
@@ -40,6 +40,28 @@ const jobLogSchema = z.object({
 
 type JobLogFormData = z.infer<typeof jobLogSchema>;
 
+// ─── Photo Upload Types ───────────────────────────────────────────────────────
+type PhotoStatus = "pending" | "uploading" | "done" | "error";
+
+interface PhotoItem {
+  id: string; // local UUID
+  file: File;
+  localUrl: string; // blob URL for preview
+  cloudUrl?: string; // final Cloudinary URL
+  caption: string;
+  status: PhotoStatus;
+  progress: number;
+  errorMessage?: string;
+}
+
+// ─── Photo Validation ─────────────────────────────────────────────────────────
+function validatePhoto(file: File): string | null {
+  if (!file.type.startsWith("image/")) return "Only image files are allowed";
+  if (file.size > 5 * 1024 * 1024) return "File must be under 5 MB";
+  return null;
+}
+
+// ─── SmartField Component ─────────────────────────────────────────────────────
 interface SmartFieldProps {
   label: string;
   newLabel: string;
@@ -124,7 +146,6 @@ async function reAuthField(): Promise<boolean> {
   const stored = localStorage.getItem("fieldEmployee");
   if (!stored) return false;
   try {
-    const emp = JSON.parse(stored);
     const pin = localStorage.getItem("fieldPin");
     if (!pin) return false;
     const res = await apiRequest("POST", "/api/field/auth", { pin });
@@ -135,16 +156,217 @@ async function reAuthField(): Promise<boolean> {
   }
 }
 
+// ─── PhotoUploadSection Component ────────────────────────────────────────────
+interface PhotoUploadSectionProps {
+  photos: PhotoItem[];
+  onAddPhotos: (files: File[]) => void;
+  onRemovePhoto: (id: string) => void;
+  onCaptionChange: (id: string, caption: string) => void;
+  onRetryPhoto: (id: string) => void;
+}
+
+function PhotoUploadSection({ photos, onAddPhotos, onRemovePhoto, onCaptionChange, onRetryPhoto }: PhotoUploadSectionProps) {
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const MAX_PHOTOS = 5;
+  const atMax = photos.length >= MAX_PHOTOS;
+  const liveRegionRef = useRef<HTMLDivElement>(null);
+
+  const announceToScreenReader = (msg: string) => {
+    if (liveRegionRef.current) {
+      liveRegionRef.current.textContent = msg;
+    }
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const available = MAX_PHOTOS - photos.length;
+    const toAdd = files.slice(0, available);
+    onAddPhotos(toAdd);
+    // Reset the input so the same file can be reselected after error
+    e.target.value = "";
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* Aria live region for screen reader announcements */}
+      <div
+        ref={liveRegionRef}
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      />
+
+      <FormLabel className="text-sm font-medium">
+        Photos
+        <span className="text-muted-foreground font-normal ml-1">(optional, up to 5)</span>
+      </FormLabel>
+
+      {/* Camera / Gallery Buttons — hidden at max */}
+      {!atMax && (
+        <div className="grid grid-cols-2 gap-3">
+          {/* Camera capture */}
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+            style={{ height: "88px" }}
+            aria-label="Take photo with camera"
+          >
+            <Camera className="w-7 h-7 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">Camera</span>
+          </button>
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            multiple
+            className="sr-only"
+            onChange={handleFileInput}
+            aria-label="Camera capture input"
+          />
+
+          {/* Gallery pick */}
+          <button
+            type="button"
+            onClick={() => galleryInputRef.current?.click()}
+            className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card hover:border-primary hover:bg-primary/5 transition-colors"
+            style={{ height: "88px" }}
+            aria-label="Choose photo from gallery"
+          >
+            <ImagePlus className="w-7 h-7 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">Gallery</span>
+          </button>
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="sr-only"
+            onChange={handleFileInput}
+            aria-label="Gallery photo input"
+          />
+        </div>
+      )}
+
+      {/* Horizontal scrolling photo strip */}
+      {photos.length > 0 && (
+        <div
+          className="flex gap-3 overflow-x-auto pb-2"
+          style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
+          role="list"
+          aria-label="Attached photos"
+        >
+          {photos.map((photo) => (
+            <div
+              key={photo.id}
+              role="listitem"
+              className="flex-shrink-0 relative rounded-lg overflow-hidden"
+              style={{ width: "140px", scrollSnapAlign: "start" }}
+            >
+              {/* Thumbnail */}
+              <div className="relative" style={{ height: "100px" }}>
+                <img
+                  src={photo.localUrl}
+                  alt={photo.caption || "Job photo"}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+
+                {/* Uploading overlay */}
+                {photo.status === "uploading" && (
+                  <div className="absolute inset-0 rounded-lg bg-black/60 flex flex-col items-center justify-center gap-1">
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                    <span className="text-white text-xs">Uploading…</span>
+                    {/* Progress bar */}
+                    <div className="w-4/5 h-1 bg-white/30 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-green-400 rounded-full transition-all duration-300"
+                        style={{ width: `${photo.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Error overlay */}
+                {photo.status === "error" && (
+                  <div className="absolute inset-0 rounded-lg bg-black/60 flex flex-col items-center justify-center gap-1 p-1">
+                    <AlertCircle className="w-5 h-5 text-red-400" />
+                    <span className="text-red-300 text-xs text-center leading-tight">
+                      {photo.errorMessage || "Upload failed"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        announceToScreenReader("Retrying upload");
+                        onRetryPhoto(photo.id);
+                      }}
+                      className="text-xs text-green-400 underline flex items-center gap-1 mt-0.5"
+                    >
+                      <RefreshCw className="w-3 h-3" /> Retry
+                    </button>
+                  </div>
+                )}
+
+                {/* Remove button — hidden while uploading */}
+                {photo.status !== "uploading" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      announceToScreenReader(`Removed photo${photo.caption ? ` of ${photo.caption}` : ""}`);
+                      onRemovePhoto(photo.id);
+                    }}
+                    className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors"
+                    aria-label={`Remove photo${photo.caption ? ` of ${photo.caption}` : ""}`}
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Caption input */}
+              <input
+                type="text"
+                value={photo.caption}
+                onChange={(e) => onCaptionChange(photo.id, e.target.value)}
+                placeholder="Add caption…"
+                maxLength={200}
+                className="w-full mt-1.5 px-2 py-1 text-xs rounded-md border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                aria-label="Photo caption"
+                style={{ minHeight: "28px" }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {atMax && (
+        <p className="text-xs text-muted-foreground">
+          Maximum 5 photos reached.
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─── Main FieldLog Component ──────────────────────────────────────────────────
 export default function FieldLog() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [employee, setEmployee] = useState<any>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedLogId, setSubmittedLogId] = useState<number | null>(null);
 
   const [customerAddingNew, setCustomerAddingNew] = useState(false);
   const [locationAddingNew, setLocationAddingNew] = useState(false);
   const [areaAddingNew, setAreaAddingNew] = useState(false);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, any>>({});
+
+  // Photo state
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [photoUploadsPending, setPhotoUploadsPending] = useState(false);
 
   const { data: customFieldsData } = useQuery<{ success: boolean; fields: CustomFieldDef[] }>({
     queryKey: ["/api/field/custom-fields"],
@@ -168,12 +390,7 @@ export default function FieldLog() {
   const { data: suggestions } = useQuery<SuggestionsData>({
     queryKey: ["/api/field/suggestions"],
     enabled: !!employee,
-    retry: async (_count, error: any) => {
-      if (error?.message?.includes("401")) {
-        return await reAuthField();
-      }
-      return false;
-    },
+    retry: false,
   });
 
   const form = useForm<JobLogFormData>({
@@ -188,10 +405,10 @@ export default function FieldLog() {
     },
   });
 
-  const customers = suggestions?.customers || [];
-  const customerLocations = suggestions?.customerLocations || {};
-  const locationAreas = suggestions?.locationAreas || {};
-  const clients = suggestions?.clients || [];
+  const customers: string[] = suggestions?.customers || [];
+  const customerLocations: Record<string, string[]> = suggestions?.customerLocations || {};
+  const locationAreas: Record<string, string[]> = suggestions?.locationAreas || {};
+  const clients: Array<{ id: number; name: string; address: string | null }> = suggestions?.clients || [];
 
   const selectedCustomer = form.watch("customerName");
   const selectedLocation = form.watch("siteLocation");
@@ -214,6 +431,149 @@ export default function FieldLog() {
       }
     }
   }, [suggestions]);
+
+  // ─── Photo Handlers ─────────────────────────────────────────────────────────
+
+  const uploadSinglePhoto = useCallback(async (photoId: string, file: File, logId: number) => {
+    // Step 1: Get signature
+    let signData: { signature: string; timestamp: number; folder: string; cloudName: string; apiKey: string };
+    try {
+      const signRes = await apiRequest("POST", "/api/field/photos/sign");
+      signData = await signRes.json();
+    } catch {
+      setPhotos(prev => prev.map(p =>
+        p.id === photoId ? { ...p, status: "error" as PhotoStatus, errorMessage: "Failed to get upload signature" } : p
+      ));
+      return;
+    }
+
+    // Step 2: Upload directly to Cloudinary
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("api_key", signData.apiKey);
+    formData.append("timestamp", String(signData.timestamp));
+    formData.append("signature", signData.signature);
+    formData.append("folder", signData.folder);
+    formData.append("allowed_formats", "jpg,jpeg,png,webp,heic");
+
+    let cloudUrl: string;
+    try {
+      // Use XHR to track progress
+      cloudUrl = await new Promise<string>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `https://api.cloudinary.com/v1_1/${signData.cloudName}/image/upload`);
+
+        xhr.upload.onprogress = (evt) => {
+          if (evt.lengthComputable) {
+            const pct = Math.round((evt.loaded / evt.total) * 90); // cap at 90 until done
+            setPhotos(prev => prev.map(p =>
+              p.id === photoId ? { ...p, progress: pct } : p
+            ));
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const result = JSON.parse(xhr.responseText);
+            resolve(result.secure_url);
+          } else {
+            reject(new Error(`Cloudinary upload failed: ${xhr.status}`));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error("Network error during upload"));
+        xhr.send(formData);
+      });
+    } catch (err: any) {
+      setPhotos(prev => prev.map(p =>
+        p.id === photoId ? { ...p, status: "error" as PhotoStatus, errorMessage: err.message || "Upload failed" } : p
+      ));
+      return;
+    }
+
+    // Step 3: Save URL to our database
+    try {
+      const caption = photos.find(p => p.id === photoId)?.caption ?? "";
+      await apiRequest("POST", `/api/field/job-logs/${logId}/photos`, {
+        url: cloudUrl,
+        caption: caption || null,
+      });
+      setPhotos(prev => prev.map(p =>
+        p.id === photoId ? { ...p, status: "done" as PhotoStatus, cloudUrl, progress: 100 } : p
+      ));
+    } catch {
+      setPhotos(prev => prev.map(p =>
+        p.id === photoId ? { ...p, status: "error" as PhotoStatus, cloudUrl, errorMessage: "Saved to Cloudinary but failed to save record" } : p
+      ));
+    }
+  }, [photos]);
+
+  const handleAddPhotos = useCallback((files: File[]) => {
+    const newPhotos: PhotoItem[] = [];
+    const errors: string[] = [];
+
+    for (const file of files) {
+      const err = validatePhoto(file);
+      if (err) {
+        errors.push(`${file.name}: ${err}`);
+        continue;
+      }
+      newPhotos.push({
+        id: crypto.randomUUID(),
+        file,
+        localUrl: URL.createObjectURL(file),
+        caption: "",
+        status: "pending",
+        progress: 0,
+      });
+    }
+
+    if (errors.length > 0) {
+      toast({ title: "Invalid file(s)", description: errors.join("\n"), variant: "destructive" });
+    }
+
+    if (newPhotos.length > 0) {
+      setPhotos(prev => [...prev, ...newPhotos].slice(0, 5));
+    }
+  }, [toast]);
+
+  const handleRemovePhoto = useCallback((id: string) => {
+    setPhotos(prev => {
+      const photo = prev.find(p => p.id === id);
+      if (photo?.localUrl) URL.revokeObjectURL(photo.localUrl);
+      return prev.filter(p => p.id !== id);
+    });
+  }, []);
+
+  const handleCaptionChange = useCallback((id: string, caption: string) => {
+    setPhotos(prev => prev.map(p => p.id === id ? { ...p, caption } : p));
+  }, []);
+
+  const handleRetryPhoto = useCallback((id: string) => {
+    if (!submittedLogId) return;
+    const photo = photos.find(p => p.id === id);
+    if (!photo) return;
+    setPhotos(prev => prev.map(p =>
+      p.id === id ? { ...p, status: "uploading", progress: 0, errorMessage: undefined } : p
+    ));
+    uploadSinglePhoto(id, photo.file, submittedLogId);
+  }, [photos, submittedLogId, uploadSinglePhoto]);
+
+  // After log is created, upload all pending photos
+  const uploadPendingPhotos = useCallback(async (logId: number) => {
+    const pending = photos.filter(p => p.status === "pending");
+    if (pending.length === 0) return;
+
+    setPhotoUploadsPending(true);
+    setPhotos(prev => prev.map(p =>
+      p.status === "pending" ? { ...p, status: "uploading" as PhotoStatus, progress: 0 } : p
+    ));
+
+    await Promise.all(pending.map(p => uploadSinglePhoto(p.id, p.file, logId)));
+    setPhotoUploadsPending(false);
+  }, [photos, uploadSinglePhoto]);
+
+  // ─── Form Submit ─────────────────────────────────────────────────────────────
 
   const submitMutation = useMutation({
     mutationFn: async (data: JobLogFormData) => {
@@ -254,12 +614,22 @@ export default function FieldLog() {
       }
       return response.json();
     },
-    onSuccess: () => {
-      setSubmitted(true);
+    onSuccess: async (result) => {
+      const logId: number = result.jobLog?.id;
+      setSubmittedLogId(logId);
+
+      // Upload photos if any were added
+      if (photos.length > 0 && logId) {
+        await uploadPendingPhotos(logId);
+      }
+
       queryClient.invalidateQueries({ queryKey: ["/api/field/job-logs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/field/suggestions"] });
+      setSubmitted(true);
+
       setTimeout(() => {
         setSubmitted(false);
+        setSubmittedLogId(null);
         const first = customers[0] || "";
         const matchedClient = clients.find(c => c.name === first);
         form.reset({
@@ -274,7 +644,10 @@ export default function FieldLog() {
         setLocationAddingNew(false);
         setAreaAddingNew(false);
         setCustomFieldValues({});
-      }, 2000);
+        // Clean up blob URLs and reset photos
+        photos.forEach(p => URL.revokeObjectURL(p.localUrl));
+        setPhotos([]);
+      }, 2500);
     },
     onError: (error: any) => {
       toast({ title: "Error", description: error.message || "Failed to submit job log", variant: "destructive" });
@@ -288,17 +661,32 @@ export default function FieldLog() {
   if (!employee) return null;
 
   if (submitted) {
+    const hasPhotos = photos.length > 0;
+    const allDone = photos.every(p => p.status === "done" || p.status === "error");
+    const anyError = photos.some(p => p.status === "error");
+
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4 pb-20">
         <div className="text-center">
           <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">Job Logged!</h2>
           <p className="text-muted-foreground">Entry saved successfully</p>
+          {hasPhotos && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {anyError
+                ? "Some photos failed to upload."
+                : photoUploadsPending
+                  ? "Uploading photos…"
+                  : `${photos.filter(p => p.status === "done").length} photo(s) attached`}
+            </p>
+          )}
         </div>
         <FieldNav canManageEmployees={employee.canManageEmployees} />
       </div>
     );
   }
+
+  const isSubmitting = submitMutation.isPending || photoUploadsPending;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -408,6 +796,15 @@ export default function FieldLog() {
                   )}
                 />
 
+                {/* ── Photo Upload Section (Leia spec: below Work Performed) ── */}
+                <PhotoUploadSection
+                  photos={photos}
+                  onAddPhotos={handleAddPhotos}
+                  onRemovePhoto={handleRemovePhoto}
+                  onCaptionChange={handleCaptionChange}
+                  onRetryPhoto={handleRetryPhoto}
+                />
+
                 {customFields.map((cf) => (
                   <div key={cf.id} className="space-y-2">
                     <FormLabel>
@@ -491,12 +888,12 @@ export default function FieldLog() {
                 <Button
                   type="submit"
                   className="w-full h-14 text-lg font-semibold"
-                  disabled={submitMutation.isPending}
+                  disabled={isSubmitting}
                 >
-                  {submitMutation.isPending ? (
+                  {isSubmitting ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Submitting...
+                      {photoUploadsPending ? "Uploading Photos…" : "Submitting…"}
                     </>
                   ) : (
                     "Submit Job Log"

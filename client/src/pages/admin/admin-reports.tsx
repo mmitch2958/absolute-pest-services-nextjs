@@ -8,7 +8,175 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { generateJobReport } from "@/lib/pdf-report";
-import { FileDown, Search, Loader2, ClipboardList } from "lucide-react";
+import { FileDown, Search, Loader2, ClipboardList, Camera, ChevronDown, ChevronUp, X, ChevronLeft, ChevronRight } from "lucide-react";
+
+// ─── Photo types ──────────────────────────────────────────────────────────────
+interface JobLogPhoto {
+  id: number;
+  jobLogId: number;
+  url: string;
+  caption: string | null;
+  uploadedAt: string;
+}
+
+// ─── Admin Lightbox ───────────────────────────────────────────────────────────
+interface AdminLightboxProps {
+  photos: JobLogPhoto[];
+  initialIndex: number;
+  onClose: () => void;
+}
+
+function AdminLightbox({ photos, initialIndex, onClose }: AdminLightboxProps) {
+  const [current, setCurrent] = useState(initialIndex);
+  const photo = photos[current];
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Photo viewer"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 text-white p-2 rounded-full hover:bg-white/20 transition-colors"
+        aria-label="Close"
+      >
+        <X className="w-6 h-6" />
+      </button>
+
+      <div className="relative max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
+        {photos.length > 1 && (
+          <button
+            onClick={() => setCurrent(i => (i - 1 + photos.length) % photos.length)}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 text-white p-2 rounded-full bg-black/40 hover:bg-black/60 transition-colors"
+            aria-label="Previous photo"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        )}
+
+        <img
+          src={photo.url}
+          alt={photo.caption || `Photo ${current + 1}`}
+          className="w-full max-h-[80vh] object-contain rounded-lg"
+        />
+
+        {photos.length > 1 && (
+          <button
+            onClick={() => setCurrent(i => (i + 1) % photos.length)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 text-white p-2 rounded-full bg-black/40 hover:bg-black/60 transition-colors"
+            aria-label="Next photo"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        )}
+
+        {photo.caption && (
+          <p className="text-white/80 text-sm text-center mt-3">{photo.caption}</p>
+        )}
+        <p className="text-white/40 text-xs text-center mt-1">
+          {current + 1} / {photos.length}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── AdminPhotoRow — expandable photo grid for a log row ──────────────────────
+interface AdminPhotoRowProps {
+  logId: number;
+}
+
+function AdminPhotoRow({ logId }: AdminPhotoRowProps) {
+  const [expanded, setExpanded] = useState(false);
+  const [lightbox, setLightbox] = useState<{ photos: JobLogPhoto[]; index: number } | null>(null);
+
+  const { data, isLoading } = useQuery<{ success: boolean; photos: JobLogPhoto[] }>({
+    queryKey: ["/api/admin/job-logs", logId, "photos"],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/job-logs/${logId}/photos`, { credentials: "include" });
+      return res.json();
+    },
+    enabled: expanded,
+  });
+
+  // Do a lightweight count-only check to show badge
+  const { data: countData } = useQuery<{ success: boolean; photos: JobLogPhoto[] }>({
+    queryKey: ["/api/admin/job-logs", logId, "photos", "count"],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/job-logs/${logId}/photos`, { credentials: "include" });
+      return res.json();
+    },
+  });
+
+  const photoCount = countData?.photos?.length ?? 0;
+  const photos = data?.photos || [];
+
+  if (photoCount === 0) return null;
+
+  return (
+    <>
+      {/* Toggle button */}
+      <button
+        type="button"
+        onClick={() => setExpanded(v => !v)}
+        className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <Camera className="w-3.5 h-3.5" />
+        <span>{photoCount} Photo{photoCount !== 1 ? "s" : ""}</span>
+        {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+
+      {/* Photo grid */}
+      {expanded && (
+        <div className="mt-2">
+          {isLoading ? (
+            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+          ) : (
+            <div
+              className="grid gap-2"
+              style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}
+            >
+              {photos.map((photo, idx) => (
+                <div key={photo.id} className="rounded-md overflow-hidden border border-border">
+                  <button
+                    type="button"
+                    onClick={() => setLightbox({ photos, index: idx })}
+                    className="w-full focus:outline-none focus:ring-2 focus:ring-primary"
+                    aria-label={photo.caption ? `View: ${photo.caption}` : `View photo ${idx + 1}`}
+                  >
+                    <img
+                      src={photo.url}
+                      alt={photo.caption || `Photo ${idx + 1}`}
+                      className="w-full object-cover"
+                      style={{ aspectRatio: "4 / 3" }}
+                    />
+                  </button>
+                  {photo.caption && (
+                    <p className="px-2 py-1 text-xs text-muted-foreground truncate">{photo.caption}</p>
+                  )}
+                  <p className="px-2 pb-1 text-xs text-muted-foreground/60">
+                    {new Date(photo.uploadedAt).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {lightbox && (
+        <AdminLightbox
+          photos={lightbox.photos}
+          initialIndex={lightbox.index}
+          onClose={() => setLightbox(null)}
+        />
+      )}
+    </>
+  );
+}
 
 export function AdminReports() {
   const { toast } = useToast();
@@ -75,7 +243,9 @@ export function AdminReports() {
     setSearchTriggered(false);
   };
 
-  const handleDownloadPDF = () => {
+  const [pdfGenerating, setPdfGenerating] = useState(false);
+
+  const handleDownloadPDF = async () => {
     if (logs.length === 0) {
       toast({ title: "No data", description: "No job logs to include in the report", variant: "destructive" });
       return;
@@ -85,15 +255,22 @@ export function AdminReports() {
       ? selectedCustomer
       : "All Customers";
 
-    generateJobReport({
-      customerName: customerLabel,
-      dateFrom: dateFrom || "Start",
-      dateTo: dateTo || new Date().toISOString().split("T")[0],
-      logs,
-      employees: employees.map((e: any) => ({ id: e.id, name: e.name })),
-    });
-
-    toast({ title: "PDF Downloaded", description: "Report has been saved to your device" });
+    setPdfGenerating(true);
+    try {
+      await generateJobReport({
+        customerName: customerLabel,
+        dateFrom: dateFrom || "Start",
+        dateTo: dateTo || new Date().toISOString().split("T")[0],
+        logs,
+        employees: employees.map((e: any) => ({ id: e.id, name: e.name })),
+      });
+      toast({ title: "PDF Downloaded", description: "Report has been saved to your device" });
+    } catch (err) {
+      console.error("PDF generation error:", err);
+      toast({ title: "PDF Error", description: "Failed to generate report", variant: "destructive" });
+    } finally {
+      setPdfGenerating(false);
+    }
   };
 
   const employeeMap = new Map(employees.map((e: any) => [e.id, e.name]));
@@ -183,9 +360,12 @@ export function AdminReports() {
               <Search className="w-4 h-4 mr-2" />
               Search
             </Button>
-            <Button variant="outline" onClick={handleDownloadPDF} disabled={logs.length === 0}>
-              <FileDown className="w-4 h-4 mr-2" />
-              Download PDF
+            <Button variant="outline" onClick={handleDownloadPDF} disabled={logs.length === 0 || pdfGenerating}>
+              {pdfGenerating ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating…</>
+              ) : (
+                <><FileDown className="w-4 h-4 mr-2" />Download PDF</>
+              )}
             </Button>
             <Button variant="ghost" onClick={handleClear}>
               Clear Filters
@@ -244,6 +424,7 @@ export function AdminReports() {
                               ))}
                             </div>
                           )}
+                          <AdminPhotoRow logId={log.id} />
                         </TableCell>
                       </TableRow>
                     ))}

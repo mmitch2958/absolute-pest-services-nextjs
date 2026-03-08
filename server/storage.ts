@@ -1,4 +1,4 @@
-import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea } from "@shared/schema";
+import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, jobLogPhotos, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type JobLogPhoto, type InsertJobLogPhoto } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gte, lte, ilike } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -112,6 +112,11 @@ export interface IStorage {
   createServicedArea(area: InsertServicedArea): Promise<ServicedArea>;
   updateServicedArea(id: number, updates: Partial<InsertServicedArea>): Promise<ServicedArea>;
   deleteServicedArea(id: number): Promise<void>;
+
+  // Job Log Photo operations
+  createJobLogPhoto(data: InsertJobLogPhoto): Promise<JobLogPhoto>;
+  getJobLogPhotos(jobLogId: number): Promise<JobLogPhoto[]>;
+  deleteJobLogPhoto(id: number, jobLogId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -631,6 +636,35 @@ export class DatabaseStorage implements IStorage {
 
   async deleteServicedArea(id: number): Promise<void> {
     await db.delete(servicedAreas).where(eq(servicedAreas.id, id));
+  }
+
+  // Job Log Photo operations
+  async createJobLogPhoto(data: InsertJobLogPhoto): Promise<JobLogPhoto> {
+    // Enforce 5-photo limit before insert
+    const existing = await db
+      .select()
+      .from(jobLogPhotos)
+      .where(eq(jobLogPhotos.jobLogId, data.jobLogId));
+    if (existing.length >= 5) {
+      throw new Error("MAX_PHOTOS_EXCEEDED");
+    }
+    const [photo] = await db.insert(jobLogPhotos).values(data).returning();
+    return photo;
+  }
+
+  async getJobLogPhotos(jobLogId: number): Promise<JobLogPhoto[]> {
+    return db
+      .select()
+      .from(jobLogPhotos)
+      .where(eq(jobLogPhotos.jobLogId, jobLogId))
+      .orderBy(jobLogPhotos.uploadedAt);
+  }
+
+  async deleteJobLogPhoto(id: number, jobLogId: number): Promise<void> {
+    // jobLogId scoping prevents cross-log deletion
+    await db
+      .delete(jobLogPhotos)
+      .where(and(eq(jobLogPhotos.id, id), eq(jobLogPhotos.jobLogId, jobLogId)));
   }
 }
 
