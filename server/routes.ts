@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema, insertServiceContractSchema, insertJobLogPhotoSchema, insertInvoiceSchema, insertInvoiceLineItemSchema, type InvoiceStatus, jobLogs as jobLogsTable, geocache, dailyRoutes, type RouteStop } from "@shared/schema";
+import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema, insertServiceContractSchema, insertJobLogPhotoSchema, insertInvoiceSchema, insertInvoiceLineItemSchema, insertJobScheduleLogSchema, type InvoiceStatus, jobLogs as jobLogsTable, geocache, dailyRoutes, jobScheduleLogs, type RouteStop } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -4092,6 +4092,342 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error downloading portal invoice PDF:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // ==========================================
+  // Admin Job Scheduling Routes (SC-SCHEDULING-001)
+  // ==========================================
+
+  // GET /api/admin/scheduled-jobs - List scheduled jobs (admin)
+  app.get("/api/admin/scheduled-jobs", requireAdmin, async (req, res) => {
+    try {
+      const filters: any = {};
+      if (req.query.employeeId) filters.employeeId = parseInt(req.query.employeeId as string);
+      if (req.query.dateFrom) filters.dateFrom = new Date(req.query.dateFrom as string);
+      if (req.query.dateTo) filters.dateTo = new Date(req.query.dateTo as string);
+      if (req.query.status) filters.status = req.query.status as string;
+
+      const jobs = await storage.getScheduledJobs(filters);
+      
+      // Fetch employee names for each job
+      const employeeIds = [...new Set(jobs.map(j => j.employeeId))];
+      const employees = await storage.getFieldEmployees();
+      const employeeMap = new Map(employees.map(e => [e.id, e.name]));
+
+      const jobsWithEmployees = jobs.map(job => ({
+        ...job,
+        employeeName: employeeMap.get(job.employeeId) || "Unknown",
+      }));
+
+      res.json({ success: true, scheduledJobs: jobsWithEmployees });
+    } catch (error) {
+      console.error("Error fetching scheduled jobs:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/scheduled-jobs/:id - Get single scheduled job with logs
+  app.get("/api/admin/scheduled-jobs/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const job = await storage.getJobLog(id);
+      
+      if (!job) {
+        return res.status(404).json({ success: false, message: "Job not found" });
+      }
+
+      const employees = await storage.getFieldEmployees();
+      const employeeMap = new Map(employees.map(e => [e.id, e.name]));
+      
+      const scheduleLogs = await storage.getJobScheduleLogs(id);
+
+      res.json({ 
+        success: true, 
+        job: {
+          ...job,
+          employeeName: employeeMap.get(job.employeeId) || "Unknown",
+        },
+        scheduleLogs 
+      });
+    } catch (error) {
+      console.error("Error fetching scheduled job:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/admin/scheduled-jobs - Create new scheduled job
+  app.post("/api/admin/scheduled-jobs", requireAdmin, async (req, res) => {
+    try {
+      const { customerName, clientId, siteLocation, siteAddress, servicedArea, workPerformed, jobDate, employeeId, priority, adminNotes, scheduledEndTime } = req.body;
+
+      if (!customerName || !siteLocation || !servicedArea || !jobDate || !employeeId) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+      }
+
+      const job = await storage.createScheduledJob({
+        employeeId,
+        customerName,
+        clientId: clientId || null,
+        siteLocation,
+        siteAddress: siteAddress || "",
+        servicedArea,
+        workPerformed: workPerformed || "",
+        jobDate: new Date(jobDate),
+        priority: priority || "medium",
+        adminNotes: adminNotes || null,
+        scheduledBy: req.session.userId,
+        scheduledEndTime: scheduledEndTime ? new Date(scheduledEndTime) : null,
+      });
+
+      res.json({ success: true, message: "Scheduled job created", job });
+    } catch (error) {
+      console.error("Error creating scheduled job:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // PATCH /api/admin/scheduled-jobs/:id - Update scheduled job (priority, notes, etc)
+  app.patch("/api/admin/scheduled-jobs/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { priority, adminNotes, scheduledEndTime, employeeId, jobDate } = req.body;
+
+      const updates: any = {};
+      if (priority !== undefined) updates.priority = priority;
+      if (adminNotes !== undefined) updates.adminNotes = adminNotes;
+      if (scheduledEndTime !== undefined) updates.scheduledEndTime = scheduledEndTime ? new Date(scheduledEndTime) : null;
+      if (employeeId !== undefined) updates.employeeId = employeeId;
+      if (jobDate !== undefined) updates.jobDate = new Date(jobDate);
+
+      const job = await storage.updateJobScheduling(id, updates, req.session.userId);
+      res.json({ success: true, message: "Job updated", job });
+    } catch (error) {
+      console.error("Error updating scheduled job:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/admin/scheduled-jobs/:id/assign - Assign job to different tech
+  app.post("/api/admin/scheduled-jobs/:id/assign", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { employeeId } = req.body;
+
+      if (!employeeId) {
+        return res.status(400).json({ success: false, message: "employeeId is required" });
+      }
+
+      const job = await storage.assignJobToTech(id, employeeId, req.session.userId);
+      res.json({ success: true, message: "Job assigned to tech", job });
+    } catch (error) {
+      console.error("Error assigning job:", error);
+      if (error instanceof Error) {
+        return res.status(400).json({ success: false, message: error.message });
+      }
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/admin/scheduled-jobs/:id/reschedule - Reschedule job
+  app.post("/api/admin/scheduled-jobs/:id/reschedule", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { jobDate, scheduledEndTime } = req.body;
+
+      if (!jobDate) {
+        return res.status(400).json({ success: false, message: "jobDate is required" });
+      }
+
+      const job = await storage.rescheduleJob(id, new Date(jobDate), req.session.userId);
+      
+      // Also update scheduledEndTime if provided
+      if (scheduledEndTime) {
+        await storage.updateJobScheduling(id, { scheduledEndTime: new Date(scheduledEndTime) }, req.session.userId);
+      }
+
+      res.json({ success: true, message: "Job rescheduled", job });
+    } catch (error) {
+      console.error("Error rescheduling job:", error);
+      if (error instanceof Error) {
+        return res.status(400).json({ success: false, message: error.message });
+      }
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/admin/scheduled-jobs/:id/cancel - Cancel scheduled job
+  app.post("/api/admin/scheduled-jobs/:id/cancel", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { reason } = req.body;
+
+      const job = await storage.cancelScheduledJob(id, req.session.userId, reason);
+      res.json({ success: true, message: "Job cancelled", job });
+    } catch (error) {
+      console.error("Error cancelling job:", error);
+      if (error instanceof Error) {
+        return res.status(400).json({ success: false, message: error.message });
+      }
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/scheduled-jobs/:id/logs - Get schedule audit logs
+  app.get("/api/admin/scheduled-jobs/:id/logs", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const logs = await storage.getJobScheduleLogs(id);
+      res.json({ success: true, logs });
+    } catch (error) {
+      console.error("Error fetching schedule logs:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // ==========================================
+  // Field Service - Scheduled Jobs Routes (SC-SCHEDULING-001)
+  // ==========================================
+
+  // GET /api/field/scheduled-jobs - Get today's scheduled jobs for field tech
+  app.get("/api/field/scheduled-jobs", requireFieldAuth, async (req, res) => {
+    try {
+      const employeeId = req.session.fieldEmployeeId;
+      const jobs = await storage.getTodaysScheduledJobs(employeeId);
+      res.json({ success: true, scheduledJobs: jobs });
+    } catch (error) {
+      console.error("Error fetching today's scheduled jobs:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/field/scheduled-jobs/:id/start - Start a scheduled job
+  app.post("/api/field/scheduled-jobs/:id/start", requireFieldAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const employeeId = req.session.fieldEmployeeId;
+
+      const job = await storage.startScheduledJob(id, employeeId);
+      res.json({ success: true, message: "Job started", job });
+    } catch (error) {
+      console.error("Error starting scheduled job:", error);
+      if (error instanceof Error) {
+        return res.status(400).json({ success: false, message: error.message });
+      }
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/field/scheduled-jobs/:id/complete - Complete a scheduled job
+  app.post("/api/field/scheduled-jobs/:id/complete", requireFieldAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const employeeId = req.session.fieldEmployeeId;
+      const { workPerformed } = req.body;
+
+      if (!workPerformed) {
+        return res.status(400).json({ success: false, message: "workPerformed is required" });
+      }
+
+      const job = await storage.completeScheduledJob(id, employeeId, workPerformed);
+      res.json({ success: true, message: "Job completed", job });
+    } catch (error) {
+      console.error("Error completing scheduled job:", error);
+      if (error instanceof Error) {
+        return res.status(400).json({ success: false, message: error.message });
+      }
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // ==========================================
+  // Offline Mode Routes (SC-OFFLINE-001)
+  // ==========================================
+
+  // Heartbeat endpoint - no auth required
+  app.get("/api/ping", (req, res) => {
+    res.json({ ok: true, timestamp: new Date().toISOString() });
+  });
+
+  // Batch sync endpoint for offline job logs
+  app.post("/api/field/sync", requireFieldAuth, async (req, res) => {
+    try {
+      const { jobLogs, clientTimestamp } = req.body;
+      const employeeId = req.session.fieldEmployeeId;
+
+      if (!Array.isArray(jobLogs) || jobLogs.length === 0) {
+        return res.status(400).json({ success: false, message: "No job logs provided" });
+      }
+
+      const results = [];
+      const now = new Date();
+
+      for (const log of jobLogs) {
+        try {
+          // Check for duplicate by localId
+          const existingLogs = await storage.getJobLogs({ employeeId });
+          const existing = existingLogs.find((l) => (l as any).localId === log.localId);
+
+          if (existing) {
+            // Duplicate - return existing server ID
+            results.push({
+              localId: log.localId,
+              serverId: existing.id,
+              status: "already_synced"
+            });
+            continue;
+          }
+
+          // Parse client timestamp for clock skew check
+          const clientCreatedAt = log.clientCreatedAt ? new Date(log.clientCreatedAt) : now;
+          const hoursDiff = Math.abs(now.getTime() - clientCreatedAt.getTime()) / (1000 * 60 * 60);
+          const needsAdminReview = hoursDiff > 48;
+
+          // Create the job log
+          const newLog = await storage.createJobLog({
+            employeeId,
+            customerName: log.customerName,
+            clientId: log.clientId || null,
+            siteLocation: log.siteLocation,
+            siteAddress: log.siteAddress || "",
+            servicedArea: log.servicedArea,
+            workPerformed: log.workPerformed,
+            jobDate: log.jobDate,
+            status: log.status || "completed",
+            customFields: log.customFields,
+            clientCreatedAt: log.clientCreatedAt,
+            serverReceivedAt: now.toISOString(),
+            needsAdminReview
+          });
+
+          // Store the localId for duplicate detection
+          if (newLog && (newLog as any).id) {
+            await storage.updateJobLog((newLog as any).id, { localId: log.localId });
+          }
+
+          results.push({
+            localId: log.localId,
+            serverId: (newLog as any)?.id,
+            status: "accepted"
+          });
+        } catch (logError) {
+          console.error("Error syncing job log:", logError);
+          results.push({
+            localId: log.localId,
+            status: "error",
+            error: logError instanceof Error ? logError.message : "Unknown error"
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        results,
+        processedAt: now.toISOString()
+      });
+    } catch (error) {
+      console.error("Error in batch sync:", error);
+      res.status(500).json({ success: false, message: "Sync failed", error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 

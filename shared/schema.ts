@@ -270,6 +270,29 @@ export const jobLogs = pgTable("job_logs", {
   jobDate: timestamp("job_date").notNull(),
   status: text("status").notNull().default("completed"), // scheduled, in_progress, completed, invoiced, paid
   customFields: jsonb("custom_fields"),
+  // Admin scheduling fields (SC-SCHEDULING-001)
+  priority: text("priority").default("medium"), // low, medium, high, urgent
+  adminNotes: text("admin_notes"), // Administrative notes for the job
+  scheduledBy: integer("scheduled_by").references(() => users.id), // Admin user who scheduled
+  scheduledEndTime: timestamp("scheduled_end_time"), // Expected end time
+  cancelledAt: timestamp("cancelled_at"), // When job was cancelled
+  cancelledBy: integer("cancelled_by").references(() => users.id), // Admin who cancelled
+  // Offline sync fields
+  localId: text("local_id"), // Client-generated UUID for duplicate detection
+  clientCreatedAt: timestamp("client_created_at"), // Timestamp from client device
+  serverReceivedAt: timestamp("server_received_at"), // Server clock when received
+  needsAdminReview: boolean("needs_admin_review").default(false), // Clock skew > 48h
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Job Schedule Logs - Audit trail for scheduling actions (SC-SCHEDULING-001)
+export const jobScheduleLogs = pgTable("job_schedule_logs", {
+  id: serial("id").primaryKey(),
+  jobLogId: integer("job_log_id").notNull().references(() => jobLogs.id, { onDelete: "cascade" }),
+  action: text("action").notNull(), // created, assigned, rescheduled, started, completed, cancelled
+  performedBy: integer("performed_by").references(() => users.id), // Admin who performed action
+  previousValue: jsonb("previous_value"), // JSON of previous values
+  newValue: jsonb("new_value"), // JSON of new values
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -370,6 +393,20 @@ export const insertFieldEmployeeSchema = createInsertSchema(fieldEmployees).omit
 });
 
 export const insertJobLogSchema = createInsertSchema(jobLogs).omit({
+  id: true,
+  createdAt: true,
+  scheduledBy: true,
+  cancelledAt: true,
+  cancelledBy: true,
+}).extend({
+  scheduledBy: z.number().int().positive().optional().nullable(),
+  cancelledBy: z.number().int().positive().optional().nullable(),
+  jobDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  scheduledEndTime: z.union([z.date(), z.string(), z.null()]).transform(val => val === null ? null : typeof val === 'string' ? new Date(val) : val).optional().nullable(),
+});
+
+// Insert schema for job schedule logs (SC-SCHEDULING-001)
+export const insertJobScheduleLogSchema = createInsertSchema(jobScheduleLogs).omit({
   id: true,
   createdAt: true,
 });

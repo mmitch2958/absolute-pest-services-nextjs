@@ -1,4 +1,4 @@
-import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, reminderLogs, reminderOptOuts, systemSettings, DEFAULT_REMINDER_SETTINGS, reviewSettings, reviewRequestLogs, DEFAULT_REVIEW_SETTINGS, shifts, shiftTimeBlocks, shiftBreaks, timeEntryAuditLog, geocache, dailyRoutes, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails, type InsertReminderLog, type ReminderLog, type InsertReminderOptOut, type ReminderOptOut, type InsertSystemSetting, type SystemSetting, type ReminderSettings, type ReminderType, type AppointmentType, type ReminderChannel, type ReviewSettings, type ReviewRequestLog, type InsertReviewRequestLog, type InsertGeocache, type GeocacheEntry, type InsertDailyRoute, type DailyRoute, type RouteStop, type DailyRouteWithDetails } from "@shared/schema";
+import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, reminderLogs, reminderOptOuts, systemSettings, DEFAULT_REMINDER_SETTINGS, reviewSettings, reviewRequestLogs, DEFAULT_REVIEW_SETTINGS, shifts, shiftTimeBlocks, shiftBreaks, timeEntryAuditLog, geocache, dailyRoutes, jobScheduleLogs, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails, type InsertReminderLog, type ReminderLog, type InsertReminderOptOut, type ReminderOptOut, type InsertSystemSetting, type SystemSetting, type ReminderSettings, type ReminderType, type AppointmentType, type ReminderChannel, type ReviewSettings, type ReviewRequestLog, type InsertReviewRequestLog, type InsertGeocache, type GeocacheEntry, type InsertDailyRoute, type DailyRoute, type RouteStop, type DailyRouteWithDetails, type JobScheduleLog, type InsertJobScheduleLog } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, gte, lte, lt, ilike, sql, sum } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -310,6 +310,32 @@ export interface IStorage {
   getDailyRoute(employeeId: number, routeDate: Date): Promise<DailyRoute | undefined>;
   createOrUpdateDailyRoute(route: InsertDailyRoute): Promise<DailyRoute>;
   getJobLogsForRoute(employeeId: number, routeDate: Date): Promise<JobLog[]>;
+
+  // Admin Job Scheduling operations (SC-SCHEDULING-001)
+  // Create a new scheduled job (admin)
+  createScheduledJob(jobData: InsertJobLog & { scheduledBy: number; priority?: string }): Promise<JobLog>;
+  // Update job with scheduling fields (admin)
+  updateJobScheduling(id: number, updates: { priority?: string; adminNotes?: string; scheduledEndTime?: Date; employeeId?: number; jobDate?: Date }, performedBy: number): Promise<JobLog>;
+  // Assign job to different tech (admin)
+  assignJobToTech(jobLogId: number, employeeId: number, performedBy: number): Promise<JobLog>;
+  // Reschedule a job (admin)
+  rescheduleJob(jobLogId: number, newJobDate: Date, performedBy: number): Promise<JobLog>;
+  // Cancel a scheduled job (admin)
+  cancelScheduledJob(jobLogId: number, performedBy: number, reason?: string): Promise<JobLog>;
+  // Get scheduled jobs (admin view)
+  getScheduledJobs(filters?: { employeeId?: number; dateFrom?: Date; dateTo?: Date; status?: string }): Promise<JobLog[]>;
+  
+  // Field operations for scheduled jobs
+  // Start a scheduled job (field tech)
+  startScheduledJob(jobLogId: number, employeeId: number): Promise<JobLog>;
+  // Complete a scheduled job (field tech)
+  completeScheduledJob(jobLogId: number, employeeId: number, workPerformed: string): Promise<JobLog>;
+  // Get jobs for field tech to start today
+  getTodaysScheduledJobs(employeeId: number): Promise<JobLog[]>;
+  
+  // Schedule audit log operations
+  createJobScheduleLog(log: InsertJobScheduleLog): Promise<JobScheduleLog>;
+  getJobScheduleLogs(jobLogId: number): Promise<JobScheduleLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2285,7 +2311,337 @@ export class DatabaseStorage implements IStorage {
 
     return result;
   }
+
+  // ==========================================
+  // Admin Job Scheduling Operations (SC-SCHEDULING-001)
+  // ==========================================
+
+  async createScheduledJob(jobData: InsertJobLog & { scheduledBy: number; priority?: string }): Promise<JobLog> {
+    // Create the job log with scheduling fields
+    const [jobLog] = await db
+      .insert(jobLogs)
+      .values({
+        employeeId: jobData.employeeId,
+        customerName: jobData.customerName,
+        clientId: jobData.clientId || null,
+        siteLocation: jobData.siteLocation,
+        siteAddress: jobData.siteAddress || "",
+        servicedArea: jobData.servicedArea,
+        workPerformed: jobData.workPerformed,
+        jobDate: jobData.jobDate,
+        status: "scheduled",
+        customFields: jobData.customFields,
+        priority: jobData.priority || "medium",
+        scheduledBy: jobData.scheduledBy,
+        scheduledEndTime: jobData.scheduledEndTime || null,
+      })
+      .returning();
+
+    // Log the creation in schedule audit
+    await this.createJobScheduleLog({
+      jobLogId: jobLog.id,
+      action: "created",
+      performedBy: jobData.scheduledBy,
+      previousValue: null,
+      newValue: {
+        employeeId: jobLog.employeeId,
+        jobDate: jobLog.jobDate,
+        status: "scheduled",
+        priority: jobLog.priority || "medium",
+      },
+    });
+
+    return jobLog;
+  }
+
+  async updateJobScheduling(
+    id: number,
+    updates: { priority?: string; adminNotes?: string; scheduledEndTime?: Date; employeeId?: number; jobDate?: Date },
+    performedBy: number
+  ): Promise<JobLog> {
+    const existing = await this.getJobLog(id);
+    if (!existing) {
+      throw new Error("Job log not found");
+    }
+
+    const updateValues: any = { ...updates };
+    
+    // Add admin notes if provided
+    if (updates.adminNotes !== undefined) {
+      updateValues.adminNotes = updates.adminNotes;
+    }
+
+    const [updated] = await db
+      .update(jobLogs)
+      .set(updateValues)
+      .where(eq(jobLogs.id, id))
+      .returning();
+
+    // Log the update in schedule audit
+    const previousValue: any = {};
+    const newValue: any = {};
+
+    if (updates.priority !== undefined) {
+      previousValue.priority = existing.priority;
+      newValue.priority = updates.priority;
+    }
+    if (updates.adminNotes !== undefined) {
+      previousValue.adminNotes = existing.adminNotes;
+      newValue.adminNotes = updates.adminNotes;
+    }
+    if (updates.scheduledEndTime !== undefined) {
+      previousValue.scheduledEndTime = existing.scheduledEndTime;
+      newValue.scheduledEndTime = updates.scheduledEndTime;
+    }
+    if (updates.employeeId !== undefined) {
+      previousValue.employeeId = existing.employeeId;
+      newValue.employeeId = updates.employeeId;
+    }
+    if (updates.jobDate !== undefined) {
+      previousValue.jobDate = existing.jobDate;
+      newValue.jobDate = updates.jobDate;
+    }
+
+    await this.createJobScheduleLog({
+      jobLogId: id,
+      action: "updated",
+      performedBy,
+      previousValue: Object.keys(previousValue).length > 0 ? previousValue : null,
+      newValue: Object.keys(newValue).length > 0 ? newValue : null,
+    });
+
+    return updated;
+  }
+
+  async assignJobToTech(jobLogId: number, employeeId: number, performedBy: number): Promise<JobLog> {
+    const existing = await this.getJobLog(jobLogId);
+    if (!existing) {
+      throw new Error("Job log not found");
+    }
+
+    const previousEmployeeId = existing.employeeId;
+
+    const [updated] = await db
+      .update(jobLogs)
+      .set({ employeeId })
+      .where(eq(jobLogs.id, jobLogId))
+      .returning();
+
+    // Log the assignment in schedule audit
+    await this.createJobScheduleLog({
+      jobLogId,
+      action: "assigned",
+      performedBy,
+      previousValue: { employeeId: previousEmployeeId },
+      newValue: { employeeId },
+    });
+
+    return updated;
+  }
+
+  async rescheduleJob(jobLogId: number, newJobDate: Date, performedBy: number): Promise<JobLog> {
+    const existing = await this.getJobLog(jobLogId);
+    if (!existing) {
+      throw new Error("Job log not found");
+    }
+
+    const previousJobDate = existing.jobDate;
+
+    const [updated] = await db
+      .update(jobLogs)
+      .set({ jobDate: newJobDate })
+      .where(eq(jobLogs.id, jobLogId))
+      .returning();
+
+    // Log the reschedule in schedule audit
+    await this.createJobScheduleLog({
+      jobLogId,
+      action: "rescheduled",
+      performedBy,
+      previousValue: { jobDate: previousJobDate },
+      newValue: { jobDate: newJobDate },
+    });
+
+    return updated;
+  }
+
+  async cancelScheduledJob(jobLogId: number, performedBy: number, reason?: string): Promise<JobLog> {
+    const existing = await this.getJobLog(jobLogId);
+    if (!existing) {
+      throw new Error("Job log not found");
+    }
+
+    if (existing.status === "completed" || existing.status === "paid" || existing.status === "invoiced") {
+      throw new Error("Cannot cancel a completed job");
+    }
+
+    const [updated] = await db
+      .update(jobLogs)
+      .set({
+        status: "cancelled",
+        cancelledAt: new Date(),
+        cancelledBy: performedBy,
+        adminNotes: reason ? `${existing.adminNotes || ""}\n\nCancellation reason: ${reason}`.trim() : existing.adminNotes,
+      })
+      .where(eq(jobLogs.id, jobLogId))
+      .returning();
+
+    // Log the cancellation in schedule audit
+    await this.createJobScheduleLog({
+      jobLogId,
+      action: "cancelled",
+      performedBy,
+      previousValue: { status: existing.status },
+      newValue: { status: "cancelled", reason },
+    });
+
+    return updated;
+  }
+
+  async getScheduledJobs(filters?: { employeeId?: number; dateFrom?: Date; dateTo?: Date; status?: string }): Promise<JobLog[]> {
+    const conditions = [];
+    
+    if (filters?.employeeId) {
+      conditions.push(eq(jobLogs.employeeId, filters.employeeId));
+    }
+    if (filters?.dateFrom) {
+      conditions.push(gte(jobLogs.jobDate, filters.dateFrom));
+    }
+    if (filters?.dateTo) {
+      conditions.push(lte(jobLogs.jobDate, filters.dateTo));
+    }
+    if (filters?.status) {
+      conditions.push(eq(jobLogs.status, filters.status));
+    } else {
+      // Default to showing scheduled/in_progress jobs if no status filter
+      conditions.push(or(eq(jobLogs.status, 'scheduled'), eq(jobLogs.status, 'in_progress')));
+    }
+
+    if (conditions.length > 0) {
+      return await db.select().from(jobLogs).where(and(...conditions)).orderBy(jobLogs.jobDate);
+    }
+    return await db.select().from(jobLogs).orderBy(jobLogs.jobDate);
+  }
+
+  async startScheduledJob(jobLogId: number, employeeId: number): Promise<JobLog> {
+    const existing = await this.getJobLog(jobLogId);
+    if (!existing) {
+      throw new Error("Job log not found");
+    }
+
+    if (existing.employeeId !== employeeId) {
+      throw new Error("This job is not assigned to you");
+    }
+
+    if (existing.status !== "scheduled") {
+      throw new Error("Job is not in scheduled status");
+    }
+
+    const [updated] = await db
+      .update(jobLogs)
+      .set({ status: "in_progress" })
+      .where(eq(jobLogs.id, jobLogId))
+      .returning();
+
+    // Log the start in schedule audit
+    await this.createJobScheduleLog({
+      jobLogId,
+      action: "started",
+      performedBy: employeeId,
+      previousValue: { status: existing.status },
+      newValue: { status: "in_progress" },
+    });
+
+    return updated;
+  }
+
+  async completeScheduledJob(jobLogId: number, employeeId: number, workPerformed: string): Promise<JobLog> {
+    const existing = await this.getJobLog(jobLogId);
+    if (!existing) {
+      throw new Error("Job log not found");
+    }
+
+    if (existing.employeeId !== employeeId) {
+      throw new Error("This job is not assigned to you");
+    }
+
+    if (existing.status !== "in_progress" && existing.status !== "scheduled") {
+      throw new Error("Job must be in progress or scheduled to be completed");
+    }
+
+    const [updated] = await db
+      .update(jobLogs)
+      .set({ 
+        status: "completed",
+        workPerformed: workPerformed || existing.workPerformed,
+      })
+      .where(eq(jobLogs.id, jobLogId))
+      .returning();
+
+    // Log the completion in schedule audit
+    await this.createJobScheduleLog({
+      jobLogId,
+      action: "completed",
+      performedBy: employeeId,
+      previousValue: { status: existing.status },
+      newValue: { status: "completed", workPerformed },
+    });
+
+    return updated;
+  }
+
+  async getTodaysScheduledJobs(employeeId: number): Promise<JobLog[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    return await db
+      .select()
+      .from(jobLogs)
+      .where(
+        and(
+          eq(jobLogs.employeeId, employeeId),
+          gte(jobLogs.jobDate, today),
+          lt(jobLogs.jobDate, tomorrow),
+          or(
+            eq(jobLogs.status, 'scheduled'),
+            eq(jobLogs.status, 'in_progress')
+          )
+        )
+      )
+      .orderBy(jobLogs.jobDate);
+  }
+
+  // ==========================================
+  // Job Schedule Audit Log Operations
+  // ==========================================
+
+  async createJobScheduleLog(log: InsertJobScheduleLog): Promise<JobScheduleLog> {
+    const [result] = await db
+      .insert(jobScheduleLogs)
+      .values({
+        jobLogId: log.jobLogId,
+        action: log.action,
+        performedBy: log.performedBy || null,
+        previousValue: log.previousValue || null,
+        newValue: log.newValue || null,
+      })
+      .returning();
+
+    return result;
+  }
+
+  async getJobScheduleLogs(jobLogId: number): Promise<JobScheduleLog[]> {
+    return await db
+      .select()
+      .from(jobScheduleLogs)
+      .where(eq(jobScheduleLogs.jobLogId, jobLogId))
+      .orderBy(jobScheduleLogs.createdAt);
+  }
 }
 
 // Export a singleton instance
+export const storage = new DatabaseStorage();
+}
 export const storage = new DatabaseStorage();

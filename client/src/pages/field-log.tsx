@@ -15,6 +15,10 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { FieldNav } from "@/components/field-nav";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle2, Loader2, Camera, ImagePlus, X, AlertCircle, RefreshCw } from "lucide-react";
+// Offline mode imports
+import { useConnectionStatus } from "@/lib/connection-monitor";
+import { enqueueJobLog, isQueueFull } from "@/lib/offline-queue";
+import { runSync } from "@/lib/sync-engine";
 
 const NEW_OPTION = "__NEW__";
 
@@ -359,6 +363,10 @@ export default function FieldLog() {
   const [employee, setEmployee] = useState<any>(null);
   const [submitted, setSubmitted] = useState(false);
   const [submittedLogId, setSubmittedLogId] = useState<number | null>(null);
+  
+  // Offline mode
+  const connection = useConnectionStatus();
+  const isOnline = connection.status === 'online';
 
   const [customerAddingNew, setCustomerAddingNew] = useState(false);
   const [locationAddingNew, setLocationAddingNew] = useState(false);
@@ -657,7 +665,76 @@ export default function FieldLog() {
     },
   });
 
-  const onSubmit = (data: JobLogFormData) => {
+  const onSubmit = async (data: JobLogFormData) => {
+    // Check if offline and handle accordingly
+    if (!isOnline) {
+      try {
+        // Check if queue is full
+        const full = await isQueueFull();
+        if (full) {
+          toast({ 
+            title: "Queue Full", 
+            description: "Offline queue is full. Please connect to the internet to sync.", 
+            variant: "destructive" 
+          });
+          return;
+        }
+        
+        // Queue the job log for later sync
+        await enqueueJobLog({
+          employeeId: employee.id,
+          customerName: data.customerName,
+          clientId: data.clientId || null,
+          siteLocation: data.siteLocation,
+          siteAddress: data.siteAddress,
+          servicedArea: data.servicedArea,
+          workPerformed: data.workPerformed,
+          jobDate: data.jobDate,
+          status: 'completed',
+          customFields: Object.keys(customFieldValues).length > 0 ? customFieldValues : undefined,
+          photos: photos.map(p => ({
+            localId: p.id,
+            file: p.file,
+            caption: p.caption
+          }))
+        });
+        
+        toast({ 
+          title: "Saved for Later", 
+          description: "Job log saved. It will sync automatically when you're back online." 
+        });
+        
+        // Reset form
+        const first = customers[0] || "";
+        const matchedClient = clients.find(c => c.name === first);
+        form.reset({
+          customerName: first,
+          clientId: matchedClient?.id || null,
+          siteLocation: "",
+          siteAddress: matchedClient?.address || "",
+          servicedArea: "",
+          workPerformed: "",
+          jobDate: new Date().toISOString().split("T")[0],
+        });
+        setCustomerAddingNew(false);
+        setLocationAddingNew(false);
+        setAreaAddingNew(false);
+        setCustomFieldValues({});
+        photos.forEach(p => URL.revokeObjectURL(p.localUrl));
+        setPhotos([]);
+        
+        return;
+      } catch (error) {
+        toast({ 
+          title: "Error", 
+          description: error instanceof Error ? error.message : "Failed to save job log offline", 
+          variant: "destructive" 
+        });
+        return;
+      }
+    }
+    
+    // Online - submit normally
     submitMutation.mutate(data);
   };
 
@@ -921,8 +998,10 @@ export default function FieldLog() {
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                       {photoUploadsPending ? "Uploading Photos…" : "Submitting…"}
                     </>
-                  ) : (
+                  ) : isOnline ? (
                     "Submit Job Log"
+                  ) : (
+                    "Save for Later"
                   )}
                 </Button>
               </form>
