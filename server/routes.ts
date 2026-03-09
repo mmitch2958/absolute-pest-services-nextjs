@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema, insertServiceContractSchema, insertJobLogPhotoSchema, insertInvoiceSchema, insertInvoiceLineItemSchema, type InvoiceStatus, jobLogs as jobLogsTable } from "@shared/schema";
+import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema, insertServiceContractSchema, insertJobLogPhotoSchema, insertInvoiceSchema, insertInvoiceLineItemSchema, type InvoiceStatus, jobLogs as jobLogsTable, geocache, dailyRoutes, type RouteStop } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -3140,6 +3140,958 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating opt-out:", error);
       res.status(500).json({ success: false, message: "Failed to unsubscribe" });
+    }
+  });
+
+  // ==========================================
+  // Route Optimization API (SC-ROUTE-001)
+  // ==========================================
+
+  // Helper: Geocode address using Google Geocoding API
+  async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.error("Google Maps API key not configured");
+      return null;
+    }
+
+    try {
+      const encodedAddress = encodeURIComponent(address);
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`
+      );
+      const data = await response.json();
+
+      if (data.status === 'OK' && data.results.length > 0) {
+        const location = data.results[0].geometry.location;
+        return { lat: location.lat, lng: location.lng };
+      }
+      console.error("Geocoding failed:", data.status, address);
+      return null;
+    } catch (error) {
+      console.error("Error geocoding address:", error);
+      return null;
+    }
+  }
+
+  // Helper: Get or create geocache entry
+  async function getOrCreateGeocache(address: string): Promise<{ lat: number; lng: number; cached: boolean }> {
+    const existing = await storage.getGeocache(address);
+    if (existing && existing.lat && existing.lng) {
+      return { lat: Number(existing.lat), lng: Number(existing.lng), cached: true };
+    }
+
+    const coords = await geocodeAddress(address);
+    if (coords) {
+      await storage.setGeocache({
+        addressText: address,
+        lat: String(coords.lat),
+        lng: String(coords.lng),
+        source: 'google',
+      });
+      return { ...coords, cached: false };
+    }
+
+    return { lat: 0, lng: 0, cached: false };
+  }
+
+  // Helper: Call Google Routes API to optimize route
+  async function optimizeRouteWithGoogle(
+    origin: string,
+    destination: string,
+    waypoints: Array<{ address: string; jobLogId: number; customerName: string }>,
+    startTime?: string
+  ): Promise<{ stops: RouteStop[]; totalDistanceMeters: number; totalDurationSeconds: number; googleMapsUrl: string } | null> {
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.error("Google Maps API key not configured");
+      return null;
+    }
+
+    if (waypoints.length === 0) {
+      return null;
+    }
+
+    // Build the request for Google Routes API
+    const requestBody: any = {
+      origin: { address: origin },
+      destination: { address: destination },
+      intermediates: waypoints.map(wp => ({ address: wp.address })),
+      travelMode: "DRIVE",
+      optimizeWaypointOrder: true,
+      departureTime: startTime || new Date().toISOString(),
+      routingPreference: "TRAFFIC_AWARE",
+    };
+
+    try {
+      const response = await fetch(
+        `https://routes.googleapis.com/v2:computeRoutes?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.legs,routes.optimizedIntermediateWaypointIndexOrder',
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.error) {
+        console.error("Google Routes API error:", data.error);
+        return null;
+      }
+
+      const route = data.routes?.[0];
+      if (!route) {
+        console.error("No route returned from Google Routes API");
+        return null;
+      }
+
+      // Extract optimized waypoint order
+      const optimizedOrder = route.optimizedIntermediateWaypointIndexOrder || [];
+      
+      // Helper to parse duration string like "3600s" to seconds
+      const parseDuration = (duration: string | undefined): number => {
+        if (!duration) return 0;
+        const match = duration.match(/^(\d+)s$/);
+        return match ? parseInt(match[1], 10) : 0;
+      };
+      
+      // Build stops in optimized order
+      const stops: RouteStop[] = [];
+      let cumulativeDuration = 0;
+
+      // First leg is from origin to first waypoint
+      const legs = route.legs || [];
+      
+      for (let i = 0; i < waypoints.length; i++) {
+        const waypointIndex = optimizedOrder[i];
+        const waypoint = waypoints[waypointIndex];
+        const leg = legs[i];
+        
+        if (!leg || !waypoint) continue;
+
+        // Parse duration from string format (e.g., "3600s")
+        const legDurationSeconds = parseDuration(leg.duration);
+        cumulativeDuration += legDurationSeconds;
+        
+        // Estimate arrival time
+        const arrivalTime = startTime 
+          ? new Date(new Date(startTime).getTime() + cumulativeDuration * 1000).toISOString()
+          : null;
+
+        stops.push({
+          sequence: i + 1,
+          jobLogId: waypoint.jobLogId,
+          customerName: waypoint.customerName,
+          address: waypoint.address,
+          estimatedArrival: arrivalTime,
+          driveDurationSeconds: legDurationSeconds,
+          lat: leg.endLocation?.latLng?.latitude || 0,
+          lng: leg.endLocation?.latLng?.longitude || 0,
+        });
+      }
+
+      // Build Google Maps URL using optimized stop order (stops, not waypoints)
+      const stopsForUrl = stops.slice(0, -1); // Exclude last stop as it's the return to start
+      const waypointStr = stopsForUrl.map(s => encodeURIComponent(s.address)).join('|');
+      const mapsUrl = waypointStr 
+        ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&waypoints=${waypointStr}&travelmode=driving`
+        : `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+
+      // Parse total duration from string format (e.g., "3600s")
+      const totalDurationSeconds = parseDuration(route.duration);
+
+      return {
+        stops,
+        totalDistanceMeters: route.distanceMeters || 0,
+        totalDurationSeconds,
+        googleMapsUrl: mapsUrl,
+      };
+    } catch (error) {
+      console.error("Error calling Google Routes API:", error);
+      return null;
+    }
+  }
+
+  // GET /api/admin/routes/jobs - Get qualifying job logs for route
+  app.get("/api/admin/routes/jobs", requireAdmin, async (req, res) => {
+    try {
+      const employeeId = parseInt(req.query.employeeId as string);
+      const dateStr = req.query.date as string;
+
+      if (!employeeId || !dateStr) {
+        return res.status(400).json({ success: false, message: "employeeId and date required" });
+      }
+
+      const routeDate = new Date(dateStr);
+      const jobLogs = await storage.getJobLogsForRoute(employeeId, routeDate);
+
+      // Get geocode status for each job
+      const jobsWithGeocode = await Promise.all(
+        jobLogs.map(async (job) => {
+          const geocodeData = job.siteAddress ? await getOrCreateGeocache(job.siteAddress) : null;
+          return {
+            id: job.id,
+            customerName: job.customerName,
+            siteAddress: job.siteAddress,
+            siteLocation: job.siteLocation,
+            jobDate: job.jobDate,
+            status: job.status,
+            hasGeocode: !!(geocodeData && geocodeData.lat && geocodeData.lng),
+            geocodeCached: geocodeData?.cached || false,
+            lat: geocodeData?.lat || null,
+            lng: geocodeData?.lng || null,
+          };
+        })
+      );
+
+      res.json({ success: true, jobs: jobsWithGeocode });
+    } catch (error) {
+      console.error("Error fetching jobs for route:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/admin/routes/optimize - Generate optimized route
+  app.post("/api/admin/routes/optimize", requireAdmin, async (req, res) => {
+    try {
+      const { employeeId, date, startAddress, jobIds } = req.body;
+
+      if (!employeeId || !date || !startAddress) {
+        return res.status(400).json({ success: false, message: "employeeId, date, and startAddress required" });
+      }
+
+      const routeDate = new Date(date);
+      let jobLogs = await storage.getJobLogsForRoute(employeeId, routeDate);
+
+      // Filter by jobIds if provided
+      if (jobIds && Array.isArray(jobIds) && jobIds.length > 0) {
+        jobLogs = jobLogs.filter(job => jobIds.includes(job.id));
+      }
+
+      // Filter jobs that have geocodable addresses
+      const geocodableJobs = jobLogs.filter(job => job.siteAddress);
+      
+      if (geocodableJobs.length === 0) {
+        return res.status(400).json({ success: false, message: "No jobs with geocodable addresses found" });
+      }
+
+      // Get geocodes for all addresses
+      const waypoints: Array<{ address: string; jobLogId: number; customerName: string }> = [];
+      for (const job of geocodableJobs) {
+        if (!job.siteAddress) continue;
+        const geocodeData = await getOrCreateGeocache(job.siteAddress);
+        if (geocodeData && geocodeData.lat && geocodeData.lng) {
+          waypoints.push({
+            address: job.siteAddress,
+            jobLogId: job.id,
+            customerName: job.customerName,
+          });
+        }
+      }
+
+      if (waypoints.length === 0) {
+        return res.status(400).json({ success: false, message: "No jobs could be geocoded" });
+      }
+
+      // Determine destination (last stop goes back to start for pest control routes)
+      const destination = startAddress;
+
+      // Optimize route with Google Routes API
+      const optimized = await optimizeRouteWithGoogle(startAddress, destination, waypoints);
+      
+      if (!optimized) {
+        return res.status(500).json({ success: false, message: "Failed to optimize route with Google" });
+      }
+
+      // Save the route
+      const route = await storage.createOrUpdateDailyRoute({
+        employeeId,
+        routeDate,
+        startAddress,
+        optimizedStopOrder: optimized.stops,
+        googleMapsUrl: optimized.googleMapsUrl,
+        totalDistanceMeters: optimized.totalDistanceMeters,
+        totalDurationSeconds: optimized.totalDurationSeconds,
+        generatedBy: req.session.userId,
+      });
+
+      res.json({ 
+        success: true, 
+        route: {
+          ...route,
+          optimizedStopOrder: JSON.parse(JSON.stringify(route.optimizedStopOrder)),
+        },
+        googleMapsUrl: optimized.googleMapsUrl,
+      });
+    } catch (error) {
+      console.error("Error optimizing route:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/routes/saved - Get saved route
+  app.get("/api/admin/routes/saved", requireAdmin, async (req, res) => {
+    try {
+      const employeeId = parseInt(req.query.employeeId as string);
+      const dateStr = req.query.date as string;
+
+      if (!employeeId || !dateStr) {
+        return res.status(400).json({ success: false, message: "employeeId and date required" });
+      }
+
+      const routeDate = new Date(dateStr);
+      const route = await storage.getDailyRoute(employeeId, routeDate);
+
+      if (!route) {
+        return res.json({ success: true, route: null });
+      }
+
+      res.json({ 
+        success: true, 
+        route: {
+          ...route,
+          optimizedStopOrder: JSON.parse(JSON.stringify(route.optimizedStopOrder)),
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching saved route:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // PUT /api/admin/routes/saved/:id - Update saved route (manual reorder)
+  app.put("/api/admin/routes/saved/:id", requireAdmin, async (req, res) => {
+    try {
+      const routeId = parseInt(req.params.id);
+      const { optimizedStopOrder, googleMapsUrl } = req.body;
+
+      if (!optimizedStopOrder) {
+        return res.status(400).json({ success: false, message: "optimizedStopOrder required" });
+      }
+
+      // Get existing route
+      const [existing] = await db
+        .select()
+        .from(dailyRoutes)
+        .where(eq(dailyRoutes.id, routeId));
+
+      if (!existing) {
+        return res.status(404).json({ success: false, message: "Route not found" });
+      }
+
+      // Update the route
+      const [updated] = await db
+        .update(dailyRoutes)
+        .set({
+          optimizedStopOrder,
+          googleMapsUrl: googleMapsUrl || existing.googleMapsUrl,
+          generatedAt: new Date(),
+        })
+        .where(eq(dailyRoutes.id, routeId))
+        .returning();
+
+      res.json({ 
+        success: true, 
+        route: {
+          ...updated,
+          optimizedStopOrder: JSON.parse(JSON.stringify(updated.optimizedStopOrder)),
+        },
+      });
+    } catch (error) {
+      console.error("Error updating saved route:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/field/route/today - Get today's route for field tech
+  app.get("/api/field/route/today", requireFieldAuth, async (req, res) => {
+    try {
+      const employeeId = req.session.fieldEmployeeId;
+      const today = new Date();
+
+      const route = await storage.getDailyRoute(employeeId, today);
+
+      if (!route) {
+        return res.json({ success: true, route: null, message: "No route generated for today" });
+      }
+
+      res.json({ 
+        success: true, 
+        route: {
+          ...route,
+          optimizedStopOrder: JSON.parse(JSON.stringify(route.optimizedStopOrder)),
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching today's route:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // ==========================================
+  // Customer Portal Routes (SC-PORT-001)
+  // ==========================================
+
+  // Portal middleware - ensure user is not admin
+  const requirePortalUser = async (req: any, res: any, next: any) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ success: false, message: "Authentication required" });
+    }
+    
+    try {
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.role === 'admin') {
+        return res.status(403).json({ success: false, message: "Customer portal access required" });
+      }
+      next();
+    } catch (error) {
+      console.error("Error checking portal access:", error);
+      return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  };
+
+  // GET /api/portal/summary - Dashboard summary for customer
+  app.get("/api/portal/summary", requirePortalUser, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      // Get user's service requests and inspections
+      const serviceRequests = await storage.getServiceRequestsByUser(userId);
+      const inspections = await storage.getInspectionSchedulesByUser(userId);
+      
+      // Get upcoming appointments (scheduled but not completed)
+      const upcomingAppointments = [
+        ...serviceRequests.filter(sr => sr.status === 'scheduled' || sr.status === 'in-progress'),
+        ...inspections.filter(ins => ins.status === 'scheduled' || ins.status === 'pending')
+      ];
+      
+      // Get completed this year
+      const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+      const completedThisYear = [
+        ...serviceRequests.filter(sr => sr.status === 'completed' && sr.completedDate && new Date(sr.completedDate) >= startOfYear),
+        ...inspections.filter(ins => ins.status === 'completed' && ins.createdAt >= startOfYear)
+      ];
+      
+      // Open requests
+      const openRequests = serviceRequests.filter(sr => sr.status === 'pending');
+      
+      // Get invoices for this user via their linked client
+      const user = await storage.getUser(userId);
+      let outstandingBalance = "0.00";
+      let hasOverdue = false;
+      
+      if (user) {
+        const clients = await storage.getClients();
+        const client = clients.find(c => c.userId === userId);
+        if (client) {
+          const allInvoices = await storage.listInvoices({ clientId: client.id });
+          const unpaidInvoices = allInvoices.filter(inv => 
+            inv.status === 'sent' || inv.status === 'viewed' || inv.status === 'overdue'
+          );
+          outstandingBalance = unpaidInvoices.reduce((sum, inv) => sum + parseFloat(String(inv.total)), 0).toFixed(2);
+          hasOverdue = unpaidInvoices.some(inv => inv.status === 'overdue');
+        }
+      }
+      
+      res.json({
+        success: true,
+        summary: {
+          upcomingCount: upcomingAppointments.length,
+          completedThisYearCount: completedThisYear.length,
+          openRequestsCount: openRequests.length,
+          outstandingBalance,
+          hasOverdue
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching portal summary:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/portal/appointments - All appointments (inspections + service requests)
+  app.get("/api/portal/appointments", requirePortalUser, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const { status, type, search } = req.query;
+      
+      const [inspections, serviceRequests] = await Promise.all([
+        storage.getInspectionSchedulesByUser(userId),
+        storage.getServiceRequestsByUser(userId)
+      ]);
+      
+      // Transform into unified appointment format
+      let appointments = [
+        ...inspections.map(ins => ({
+          id: ins.id,
+          type: 'inspection' as const,
+          serviceType: ins.serviceType,
+          address: ins.address,
+          city: ins.city,
+          date: ins.preferredDate,
+          time: ins.preferredTime,
+          status: ins.status,
+          urgency: ins.urgency,
+          description: ins.message || '',
+          createdAt: ins.createdAt,
+          scheduledDate: null,
+          completedDate: null,
+          estimatedCost: null,
+          finalCost: null,
+          technicianNotes: null
+        })),
+        ...serviceRequests.map(sr => ({
+          id: sr.id,
+          type: 'service' as const,
+          serviceType: sr.serviceType,
+          address: sr.address,
+          city: sr.city,
+          date: sr.scheduledDate || sr.createdAt,
+          time: null,
+          status: sr.status,
+          urgency: sr.priority,
+          description: sr.description,
+          createdAt: sr.createdAt,
+          scheduledDate: sr.scheduledDate,
+          completedDate: sr.completedDate,
+          estimatedCost: sr.estimatedCost,
+          finalCost: sr.finalCost,
+          technicianNotes: sr.technicianNotes
+        }))
+      ];
+      
+      // Filter by status
+      if (status) {
+        appointments = appointments.filter(apt => apt.status === status);
+      }
+      
+      // Filter by type
+      if (type) {
+        appointments = appointments.filter(apt => apt.type === type);
+      }
+      
+      // Filter by search (address or service type)
+      if (search) {
+        const searchLower = (search as string).toLowerCase();
+        appointments = appointments.filter(apt => 
+          apt.address.toLowerCase().includes(searchLower) ||
+          apt.serviceType.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      // Sort by date descending (most recent first)
+      appointments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      res.json({ success: true, appointments });
+    } catch (error) {
+      console.error("Error fetching portal appointments:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/portal/appointments/:id - Single appointment detail
+  app.get("/api/portal/appointments/:id", requirePortalUser, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { type } = req.query; // 'inspection' or 'service'
+      const userId = req.session.userId;
+      
+      if (!type || (type !== 'inspection' && type !== 'service')) {
+        return res.status(400).json({ success: false, message: "Invalid or missing type parameter" });
+      }
+      
+      let appointment;
+      
+      if (type === 'inspection') {
+        const inspections = await storage.getInspectionSchedulesByUser(userId);
+        appointment = inspections.find(ins => ins.id === parseInt(id));
+        if (appointment) {
+          appointment = { ...appointment, appointmentType: 'inspection' };
+        }
+      } else {
+        const serviceRequests = await storage.getServiceRequestsByUser(userId);
+        appointment = serviceRequests.find(sr => sr.id === parseInt(id));
+        if (appointment) {
+          appointment = { ...appointment, appointmentType: 'service' };
+        }
+      }
+      
+      if (!appointment) {
+        return res.status(404).json({ success: false, message: "Appointment not found" });
+      }
+      
+      res.json({ success: true, appointment });
+    } catch (error) {
+      console.error("Error fetching portal appointment detail:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/portal/appointments - Create new inspection/appointment request
+  app.post("/api/portal/appointments", requirePortalUser, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+      
+      const { serviceType, preferredDate, preferredTime, urgency, address, city, message } = req.body;
+      
+      // Validate required fields
+      if (!serviceType || !preferredDate || !preferredTime || !urgency || !address || !city) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+      }
+      
+      // Validate date is not in the past (at least tomorrow)
+      const requestedDate = new Date(preferredDate);
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      
+      if (requestedDate < tomorrow) {
+        return res.status(400).json({ success: false, message: "Appointments must be scheduled at least 1 day in advance" });
+      }
+      
+      // Create inspection schedule
+      const inspection = await storage.createInspectionSchedule({
+        userId,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone || '',
+        email: user.email,
+        address,
+        city,
+        serviceType,
+        preferredDate: requestedDate,
+        preferredTime,
+        urgency,
+        message: message || null
+      });
+      
+      // Send email confirmation to customer
+      await sendInspectionScheduleEmail({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone || '',
+        email: user.email,
+        address,
+        city,
+        serviceType,
+        preferredDate: requestedDate,
+        preferredTime,
+        urgency,
+        message: message || ""
+      });
+      
+      // Also create/update prospect for admin
+      try {
+        await storage.createOrUpdateProspect({
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          phone: user.phone || undefined,
+          address,
+          notes: `Inspection Request (Portal) - Service: ${serviceType}\nPreferred: ${requestedDate.toLocaleDateString()} ${preferredTime}\nUrgency: ${urgency}`,
+          serviceType,
+        });
+      } catch (prospectError) {
+        console.error("Failed to create/update prospect:", prospectError);
+      }
+      
+      res.json({
+        success: true,
+        message: "Appointment scheduled successfully",
+        appointment: { ...inspection, type: 'inspection' }
+      });
+    } catch (error) {
+      console.error("Error creating portal appointment:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/portal/service-requests - List service requests
+  app.get("/api/portal/service-requests", requirePortalUser, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const serviceRequests = await storage.getServiceRequestsByUser(userId);
+      res.json({ success: true, serviceRequests });
+    } catch (error) {
+      console.error("Error fetching portal service requests:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/portal/service-requests - Create new service request
+  app.post("/api/portal/service-requests", requirePortalUser, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+      
+      const { serviceType, description, address, city, priority } = req.body;
+      
+      // Validate required fields
+      if (!serviceType || !description || !address || !city || !priority) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+      }
+      
+      // Check for duplicate open request of same type at same address
+      const existingRequests = await storage.getServiceRequestsByUser(userId);
+      const duplicate = existingRequests.find(req => 
+        req.serviceType === serviceType && 
+        req.address.toLowerCase() === address.toLowerCase() &&
+        (req.status === 'pending' || req.status === 'scheduled')
+      );
+      
+      // Create service request
+      const serviceRequest = await storage.createServiceRequest({
+        userId,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        serviceType,
+        description,
+        address,
+        city,
+        priority
+      });
+      
+      // Send email notification
+      await sendServiceRequestEmail({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        serviceType,
+        description,
+        address,
+        city,
+        priority,
+        customerEmail: user.email,
+        customerPhone: user.phone || ""
+      });
+      
+      // Also create/update prospect
+      try {
+        await storage.createOrUpdateProspect({
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          phone: user.phone || undefined,
+          address,
+          notes: `Service Request (Portal) - Service: ${serviceType}\nPriority: ${priority}\nDescription: ${description}`,
+          serviceType,
+        });
+      } catch (prospectError) {
+        console.error("Failed to create/update prospect:", prospectError);
+      }
+      
+      res.json({
+        success: true,
+        message: duplicate 
+          ? "Service request submitted. Note: You have an existing open request for this service at this address."
+          : "Service request submitted successfully",
+        serviceRequest,
+        duplicateWarning: duplicate ? true : false
+      });
+    } catch (error) {
+      console.error("Error creating portal service request:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/portal/profile - Get current user profile
+  app.get("/api/portal/profile", requirePortalUser, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+      
+      res.json({
+        success: true,
+        profile: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          address: user.address
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching portal profile:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // PUT /api/portal/profile - Update user profile
+  app.put("/api/portal/profile", requirePortalUser, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const { firstName, lastName, phone, address } = req.body;
+      
+      const updates: any = {};
+      if (firstName) updates.firstName = firstName;
+      if (lastName) updates.lastName = lastName;
+      if (phone !== undefined) updates.phone = phone;
+      if (address !== undefined) updates.address = address;
+      
+      const updatedUser = await storage.updateUser(userId, updates);
+      
+      res.json({
+        success: true,
+        message: "Profile updated successfully",
+        profile: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          phone: updatedUser.phone,
+          address: updatedUser.address
+        }
+      });
+    } catch (error) {
+      console.error("Error updating portal profile:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // ==========================================
+  // Invoice Portal Routes (Phase 2 - stub for now)
+  // ==========================================
+  
+  // GET /api/portal/invoices - List invoices for the customer
+  app.get("/api/portal/invoices", requirePortalUser, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+      
+      // Find client linked to this user
+      const clients = await storage.getClients();
+      const client = clients.find(c => c.userId === userId);
+      
+      if (!client) {
+        return res.json({ success: true, invoices: [] });
+      }
+      
+      // Get invoices for this client (exclude draft and void)
+      const allInvoices = await storage.listInvoices({ clientId: client.id });
+      const visibleInvoices = allInvoices.filter(inv => 
+        inv.status !== 'draft' && inv.status !== 'void'
+      );
+      
+      // Sort: overdue first, then pending by due date, then paid (most recent)
+      visibleInvoices.sort((a, b) => {
+        if (a.status === 'overdue' && b.status !== 'overdue') return -1;
+        if (b.status === 'overdue' && a.status !== 'overdue') return 1;
+        if (a.status === 'paid' && b.status !== 'paid') return 1;
+        if (b.status === 'paid' && a.status !== 'paid') return -1;
+        if (a.status !== 'paid' && b.status !== 'paid') {
+          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+        }
+        return new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime();
+      });
+      
+      res.json({ success: true, invoices: visibleInvoices });
+    } catch (error) {
+      console.error("Error fetching portal invoices:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/portal/invoices/:id - Get invoice detail
+  app.get("/api/portal/invoices/:id", requirePortalUser, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.session.userId;
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+      
+      // Verify user has access to this invoice
+      const clients = await storage.getClients();
+      const client = clients.find(c => c.userId === userId);
+      
+      if (!client) {
+        return res.status(403).json({ success: false, message: "No client account linked" });
+      }
+      
+      const invoice = await storage.getInvoice(parseInt(id));
+      
+      if (!invoice || invoice.clientId !== client.id) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+      
+      // If invoice is 'sent', mark as 'viewed'
+      if (invoice.status === 'sent') {
+        await storage.updateInvoiceStatus(invoice.id, 'viewed', 'customer', 'Customer viewed in portal');
+        const updatedInvoice = await storage.getInvoice(invoice.id);
+        Object.assign(invoice, updatedInvoice);
+      }
+      
+      const lineItems = await storage.getLineItemsByInvoice(invoice.id);
+      
+      res.json({
+        success: true,
+        invoice: {
+          ...invoice,
+          client: { name: client.name, email: client.email, address: client.address, phone: client.phone },
+          lineItems
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching portal invoice detail:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/portal/invoices/:id/pdf - Download invoice PDF
+  app.get("/api/portal/invoices/:id/pdf", requirePortalUser, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.session.userId;
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+      
+      const clients = await storage.getClients();
+      const client = clients.find(c => c.userId === userId);
+      
+      if (!client) {
+        return res.status(403).json({ success: false, message: "No client account linked" });
+      }
+      
+      const invoice = await storage.getInvoice(parseInt(id));
+      
+      if (!invoice || invoice.clientId !== client.id) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+      
+      // Check if PDF exists
+      if (!invoice.pdfUrl) {
+        return res.status(404).json({ success: false, message: "PDF not available" });
+      }
+      
+      // Redirect to PDF URL
+      res.redirect(invoice.pdfUrl);
+    } catch (error) {
+      console.error("Error downloading portal invoice PDF:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
     }
   });
 

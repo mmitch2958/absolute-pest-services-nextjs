@@ -1,6 +1,6 @@
-import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, reminderLogs, reminderOptOuts, systemSettings, DEFAULT_REMINDER_SETTINGS, reviewSettings, reviewRequestLogs, DEFAULT_REVIEW_SETTINGS, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails, type InsertReminderLog, type ReminderLog, type InsertReminderOptOut, type ReminderOptOut, type InsertSystemSetting, type SystemSetting, type ReminderSettings, type ReminderType, type AppointmentType, type ReminderChannel, type ReviewSettings, type ReviewRequestLog, type InsertReviewRequestLog } from "@shared/schema";
+import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, reminderLogs, reminderOptOuts, systemSettings, DEFAULT_REMINDER_SETTINGS, reviewSettings, reviewRequestLogs, DEFAULT_REVIEW_SETTINGS, shifts, shiftTimeBlocks, shiftBreaks, timeEntryAuditLog, geocache, dailyRoutes, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails, type InsertReminderLog, type ReminderLog, type InsertReminderOptOut, type ReminderOptOut, type InsertSystemSetting, type SystemSetting, type ReminderSettings, type ReminderType, type AppointmentType, type ReminderChannel, type ReviewSettings, type ReviewRequestLog, type InsertReviewRequestLog, type InsertGeocache, type GeocacheEntry, type InsertDailyRoute, type DailyRoute, type RouteStop, type DailyRouteWithDetails } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gte, lte, lt, ilike, sql, sum } from "drizzle-orm";
+import { eq, and, or, desc, gte, lte, lt, ilike, sql, sum } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { sendInvoiceOverdueEmail } from "./email";
@@ -101,6 +101,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<User>): Promise<User>;
   authenticateUser(email: string, password: string): Promise<User | null>;
   
   // Contact operations
@@ -302,6 +303,13 @@ export interface IStorage {
   getUpcomingItems(): Promise<UpcomingItemsData>;
   getTopClients(from: Date, to: Date, limit?: number): Promise<TopClientData[]>;
   getContactSubmissionsSummary(from: Date, to: Date): Promise<ContactSubmissionSummary>;
+
+  // Route optimization operations (SC-ROUTE-001)
+  getGeocache(address: string): Promise<GeocacheEntry | undefined>;
+  setGeocache(entry: InsertGeocache): Promise<GeocacheEntry>;
+  getDailyRoute(employeeId: number, routeDate: Date): Promise<DailyRoute | undefined>;
+  createOrUpdateDailyRoute(route: InsertDailyRoute): Promise<DailyRoute>;
+  getJobLogsForRoute(employeeId: number, routeDate: Date): Promise<JobLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -339,6 +347,15 @@ export class DatabaseStorage implements IStorage {
       return null;
     }
     
+    return user;
+  }
+
+  async updateUser(id: number, updates: Partial<User>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, id))
+      .returning();
     return user;
   }
 
@@ -2145,6 +2162,130 @@ export class DatabaseStorage implements IStorage {
       })),
     };
   }
+
+  // ==========================================
+  // Route Optimization (SC-ROUTE-001)
+  // ==========================================
+
+  async getGeocache(address: string): Promise<GeocacheEntry | undefined> {
+    // Normalize address for lookup
+    const normalizedAddress = address.toLowerCase().trim();
+    const [result] = await db
+      .select()
+      .from(geocache)
+      .where(eq(geocache.addressText, normalizedAddress));
+    return result;
+  }
+
+  async setGeocache(entry: InsertGeocache): Promise<GeocacheEntry> {
+    // Normalize address for storage
+    const normalizedAddress = entry.addressText.toLowerCase().trim();
+    const [result] = await db
+      .insert(geocache)
+      .values({
+        ...entry,
+        addressText: normalizedAddress,
+      })
+      .onConflictDoUpdate({
+        target: geocache.addressText,
+        set: {
+          lat: entry.lat,
+          lng: entry.lng,
+          geocodedAt: new Date(),
+          source: entry.source || 'google',
+        },
+      })
+      .returning();
+    return result;
+  }
+
+  async getDailyRoute(employeeId: number, routeDate: Date): Promise<DailyRoute | undefined> {
+    // For DATE type, use the date portion only for comparison
+    const dateStr = routeDate.toISOString().split('T')[0];
+
+    const [result] = await db
+      .select()
+      .from(dailyRoutes)
+      .where(
+        and(
+          eq(dailyRoutes.employeeId, employeeId),
+          eq(dailyRoutes.routeDate, dateStr)
+        )
+      );
+    return result;
+  }
+
+  async createOrUpdateDailyRoute(route: InsertDailyRoute): Promise<DailyRoute> {
+    // For DATE type, use the date portion only
+    const dateStr = route.routeDate.toString().split('T')[0];
+
+    // First try to get existing route
+    const existing = await this.getDailyRoute(route.employeeId, route.routeDate);
+
+    if (existing) {
+      // Update existing route
+      const [result] = await db
+        .update(dailyRoutes)
+        .set({
+          startAddress: route.startAddress,
+          optimizedStopOrder: route.optimizedStopOrder,
+          googleMapsUrl: route.googleMapsUrl,
+          totalDistanceMeters: route.totalDistanceMeters,
+          totalDurationSeconds: route.totalDurationSeconds,
+          generatedAt: new Date(),
+          generatedBy: route.generatedBy,
+        })
+        .where(eq(dailyRoutes.id, existing.id))
+        .returning();
+      return result;
+    } else {
+      // Insert new route
+      const [result] = await db
+        .insert(dailyRoutes)
+        .values({
+          employeeId: route.employeeId,
+          routeDate: route.routeDate,
+          startAddress: route.startAddress,
+          optimizedStopOrder: route.optimizedStopOrder,
+          googleMapsUrl: route.googleMapsUrl,
+          totalDistanceMeters: route.totalDistanceMeters,
+          totalDurationSeconds: route.totalDurationSeconds,
+          generatedBy: route.generatedBy,
+        })
+        .returning();
+      return result;
+    }
+  }
+
+  async getJobLogsForRoute(employeeId: number, routeDate: Date): Promise<JobLog[]> {
+    const dateStart = new Date(routeDate);
+    dateStart.setHours(0, 0, 0, 0);
+    const dateEnd = new Date(routeDate);
+    dateEnd.setHours(23, 59, 59, 999);
+
+    // Get job logs for this employee on this date with status 'scheduled' or 'in_progress'
+    // and where siteAddress is NOT NULL (geocodable)
+    const result = await db
+      .select()
+      .from(jobLogs)
+      .where(
+        and(
+          eq(jobLogs.employeeId, employeeId),
+          gte(jobLogs.jobDate, dateStart),
+          lte(jobLogs.jobDate, dateEnd),
+          sql`${jobLogs.siteAddress} IS NOT NULL`,
+          sql`${jobLogs.siteAddress} != ''`,
+          or(
+            eq(jobLogs.status, 'scheduled'),
+            eq(jobLogs.status, 'in_progress')
+          )
+        )
+      )
+      .orderBy(jobLogs.jobDate);
+
+    return result;
+  }
 }
 
+// Export a singleton instance
 export const storage = new DatabaseStorage();

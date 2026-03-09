@@ -37,6 +37,16 @@ import FieldHistory from "@/pages/field-history";
 import FieldEmployees from "@/pages/field-employees";
 import FieldReports from "@/pages/field-reports";
 import PitchDeck from "@/pages/pitch-deck";
+import PortalLayout from "@/pages/portal/PortalLayout";
+import PortalDashboard from "@/pages/portal/PortalDashboard";
+import PortalAppointments from "@/pages/portal/PortalAppointments";
+import PortalNewAppointment from "@/pages/portal/PortalNewAppointment";
+import PortalAppointmentDetail from "@/pages/portal/PortalAppointmentDetail";
+import PortalServiceRequests from "@/pages/portal/PortalServiceRequests";
+import PortalNewServiceRequest from "@/pages/portal/PortalNewServiceRequest";
+import PortalInvoices from "@/pages/portal/PortalInvoices";
+import PortalInvoiceDetail from "@/pages/portal/PortalInvoiceDetail";
+import PortalProfile from "@/pages/portal/PortalProfile";
 
 function Router() {
   // Track page views when routes change - Google Analytics integration
@@ -116,6 +126,18 @@ function Router() {
           <AdminCalendar />
         </AdminLayout>
       </Route>
+      
+      {/* Customer Portal Routes */}
+      <Route path="/portal" component={PortalLayout} />
+      <Route path="/portal/" component={PortalDashboard} />
+      <Route path="/portal/appointments" component={PortalAppointments} />
+      <Route path="/portal/appointments/new" component={PortalNewAppointment} />
+      <Route path="/portal/appointments/:id" component={PortalAppointmentDetail} />
+      <Route path="/portal/service-requests" component={PortalServiceRequests} />
+      <Route path="/portal/service-requests/new" component={PortalNewServiceRequest} />
+      <Route path="/portal/invoices" component={PortalInvoices} />
+      <Route path="/portal/invoices/:id" component={PortalInvoiceDetail} />
+      <Route path="/portal/profile" component={PortalProfile} />
       
       <Route component={NotFound} />
     </Switch>

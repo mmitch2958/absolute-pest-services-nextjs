@@ -913,3 +913,66 @@ export interface ShiftWithDetails extends Shift {
   timeBlocks?: ShiftTimeBlock[];
   breaks?: ShiftBreak[];
 }
+
+// ============================================
+// Route Optimization Tables (SC-ROUTE-001)
+// ============================================
+
+// Geocache to avoid re-geocoding the same address
+export const geocache = pgTable("geocache", {
+  id: serial("id").primaryKey(),
+  addressText: text("address_text").notNull().unique(), // normalized address
+  lat: decimal("lat", { precision: 10, scale: 7 }),
+  lng: decimal("lng", { precision: 10, scale: 7 }),
+  geocodedAt: timestamp("geocoded_at").defaultNow().notNull(),
+  source: text("source").notNull().default("google"), // 'google', 'manual'
+});
+
+// Store optimized routes per tech per day
+export const dailyRoutes = pgTable("daily_routes", {
+  id: serial("id").primaryKey(),
+  employeeId: integer("employee_id").notNull().references(() => fieldEmployees.id),
+  routeDate: date("route_date").notNull(),
+  startAddress: text("start_address"), // depot/starting address
+  optimizedStopOrder: jsonb("optimized_stop_order").notNull(), 
+  // [{jobLogId, sequence, estimatedArrival, driveDurationSeconds, lat, lng, customerName, address}]
+  googleMapsUrl: text("google_maps_url"),
+  totalDistanceMeters: integer("total_distance_meters"),
+  totalDurationSeconds: integer("total_duration_seconds"),
+  generatedAt: timestamp("generated_at").defaultNow().notNull(),
+  generatedBy: integer("generated_by").references(() => users.id),
+});
+
+// Zod schemas for route optimization
+export const insertGeocacheSchema = createInsertSchema(geocache).omit({
+  id: true,
+  geocodedAt: true,
+});
+
+export const insertDailyRouteSchema = createInsertSchema(dailyRoutes).omit({
+  id: true,
+  generatedAt: true,
+});
+
+// Route optimization types
+export type InsertGeocache = z.infer<typeof insertGeocacheSchema>;
+export type GeocacheEntry = typeof geocache.$inferSelect;
+export type InsertDailyRoute = z.infer<typeof insertDailyRouteSchema>;
+export type DailyRoute = typeof dailyRoutes.$inferSelect;
+
+// Optimized stop order item type
+export interface RouteStop {
+  sequence: number;
+  jobLogId: number;
+  customerName: string;
+  address: string;
+  estimatedArrival: string | null; // ISO timestamp
+  driveDurationSeconds: number;
+  lat: number;
+  lng: number;
+}
+
+// Daily route with employee details
+export interface DailyRouteWithDetails extends DailyRoute {
+  employee?: { id: number; name: string };
+}
