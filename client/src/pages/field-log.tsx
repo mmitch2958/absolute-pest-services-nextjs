@@ -33,6 +33,7 @@ const jobLogSchema = z.object({
   customerName: z.string().min(1, "Customer name is required"),
   clientId: z.number().nullable().optional(),
   siteLocation: z.string().min(1, "Site location is required"),
+  siteAddress: z.string().optional(),
   servicedArea: z.string().min(1, "Serviced area is required"),
   workPerformed: z.string().min(1, "Work performed is required"),
   jobDate: z.string().min(1, "Job date is required"),
@@ -399,6 +400,7 @@ export default function FieldLog() {
       customerName: "",
       clientId: null,
       siteLocation: "",
+      siteAddress: "",
       servicedArea: "",
       workPerformed: "",
       jobDate: new Date().toISOString().split("T")[0],
@@ -636,6 +638,7 @@ export default function FieldLog() {
           customerName: first,
           clientId: matchedClient?.id || null,
           siteLocation: "",
+          siteAddress: matchedClient?.address || "",
           servicedArea: "",
           workPerformed: "",
           jobDate: new Date().toISOString().split("T")[0],
@@ -748,11 +751,34 @@ export default function FieldLog() {
                         onSetAddingNew={setLocationAddingNew}
                         onChange={(val) => {
                           field.onChange(val);
+                          // Try to pre-fill address from client data if available
+                          const matchedClient = clients.find(c => c.name === selectedCustomer);
+                          if (matchedClient && matchedClient.address) {
+                            form.setValue("siteAddress", matchedClient.address);
+                          }
                           form.setValue("servicedArea", "");
                           setAreaAddingNew(false);
                         }}
                         placeholder="Enter new site location"
                       />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="siteAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Site Address <span className="text-muted-foreground text-xs">(optional)</span></FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter site address (street, suite, etc.)"
+                          className="h-12 text-base"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

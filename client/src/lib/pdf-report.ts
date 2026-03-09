@@ -266,6 +266,7 @@ export interface JobReceiptData {
   id: number;
   customerName: string;
   siteLocation: string;
+  siteAddress?: string;
   servicedArea: string;
   workPerformed: string;
   jobDate: string;
@@ -344,6 +345,14 @@ export async function generateJobReceipt(data: JobReceiptData) {
   doc.text("Location:", margin, y);
   doc.setFont("helvetica", "normal");
   doc.text(data.siteLocation, margin + 25, y);
+
+  if (data.siteAddress) {
+    y += 7;
+    doc.setFont("helvetica", "bold");
+    doc.text("Address:", margin, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(data.siteAddress, margin + 25, y);
+  }
 
   y += 7;
   doc.setFont("helvetica", "bold");

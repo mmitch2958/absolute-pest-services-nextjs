@@ -51,7 +51,7 @@ export function ContractManagement() {
   const customers: any[] = (customersData as any)?.clients ?? [];
 
   const { data: employeesData } = useQuery({
-    queryKey: ["/api/field/employees"],
+    queryKey: ["/api/admin/field-employees"],
   });
   const employees: any[] = (employeesData as any)?.employees ?? [];
 

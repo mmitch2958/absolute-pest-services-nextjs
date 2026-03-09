@@ -343,6 +343,7 @@ export function AdminReports() {
         id: log.id,
         customerName: log.customerName,
         siteLocation: log.siteLocation,
+        siteAddress: log.siteAddress,
         servicedArea: log.servicedArea,
         workPerformed: log.workPerformed,
         jobDate: log.jobDate,
