@@ -108,7 +108,7 @@ Admin can create a new job from the admin portal with full control over all fiel
 **Required Fields (create form):**
 | Field | Source | Required | Notes |
 |-------|--------|----------|-------|
-| `employeeId` | `field_employees` dropdown | ❌ | Default "none" - can be assigned later |
+| `employeeId` | `field_employees` dropdown | ❌ | Default "Unassigned" - can be assigned later |
 | `clientId` | `clients` dropdown + search | ✅ | Select or search existing client |
 | `customerName` | Auto-filled from client | ✅ | Editable override |
 | `jobDate` | Date + time picker | ✅ | Stored as `timestamp` |

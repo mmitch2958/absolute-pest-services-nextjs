@@ -4117,7 +4117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const jobsWithEmployees = jobs.map(job => ({
         ...job,
-        employeeName: employeeMap.get(job.employeeId) || "Unknown",
+        employeeName: job.employeeId ? (employeeMap.get(job.employeeId) || "Unknown") : "Unassigned",
       }));
 
       res.json({ success: true, scheduledJobs: jobsWithEmployees });
@@ -4146,7 +4146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true, 
         job: {
           ...job,
-          employeeName: employeeMap.get(job.employeeId) || "Unknown",
+          employeeName: job.employeeId ? (employeeMap.get(job.employeeId) || "Unknown") : "Unassigned",
         },
         scheduleLogs 
       });
@@ -4161,12 +4161,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { customerName, clientId, siteLocation, siteAddress, servicedArea, workPerformed, jobDate, employeeId, priority, adminNotes, scheduledEndTime } = req.body;
 
-      if (!customerName || !siteLocation || !servicedArea || !jobDate || !employeeId) {
-        return res.status(400).json({ success: false, message: "Missing required fields" });
+      // employeeId is optional - if not provided or null, job will be unassigned
+      if (!customerName || !siteLocation || !servicedArea || !jobDate) {
+        return res.status(400).json({ success: false, message: "Missing required fields: customerName, siteLocation, servicedArea, jobDate" });
       }
 
       const job = await storage.createScheduledJob({
-        employeeId,
+        employeeId: employeeId || null,
         customerName,
         clientId: clientId || null,
         siteLocation,
@@ -4333,6 +4334,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: "Job completed", job });
     } catch (error) {
       console.error("Error completing scheduled job:", error);
+      if (error instanceof Error) {
+        return res.status(400).json({ success: false, message: error.message });
+      }
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/field/jobs/unassigned - Get unassigned scheduled jobs
+  app.get("/api/field/jobs/unassigned", requireFieldAuth, async (req, res) => {
+    try {
+      const filters: any = {};
+      if (req.query.dateFrom) filters.dateFrom = new Date(req.query.dateFrom as string);
+      if (req.query.dateTo) filters.dateTo = new Date(req.query.dateTo as string);
+      if (req.query.status) filters.status = req.query.status as string;
+
+      const jobs = await storage.getUnassignedScheduledJobs(filters);
+      res.json({ success: true, jobs });
+    } catch (error) {
+      console.error("Error fetching unassigned jobs:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/field/jobs/:id/claim - Claim an unassigned scheduled job
+  app.post("/api/field/jobs/:id/claim", requireFieldAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const employeeId = req.session.fieldEmployeeId;
+
+      const job = await storage.claimScheduledJob(id, employeeId);
+      res.json({ success: true, message: "Job claimed successfully", job });
+    } catch (error) {
+      console.error("Error claiming job:", error);
       if (error instanceof Error) {
         return res.status(400).json({ success: false, message: error.message });
       }

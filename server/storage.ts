@@ -326,6 +326,10 @@ export interface IStorage {
   getScheduledJobs(filters?: { employeeId?: number; dateFrom?: Date; dateTo?: Date; status?: string }): Promise<JobLog[]>;
   
   // Field operations for scheduled jobs
+  // Get unassigned scheduled jobs (for field tech to claim)
+  getUnassignedScheduledJobs(filters?: { dateFrom?: Date; dateTo?: Date; status?: string }): Promise<JobLog[]>;
+  // Claim an unassigned scheduled job (field tech)
+  claimScheduledJob(jobLogId: number, employeeId: number): Promise<JobLog>;
   // Start a scheduled job (field tech)
   startScheduledJob(jobLogId: number, employeeId: number): Promise<JobLog>;
   // Complete a scheduled job (field tech)
@@ -2523,6 +2527,58 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(jobLogs).orderBy(jobLogs.jobDate);
   }
 
+  async getUnassignedScheduledJobs(filters?: { dateFrom?: Date; dateTo?: Date; status?: string }): Promise<JobLog[]> {
+    // Get jobs where employeeId is NULL (unassigned)
+    const conditions = [eq(jobLogs.employeeId, null)];
+    
+    if (filters?.dateFrom) {
+      conditions.push(gte(jobLogs.jobDate, filters.dateFrom));
+    }
+    if (filters?.dateTo) {
+      conditions.push(lte(jobLogs.jobDate, filters.dateTo));
+    }
+    if (filters?.status) {
+      conditions.push(eq(jobLogs.status, filters.status));
+    } else {
+      // Default to showing scheduled jobs if no status filter
+      conditions.push(eq(jobLogs.status, 'scheduled'));
+    }
+
+    return await db.select().from(jobLogs).where(and(...conditions)).orderBy(jobLogs.jobDate);
+  }
+
+  async claimScheduledJob(jobLogId: number, employeeId: number): Promise<JobLog> {
+    const existing = await this.getJobLog(jobLogId);
+    if (!existing) {
+      throw new Error("Job log not found");
+    }
+
+    if (existing.employeeId !== null) {
+      throw new Error("This job is already assigned to someone else");
+    }
+
+    if (existing.status !== "scheduled") {
+      throw new Error("Job is not in scheduled status");
+    }
+
+    const [updated] = await db
+      .update(jobLogs)
+      .set({ employeeId })
+      .where(eq(jobLogs.id, jobLogId))
+      .returning();
+
+    // Log the claim in schedule audit
+    await this.createJobScheduleLog({
+      jobLogId,
+      action: "claimed",
+      performedBy: employeeId,
+      previousValue: { employeeId: null },
+      newValue: { employeeId },
+    });
+
+    return updated;
+  }
+
   async startScheduledJob(jobLogId: number, employeeId: number): Promise<JobLog> {
     const existing = await this.getJobLog(jobLogId);
     if (!existing) {
@@ -2642,6 +2698,4 @@ export class DatabaseStorage implements IStorage {
 }
 
 // Export a singleton instance
-export const storage = new DatabaseStorage();
-}
 export const storage = new DatabaseStorage();

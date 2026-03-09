@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, varchar, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, varchar, jsonb, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -260,7 +260,7 @@ export const fieldEmployees = pgTable("field_employees", {
 
 export const jobLogs = pgTable("job_logs", {
   id: serial("id").primaryKey(),
-  employeeId: integer("employee_id").notNull().references(() => fieldEmployees.id),
+  employeeId: integer("employee_id").references(() => fieldEmployees.id), // nullable for unassigned jobs
   customerName: text("customer_name").notNull(),
   clientId: integer("client_id").references(() => clients.id),
   siteLocation: text("site_location").notNull(),
