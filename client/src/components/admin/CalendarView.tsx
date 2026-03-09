@@ -14,16 +14,22 @@ export function CalendarView() {
   const startDate = startOfWeek(monthStart);
   const endDate = endOfWeek(monthEnd);
 
-  const { data: visits, isLoading } = useQuery({
-    queryKey: ["/api/admin/service-contracts/calendar", {
-      from: format(startDate, 'yyyy-MM-dd'),
-      to: format(endDate, 'yyyy-MM-dd'),
-    }],
+  const fromParam = format(startDate, 'yyyy-MM-dd');
+  const toParam = format(endDate, 'yyyy-MM-dd');
+
+  const { data: calendarData, isLoading } = useQuery({
+    queryKey: [`/api/admin/service-contracts/calendar?from=${fromParam}&to=${toParam}`],
   });
 
+  // API returns { success: true, contracts: ServiceContract[] }
+  // Each contract has nextScheduledDate (the scheduled date) and no customerName yet
+  const visits: any[] = (calendarData as any)?.contracts ?? [];
+
   const getDayVisits = (day: Date) => {
-    if (!visits) return [];
-    return visits.filter((v: any) => isSameDay(new Date(v.scheduledDate), day));
+    return visits.filter((v: any) => {
+      const dateField = v.scheduledDate ?? v.nextScheduledDate;
+      return dateField && isSameDay(new Date(dateField), day);
+    });
   };
 
   const days = eachDayOfInterval({ start: startDate, end: endDate });
@@ -38,6 +44,7 @@ export function CalendarView() {
   };
 
   if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading calendar...</div>;
+  if (!calendarData) return null;
 
   return (
     <div className="space-y-4">
@@ -83,10 +90,10 @@ export function CalendarView() {
                   </div>
                   
                   <div className="space-y-1">
-                    {dayVisits.slice(0, 3).map((visit: any, vIdx) => (
+                    {dayVisits.slice(0, 3).map((visit: any, vIdx: number) => (
                       <div key={vIdx} className="text-xs truncate bg-secondary/30 rounded px-1.5 py-0.5 flex items-center gap-1.5">
                         <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getDotColor(visit.frequency)}`} />
-                        {visit.customerName || `Visit #${visit.id}`}
+                        {visit.customerName || visit.siteLocation || `Contract #${visit.id}`}
                       </div>
                     ))}
                     {dayVisits.length > 3 && (
@@ -103,20 +110,20 @@ export function CalendarView() {
                       <Badge variant="secondary">{dayVisits.length} visits</Badge>
                     </h4>
                     <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-                      {dayVisits.map((visit: any, vIdx) => (
+                      {dayVisits.map((visit: any, vIdx: number) => (
                         <div key={vIdx} className="space-y-1.5 text-sm p-2 rounded border bg-card">
                           <div className="font-medium flex items-center gap-2">
                             <span className={`w-2 h-2 rounded-full ${getDotColor(visit.frequency)}`} />
-                            {visit.customerName || "Customer"} 
+                            {visit.customerName || visit.siteLocation || `Contract #${visit.id}`}
                             <Badge variant="outline" className="ml-auto text-xs capitalize">{visit.frequency}</Badge>
                           </div>
                           <div className="text-xs text-muted-foreground flex items-center gap-1.5">
                             <MapPin className="h-3 w-3" />
-                            {visit.siteLocationName || visit.servicedAreaName || "Main Location"}
+                            {visit.siteLocationName || visit.siteLocation || visit.servicedArea || "Main Location"}
                           </div>
                           <div className="text-xs text-muted-foreground flex items-center gap-1.5">
                             <User className="h-3 w-3" />
-                            {visit.assignedEmployeeName || "Unassigned"}
+                            {visit.assignedEmployeeName || (visit.assignedEmployeeId ? `Employee #${visit.assignedEmployeeId}` : "Unassigned")}
                           </div>
                         </div>
                       ))}

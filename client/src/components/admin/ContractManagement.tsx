@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Plus, Edit2, Calendar, FileText } from "lucide-react";
+import { Plus, Edit2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,17 +40,20 @@ export function ContractManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<any | null>(null);
 
-  const { data: contracts, isLoading } = useQuery({
+  const { data: contractsData, isLoading } = useQuery({
     queryKey: ["/api/admin/service-contracts"],
   });
-  
-  const { data: customers } = useQuery({
-    queryKey: ["/api/field/customers"],
-  });
+  const contracts: any[] = (contractsData as any)?.contracts ?? [];
 
-  const { data: employees } = useQuery({
+  const { data: customersData } = useQuery({
+    queryKey: ["/api/clients"],
+  });
+  const customers: any[] = (customersData as any)?.clients ?? [];
+
+  const { data: employeesData } = useQuery({
     queryKey: ["/api/field/employees"],
   });
+  const employees: any[] = (employeesData as any)?.employees ?? [];
 
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -94,20 +97,44 @@ export function ContractManagement() {
     }
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`/api/admin/service-contracts/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete contract");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/service-contracts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/service-contracts/calendar"] });
+      toast({ title: "Deleted", description: "Contract deleted successfully" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  });
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const data = {
+    const data: Record<string, unknown> = {
       customerId: Number(formData.get("customerId")),
-      siteLocationId: formData.get("siteLocationId") ? Number(formData.get("siteLocationId")) : undefined,
-      servicedAreaId: formData.get("servicedAreaId") ? Number(formData.get("servicedAreaId")) : undefined,
+      siteLocation: formData.get("siteLocation") as string,
+      servicedArea: formData.get("servicedArea") as string,
       frequency: formData.get("frequency"),
-      assignedEmployeeId: formData.get("assignedEmployeeId") ? Number(formData.get("assignedEmployeeId")) : undefined,
-      startDate: formData.get("startDate"),
-      endDate: formData.get("endDate") || undefined,
-      defaultWorkTemplate: formData.get("defaultWorkTemplate") || undefined,
+      assignedEmployeeId: formData.get("assignedEmployeeId") ? Number(formData.get("assignedEmployeeId")) : null,
+      startDate: formData.get("startDate") || null,
+      endDate: formData.get("endDate") || null,
+      defaultWorkTemplate: formData.get("defaultWorkTemplate") || null,
       isActive: formData.get("isActive") === "on",
     };
+    // nextScheduledDate is required on create; on edit it keeps existing value if not provided
+    const nextScheduledDateVal = formData.get("nextScheduledDate") as string;
+    if (nextScheduledDateVal) {
+      data.nextScheduledDate = nextScheduledDateVal;
+    } else if (!editingContract) {
+      // Default to start date if creating
+      data.nextScheduledDate = data.startDate as string || new Date().toISOString().split("T")[0];
+    }
     saveMutation.mutate(data);
   };
 
@@ -140,9 +167,9 @@ export function ContractManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {contracts?.map((contract: any) => {
-              const customerName = customers?.find((c: any) => c.id === contract.customerId)?.name || "Unknown Customer";
-              const employeeName = employees?.find((e: any) => e.id === contract.assignedEmployeeId)?.name || "Unassigned";
+            {contracts.map((contract: any) => {
+              const customerName = customers.find((c: any) => c.id === contract.customerId)?.name || "Unknown Customer";
+              const employeeName = employees.find((e: any) => e.id === contract.assignedEmployeeId)?.name || "Unassigned";
               
               return (
                 <TableRow key={contract.id}>
@@ -166,11 +193,22 @@ export function ContractManagement() {
                     >
                       {contract.isActive ? "Deactivate" : "Activate"}
                     </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm(`Delete contract for ${customerName}? This cannot be undone.`)) {
+                          deleteMutation.mutate(contract.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               );
             })}
-            {(!contracts || contracts.length === 0) && (
+            {contracts.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   No contracts found. Complete contracts to get started.
@@ -193,7 +231,7 @@ export function ContractManagement() {
                 <Select name="customerId" defaultValue={editingContract?.customerId?.toString()} required>
                   <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
                   <SelectContent>
-                    {customers?.map((c: any) => (
+                    {customers.map((c: any) => (
                       <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -212,10 +250,23 @@ export function ContractManagement() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input type="date" name="startDate" defaultValue={editingContract?.startDate ? format(new Date(editingContract.startDate), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd')} required />
+                <Label htmlFor="siteLocation">Site Location</Label>
+                <Input name="siteLocation" defaultValue={editingContract?.siteLocation || ""} placeholder="e.g. Main Building" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="servicedArea">Serviced Area</Label>
+                <Input name="servicedArea" defaultValue={editingContract?.servicedArea || ""} placeholder="e.g. Cafeteria" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="nextScheduledDate">Next Scheduled Date</Label>
+                <Input type="date" name="nextScheduledDate" defaultValue={editingContract?.nextScheduledDate ? format(new Date(editingContract.nextScheduledDate), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd')} required={!editingContract} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="startDate">Contract Start Date</Label>
+                <Input type="date" name="startDate" defaultValue={editingContract?.startDate ? format(new Date(editingContract.startDate), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd')} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="endDate">End Date (Optional)</Label>
@@ -224,11 +275,11 @@ export function ContractManagement() {
 
               <div className="space-y-2">
                 <Label htmlFor="assignedEmployeeId">Assigned Employee</Label>
-                <Select name="assignedEmployeeId" defaultValue={editingContract?.assignedEmployeeId?.toString()}>
+                <Select name="assignedEmployeeId" defaultValue={editingContract?.assignedEmployeeId?.toString() ?? ""}>
                   <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Unassigned</SelectItem>
-                    {employees?.map((e: any) => (
+                    {employees.map((e: any) => (
                       <SelectItem key={e.id} value={e.id.toString()}>{e.name}</SelectItem>
                     ))}
                   </SelectContent>

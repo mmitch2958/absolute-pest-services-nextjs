@@ -1815,7 +1815,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const customerId = req.query.customerId ? parseInt(req.query.customerId as string) : undefined;
       const isActive = req.query.isActive !== undefined ? req.query.isActive === "true" : undefined;
-      const contracts = await storage.getServiceContracts({ customerId, isActive });
+      const assignedEmployeeId = req.query.assignedEmployeeId ? parseInt(req.query.assignedEmployeeId as string) : undefined;
+      const contracts = await storage.getServiceContracts({ customerId, isActive, assignedEmployeeId });
       res.json({ success: true, contracts });
     } catch (error) {
       console.error("Error fetching service contracts:", error);
@@ -1894,7 +1895,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/service-contracts/:id/generate-job", requireAdmin, async (req, res) => {
     try {
       const contractId = parseInt(req.params.id);
-      
+
+      // Fetch contract first for pre-checks
+      const contract = await storage.getServiceContract(contractId);
+      if (!contract) {
+        return res.status(404).json({ success: false, message: "Service contract not found" });
+      }
+
+      // Check contract is active
+      if (!contract.isActive) {
+        return res.status(400).json({ success: false, message: "Cannot generate job from an inactive contract" });
+      }
+
+      // Require an assigned technician
+      if (!contract.assignedEmployeeId) {
+        return res.status(400).json({ success: false, message: "Contract has no assigned technician — assign one before generating a job" });
+      }
+
+      // Idempotency check: prevent duplicate generation within the same frequency window
+      if (contract.lastGeneratedJobDate) {
+        const now = new Date();
+        const last = new Date(contract.lastGeneratedJobDate);
+        let windowMs = 28 * 24 * 60 * 60 * 1000; // monthly default
+        if (contract.frequency === "weekly")    windowMs = 7  * 24 * 60 * 60 * 1000;
+        if (contract.frequency === "quarterly") windowMs = 84 * 24 * 60 * 60 * 1000;
+        if (contract.frequency === "bi-annual") windowMs = 180 * 24 * 60 * 60 * 1000;
+        if (contract.frequency === "annual")    windowMs = 365 * 24 * 60 * 60 * 1000;
+        if (now.getTime() - last.getTime() < windowMs) {
+          return res.status(409).json({
+            success: false,
+            message: "A job has already been generated for this contract in the current cycle",
+            lastGeneratedJobDate: contract.lastGeneratedJobDate,
+          });
+        }
+      }
+
       const result = await storage.generateJobFromContract(contractId);
       res.json({ 
         success: true, 

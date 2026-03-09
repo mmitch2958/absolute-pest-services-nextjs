@@ -3,6 +3,19 @@ import { db } from "./db";
 import { eq, and, desc, gte, lte, ilike } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
+function advanceNextScheduledDate(current: Date, frequency: string): Date {
+  const next = new Date(current);
+  switch (frequency) {
+    case "weekly":    next.setDate(next.getDate() + 7); break;
+    case "monthly":   next.setMonth(next.getMonth() + 1); break;
+    case "quarterly": next.setMonth(next.getMonth() + 3); break;
+    case "bi-annual": next.setMonth(next.getMonth() + 6); break;
+    case "annual":    next.setFullYear(next.getFullYear() + 1); break;
+    default:          next.setMonth(next.getMonth() + 1);
+  }
+  return next;
+}
+
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
@@ -718,7 +731,7 @@ export class DatabaseStorage implements IStorage {
     const jobLog = await db
       .insert(jobLogs)
       .values({
-        employeeId: contract.assignedEmployeeId || 1, // Default to employee 1 if not assigned
+        employeeId: contract.assignedEmployeeId!,
         customerName: await this.getCustomerName(contract.customerId),
         clientId: contract.customerId,
         siteLocation: contract.siteLocation,
@@ -726,15 +739,19 @@ export class DatabaseStorage implements IStorage {
         servicedArea: contract.servicedArea,
         workPerformed: contract.defaultWorkTemplate || "Scheduled service",
         jobDate: contract.nextScheduledDate,
-        status: "completed",
+        status: "scheduled",
         createdAt: new Date(),
       })
       .returning();
+
+    // Advance nextScheduledDate by frequency interval
+    const nextDate = advanceNextScheduledDate(contract.nextScheduledDate, contract.frequency);
 
     const updatedContract = await db
       .update(serviceContracts)
       .set({
         lastGeneratedJobDate: new Date(),
+        nextScheduledDate: nextDate,
         updatedAt: new Date(),
       })
       .where(eq(serviceContracts.id, contractId))
