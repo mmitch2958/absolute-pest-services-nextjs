@@ -1,4 +1,4 @@
-import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails } from "@shared/schema";
+import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, reminderLogs, reminderOptOuts, systemSettings, DEFAULT_REMINDER_SETTINGS, reviewSettings, reviewRequestLogs, DEFAULT_REVIEW_SETTINGS, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails, type InsertReminderLog, type ReminderLog, type InsertReminderOptOut, type ReminderOptOut, type InsertSystemSetting, type SystemSetting, type ReminderSettings, type ReminderType, type AppointmentType, type ReminderChannel, type ReviewSettings, type ReviewRequestLog, type InsertReviewRequestLog } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gte, lte, lt, ilike, sql, sum } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -246,6 +246,51 @@ export interface IStorage {
 
   // Invoice from job log
   createInvoiceFromJobLog(jobLogId: number, dueDate: Date, createdBy: number): Promise<Invoice>;
+
+  // Reminder operations (SC-REMINDERS-001)
+  getReminderLogs(appointmentType?: AppointmentType, appointmentId?: number, limit?: number): Promise<ReminderLog[]>;
+  createReminderLog(log: InsertReminderLog): Promise<ReminderLog>;
+  getReminderLogByAppointment(appointmentType: AppointmentType, appointmentId: number, reminderType: ReminderType, channel: ReminderChannel): Promise<ReminderLog | undefined>;
+  deleteReminderLog(id: number): Promise<void>;
+  
+  // Opt-out operations
+  getReminderOptOuts(): Promise<ReminderOptOut[]>;
+  getReminderOptOutByToken(token: string): Promise<ReminderOptOut | undefined>;
+  getReminderOptOutByEmail(email: string): Promise<ReminderOptOut | undefined>;
+  getReminderOptOutByPhone(phone: string): Promise<ReminderOptOut | undefined>;
+  createReminderOptOut(optOut: InsertReminderOptOut & { token: string }): Promise<ReminderOptOut>;
+  deleteReminderOptOut(id: number): Promise<void>;
+  
+  // System settings operations
+  getSystemSetting(key: string): Promise<string | undefined>;
+  getAllReminderSettings(): Promise<ReminderSettings>;
+  setSystemSetting(key: string, value: string, updatedBy?: number): Promise<SystemSetting>;
+  setReminderSettings(settings: Partial<ReminderSettings>, updatedBy?: number): Promise<ReminderSettings>;
+  
+  // Reminder query operations - get appointments needing reminders
+  getInspectionsFor24hReminder(): Promise<InspectionSchedule[]>;
+  getInspectionsForSameDayReminder(): Promise<InspectionSchedule[]>;
+  getServiceRequestsFor24hReminder(): Promise<ServiceRequest[]>;
+  getServiceRequestsForSameDayReminder(): Promise<ServiceRequest[]>;
+  getJobLogsFor24hReminder(): Promise<JobLog[]>;
+  getJobLogsForSameDayReminder(): Promise<JobLog[]>;
+
+  // Review request operations (SC-REVIEWS-001)
+  getReviewSettings(): Promise<ReviewSettings>;
+  updateReviewSettings(settings: Partial<ReviewSettings>): Promise<ReviewSettings>;
+  createReviewRequestLog(log: InsertReviewRequestLog): Promise<ReviewRequestLog>;
+  getReviewRequestLogByJobLogId(jobLogId: number): Promise<ReviewRequestLog | undefined>;
+  getReviewRequestLogByInvoiceId(invoiceId: number): Promise<ReviewRequestLog | undefined>;
+  getPendingReviewRequests(): Promise<ReviewRequestLog[]>;
+  updateReviewRequestLog(id: number, updates: Partial<ReviewRequestLog>): Promise<ReviewRequestLog>;
+  getReviewRequestLogs(options?: { limit?: number; offset?: number; status?: string; clientId?: number }): Promise<{ logs: ReviewRequestLog[]; total: number }>;
+  deleteReviewRequestLog(id: number): Promise<void>;
+  getClientById(id: number): Promise<Client | undefined>;
+  getJobLogById(id: number): Promise<JobLog | undefined>;
+  getInvoiceById(id: number): Promise<Invoice | undefined>;
+  updateClient(id: number, updates: Partial<Client>): Promise<Client>;
+  hasRecentReviewRequest(clientId: number, days: number): Promise<boolean>;
+  countReviewRequestsSentThisYear(clientId: number): Promise<number>;
 
   // Analytics operations
   getAnalyticsOverview(from: Date, to: Date): Promise<AnalyticsOverview>;
@@ -1362,6 +1407,359 @@ export class DatabaseStorage implements IStorage {
     });
 
     return (await this.getInvoice(invoice.id))!;
+  }
+
+  // ==========================================
+  // Reminder Implementations (SC-REMINDERS-001)
+  // ==========================================
+
+  async getReminderLogs(appointmentType?: AppointmentType, appointmentId?: number, limit = 50): Promise<ReminderLog[]> {
+    let query = db.select().from(reminderLogs).orderBy(desc(reminderLogs.sentAt)).limit(limit);
+    
+    if (appointmentType && appointmentId) {
+      return await db.select().from(reminderLogs)
+        .where(and(
+          eq(reminderLogs.appointmentType, appointmentType),
+          eq(reminderLogs.appointmentId, appointmentId)
+        ))
+        .orderBy(desc(reminderLogs.sentAt))
+        .limit(limit);
+    } else if (appointmentType) {
+      return await db.select().from(reminderLogs)
+        .where(eq(reminderLogs.appointmentType, appointmentType))
+        .orderBy(desc(reminderLogs.sentAt))
+        .limit(limit);
+    }
+    
+    return await query;
+  }
+
+  async createReminderLog(log: InsertReminderLog): Promise<ReminderLog> {
+    const [created] = await db.insert(reminderLogs).values(log).returning();
+    return created;
+  }
+
+  async getReminderLogByAppointment(appointmentType: AppointmentType, appointmentId: number, reminderType: ReminderType, channel: ReminderChannel): Promise<ReminderLog | undefined> {
+    const [log] = await db.select().from(reminderLogs).where(and(
+      eq(reminderLogs.appointmentType, appointmentType),
+      eq(reminderLogs.appointmentId, appointmentId),
+      eq(reminderLogs.reminderType, reminderType),
+      eq(reminderLogs.channel, channel)
+    ));
+    return log || undefined;
+  }
+
+  async deleteReminderLog(id: number): Promise<void> {
+    await db.delete(reminderLogs).where(eq(reminderLogs.id, id));
+  }
+
+  // Opt-out operations
+  async getReminderOptOuts(): Promise<ReminderOptOut[]> {
+    return await db.select().from(reminderOptOuts).orderBy(desc(reminderOptOuts.optedOutAt));
+  }
+
+  async getReminderOptOutByToken(token: string): Promise<ReminderOptOut | undefined> {
+    const [optOut] = await db.select().from(reminderOptOuts).where(eq(reminderOptOuts.token, token));
+    return optOut || undefined;
+  }
+
+  async getReminderOptOutByEmail(email: string): Promise<ReminderOptOut | undefined> {
+    const [optOut] = await db.select().from(reminderOptOuts).where(eq(reminderOptOuts.email, email.toLowerCase()));
+    return optOut || undefined;
+  }
+
+  async getReminderOptOutByPhone(phone: string): Promise<ReminderOptOut | undefined> {
+    const [optOut] = await db.select().from(reminderOptOuts).where(eq(reminderOptOuts.phone, phone));
+    return optOut || undefined;
+  }
+
+  async createReminderOptOut(optOut: InsertReminderOptOut & { token: string }): Promise<ReminderOptOut> {
+    const [created] = await db.insert(reminderOptOuts).values({
+      ...optOut,
+      email: optOut.email?.toLowerCase(),
+      phone: optOut.phone,
+    }).returning();
+    return created;
+  }
+
+  async deleteReminderOptOut(id: number): Promise<void> {
+    await db.delete(reminderOptOuts).where(eq(reminderOptOuts.id, id));
+  }
+
+  // System settings operations
+  async getSystemSetting(key: string): Promise<string | undefined> {
+    const [setting] = await db.select().from(systemSettings).where(eq(systemSettings.key, key));
+    return setting?.value;
+  }
+
+  async getAllReminderSettings(): Promise<ReminderSettings> {
+    const settings: ReminderSettings = { ...DEFAULT_REMINDER_SETTINGS };
+    
+    for (const key of Object.keys(DEFAULT_REMINDER_SETTINGS)) {
+      const value = await this.getSystemSetting(key);
+      if (value !== undefined) {
+        // Parse based on expected type
+        if (key === 'reminder_time_hour') {
+          settings[key as keyof ReminderSettings] = parseInt(value, 10) as any;
+        } else if (key.endsWith('_enabled')) {
+          settings[key as keyof ReminderSettings] = (value === 'true') as any;
+        } else {
+          (settings as any)[key] = value;
+        }
+      }
+    }
+    
+    return settings;
+  }
+
+  async setSystemSetting(key: string, value: string, updatedBy?: number): Promise<SystemSetting> {
+    const [setting] = await db.insert(systemSettings)
+      .values({ key, value, updatedBy })
+      .onConflictDoUpdate({
+        target: systemSettings.key,
+        set: { value, updatedBy, updatedAt: new Date() }
+      })
+      .returning();
+    return setting;
+  }
+
+  async setReminderSettings(settings: Partial<ReminderSettings>, updatedBy?: number): Promise<ReminderSettings> {
+    for (const [key, value] of Object.entries(settings)) {
+      await this.setSystemSetting(key, String(value), updatedBy);
+    }
+    return this.getAllReminderSettings();
+  }
+
+  // ============================================
+  // Review Request Operations (SC-REVIEWS-001)
+  // ============================================
+
+  async getReviewSettings(): Promise<ReviewSettings> {
+    const settings: ReviewSettings = { ...DEFAULT_REVIEW_SETTINGS, id: 1, updatedAt: new Date() };
+    
+    const keys = [
+      'review_enabled', 'review_delay_hours', 'review_google_link', 
+      'review_facebook_link', 'review_cooldown_days', 
+      'review_trigger_job_completion', 'review_trigger_invoice_paid',
+      'review_custom_message'
+    ];
+    
+    for (const key of keys) {
+      const value = await this.getSystemSetting(key);
+      if (value !== undefined) {
+        const settingKey = key.replace('review_', '').replace('_enabled', 'Enabled');
+        switch (settingKey) {
+          case 'delayHours':
+          case 'cooldownDays':
+            (settings as any)[settingKey] = parseInt(value, 10);
+            break;
+          case 'googleReviewLink':
+          case 'facebookReviewLink':
+          case 'customMessage':
+            (settings as any)[settingKey] = value;
+            break;
+          case 'enabled':
+          case 'triggerJobCompletion':
+          case 'triggerInvoicePaid':
+            (settings as any)[settingKey] = value === 'true';
+            break;
+        }
+      }
+    }
+    
+    return settings;
+  }
+
+  async updateReviewSettings(updates: Partial<ReviewSettings>): Promise<ReviewSettings> {
+    const settingMap: Record<string, string> = {
+      'enabled': 'review_enabled',
+      'delayHours': 'review_delay_hours',
+      'googleReviewLink': 'review_google_link',
+      'facebookReviewLink': 'review_facebook_link',
+      'cooldownDays': 'review_cooldown_days',
+      'triggerJobCompletion': 'review_trigger_job_completion',
+      'triggerInvoicePaid': 'review_trigger_invoice_paid',
+      'customMessage': 'review_custom_message',
+    };
+
+    for (const [key, value] of Object.entries(updates)) {
+      const settingKey = settingMap[key];
+      if (settingKey) {
+        await this.setSystemSetting(settingKey, String(value));
+      }
+    }
+    return this.getReviewSettings();
+  }
+
+  async createReviewRequestLog(log: InsertReviewRequestLog): Promise<ReviewRequestLog> {
+    const [created] = await db.insert(reviewRequestLogs).values(log).returning();
+    return created;
+  }
+
+  async getReviewRequestLogByJobLogId(jobLogId: number): Promise<ReviewRequestLog | undefined> {
+    const [log] = await db.select().from(reviewRequestLogs).where(sql`${reviewRequestLogs.jobLogId} = ${jobLogId}`);
+    return log;
+  }
+
+  async getReviewRequestLogByInvoiceId(invoiceId: number): Promise<ReviewRequestLog | undefined> {
+    const [log] = await db.select().from(reviewRequestLogs).where(sql`${reviewRequestLogs.invoiceId} = ${invoiceId}`);
+    return log;
+  }
+
+  async getPendingReviewRequests(): Promise<ReviewRequestLog[]> {
+    return await db.select().from(reviewRequestLogs).where(and(
+      sql`${reviewRequestLogs.status} = 'pending'`,
+      sql`${reviewRequestLogs.scheduledSendAt} <= ${new Date()}`
+    ));
+  }
+
+  async updateReviewRequestLog(id: number, updates: Partial<ReviewRequestLog>): Promise<ReviewRequestLog> {
+    const [updated] = await db.update(reviewRequestLogs)
+      .set(updates)
+      .where(sql`${reviewRequestLogs.id} = ${id}`)
+      .returning();
+    return updated;
+  }
+
+  async getReviewRequestLogs(options?: { limit?: number; offset?: number; status?: string; clientId?: number }): Promise<{ logs: ReviewRequestLog[]; total: number }> {
+    const limit = options?.limit || 50;
+    const offset = options?.offset || 0;
+    
+    let whereClause = undefined;
+    const conditions = [];
+    
+    if (options?.status) {
+      conditions.push(sql`${reviewRequestLogs.status} = ${options.status}`);
+    }
+    if (options?.clientId) {
+      conditions.push(sql`${reviewRequestLogs.clientId} = ${options.clientId}`);
+    }
+    
+    if (conditions.length > 0) {
+      whereClause = and(...conditions);
+    }
+
+    const logs = await db.select().from(reviewRequestLogs)
+      .where(whereClause)
+      .orderBy(sql`${reviewRequestLogs.createdAt} DESC`)
+      .limit(limit)
+      .offset(offset);
+
+    // Get total count
+    const [{ count }] = await db.select({ count: sql`COUNT(*)` }).from(reviewRequestLogs).where(whereClause);
+    
+    return { logs, total: Number(count) };
+  }
+
+  async deleteReviewRequestLog(id: number): Promise<void> {
+    await db.delete(reviewRequestLogs).where(sql`${reviewRequestLogs.id} = ${id}`);
+  }
+
+  async getClientById(id: number): Promise<Client | undefined> {
+    const [client] = await db.select().from(clients).where(sql`${clients.id} = ${id}`);
+    return client;
+  }
+
+  async getJobLogById(id: number): Promise<JobLog | undefined> {
+    const [jobLog] = await db.select().from(jobLogs).where(sql`${jobLogs.id} = ${id}`);
+    return jobLog;
+  }
+
+  async getInvoiceById(id: number): Promise<Invoice | undefined> {
+    const [invoice] = await db.select().from(invoices).where(sql`${invoices.id} = ${id}`);
+    return invoice;
+  }
+
+  async hasRecentReviewRequest(clientId: number, days: number): Promise<boolean> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    const [log] = await db.select().from(reviewRequestLogs).where(and(
+      sql`${reviewRequestLogs.clientId} = ${clientId}`,
+      sql`${reviewRequestLogs.status} = 'sent'`,
+      sql`${reviewRequestLogs.sentAt} >= ${cutoffDate}`
+    ));
+    
+    return !!log;
+  }
+
+  async countReviewRequestsSentThisYear(clientId: number): Promise<number> {
+    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+    
+    const [{ count }] = await db.select({ count: sql`COUNT(*)` }).from(reviewRequestLogs).where(and(
+      sql`${reviewRequestLogs.clientId} = ${clientId}`,
+      sql`${reviewRequestLogs.status} = 'sent'`,
+      sql`${reviewRequestLogs.sentAt} >= ${startOfYear}`
+    ));
+    
+    return Number(count);
+  }
+
+  // Query appointments for reminders
+  async getInspectionsFor24hReminder(): Promise<InspectionSchedule[]> {
+    const now = new Date();
+    const windowStart = new Date(now.getTime() + 20 * 60 * 60 * 1000); // 20 hours from now
+    const windowEnd = new Date(now.getTime() + 44 * 60 * 60 * 1000); // 44 hours from now
+    
+    return await db.select().from(inspectionSchedules).where(and(
+      sql`${inspectionSchedules.preferredDate} BETWEEN ${windowStart} AND ${windowEnd}`,
+      sql`${inspectionSchedules.status} != 'cancelled'`
+    ));
+  }
+
+  async getInspectionsForSameDayReminder(): Promise<InspectionSchedule[]> {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    
+    return await db.select().from(inspectionSchedules).where(and(
+      sql`${inspectionSchedules.preferredDate} BETWEEN ${todayStart} AND ${todayEnd}`,
+      sql`${inspectionSchedules.status} != 'cancelled'`
+    ));
+  }
+
+  async getServiceRequestsFor24hReminder(): Promise<ServiceRequest[]> {
+    const now = new Date();
+    const windowStart = new Date(now.getTime() + 20 * 60 * 60 * 1000);
+    const windowEnd = new Date(now.getTime() + 44 * 60 * 60 * 1000);
+    
+    return await db.select().from(serviceRequests).where(and(
+      sql`${serviceRequests.scheduledDate} BETWEEN ${windowStart} AND ${windowEnd}`,
+      eq(serviceRequests.status, 'scheduled')
+    ));
+  }
+
+  async getServiceRequestsForSameDayReminder(): Promise<ServiceRequest[]> {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    
+    return await db.select().from(serviceRequests).where(and(
+      sql`${serviceRequests.scheduledDate} BETWEEN ${todayStart} AND ${todayEnd}`,
+      eq(serviceRequests.status, 'scheduled')
+    ));
+  }
+
+  async getJobLogsFor24hReminder(): Promise<JobLog[]> {
+    const now = new Date();
+    const windowStart = new Date(now.getTime() + 20 * 60 * 60 * 1000);
+    const windowEnd = new Date(now.getTime() + 44 * 60 * 60 * 1000);
+    
+    return await db.select().from(jobLogs).where(and(
+      sql`${jobLogs.jobDate} BETWEEN ${windowStart} AND ${windowEnd}`,
+      eq(jobLogs.status, 'scheduled')
+    ));
+  }
+
+  async getJobLogsForSameDayReminder(): Promise<JobLog[]> {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    
+    return await db.select().from(jobLogs).where(and(
+      sql`${jobLogs.jobDate} BETWEEN ${todayStart} AND ${todayEnd}`,
+      eq(jobLogs.status, 'scheduled')
+    ));
   }
 
   // ==========================================

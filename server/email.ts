@@ -949,3 +949,270 @@ Absolute Pest Services
     text,
   });
 }
+
+// Appointment Reminder Email (SC-REMINDERS-001)
+export interface AppointmentReminderEmailData {
+  recipientEmail: string;
+  customerName: string;
+  serviceType: string;
+  appointmentDate: Date;
+  appointmentTime?: string;
+  address: string;
+  city: string;
+  reminderType: '24h' | 'same_day';
+  unsubscribeToken?: string;
+}
+
+export async function sendAppointmentReminderEmail(data: AppointmentReminderEmailData): Promise<boolean> {
+  const baseUrl = process.env.BASE_URL || 'https://absolutepestservices.com';
+  
+  // Format the date for display (Eastern Time)
+  const formattedDate = data.appointmentDate.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'America/New_York',
+  });
+
+  const timeDisplay = data.appointmentTime || 'TBD';
+  const reminderGreeting = data.reminderType === '24h' 
+    ? 'This is a reminder that your appointment is tomorrow' 
+    : 'This is a reminder that your appointment is today';
+
+  const unsubscribeLink = data.unsubscribeToken 
+    ? `${baseUrl}/api/reminders/unsubscribe?token=${data.unsubscribeToken}`
+    : null;
+
+  const subject = data.reminderType === '24h'
+    ? `Appointment Reminder — ${data.serviceType} Tomorrow`
+    : `Today's Appointment — ${data.serviceType}`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <!-- Header -->
+        <div style="background-color: #1f2937; padding: 20px; text-align: center;">
+          <h1 style="color: #eab308; margin: 0; font-size: 24px;">Absolute Pest Services</h1>
+        </div>
+
+        <!-- Content -->
+        <div style="padding: 30px 20px;">
+          <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 20px;">Appointment Reminder</h2>
+          
+          <p style="color: #374151; margin: 0 0 20px 0; font-size: 16px;">
+            Dear <strong>${data.customerName}</strong>,
+          </p>
+
+          <p style="color: #374151; margin: 0 0 20px 0; font-size: 16px;">
+            ${reminderGreeting}. Please find your appointment details below:
+          </p>
+
+          <!-- Appointment Details -->
+          <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Service Type</td>
+              <td style="padding: 12px 0; color: #1f2937; font-weight: 600; text-align: right; border-bottom: 1px solid #e5e7eb;">${data.serviceType}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Date</td>
+              <td style="padding: 12px 0; color: #1f2937; font-weight: 600; text-align: right; border-bottom: 1px solid #e5e7eb;">${formattedDate}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Time</td>
+              <td style="padding: 12px 0; color: #1f2937; font-weight: 600; text-align: right; border-bottom: 1px solid #e5e7eb;">${timeDisplay}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Address</td>
+              <td style="padding: 12px 0; color: #1f2937; font-weight: 600; text-align: right; border-bottom: 1px solid #e5e7eb;">${data.address}, ${data.city}</td>
+            </tr>
+          </table>
+
+          <p style="color: #374151; margin: 20px 0; font-size: 16px;">
+            <strong>Need to reschedule?</strong> Please call us at <strong>(484) 643-2225</strong> and we'll be happy to help you find a more convenient time.
+          </p>
+
+          <p style="color: #6b7280; margin: 30px 0 20px 0; font-size: 14px;">
+            If you have any questions, please don't hesitate to contact us.
+          </p>
+
+          <div style="margin-top: 30px; text-align: center;">
+            <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+              Absolute Pest Services<br>
+              <a href="http://absolutepestservices.com" style="color: #eab308; text-decoration: none;">Visit Our Website</a>
+            </p>
+          </div>
+          
+          ${unsubscribeLink ? `
+          <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #9ca3af;">
+            <a href="${unsubscribeLink}" style="color: #6b7280; text-decoration: underline;">Unsubscribe from appointment reminders</a>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+  `;
+
+  const text = `
+Appointment Reminder — Absolute Pest Services
+
+Dear ${data.customerName},
+
+${reminderGreeting}. Please find your appointment details below:
+
+Service Type: ${data.serviceType}
+Date: ${formattedDate}
+Time: ${timeDisplay}
+Address: ${data.address}, ${data.city}
+
+Need to reschedule? Please call us at (484) 643-2225 and we'll be happy to help you find a more convenient time.
+
+If you have any questions, please don't hesitate to contact us.
+
+Absolute Pest Services
+${unsubscribeLink ? `\n\nTo unsubscribe from appointment reminders, visit: ${unsubscribeLink}` : ''}
+  `;
+
+  return await sendEmail({
+    to: data.recipientEmail,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text,
+  });
+}
+
+// ============================================
+// Review Request Email (SC-REVIEWS-001)
+// ============================================
+
+export interface ReviewRequestEmailData {
+  recipientEmail: string;
+  customerName: string;
+  serviceDescription: string;
+  jobDate: Date;
+  siteLocation: string;
+  googleReviewLink: string;
+  customMessage?: string;
+}
+
+export async function sendReviewRequestEmail(data: ReviewRequestEmailData): Promise<boolean> {
+  const formattedDate = data.jobDate.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const subject = 'How did we do? Leave us a quick Google review';
+
+  const html = `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <!-- Header -->
+        <div style="background-color: #1f2937; padding: 20px; text-align: center;">
+          <h1 style="color: #eab308; margin: 0; font-size: 24px;">Absolute Pest Services</h1>
+        </div>
+
+        <!-- Content -->
+        <div style="padding: 30px 20px;">
+          <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 20px;">How did we do?</h2>
+          
+          <p style="color: #374151; margin: 0 0 20px 0; font-size: 16px;">
+            Dear <strong>${data.customerName}</strong>,
+          </p>
+
+          <p style="color: #374151; margin: 0 0 20px 0; font-size: 16px;">
+            Thank you for choosing Absolute Pest Services! We recently completed a service at your property and we'd love to hear about your experience.
+          </p>
+
+          <!-- Service Details -->
+          <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background-color: #f9fafb; border-radius: 8px;">
+            <tr>
+              <td style="padding: 12px 15px; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Service Date</td>
+              <td style="padding: 12px 15px; color: #1f2937; font-weight: 600; text-align: right; border-bottom: 1px solid #e5e7eb;">${formattedDate}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 15px; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Location</td>
+              <td style="padding: 12px 15px; color: #1f2937; font-weight: 600; text-align: right; border-bottom: 1px solid #e5e7eb;">${data.siteLocation}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 15px; color: #6b7280;">Service</td>
+              <td style="padding: 12px 15px; color: #1f2937; font-weight: 600; text-align: right;">${data.serviceDescription}</td>
+            </tr>
+          </table>
+
+          ${data.customMessage ? `
+          <p style="color: #374151; margin: 20px 0; font-size: 16px; font-style: italic;">
+            "${data.customMessage}"
+          </p>
+          ` : ''}
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${data.googleReviewLink}" style="display: inline-block; background-color: #eab308; color: white; padding: 14px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
+              Leave a Google Review
+            </a>
+          </div>
+
+          <p style="color: #6b7280; margin: 20px 0 20px 0; font-size: 14px;">
+            If you have any questions or concerns about the service, please don't hesitate to contact us at <strong>(484) 643-2225</strong>.
+          </p>
+
+          <div style="margin-top: 30px; text-align: center;">
+            <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+              Absolute Pest Services<br>
+              <a href="http://absolutepestservices.com" style="color: #eab308; text-decoration: none;">Visit Our Website</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+  `;
+
+  const text = `
+How did we do? - Absolute Pest Services
+
+Dear ${data.customerName},
+
+Thank you for choosing Absolute Pest Services! We recently completed a service at your property and we'd love to hear about your experience.
+
+Service Details:
+- Date: ${formattedDate}
+- Location: ${data.siteLocation}
+- Service: ${data.serviceDescription}
+
+${data.customMessage ? `\n"${data.customMessage}"\n` : ''}
+Leave a Google review: ${data.googleReviewLink}
+
+If you have any questions or concerns about the service, please don't hesitate to contact us at (484) 643-2225.
+
+Thank you for your business!
+Absolute Pest Services
+  `;
+
+  return await sendEmail({
+    to: data.recipientEmail,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text,
+  });
+}

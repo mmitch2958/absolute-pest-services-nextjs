@@ -94,6 +94,7 @@ export const clients = pgTable("clients", {
   clientType: text("client_type").notNull().default("prospect"), // prospect, client
   status: text("status").notNull().default("active"), // active, inactive
   notes: text("notes"),
+  reviewOptOut: boolean("review_opt_out").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -583,3 +584,180 @@ export interface InvoiceStats {
   totalPaidAllTime: string;
   countByStatus: Record<InvoiceStatus, number>;
 }
+
+// ============================================
+// Reminder Tables (SC-REMINDERS-001)
+// ============================================
+
+export type ReminderType = '24h' | 'same_day';
+export type ReminderChannel = 'email' | 'sms';
+export type AppointmentType = 'inspection' | 'service_request' | 'job_log';
+export type OptOutType = 'email' | 'sms' | 'all';
+
+export const reminderLogs = pgTable("reminder_logs", {
+  id: serial("id").primaryKey(),
+  appointmentType: text("appointment_type").notNull(), // 'inspection', 'service_request', 'job_log'
+  appointmentId: integer("appointment_id").notNull(),
+  reminderType: text("reminder_type").notNull(), // '24h', 'same_day'
+  channel: text("channel").notNull(), // 'email', 'sms'
+  recipientEmail: text("recipient_email"),
+  recipientPhone: text("recipient_phone"),
+  sentAt: timestamp("sent_at").defaultNow().notNull(),
+  success: boolean("success").notNull().default(true),
+  errorMessage: text("error_message"),
+});
+
+// Unique constraint: prevent duplicate reminders per appointment + type + channel
+export const reminderLogsUniqueConstraint = (table: typeof reminderLogs) => {
+  return [table.appointmentType, table.appointmentId, table.reminderType, table.channel];
+};
+
+export const reminderOptOuts = pgTable("reminder_opt_outs", {
+  id: serial("id").primaryKey(),
+  email: text("email"), // indexed; null if SMS-only opt-out
+  phone: text("phone"), // indexed; null if email-only opt-out
+  token: text("token").notNull().unique(), // UUID v4 used in unsubscribe URL
+  optedOutAt: timestamp("opted_out_at").defaultNow().notNull(),
+  optOutType: text("opt_out_type").notNull(), // 'email', 'sms', 'all'
+});
+
+export const systemSettings = pgTable("system_settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedBy: integer("updated_by").references(() => users.id),
+});
+
+// Zod schemas for reminders
+export const insertReminderLogSchema = createInsertSchema(reminderLogs).omit({
+  id: true,
+  sentAt: true,
+});
+
+export const insertReminderOptOutSchema = createInsertSchema(reminderOptOuts).omit({
+  id: true,
+  optedOutAt: true,
+  token: true,
+});
+
+export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit({
+  id: true,
+  updatedAt: true,
+});
+
+// Reminder types
+export type InsertReminderLog = z.infer<typeof insertReminderLogSchema>;
+export type ReminderLog = typeof reminderLogs.$inferSelect;
+export type InsertReminderOptOut = z.infer<typeof insertReminderOptOutSchema>;
+export type ReminderOptOut = typeof reminderOptOuts.$inferSelect;
+export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
+export type SystemSetting = typeof systemSettings.$inferSelect;
+
+// Reminder data interfaces
+export interface ReminderData {
+  appointmentType: AppointmentType;
+  appointmentId: number;
+  customerName: string;
+  email: string;
+  phone?: string;
+  serviceType: string;
+  appointmentDate: Date;
+  appointmentTime?: string;
+  address: string;
+  city: string;
+}
+
+export interface ReminderSettings {
+  reminders_enabled: boolean;
+  reminder_time_hour: number;
+  reminder_timezone: string;
+  reminder_24h_enabled: boolean;
+  reminder_same_day_enabled: boolean;
+  reminder_email_enabled: boolean;
+  reminder_sms_enabled: boolean;
+  reminder_inspection_enabled: boolean;
+  reminder_service_request_enabled: boolean;
+  reminder_job_log_enabled: boolean;
+}
+
+// Default reminder settings
+export const DEFAULT_REMINDER_SETTINGS: ReminderSettings = {
+  reminders_enabled: true,
+  reminder_time_hour: 16, // 4 PM Eastern = 20 UTC (EST) / 21 UTC (EDT)
+  reminder_timezone: 'America/New_York',
+  reminder_24h_enabled: true,
+  reminder_same_day_enabled: true,
+  reminder_email_enabled: true,
+  reminder_sms_enabled: true,
+  reminder_inspection_enabled: true,
+  reminder_service_request_enabled: true,
+  reminder_job_log_enabled: true,
+};
+
+// ============================================
+// Review Request Tables (SC-REVIEWS-001)
+// ============================================
+
+export type ReviewTriggerType = 'job_completion' | 'invoice_paid' | 'manual';
+export type ReviewRequestStatus = 'pending' | 'sent' | 'failed' | 'skipped' | 'cancelled';
+
+export const reviewSettings = pgTable("review_settings", {
+  id: serial("id").primaryKey(), // single row, id = 1
+  enabled: boolean("enabled").default(true).notNull(),
+  delayHours: integer("delay_hours").default(24).notNull(),
+  googleReviewLink: text("google_review_link").notNull().default("https://g.page/r/CXh2r5bK1ZCXEBM/review"),
+  facebookReviewLink: text("facebook_review_link"),
+  cooldownDays: integer("cooldown_days").default(30).notNull(),
+  triggerJobCompletion: boolean("trigger_job_completion").default(true).notNull(),
+  triggerInvoicePaid: boolean("trigger_invoice_paid").default(false).notNull(),
+  customMessage: text("custom_message"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const reviewRequestLogs = pgTable("review_request_logs", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").references(() => clients.id, { onDelete: "set null" }),
+  jobLogId: integer("job_log_id").references(() => jobLogs.id, { onDelete: "set null" }),
+  invoiceId: integer("invoice_id").references(() => invoices.id, { onDelete: "set null" }),
+  recipientEmail: text("recipient_email").notNull(),
+  triggerType: text("trigger_type").notNull(), // 'job_completion', 'invoice_paid', 'manual'
+  status: text("status").notNull().default("pending"), // 'pending', 'sent', 'failed', 'skipped', 'cancelled'
+  scheduledSendAt: timestamp("scheduled_send_at").notNull(),
+  sentAt: timestamp("sent_at"),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Zod schemas for reviews
+export const insertReviewSettingsSchema = createInsertSchema(reviewSettings).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export const insertReviewRequestLogSchema = createInsertSchema(reviewRequestLogs).omit({
+  id: true,
+  sentAt: true,
+  attemptCount: true,
+  errorMessage: true,
+  createdAt: true,
+});
+
+// Review types
+export type InsertReviewSettings = z.infer<typeof insertReviewSettingsSchema>;
+export type ReviewSettings = typeof reviewSettings.$inferSelect;
+export type InsertReviewRequestLog = z.infer<typeof insertReviewRequestLogSchema>;
+export type ReviewRequestLog = typeof reviewRequestLogs.$inferSelect;
+
+// Default review settings
+export const DEFAULT_REVIEW_SETTINGS: Omit<ReviewSettings, 'id' | 'updatedAt'> = {
+  enabled: true,
+  delayHours: 24,
+  googleReviewLink: "https://g.page/r/CXh2r5bK1ZCXEBM/review",
+  facebookReviewLink: "",
+  cooldownDays: 30,
+  triggerJobCompletion: true,
+  triggerInvoicePaid: false,
+  customMessage: "",
+};

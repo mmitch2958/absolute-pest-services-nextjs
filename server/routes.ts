@@ -1,10 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema, insertServiceContractSchema, insertJobLogPhotoSchema, insertInvoiceSchema, insertInvoiceLineItemSchema, type InvoiceStatus } from "@shared/schema";
+import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema, insertServiceContractSchema, insertJobLogPhotoSchema, insertInvoiceSchema, insertInvoiceLineItemSchema, type InvoiceStatus, jobLogs as jobLogsTable } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import session from "express-session";
 import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail, sendJobLogNotification, sendInvoiceEmail, sendInvoiceOverdueEmail, sendPaymentConfirmationEmail } from "./email";
+import { sendReviewRequestNow, scheduleReviewRequestForJobLog, scheduleReviewRequestForInvoice, cancelReviewRequestForInvoice } from "./reviews";
 import { assertTransition, isTransitionAllowed } from "./invoiceStateMachine";
 import Parser from "rss-parser";
 import { verifyTurnstile } from "./turnstile";
@@ -1675,7 +1678,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (updates.jobDate && typeof updates.jobDate === "string") {
         updates.jobDate = new Date(updates.jobDate);
       }
+      
+      // Get the existing job log to check status change
+      const existingJobLog = await storage.getJobLogById(id);
+      const oldStatus = existingJobLog?.status;
+      const newStatus = updates.status;
+      
       const jobLog = await storage.updateJobLog(id, updates);
+      
+      // Trigger review request when status changes to 'completed'
+      if (oldStatus !== 'completed' && newStatus === 'completed') {
+        scheduleReviewRequestForJobLog(id).catch(err => {
+          console.error("[ReviewRequest] Error scheduling review request on job completion:", err);
+        });
+      }
+      
       res.json({ success: true, jobLog });
     } catch (error) {
       res.status(500).json({ success: false, message: "Internal server error" });
@@ -2497,6 +2514,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paidAt: new Date(),
           paymentMethod: paymentMethod || 'other',
         });
+        
+        // Trigger review request on invoice payment (if enabled)
+        scheduleReviewRequestForInvoice(id).catch(err => {
+          console.error("[ReviewRequest] Error scheduling review request on invoice paid:", err);
+        });
       }
 
       const updatedInvoice = await storage.getInvoice(id);
@@ -2772,6 +2794,352 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating PDF:", error);
       res.status(500).json({ success: false, message: "Failed to generate PDF" });
+    }
+  });
+
+  // ==========================================
+  // Reminder Admin Routes (SC-REMINDERS-001)
+  // ==========================================
+
+  // Get reminder settings
+  app.get("/api/admin/reminders/settings", requireAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getAllReminderSettings();
+      res.json({ success: true, settings });
+    } catch (error) {
+      console.error("Error fetching reminder settings:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch settings" });
+    }
+  });
+
+  // Update reminder settings
+  app.patch("/api/admin/reminders/settings", requireAdmin, async (req, res) => {
+    try {
+      const userId = req.session?.userId;
+      const settings = await storage.setReminderSettings(req.body, userId);
+      res.json({ success: true, settings });
+    } catch (error) {
+      console.error("Error updating reminder settings:", error);
+      res.status(500).json({ success: false, message: "Failed to update settings" });
+    }
+  });
+
+  // Get reminder logs
+  app.get("/api/admin/reminders/logs", requireAdmin, async (req, res) => {
+    try {
+      const { appointmentType, appointmentId, limit } = req.query;
+      const logs = await storage.getReminderLogs(
+        appointmentType as any,
+        appointmentId ? parseInt(appointmentId as string) : undefined,
+        limit ? parseInt(limit as string) : undefined
+      );
+      res.json({ success: true, logs });
+    } catch (error) {
+      console.error("Error fetching reminder logs:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch logs" });
+    }
+  });
+
+  // Delete reminder log (force re-send)
+  app.delete("/api/admin/reminders/logs/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteReminderLog(id);
+      res.json({ success: true, message: "Reminder log deleted" });
+    } catch (error) {
+      console.error("Error deleting reminder log:", error);
+      res.status(500).json({ success: false, message: "Failed to delete log" });
+    }
+  });
+
+  // Manual send reminder (bypass idempotency)
+  app.post("/api/admin/reminders/send-now", requireAdmin, async (req, res) => {
+    try {
+      const { appointmentType, appointmentId, reminderType, channel } = req.body;
+      
+      // Fetch the appointment data based on type
+      let appointment: any;
+      let reminderData: any;
+      
+      if (appointmentType === 'inspection') {
+        const inspections = await storage.getInspectionSchedules();
+        appointment = inspections.find(i => i.id === appointmentId);
+        if (appointment) {
+          reminderData = {
+            appointmentType: 'inspection',
+            appointmentId: appointment.id,
+            customerName: `${appointment.firstName} ${appointment.lastName}`,
+            email: appointment.email,
+            phone: appointment.phone,
+            serviceType: appointment.serviceType,
+            appointmentDate: new Date(appointment.preferredDate),
+            appointmentTime: appointment.preferredTime,
+            address: appointment.address,
+            city: appointment.city,
+          };
+        }
+      } else if (appointmentType === 'service_request') {
+        const srs = await storage.getServiceRequests();
+        appointment = srs.find(sr => sr.id === appointmentId);
+        if (appointment) {
+          const user = await storage.getUser(appointment.userId);
+          reminderData = {
+            appointmentType: 'service_request',
+            appointmentId: appointment.id,
+            customerName: `${appointment.firstName} ${appointment.lastName}`,
+            email: user?.email || '',
+            phone: user?.phone,
+            serviceType: appointment.serviceType,
+            appointmentDate: new Date(appointment.scheduledDate || new Date()),
+            address: appointment.address,
+            city: appointment.city,
+          };
+        }
+      } else if (appointmentType === 'job_log') {
+        const jobLogs = await db.select().from(jobLogsTable).where(eq(jobLogsTable.id, appointmentId));
+        appointment = jobLogs[0];
+        if (appointment) {
+          const client = appointment.clientId ? await storage.getClient(appointment.clientId) : null;
+          reminderData = {
+            appointmentType: 'job_log',
+            appointmentId: appointment.id,
+            customerName: appointment.customerName,
+            email: client?.email || '',
+            phone: client?.phone,
+            serviceType: appointment.workPerformed,
+            appointmentDate: new Date(appointment.jobDate),
+            address: appointment.siteAddress || appointment.siteLocation,
+            city: '',
+          };
+        }
+      }
+      
+      if (!reminderData) {
+        return res.status(404).json({ success: false, message: "Appointment not found" });
+      }
+
+      let success = false;
+      
+      if (channel === 'email' || !channel) {
+        const { sendAppointmentReminderEmail } = await import("./email");
+        success = await sendAppointmentReminderEmail({
+          recipientEmail: reminderData.email,
+          customerName: reminderData.customerName,
+          serviceType: reminderData.serviceType,
+          appointmentDate: reminderData.appointmentDate,
+          appointmentTime: reminderData.appointmentTime,
+          address: reminderData.address,
+          city: reminderData.city,
+          reminderType: reminderType || '24h',
+        });
+      } else if (channel === 'sms') {
+        const { sendAppointmentReminderSMS } = await import("./sms");
+        success = await sendAppointmentReminderSMS({
+          toPhone: reminderData.phone || '',
+          customerName: reminderData.customerName,
+          serviceType: reminderData.serviceType,
+          appointmentDate: reminderData.appointmentDate,
+          appointmentTime: reminderData.appointmentTime,
+          address: reminderData.address,
+          reminderType: reminderType || '24h',
+        });
+      }
+      
+      // Log the manual send
+      await storage.createReminderLog({
+        appointmentType,
+        appointmentId,
+        reminderType: reminderType || '24h',
+        channel: channel || 'email',
+        recipientEmail: channel === 'sms' ? undefined : reminderData.email,
+        recipientPhone: channel === 'sms' ? reminderData.phone : undefined,
+        success,
+        errorMessage: success ? undefined : 'Manual send failed',
+      });
+      
+      res.json({ success, message: success ? "Reminder sent" : "Failed to send reminder" });
+    } catch (error) {
+      console.error("Error sending manual reminder:", error);
+      res.status(500).json({ success: false, message: "Failed to send reminder" });
+    }
+  });
+
+  // Get opt-out list
+  app.get("/api/admin/reminders/opt-outs", requireAdmin, async (req, res) => {
+    try {
+      const optOuts = await storage.getReminderOptOuts();
+      res.json({ success: true, optOuts });
+    } catch (error) {
+      console.error("Error fetching opt-outs:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch opt-outs" });
+    }
+  });
+
+  // Delete opt-out (re-enable customer)
+  app.delete("/api/admin/reminders/opt-outs/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteReminderOptOut(id);
+      res.json({ success: true, message: "Opt-out removed" });
+    } catch (error) {
+      console.error("Error deleting opt-out:", error);
+      res.status(500).json({ success: false, message: "Failed to delete opt-out" });
+    }
+  });
+
+  // ============================================
+  // Review Request Routes (SC-REVIEWS-001)
+  // ============================================
+
+  // Get review settings
+  app.get("/api/admin/reviews/settings", requireAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getReviewSettings();
+      res.json({ success: true, settings });
+    } catch (error) {
+      console.error("Error fetching review settings:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch review settings" });
+    }
+  });
+
+  // Update review settings
+  app.patch("/api/admin/reviews/settings", requireAdmin, async (req, res) => {
+    try {
+      const updates = req.body;
+      const settings = await storage.updateReviewSettings(updates);
+      res.json({ success: true, settings });
+    } catch (error) {
+      console.error("Error updating review settings:", error);
+      res.status(500).json({ success: false, message: "Failed to update review settings" });
+    }
+  });
+
+  // Get review request logs
+  app.get("/api/admin/reviews/logs", requireAdmin, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const status = req.query.status as string || undefined;
+      const clientId = req.query.clientId ? parseInt(req.query.clientId as string) : undefined;
+      
+      const result = await storage.getReviewRequestLogs({ limit, offset, status, clientId });
+      res.json({ success: true, logs: result.logs, total: result.total });
+    } catch (error) {
+      console.error("Error fetching review request logs:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch review request logs" });
+    }
+  });
+
+  // Delete review request log (allow re-send)
+  app.delete("/api/admin/reviews/logs/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteReviewRequestLog(id);
+      res.json({ success: true, message: "Review request log deleted" });
+    } catch (error) {
+      console.error("Error deleting review request log:", error);
+      res.status(500).json({ success: false, message: "Failed to delete review request log" });
+    }
+  });
+
+  // Manually trigger review request for a job log
+  app.post("/api/admin/reviews/send-now/:jobLogId", requireAdmin, async (req, res) => {
+    try {
+      const jobLogId = parseInt(req.params.jobLogId);
+      const result = await sendReviewRequestNow(jobLogId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error sending manual review request:", error);
+      res.status(500).json({ success: false, message: "Failed to send review request" });
+    }
+  });
+
+  // Toggle client review opt-out
+  app.patch("/api/admin/clients/:id/review-opt-out", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { reviewOptOut } = req.body;
+      
+      const client = await storage.getClientById(id);
+      if (!client) {
+        return res.status(404).json({ success: false, message: "Client not found" });
+      }
+      
+      const updated = await storage.updateClient(id, { reviewOptOut: !!reviewOptOut });
+      res.json({ success: true, client: updated });
+    } catch (error) {
+      console.error("Error updating client opt-out:", error);
+      res.status(500).json({ success: false, message: "Failed to update client opt-out status" });
+    }
+  });
+
+  // Public unsubscribe endpoint
+  app.get("/api/reminders/unsubscribe", async (req, res) => {
+    try {
+      const { token } = req.query;
+      if (!token) {
+        return res.status(400).json({ success: false, message: "Token required" });
+      }
+      
+      const optOut = await storage.getReminderOptOutByToken(token as string);
+      if (!optOut) {
+        return res.status(404).json({ success: false, message: "Invalid token" });
+      }
+      
+      // Render unsubscribe confirmation page
+      const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Unsubscribe - Absolute Pest Services</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+  <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">You're Unsubscribed</h1>
+    <p class="text-gray-600 mb-6">
+      You've been successfully unsubscribed from appointment reminders.
+    </p>
+    <a href="https://absolutepestservices.com" class="inline-block bg-yellow-500 text-gray-900 px-6 py-2 rounded font-semibold hover:bg-yellow-400">
+      Return to Website
+    </a>
+  </div>
+</body>
+</html>
+      `;
+      
+      res.setHeader('Content-Type', 'text/html');
+      res.send(html);
+    } catch (error) {
+      console.error("Error processing unsubscribe:", error);
+      res.status(500).json({ success: false, message: "Failed to process unsubscribe" });
+    }
+  });
+
+  // API endpoint to handle unsubscribe (JSON response)
+  app.post("/api/reminders/unsubscribe", async (req, res) => {
+    try {
+      const { email, phone, optOutType } = req.body;
+      
+      if (!email && !phone) {
+        return res.status(400).json({ success: false, message: "Email or phone required" });
+      }
+      
+      const token = require('uuid').v4();
+      
+      await storage.createReminderOptOut({
+        email,
+        phone,
+        optOutType: optOutType || 'all',
+        token,
+      });
+      
+      res.json({ success: true, message: "Successfully unsubscribed", token });
+    } catch (error) {
+      console.error("Error creating opt-out:", error);
+      res.status(500).json({ success: false, message: "Failed to unsubscribe" });
     }
   });
 
