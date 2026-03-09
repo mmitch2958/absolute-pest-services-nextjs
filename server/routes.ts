@@ -61,6 +61,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
+  // ==========================================
+  // Analytics Routes (SC-DA-001)
+  // ==========================================
+
+  // Helper to parse date range from query params
+  const parseDateRange = (req: any) => {
+    const now = new Date();
+    let from: Date, to: Date;
+
+    if (req.query.from && req.query.to) {
+      from = new Date(req.query.from);
+      to = new Date(req.query.to);
+    } else {
+      // Default to last 12 months
+      from = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+      to = now;
+    }
+
+    return { from, to };
+  };
+
+  // GET /api/admin/analytics/overview - KPI cards data
+  app.get("/api/admin/analytics/overview", requireAdmin, async (req, res) => {
+    try {
+      const { from, to } = parseDateRange(req);
+      const overview = await storage.getAnalyticsOverview(from, to);
+      res.json({ success: true, overview });
+    } catch (error) {
+      console.error("Error fetching analytics overview:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/analytics/jobs-over-time - Jobs over time chart data
+  app.get("/api/admin/analytics/jobs-over-time", requireAdmin, async (req, res) => {
+    try {
+      const { from, to } = parseDateRange(req);
+      const groupBy = (req.query.groupBy as 'month' | 'week') || 'month';
+      const data = await storage.getJobsOverTime(from, to, groupBy);
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error fetching jobs over time:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/analytics/jobs-by-area - Jobs by area donut chart
+  app.get("/api/admin/analytics/jobs-by-area", requireAdmin, async (req, res) => {
+    try {
+      const { from, to } = parseDateRange(req);
+      const data = await storage.getJobsByArea(from, to);
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error fetching jobs by area:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/analytics/jobs-by-status - Jobs by status breakdown
+  app.get("/api/admin/analytics/jobs-by-status", requireAdmin, async (req, res) => {
+    try {
+      const { from, to } = parseDateRange(req);
+      const data = await storage.getJobsByStatus(from, to);
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error fetching jobs by status:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/analytics/employee-productivity - Employee productivity table
+  app.get("/api/admin/analytics/employee-productivity", requireAdmin, async (req, res) => {
+    try {
+      const { from, to } = parseDateRange(req);
+      const data = await storage.getEmployeeProductivity(from, to);
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error fetching employee productivity:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/analytics/contracts-summary - Contract health summary
+  app.get("/api/admin/analytics/contracts-summary", requireAdmin, async (req, res) => {
+    try {
+      const data = await storage.getContractsSummary();
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error fetching contracts summary:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/analytics/upcoming - Upcoming scheduled jobs, inspections, requests
+  app.get("/api/admin/analytics/upcoming", requireAdmin, async (req, res) => {
+    try {
+      const data = await storage.getUpcomingItems();
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error fetching upcoming items:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/analytics/top-clients - Top clients by job count
+  app.get("/api/admin/analytics/top-clients", requireAdmin, async (req, res) => {
+    try {
+      const { from, to } = parseDateRange(req);
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const data = await storage.getTopClients(from, to, limit);
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error fetching top clients:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/analytics/contact-submissions - Contact form submissions
+  app.get("/api/admin/analytics/contact-submissions", requireAdmin, async (req, res) => {
+    try {
+      const { from, to } = parseDateRange(req);
+      const data = await storage.getContactSubmissionsSummary(from, to);
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error fetching contact submissions:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Authentication routes
   app.post("/api/auth/register", async (req, res) => {
     try {

@@ -1,5 +1,5 @@
-import { DashboardCreator } from "@/components/admin/DashboardCreator";
+import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
 
 export function AdminDashboards() {
-  return <DashboardCreator />;
+  return <AdminAnalytics />;
 }

@@ -1,6 +1,6 @@
 import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gte, lte, ilike, sql, sum } from "drizzle-orm";
+import { eq, and, desc, gte, lte, lt, ilike, sql, sum } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { sendInvoiceOverdueEmail } from "./email";
@@ -1362,6 +1362,390 @@ export class DatabaseStorage implements IStorage {
     });
 
     return (await this.getInvoice(invoice.id))!;
+  }
+
+  // ==========================================
+  // Analytics Implementations
+  // ==========================================
+
+  async getAnalyticsOverview(from: Date, to: Date): Promise<AnalyticsOverview> {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Start of current week
+
+    // Jobs this month
+    const [jobsThisMonthResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(jobLogs)
+      .where(gte(jobLogs.jobDate, startOfMonth));
+    const jobsThisMonth = jobsThisMonthResult?.count || 0;
+
+    // Jobs this week
+    const [jobsThisWeekResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(jobLogs)
+      .where(gte(jobLogs.jobDate, startOfWeek));
+    const jobsThisWeek = jobsThisWeekResult?.count || 0;
+
+    // Active clients
+    const [activeClientsResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(clients)
+      .where(eq(clients.status, 'active'));
+    const activeClients = activeClientsResult?.count || 0;
+
+    // Active contracts
+    const [activeContractsResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(serviceContracts)
+      .where(eq(serviceContracts.isActive, true));
+    const activeContracts = activeContractsResult?.count || 0;
+
+    // Open service requests (pending or scheduled)
+    const [openRequestsResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(serviceRequests)
+      .where(sql`${serviceRequests.status} IN ('pending', 'scheduled')`);
+    const openServiceRequests = openRequestsResult?.count || 0;
+
+    // Overdue invoices (placeholder until Feature #5)
+    const [overdueInvoicesResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(invoices)
+      .where(eq(invoices.status, 'overdue'));
+    const overdueInvoices = overdueInvoicesResult?.count || 0;
+
+    // Outstanding revenue (sum of unpaid invoices - placeholder until Feature #5)
+    const [outstandingResult] = await db
+      .select({ total: sql<string>`COALESCE(SUM(${invoices.total}), 0)` })
+      .from(invoices)
+      .where(sql`${invoices.status} IN ('sent', 'viewed', 'overdue')`);
+    const outstandingRevenue = parseFloat(outstandingResult?.total || '0');
+
+    return {
+      jobsThisMonth,
+      jobsThisWeek,
+      activeClients,
+      activeContracts,
+      openServiceRequests,
+      overdueInvoices,
+      outstandingRevenue,
+    };
+  }
+
+  async getJobsOverTime(from: Date, to: Date, groupBy: 'month' | 'week' = 'month'): Promise<JobsOverTimeData[]> {
+    const interval = groupBy === 'month' ? 'month' : 'week';
+    
+    const results = await db
+      .select({
+        period: sql<string>`DATE_TRUNC('${sql.raw(interval)}', ${jobLogs.jobDate})`,
+        count: sql<number>`count(*)`,
+      })
+      .from(jobLogs)
+      .where(and(gte(jobLogs.jobDate, from), lte(jobLogs.jobDate, to)))
+      .groupBy(sql`DATE_TRUNC('${sql.raw(interval)}', ${jobLogs.jobDate})`)
+      .orderBy(sql`DATE_TRUNC('${sql.raw(interval)}', ${jobLogs.jobDate})`);
+
+    return results.map(r => ({
+      month: new Date(r.period).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+      count: Number(r.count),
+    }));
+  }
+
+  async getJobsByArea(from: Date, to: Date): Promise<JobsByAreaData[]> {
+    const results = await db
+      .select({
+        area: jobLogs.servicedArea,
+        count: sql<number>`count(*)`,
+      })
+      .from(jobLogs)
+      .where(and(gte(jobLogs.jobDate, from), lte(jobLogs.jobDate, to)))
+      .groupBy(jobLogs.servicedArea)
+      .orderBy(sql`count(*) DESC`);
+
+    // Get top 6 + "Other"
+    const top6 = results.slice(0, 6);
+    const otherCount = results.slice(6).reduce((sum, r) => sum + Number(r.count), 0);
+
+    const mapped = top6.map(r => ({
+      area: r.area || 'Unknown',
+      count: Number(r.count),
+    }));
+
+    if (otherCount > 0) {
+      mapped.push({ area: 'Other', count: otherCount });
+    }
+
+    return mapped;
+  }
+
+  async getJobsByStatus(from: Date, to: Date): Promise<JobsByStatusData[]> {
+    const results = await db
+      .select({
+        status: jobLogs.status,
+        count: sql<number>`count(*)`,
+      })
+      .from(jobLogs)
+      .where(and(gte(jobLogs.jobDate, from), lte(jobLogs.jobDate, to)))
+      .groupBy(jobLogs.status)
+      .orderBy(sql`count(*) DESC`);
+
+    return results.map(r => ({
+      status: r.status || 'unknown',
+      count: Number(r.count),
+    }));
+  }
+
+  async getEmployeeProductivity(from: Date, to: Date): Promise<EmployeeProductivityData[]> {
+    const employees = await this.getFieldEmployees();
+    const productivity: EmployeeProductivityData[] = [];
+
+    for (const emp of employees) {
+      // Jobs in date range
+      const [periodResult] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(jobLogs)
+        .where(and(eq(jobLogs.employeeId, emp.id), gte(jobLogs.jobDate, from), lte(jobLogs.jobDate, to)));
+      
+      // All time jobs
+      const [allTimeResult] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(jobLogs)
+        .where(eq(jobLogs.employeeId, emp.id));
+
+      // Last job date
+      const [lastJob] = await db
+        .select({ jobDate: jobLogs.jobDate })
+        .from(jobLogs)
+        .where(eq(jobLogs.employeeId, emp.id))
+        .orderBy(desc(jobLogs.jobDate))
+        .limit(1);
+
+      productivity.push({
+        employeeId: emp.id,
+        name: emp.name,
+        jobsThisPeriod: Number(periodResult?.count || 0),
+        jobsAllTime: Number(allTimeResult?.count || 0),
+        lastJobDate: lastJob?.jobDate || null,
+        isActive: emp.isActive,
+      });
+    }
+
+    return productivity.sort((a, b) => b.jobsThisPeriod - a.jobsThisPeriod);
+  }
+
+  async getContractsSummary(): Promise<ContractsSummaryData> {
+    const now = new Date();
+    const endOfWeek = new Date(now);
+    endOfWeek.setDate(now.getDate() + 7);
+
+    // Total active
+    const [totalActiveResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(serviceContracts)
+      .where(eq(serviceContracts.isActive, true));
+    const totalActive = Number(totalActiveResult?.count || 0);
+
+    // Due this week
+    const [dueThisWeekResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(serviceContracts)
+      .where(and(
+        eq(serviceContracts.isActive, true),
+        gte(serviceContracts.nextScheduledDate, now),
+        lte(serviceContracts.nextScheduledDate, endOfWeek)
+      ));
+    const dueThisWeek = Number(dueThisWeekResult?.count || 0);
+
+    // Overdue
+    const [overdueResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(serviceContracts)
+      .where(and(
+        eq(serviceContracts.isActive, true),
+        lt(serviceContracts.nextScheduledDate, now)
+      ));
+    const overdue = Number(overdueResult?.count || 0);
+
+    // By frequency
+    const freqResults = await db
+      .select({
+        frequency: serviceContracts.frequency,
+        count: sql<number>`count(*)`,
+      })
+      .from(serviceContracts)
+      .where(eq(serviceContracts.isActive, true))
+      .groupBy(serviceContracts.frequency);
+
+    const byFrequency = freqResults.map(r => ({
+      frequency: r.frequency || 'monthly',
+      count: Number(r.count),
+    }));
+
+    return { totalActive, dueThisWeek, overdue, byFrequency };
+  }
+
+  async getUpcomingItems(): Promise<UpcomingItemsData> {
+    const now = new Date();
+    const twoWeeksLater = new Date(now);
+    twoWeeksLater.setDate(now.getDate() + 14);
+
+    // Scheduled jobs (next 14 days)
+    const scheduledJobsResult = await db
+      .select({
+        id: jobLogs.id,
+        jobDate: jobLogs.jobDate,
+        customerName: jobLogs.customerName,
+        workPerformed: jobLogs.workPerformed,
+      })
+      .from(jobLogs)
+      .where(and(
+        eq(jobLogs.status, 'scheduled'),
+        gte(jobLogs.jobDate, now),
+        lte(jobLogs.jobDate, twoWeeksLater)
+      ))
+      .orderBy(jobLogs.jobDate);
+
+    const scheduledJobs: UpcomingItem[] = scheduledJobsResult.map(j => ({
+      type: 'job' as const,
+      id: Number(j.id),
+      date: new Date(j.jobDate),
+      customerName: j.customerName || 'Unknown',
+      serviceType: j.workPerformed || 'Service',
+    }));
+
+    // Pending inspections
+    const inspectionsResult = await db
+      .select({
+        id: inspectionSchedules.id,
+        preferredDate: inspectionSchedules.preferredDate,
+        firstName: inspectionSchedules.firstName,
+        lastName: inspectionSchedules.lastName,
+        serviceType: inspectionSchedules.serviceType,
+      })
+      .from(inspectionSchedules)
+      .where(eq(inspectionSchedules.status, 'pending'))
+      .orderBy(inspectionSchedules.preferredDate);
+
+    const pendingInspections: UpcomingItem[] = inspectionsResult
+      .filter(i => i.preferredDate && new Date(i.preferredDate) <= twoWeeksLater)
+      .map(i => ({
+        type: 'inspection' as const,
+        id: Number(i.id),
+        date: new Date(i.preferredDate),
+        customerName: `${i.firstName || ''} ${i.lastName || ''}`.trim(),
+        serviceType: i.serviceType || 'Inspection',
+      }));
+
+    // Pending service requests
+    const requestsResult = await db
+      .select({
+        id: serviceRequests.id,
+        scheduledDate: serviceRequests.scheduledDate,
+        firstName: serviceRequests.firstName,
+        lastName: serviceRequests.lastName,
+        serviceType: serviceRequests.serviceType,
+      })
+      .from(serviceRequests)
+      .where(sql`${serviceRequests.status} IN ('pending', 'scheduled')`)
+      .orderBy(serviceRequests.scheduledDate);
+
+    const pendingRequests: UpcomingItem[] = requestsResult
+      .filter(r => r.scheduledDate && new Date(r.scheduledDate) <= twoWeeksLater)
+      .map(r => ({
+        type: 'request' as const,
+        id: Number(r.id),
+        date: new Date(r.scheduledDate),
+        customerName: `${r.firstName || ''} ${r.lastName || ''}`.trim(),
+        serviceType: r.serviceType || 'Service Request',
+      }));
+
+    return { scheduledJobs, pendingInspections, pendingRequests };
+  }
+
+  async getTopClients(from: Date, to: Date, limit = 10): Promise<TopClientData[]> {
+    const jobWithClients = await db
+      .select({
+        clientId: jobLogs.clientId,
+        clientName: clients.name,
+        jobDate: jobLogs.jobDate,
+      })
+      .from(jobLogs)
+      .leftJoin(clients, eq(jobLogs.clientId, clients.id))
+      .where(and(gte(jobLogs.jobDate, from), lte(jobLogs.jobDate, to), sql`${jobLogs.clientId} IS NOT NULL`));
+
+    // Group by client
+    const clientMap = new Map<number, { name: string; jobs: number; lastJob: Date | null }>();
+    
+    for (const job of jobWithClients) {
+      if (!job.clientId) continue;
+      const existing = clientMap.get(job.clientId);
+      if (existing) {
+        existing.jobs++;
+        if (job.jobDate && (!existing.lastJob || new Date(job.jobDate) > existing.lastJob)) {
+          existing.lastJob = new Date(job.jobDate);
+        }
+      } else {
+        clientMap.set(job.clientId, {
+          name: job.clientName || 'Unknown',
+          jobs: 1,
+          lastJob: job.jobDate ? new Date(job.jobDate) : null,
+        });
+      }
+    }
+
+    // Check which clients have active contracts
+    const activeContractClients = await db
+      .select({ customerId: serviceContracts.customerId })
+      .from(serviceContracts)
+      .where(eq(serviceContracts.isActive, true));
+    const activeClientIds = new Set(activeContractClients.map(c => c.customerId));
+
+    const result: TopClientData[] = [];
+    for (const [clientId, data] of clientMap) {
+      result.push({
+        clientId,
+        clientName: data.name,
+        totalJobs: data.jobs,
+        lastJobDate: data.lastJob,
+        hasActiveContract: activeClientIds.has(clientId),
+      });
+    }
+
+    return result.sort((a, b) => b.totalJobs - a.totalJobs).slice(0, limit);
+  }
+
+  async getContactSubmissionsSummary(from: Date, to: Date): Promise<ContactSubmissionSummary> {
+    const [countResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(contactSubmissions)
+      .where(and(gte(contactSubmissions.createdAt, from), lte(contactSubmissions.createdAt, to)));
+
+    const recentResult = await db
+      .select({
+        id: contactSubmissions.id,
+        firstName: contactSubmissions.firstName,
+        lastName: contactSubmissions.lastName,
+        serviceType: contactSubmissions.serviceType,
+        city: contactSubmissions.city,
+        createdAt: contactSubmissions.createdAt,
+      })
+      .from(contactSubmissions)
+      .orderBy(desc(contactSubmissions.createdAt))
+      .limit(5);
+
+    return {
+      count: Number(countResult?.count || 0),
+      recent: recentResult.map(r => ({
+        id: Number(r.id),
+        firstName: r.firstName || '',
+        lastName: r.lastName || '',
+        serviceType: r.serviceType || '',
+        city: r.city || '',
+        createdAt: new Date(r.createdAt),
+      })),
+    };
   }
 }
 
