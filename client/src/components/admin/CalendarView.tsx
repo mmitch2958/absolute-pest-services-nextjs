@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from "date-fns";
-import { ChevronLeft, ChevronRight, User, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, User, MapPin, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
@@ -17,12 +17,12 @@ export function CalendarView() {
   const fromParam = format(startDate, 'yyyy-MM-dd');
   const toParam = format(endDate, 'yyyy-MM-dd');
 
-  const { data: calendarData, isLoading } = useQuery({
+  const { data: calendarData, isLoading, isError, refetch } = useQuery({
     queryKey: [`/api/admin/service-contracts/calendar?from=${fromParam}&to=${toParam}`],
   });
 
-  // API returns { success: true, contracts: ServiceContract[] }
-  // Each contract has nextScheduledDate (the scheduled date) and no customerName yet
+  // API returns { success: true, contracts: ContractCalendarEvent[] }
+  // Each contract has nextScheduledDate and customerName (joined from clients table)
   const visits: any[] = (calendarData as any)?.contracts ?? [];
 
   const getDayVisits = (day: Date) => {
@@ -44,7 +44,20 @@ export function CalendarView() {
   };
 
   if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading calendar...</div>;
-  if (!calendarData) return null;
+  if (isError || !calendarData) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center rounded-lg border border-destructive/20 bg-destructive/5 space-y-4">
+        <AlertCircle className="h-10 w-10 text-destructive" />
+        <div className="space-y-2">
+          <h3 className="text-xl font-medium text-foreground">Failed to load calendar data</h3>
+          <p className="text-muted-foreground">There was an error communicating with the server.</p>
+        </div>
+        <Button onClick={() => refetch()} variant="outline" className="mt-4">
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

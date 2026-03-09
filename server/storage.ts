@@ -1,7 +1,12 @@
 import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gte, lte, ilike } from "drizzle-orm";
+import { eq, and, desc, gte, lte, ilike, innerJoin } from "drizzle-orm";
 import bcrypt from "bcrypt";
+
+// Calendar event type with customer name joined from clients table
+export interface ContractCalendarEvent extends Omit<ServiceContract, "customerId"> {
+  customerName: string;
+}
 
 function advanceNextScheduledDate(current: Date, frequency: string): Date {
   const next = new Date(current);
@@ -132,8 +137,8 @@ export interface IStorage {
   getServiceContract(id: number): Promise<ServiceContract | undefined>;
   updateServiceContract(id: number, updates: Partial<InsertServiceContract>): Promise<ServiceContract>;
   deleteServiceContract(id: number): Promise<void>;
-  getServiceContractsInDateRange(from: Date, to: Date): Promise<ServiceContract[]>;
-  getServiceContractsByDateRange(from: Date, to: Date): Promise<ServiceContract[]>;
+  getServiceContractsInDateRange(from: Date, to: Date): Promise<ContractCalendarEvent[]>;
+  getServiceContractsByDateRange(from: Date, to: Date): Promise<ContractCalendarEvent[]>;
   generateJobFromContract(contractId: number): Promise<{ jobLog: JobLog; updatedContract: ServiceContract }>;
 
   // Job Log Photo operations
@@ -692,10 +697,28 @@ export class DatabaseStorage implements IStorage {
     return contract || undefined;
   }
 
-  async getServiceContractsInDateRange(from: Date, to: Date): Promise<ServiceContract[]> {
-    return await db
-      .select()
+  async getServiceContractsInDateRange(from: Date, to: Date): Promise<ContractCalendarEvent[]> {
+    const results = await db
+      .select({
+        id: serviceContracts.id,
+        customerId: serviceContracts.customerId,
+        frequency: serviceContracts.frequency,
+        nextScheduledDate: serviceContracts.nextScheduledDate,
+        siteLocation: serviceContracts.siteLocation,
+        servicedArea: serviceContracts.servicedArea,
+        defaultWorkTemplate: serviceContracts.defaultWorkTemplate,
+        lastGeneratedJobDate: serviceContracts.lastGeneratedJobDate,
+        notes: serviceContracts.notes,
+        assignedEmployeeId: serviceContracts.assignedEmployeeId,
+        startDate: serviceContracts.startDate,
+        endDate: serviceContracts.endDate,
+        isActive: serviceContracts.isActive,
+        createdAt: serviceContracts.createdAt,
+        updatedAt: serviceContracts.updatedAt,
+        customerName: clients.name,
+      })
       .from(serviceContracts)
+      .innerJoin(clients, eq(serviceContracts.customerId, clients.id))
       .where(
         and(
           gte(serviceContracts.nextScheduledDate, from),
@@ -703,12 +726,32 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(serviceContracts.nextScheduledDate);
+    
+    return results;
   }
 
-  async getServiceContractsByDateRange(from: Date, to: Date): Promise<ServiceContract[]> {
-    return await db
-      .select()
+  async getServiceContractsByDateRange(from: Date, to: Date): Promise<ContractCalendarEvent[]> {
+    const results = await db
+      .select({
+        id: serviceContracts.id,
+        customerId: serviceContracts.customerId,
+        frequency: serviceContracts.frequency,
+        nextScheduledDate: serviceContracts.nextScheduledDate,
+        siteLocation: serviceContracts.siteLocation,
+        servicedArea: serviceContracts.servicedArea,
+        defaultWorkTemplate: serviceContracts.defaultWorkTemplate,
+        lastGeneratedJobDate: serviceContracts.lastGeneratedJobDate,
+        notes: serviceContracts.notes,
+        assignedEmployeeId: serviceContracts.assignedEmployeeId,
+        startDate: serviceContracts.startDate,
+        endDate: serviceContracts.endDate,
+        isActive: serviceContracts.isActive,
+        createdAt: serviceContracts.createdAt,
+        updatedAt: serviceContracts.updatedAt,
+        customerName: clients.name,
+      })
       .from(serviceContracts)
+      .innerJoin(clients, eq(serviceContracts.customerId, clients.id))
       .where(
         and(
           gte(serviceContracts.startDate, from),
@@ -716,6 +759,8 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(serviceContracts.startDate);
+    
+    return results;
   }
 
   async generateJobFromContract(contractId: number): Promise<{ jobLog: JobLog; updatedContract: ServiceContract }> {
