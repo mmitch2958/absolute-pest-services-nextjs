@@ -1,11 +1,86 @@
-import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto } from "@shared/schema";
+import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gte, lte, ilike, innerJoin } from "drizzle-orm";
+import { eq, and, desc, gte, lte, ilike, sql, sum } from "drizzle-orm";
 import bcrypt from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
+import { sendInvoiceOverdueEmail } from "./email";
 
 // Calendar event type with customer name joined from clients table
 export interface ContractCalendarEvent extends Omit<ServiceContract, "customerId"> {
   customerName: string;
+}
+
+// ==========================================
+// Analytics Types
+// ==========================================
+
+export interface AnalyticsOverview {
+  jobsThisMonth: number;
+  jobsThisWeek: number;
+  activeClients: number;
+  activeContracts: number;
+  openServiceRequests: number;
+  overdueInvoices: number;
+  outstandingRevenue: number;
+}
+
+export interface JobsOverTimeData {
+  month: string;
+  count: number;
+}
+
+export interface JobsByAreaData {
+  area: string;
+  count: number;
+}
+
+export interface JobsByStatusData {
+  status: string;
+  count: number;
+}
+
+export interface EmployeeProductivityData {
+  employeeId: number;
+  name: string;
+  jobsThisPeriod: number;
+  jobsAllTime: number;
+  lastJobDate: Date | null;
+  isActive: boolean;
+}
+
+export interface ContractsSummaryData {
+  totalActive: number;
+  dueThisWeek: number;
+  overdue: number;
+  byFrequency: { frequency: string; count: number }[];
+}
+
+export interface UpcomingItem {
+  type: 'job' | 'inspection' | 'request';
+  id: number;
+  date: Date;
+  customerName: string;
+  serviceType: string;
+  assignedEmployee?: string;
+}
+
+export interface UpcomingItemsData {
+  scheduledJobs: UpcomingItem[];
+  pendingInspections: UpcomingItem[];
+  pendingRequests: UpcomingItem[];
+}
+
+export interface TopClientData {
+  clientId: number;
+  clientName: string;
+  totalJobs: number;
+  lastJobDate: Date | null;
+  hasActiveContract: boolean;
+}
+
+export interface ContactSubmissionSummary {
+  count: number;
+  recent: { id: number; firstName: string; lastName: string; serviceType: string; city: string; createdAt: Date }[];
 }
 
 function advanceNextScheduledDate(current: Date, frequency: string): Date {
@@ -145,6 +220,43 @@ export interface IStorage {
   createJobLogPhoto(data: InsertJobLogPhoto): Promise<JobLogPhoto>;
   getJobLogPhotos(jobLogId: number): Promise<JobLogPhoto[]>;
   deleteJobLogPhoto(id: number, jobLogId: number): Promise<void>;
+
+  // Invoice operations
+  createInvoice(data: InsertInvoice): Promise<Invoice>;
+  getInvoice(id: number): Promise<Invoice | undefined>;
+  getInvoiceByToken(token: string): Promise<Invoice | undefined>;
+  getInvoiceByNumber(invoiceNumber: string): Promise<Invoice | undefined>;
+  listInvoices(filters?: { clientId?: number; status?: InvoiceStatus; fromDate?: Date; toDate?: Date; page?: number; limit?: number }): Promise<InvoiceWithDetails[]>;
+  updateInvoice(id: number, data: Partial<Invoice>): Promise<Invoice>;
+  getInvoiceStats(): Promise<InvoiceStats>;
+
+  // Line Item operations
+  createLineItem(data: InsertInvoiceLineItem): Promise<InvoiceLineItem>;
+  updateLineItem(id: number, data: Partial<InvoiceLineItem>): Promise<InvoiceLineItem>;
+  deleteLineItem(id: number): Promise<void>;
+  getLineItemsByInvoice(invoiceId: number): Promise<InvoiceLineItem[]>;
+
+  // Status Log operations
+  logInvoiceStatusChange(data: InsertInvoiceStatusLog): Promise<InvoiceStatusLog>;
+  getInvoiceStatusLog(invoiceId: number): Promise<InvoiceStatusLog[]>;
+
+  // Invoice status transitions
+  updateInvoiceStatus(id: number, toStatus: InvoiceStatus, actor: string, note?: string): Promise<Invoice>;
+  markInvoicesOverdue(): Promise<number>;
+
+  // Invoice from job log
+  createInvoiceFromJobLog(jobLogId: number, dueDate: Date, createdBy: number): Promise<Invoice>;
+
+  // Analytics operations
+  getAnalyticsOverview(from: Date, to: Date): Promise<AnalyticsOverview>;
+  getJobsOverTime(from: Date, to: Date, groupBy?: 'month' | 'week'): Promise<JobsOverTimeData[]>;
+  getJobsByArea(from: Date, to: Date): Promise<JobsByAreaData[]>;
+  getJobsByStatus(from: Date, to: Date): Promise<JobsByStatusData[]>;
+  getEmployeeProductivity(from: Date, to: Date): Promise<EmployeeProductivityData[]>;
+  getContractsSummary(): Promise<ContractsSummaryData>;
+  getUpcomingItems(): Promise<UpcomingItemsData>;
+  getTopClients(from: Date, to: Date, limit?: number): Promise<TopClientData[]>;
+  getContactSubmissionsSummary(from: Date, to: Date): Promise<ContactSubmissionSummary>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -856,6 +968,400 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(jobLogPhotos)
       .where(and(eq(jobLogPhotos.id, id), eq(jobLogPhotos.jobLogId, jobLogId)));
+  }
+
+  // ============================================
+  // Invoice Operations (SC-INV-001)
+  // ============================================
+
+  private async generateInvoiceNumber(): Promise<string> {
+    const year = new Date().getFullYear();
+    const seqName = `invoice_seq_${year}`;
+    
+    // Create sequence if it doesn't exist (using raw SQL)
+    await db.execute(sql`CREATE SEQUENCE IF NOT EXISTS ${sql.identifier(seqName)} START 1`);
+    
+    // Get next value
+    const result = await db.execute(sql`SELECT nextval(${sql.identifier(seqName)}) as n`);
+    const n = String(result.rows[0].n).padStart(4, '0');
+    return `INV-${year}-${n}`;
+  }
+
+  async createInvoice(insertInvoice: InsertInvoice): Promise<Invoice> {
+    const invoiceNumber = await this.generateInvoiceNumber();
+    const viewToken = uuidv4();
+    
+    const [invoice] = await db
+      .insert(invoices)
+      .values({
+        ...insertInvoice,
+        invoiceNumber,
+        viewToken,
+        status: 'draft',
+        subtotal: String(insertInvoice.subtotal),
+        taxTotal: String(insertInvoice.taxTotal || '0'),
+        total: String(insertInvoice.total),
+      } as any)
+      .returning();
+    
+    // Log initial creation
+    await this.logInvoiceStatusChange({
+      invoiceId: invoice.id,
+      fromStatus: null,
+      toStatus: 'draft',
+      actor: insertInvoice.createdBy ? `admin:${insertInvoice.createdBy}` : 'system',
+      note: 'Invoice created',
+    });
+    
+    return invoice;
+  }
+
+  async getInvoice(id: number): Promise<Invoice | undefined> {
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+    return invoice || undefined;
+  }
+
+  async getInvoiceByToken(token: string): Promise<Invoice | undefined> {
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.viewToken, token));
+    return invoice || undefined;
+  }
+
+  async getInvoiceByNumber(invoiceNumber: string): Promise<Invoice | undefined> {
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.invoiceNumber, invoiceNumber));
+    return invoice || undefined;
+  }
+
+  async listInvoices(filters?: { clientId?: number; status?: InvoiceStatus; fromDate?: Date; toDate?: Date; page?: number; limit?: number }): Promise<InvoiceWithDetails[]> {
+    const conditions = [];
+    
+    if (filters?.clientId) {
+      conditions.push(eq(invoices.clientId, filters.clientId));
+    }
+    if (filters?.status) {
+      conditions.push(eq(invoices.status, filters.status));
+    }
+    if (filters?.fromDate) {
+      conditions.push(gte(invoices.issueDate, filters.fromDate));
+    }
+    if (filters?.toDate) {
+      conditions.push(lte(invoices.issueDate, filters.toDate));
+    }
+
+    const page = filters?.page || 1;
+    const limit = filters?.limit || 50;
+    const offset = (page - 1) * limit;
+
+    let query = db.select().from(invoices);
+    
+    if (conditions.length > 0) {
+      query = db.select().from(invoices).where(and(...conditions)) as any;
+    }
+
+    const results = await query
+      .orderBy(desc(invoices.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    // Fetch related data for each invoice
+    const invoicesWithDetails: InvoiceWithDetails[] = await Promise.all(
+      results.map(async (invoice) => {
+        const client = await this.getClient(invoice.clientId);
+        const lineItems = await this.getLineItemsByInvoice(invoice.id);
+        const statusLogs = await this.getInvoiceStatusLog(invoice.id);
+        return {
+          ...invoice,
+          client,
+          lineItems,
+          statusLogs,
+        };
+      })
+    );
+
+    return invoicesWithDetails;
+  }
+
+  async updateInvoice(id: number, updates: Partial<Invoice>): Promise<Invoice> {
+    const [invoice] = await db
+      .update(invoices)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(invoices.id, id))
+      .returning();
+    return invoice;
+  }
+
+  async getInvoiceStats(): Promise<InvoiceStats> {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    // Get all non-void, non-paid invoices (outstanding)
+    const outstandingResult = await db
+      .select({ total: sum(sql`${invoices.total}::numeric`) })
+      .from(invoices)
+      .where(and(
+        sql`${invoices.status} IN ('draft', 'sent', 'viewed', 'overdue')`
+      ));
+    
+    // Get overdue invoices
+    const overdueResult = await db
+      .select({ total: sum(sql`${invoices.total}::numeric`) })
+      .from(invoices)
+      .where(eq(invoices.status, 'overdue'));
+    
+    // Get paid this month
+    const paidThisMonthResult = await db
+      .select({ total: sum(sql`${invoices.total}::numeric`) })
+      .from(invoices)
+      .where(and(
+        eq(invoices.status, 'paid'),
+        gte(invoices.paidAt, startOfMonth)
+      ));
+    
+    // Get paid all time
+    const paidAllTimeResult = await db
+      .select({ total: sum(sql`${invoices.total}::numeric`) })
+      .from(invoices)
+      .where(eq(invoices.status, 'paid'));
+    
+    // Get count by status
+    const statusCounts = await db
+      .select({ status: invoices.status, count: sql`count(*)::int` })
+      .from(invoices)
+      .groupBy(invoices.status);
+
+    const countByStatus: Record<InvoiceStatus, number> = {
+      draft: 0,
+      sent: 0,
+      viewed: 0,
+      paid: 0,
+      overdue: 0,
+      void: 0,
+    };
+
+    for (const row of statusCounts) {
+      if (row.status && row.status in countByStatus) {
+        countByStatus[row.status as InvoiceStatus] = Number(row.count) || 0;
+      }
+    }
+
+    return {
+      totalOutstanding: outstandingResult[0]?.total?.toString() || '0.00',
+      totalOverdue: overdueResult[0]?.total?.toString() || '0.00',
+      totalPaidThisMonth: paidThisMonthResult[0]?.total?.toString() || '0.00',
+      totalPaidAllTime: paidAllTimeResult[0]?.total?.toString() || '0.00',
+      countByStatus,
+    };
+  }
+
+  // Line Item operations
+  async createLineItem(data: InsertInvoiceLineItem): Promise<InvoiceLineItem> {
+    // Calculate line totals
+    const quantity = parseFloat(String(data.quantity || 1));
+    const unitRate = parseFloat(String(data.unitRate));
+    const taxRate = parseFloat(String(data.taxRate || 0));
+    const lineTotal = quantity * unitRate;
+    const lineTax = lineTotal * (taxRate / 100);
+
+    const [lineItem] = await db
+      .insert(invoiceLineItems)
+      .values({
+        ...data,
+        quantity: String(data.quantity || 1),
+        unitRate: String(data.unitRate),
+        taxRate: String(data.taxRate || 0),
+        lineTotal: lineTotal.toFixed(2),
+        lineTax: lineTax.toFixed(2),
+      } as any)
+      .returning();
+    return lineItem;
+  }
+
+  async updateLineItem(id: number, updates: Partial<InvoiceLineItem>): Promise<InvoiceLineItem> {
+    const [lineItem] = await db
+      .update(invoiceLineItems)
+      .set(updates as any)
+      .where(eq(invoiceLineItems.id, id))
+      .returning();
+    return lineItem;
+  }
+
+  async deleteLineItem(id: number): Promise<void> {
+    await db.delete(invoiceLineItems).where(eq(invoiceLineItems.id, id));
+  }
+
+  async getLineItemsByInvoice(invoiceId: number): Promise<InvoiceLineItem[]> {
+    return await db
+      .select()
+      .from(invoiceLineItems)
+      .where(eq(invoiceLineItems.invoiceId, invoiceId))
+      .orderBy(invoiceLineItems.sortOrder);
+  }
+
+  // Status Log operations
+  async logInvoiceStatusChange(data: InsertInvoiceStatusLog): Promise<InvoiceStatusLog> {
+    const [log] = await db
+      .insert(invoiceStatusLogs)
+      .values(data)
+      .returning();
+    return log;
+  }
+
+  async getInvoiceStatusLog(invoiceId: number): Promise<InvoiceStatusLog[]> {
+    return await db
+      .select()
+      .from(invoiceStatusLogs)
+      .where(eq(invoiceStatusLogs.invoiceId, invoiceId))
+      .orderBy(invoiceStatusLogs.createdAt);
+  }
+
+  // Invoice status transitions
+  async updateInvoiceStatus(id: number, toStatus: InvoiceStatus, actor: string, note?: string): Promise<Invoice> {
+    const invoice = await this.getInvoice(id);
+    if (!invoice) {
+      throw new Error("Invoice not found");
+    }
+
+    const fromStatus = invoice.status;
+
+    // Update the invoice
+    const updates: Partial<Invoice> = {
+      status: toStatus,
+      updatedAt: new Date(),
+    };
+
+    // Set timestamps based on status
+    if (toStatus === 'sent' && !invoice.sentAt) {
+      (updates as any).sentAt = new Date();
+    }
+    if (toStatus === 'viewed' && !invoice.viewedAt) {
+      (updates as any).viewedAt = new Date();
+    }
+    if (toStatus === 'paid') {
+      (updates as any).paidAt = new Date();
+    }
+
+    const updatedInvoice = await this.updateInvoice(id, updates);
+
+    // Log the status change
+    await this.logInvoiceStatusChange({
+      invoiceId: id,
+      fromStatus,
+      toStatus,
+      actor,
+      note,
+    });
+
+    // Sync jobLog status if applicable
+    if (invoice.jobLogId) {
+      if (toStatus === 'sent' || toStatus === 'viewed') {
+        await this.updateJobLog(invoice.jobLogId, { status: 'invoiced' });
+      } else if (toStatus === 'paid') {
+        await this.updateJobLog(invoice.jobLogId, { status: 'paid' });
+      } else if (toStatus === 'void') {
+        await this.updateJobLog(invoice.jobLogId, { status: 'completed' });
+      }
+    }
+
+    return updatedInvoice;
+  }
+
+  async markInvoicesOverdue(): Promise<number> {
+    const now = new Date();
+    
+    // Find invoices that are sent or viewed, past due date, and not already overdue
+    const overdueInvoices = await db
+      .select()
+      .from(invoices)
+      .where(and(
+        sql`${invoices.status} IN ('sent', 'viewed')`,
+        sql`${invoices.dueDate} < ${now}`
+      ));
+
+    let updatedCount = 0;
+    for (const invoice of overdueInvoices) {
+      await this.updateInvoiceStatus(invoice.id, 'overdue', 'system', 'Auto-marked overdue by cron');
+      updatedCount++;
+      
+      // Send overdue email (BUG-002 fix)
+      try {
+        const client = await this.getClient(invoice.clientId);
+        if (client && client.email) {
+          await sendInvoiceOverdueEmail({
+            clientEmail: client.email,
+            clientName: client.name,
+            invoiceNumber: invoice.invoiceNumber,
+            dueDate: new Date(invoice.dueDate),
+            total: String(invoice.total),
+            viewToken: invoice.viewToken!,
+          });
+          console.log(`Sent overdue email for invoice ${invoice.invoiceNumber}`);
+        }
+      } catch (emailError) {
+        console.error(`Failed to send overdue email for invoice ${invoice.invoiceNumber}:`, emailError);
+      }
+    }
+
+    return updatedCount;
+  }
+
+  async createInvoiceFromJobLog(jobLogId: number, dueDate: Date, createdBy: number): Promise<Invoice> {
+    const jobLog = await this.getJobLog(jobLogId);
+    if (!jobLog) {
+      throw new Error("Job log not found");
+    }
+
+    if (!jobLog.clientId) {
+      throw new Error("Job log has no associated client");
+    }
+
+    // Get client info
+    const client = await this.getClient(jobLog.clientId);
+    if (!client) {
+      throw new Error("Client not found");
+    }
+
+    // Create invoice with line item from job log
+    const invoice = await this.createInvoice({
+      clientId: jobLog.clientId,
+      jobLogId,
+      dueDate,
+      subtotal: '0', // Will be calculated from line items
+      taxTotal: '0',
+      total: '0',
+      createdBy,
+    });
+
+    // Create line item from job log - use default rate since jobLog doesn't have cost fields
+    const unitRate = '0'; // Job log doesn't have finalCost/estimatedCost
+    const quantity = '1';
+    const taxRate = '6'; // PA sales tax default
+
+    await this.createLineItem({
+      invoiceId: invoice.id,
+      description: jobLog.workPerformed,
+      quantity,
+      unitRate,
+      taxRate,
+    });
+
+    // Recalculate totals
+    const lineItems = await this.getLineItemsByInvoice(invoice.id);
+    let subtotal = 0;
+    let taxTotal = 0;
+    for (const item of lineItems) {
+      subtotal += parseFloat(String(item.lineTotal));
+      taxTotal += parseFloat(String(item.lineTax));
+    }
+
+    await this.updateInvoice(invoice.id, {
+      subtotal: subtotal.toFixed(2),
+      taxTotal: taxTotal.toFixed(2),
+      total: (subtotal + taxTotal).toFixed(2),
+    });
+
+    return (await this.getInvoice(invoice.id))!;
   }
 }
 

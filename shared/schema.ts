@@ -468,3 +468,118 @@ export type InsertServiceContract = z.infer<typeof insertServiceContractSchema>;
 export type ServiceContract = typeof serviceContracts.$inferSelect;
 export type InsertJobLogPhoto = z.infer<typeof insertJobLogPhotoSchema>;
 export type JobLogPhoto = typeof jobLogPhotos.$inferSelect;
+
+// ============================================
+// Invoice Tables (SC-INV-001)
+// ============================================
+
+export type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'paid' | 'overdue' | 'void';
+
+export const invoices = pgTable("invoices", {
+  id: serial("id").primaryKey(),
+  invoiceNumber: varchar("invoice_number", { length: 20 }).notNull().unique(),
+  clientId: integer("client_id").notNull().references(() => clients.id),
+  jobLogId: integer("job_log_id").references(() => jobLogs.id),
+  status: text("status").notNull().default("draft"), // draft, sent, viewed, paid, overdue, void
+  issueDate: timestamp("issue_date").notNull().defaultNow(),
+  dueDate: timestamp("due_date").notNull(),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  taxTotal: decimal("tax_total", { precision: 10, scale: 2 }).notNull().default("0"),
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  notes: text("notes"),
+  pdfUrl: text("pdf_url"),
+  viewToken: varchar("view_token", { length: 36 }).unique(),
+  sentAt: timestamp("sent_at"),
+  viewedAt: timestamp("viewed_at"),
+  paidAt: timestamp("paid_at"),
+  paymentMethod: text("payment_method"), // cash, check, card, stripe, other
+  paymentAmount: decimal("payment_amount", { precision: 10, scale: 2 }),
+  paymentNote: text("payment_note"),
+  voidReason: text("void_reason"),
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const invoiceLineItems = pgTable("invoice_line_items", {
+  id: serial("id").primaryKey(),
+  invoiceId: integer("invoice_id").notNull().references(() => invoices.id, { onDelete: "cascade" }),
+  description: text("description").notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 3 }).notNull().default("1"),
+  unitRate: decimal("unit_rate", { precision: 10, scale: 2 }).notNull(),
+  taxRate: decimal("tax_rate", { precision: 5, scale: 2 }).notNull().default("0"),
+  lineTotal: decimal("line_total", { precision: 10, scale: 2 }).notNull(),
+  lineTax: decimal("line_tax", { precision: 10, scale: 2 }).notNull().default("0"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const invoiceStatusLogs = pgTable("invoice_status_logs", {
+  id: serial("id").primaryKey(),
+  invoiceId: integer("invoice_id").notNull().references(() => invoices.id, { onDelete: "cascade" }),
+  fromStatus: text("from_status"),
+  toStatus: text("to_status").notNull(),
+  actor: text("actor").notNull(), // admin:{userId}, system, customer
+  note: text("note"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Zod schemas for invoices
+export const insertInvoiceSchema = createInsertSchema(invoices).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  invoiceNumber: true,
+  viewToken: true,
+  sentAt: true,
+  viewedAt: true,
+  paidAt: true,
+}).extend({
+  dueDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  issueDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val).optional(),
+  subtotal: z.union([z.string(), z.number()]).transform(val => String(val)),
+  taxTotal: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+  total: z.union([z.string(), z.number()]).transform(val => String(val)),
+  clientId: z.number().int().positive(),
+  jobLogId: z.number().int().positive().optional().nullable(),
+});
+
+export const insertInvoiceLineItemSchema = createInsertSchema(invoiceLineItems).omit({
+  id: true,
+  createdAt: true,
+  lineTotal: true,
+  lineTax: true,
+}).extend({
+  quantity: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+  unitRate: z.union([z.string(), z.number()]).transform(val => String(val)),
+  taxRate: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+});
+
+export const insertInvoiceStatusLogSchema = createInsertSchema(invoiceStatusLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Invoice types
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoiceLineItem = z.infer<typeof insertInvoiceLineItemSchema>;
+export type InvoiceLineItem = typeof invoiceLineItems.$inferSelect;
+export type InsertInvoiceStatusLog = z.infer<typeof insertInvoiceStatusLogSchema>;
+export type InvoiceStatusLog = typeof invoiceStatusLogs.$inferSelect;
+
+// Invoice with relations
+export interface InvoiceWithDetails extends Invoice {
+  client?: Client;
+  lineItems?: InvoiceLineItem[];
+  statusLogs?: InvoiceStatusLog[];
+}
+
+// Invoice stats
+export interface InvoiceStats {
+  totalOutstanding: string;
+  totalOverdue: string;
+  totalPaidThisMonth: string;
+  totalPaidAllTime: string;
+  countByStatus: Record<InvoiceStatus, number>;
+}

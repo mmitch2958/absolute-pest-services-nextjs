@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import cron from "node-cron";
+import { storage } from "./storage";
 
 // Extend session type to include userId
 declare module 'express-session' {
@@ -86,6 +88,21 @@ app.use((req, res, next) => {
   } else {
     serveStatic(app);
   }
+
+  // Cron job to check for overdue invoices (runs daily at 9 AM)
+  // BUG-002 fix: Wire up automatic overdue check
+  cron.schedule("0 9 * * *", async () => {
+    try {
+      console.log("Running daily overdue invoice check...");
+      const count = await storage.markInvoicesOverdue();
+      if (count > 0) {
+        console.log(`Marked ${count} invoices as overdue and sent emails`);
+      }
+    } catch (error) {
+      console.error("Error in overdue invoice cron job:", error);
+    }
+  });
+  console.log("Scheduled daily overdue invoice check at 9 AM");
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.

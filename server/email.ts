@@ -603,3 +603,349 @@ Website: ${baseUrl}
     text
   });
 }
+
+// ============================================
+// Invoice Emails (SC-INV-001)
+// ============================================
+
+export async function sendInvoiceEmail(data: {
+  clientEmail: string;
+  clientName: string;
+  invoiceNumber: string;
+  invoiceDate: Date;
+  dueDate: Date;
+  total: string;
+  viewToken: string;
+  pdfUrl?: string;
+}): Promise<boolean> {
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+    ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+    : 'http://localhost:5000';
+
+  const viewUrl = `${baseUrl}/api/invoices/view/${data.viewToken}`;
+  const formattedInvoiceDate = data.invoiceDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  const formattedDueDate = data.dueDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const subject = `Invoice #${data.invoiceNumber} from Absolute Pest Services`;
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${subject}</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f9fafb;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);">
+        <div style="background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); padding: 40px 20px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">INVOICE</h1>
+          <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">#${data.invoiceNumber}</p>
+        </div>
+        <div style="padding: 40px 30px;">
+          <p style="color: #4b5563; margin: 0 0 20px 0; font-size: 16px;">
+            Dear <strong>${data.clientName}</strong>,
+          </p>
+          <p style="color: #4b5563; margin: 0 0 20px 0; font-size: 16px;">
+            Thank you for choosing Absolute Pest Services! Please find your invoice details below.
+          </p>
+          
+          <table style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+            <tr>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Invoice Number</td>
+              <td style="padding: 12px 0; color: #1f2937; font-weight: 600; text-align: right; border-bottom: 1px solid #e5e7eb;">${data.invoiceNumber}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Invoice Date</td>
+              <td style="padding: 12px 0; color: #1f2937; text-align: right; border-bottom: 1px solid #e5e7eb;">${formattedInvoiceDate}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; color: #6b7280; border-bottom: 1px solid #e5e7eb;">Due Date</td>
+              <td style="padding: 12px 0; color: #1f2937; text-align: right; border-bottom: 1px solid #e5e7eb;">${formattedDueDate}</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 0; color: #6b7280;">Total Amount</td>
+              <td style="padding: 12px 0; color: #1f2937; font-weight: bold; font-size: 18px; text-align: right;">$${data.total}</td>
+            </tr>
+          </table>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${viewUrl}" style="display: inline-block; background-color: #eab308; color: white; padding: 14px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">View Invoice</a>
+          </div>
+
+          ${data.pdfUrl ? `
+          <p style="color: #6b7280; margin: 20px 0; font-size: 14px; text-align: center;">
+            A PDF copy is also attached to this email.
+          </p>
+          ` : ''}
+
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+            <p style="color: #6b7280; margin: 0 0 10px 0; font-size: 14px;">
+              <strong>Payment Instructions:</strong><br>
+              Payment is due by ${formattedDueDate}. You can pay via cash, check, or credit card.
+            </p>
+            <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+              If you have any questions, please contact us at <strong>(484) 643-2225</strong>.
+            </p>
+          </div>
+
+          <div style="margin-top: 30px; text-align: center;">
+            <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+              Absolute Pest Services<br>
+              <a href="${baseUrl}" style="color: #eab308; text-decoration: none;">Visit Our Website</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const text = `
+Invoice #${data.invoiceNumber} from Absolute Pest Services
+
+Dear ${data.clientName},
+
+Thank you for choosing Absolute Pest Services! Please find your invoice details below:
+
+Invoice Number: ${data.invoiceNumber}
+Invoice Date: ${formattedInvoiceDate}
+Due Date: ${formattedDueDate}
+Total Amount: $${data.total}
+
+View your invoice online: ${viewUrl}
+
+Payment Instructions:
+Payment is due by ${formattedDueDate}. You can pay via cash, check, or credit card.
+
+If you have any questions, please contact us at (484) 643-2225.
+
+Absolute Pest Services
+  `;
+
+  // Send to customer
+  const customerSent = await sendEmail({
+    to: data.clientEmail,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text,
+  });
+
+  // Send CC to business
+  const businessSent = await sendEmail({
+    to: TO_EMAIL,
+    from: FROM_EMAIL,
+    subject: `[INVOICE SENT] ${subject}`,
+    html: `<p>Invoice #${data.invoiceNumber} sent to ${data.clientEmail} (${data.clientName})</p>`,
+    text: `Invoice #${data.invoiceNumber} sent to ${data.clientEmail} (${data.clientName})`,
+  });
+
+  return customerSent && businessSent;
+}
+
+export async function sendInvoiceOverdueEmail(data: {
+  clientEmail: string;
+  clientName: string;
+  invoiceNumber: string;
+  dueDate: Date;
+  total: string;
+  viewToken: string;
+}): Promise<boolean> {
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+    ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+    : 'http://localhost:5000';
+
+  const viewUrl = `${baseUrl}/api/invoices/view/${data.viewToken}`;
+  const formattedDueDate = data.dueDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const subject = `OVERDUE: Invoice #${data.invoiceNumber} — Action Required`;
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${subject}</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f9fafb;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);">
+        <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 30px 20px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">OVERDUE NOTICE</h1>
+          <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Invoice #${data.invoiceNumber}</p>
+        </div>
+        <div style="padding: 40px 30px;">
+          <p style="color: #4b5563; margin: 0 0 20px 0; font-size: 16px;">
+            Dear <strong>${data.clientName}</strong>,
+          </p>
+          <p style="color: #4b5563; margin: 0 0 20px 0; font-size: 16px;">
+            This is a reminder that your invoice is past due. Please take action to avoid service interruption.
+          </p>
+          
+          <table style="width: 100%; border-collapse: collapse; margin: 30px 0; background-color: #fef2f2; border-radius: 8px;">
+            <tr>
+              <td style="padding: 15px; color: #991b1b; border-bottom: 1px solid #fecaca;">Original Due Date</td>
+              <td style="padding: 15px; color: #1f2937; font-weight: 600; text-align: right; border-bottom: 1px solid #fecaca;">${formattedDueDate}</td>
+            </tr>
+            <tr>
+              <td style="padding: 15px; color: #991b1b;">Outstanding Amount</td>
+              <td style="padding: 15px; color: #1f2937; font-weight: bold; font-size: 20px; text-align: right;">$${data.total}</td>
+            </tr>
+          </table>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${viewUrl}" style="display: inline-block; background-color: #dc2626; color: white; padding: 14px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">View & Pay Invoice</a>
+          </div>
+
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+            <p style="color: #6b7280; margin: 0 0 10px 0; font-size: 14px;">
+              If you have already sent payment, please ignore this notice. Otherwise, please contact us at <strong>(484) 643-2225</strong> to discuss payment options.
+            </p>
+          </div>
+
+          <div style="margin-top: 30px; text-align: center;">
+            <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+              Absolute Pest Services<br>
+              <a href="${baseUrl}" style="color: #eab308; text-decoration: none;">Visit Our Website</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const text = `
+OVERDUE NOTICE: Invoice #${data.invoiceNumber}
+
+Dear ${data.clientName},
+
+This is a reminder that your invoice is past due. Please take action to avoid service interruption.
+
+Original Due Date: ${formattedDueDate}
+Outstanding Amount: $${data.total}
+
+View and pay your invoice: ${viewUrl}
+
+If you have already sent payment, please ignore this notice. Otherwise, please contact us at (484) 643-2225.
+
+Absolute Pest Services
+  `;
+
+  return await sendEmail({
+    to: data.clientEmail,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text,
+  });
+}
+
+export async function sendPaymentConfirmationEmail(data: {
+  clientEmail: string;
+  clientName: string;
+  invoiceNumber: string;
+  amountPaid: string;
+  paidAt: Date;
+  paymentMethod: string;
+}): Promise<boolean> {
+  const formattedPaidAt = data.paidAt.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const subject = `Payment Received — Invoice #${data.invoiceNumber}`;
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${subject}</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f9fafb;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);">
+        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 20px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">PAYMENT RECEIVED</h1>
+          <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Thank you!</p>
+        </div>
+        <div style="padding: 40px 30px;">
+          <p style="color: #4b5563; margin: 0 0 20px 0; font-size: 16px;">
+            Dear <strong>${data.clientName}</strong>,
+          </p>
+          <p style="color: #4b5563; margin: 0 0 20px 0; font-size: 16px;">
+            We have received your payment. Thank you for your business!
+          </p>
+          
+          <table style="width: 100%; border-collapse: collapse; margin: 30px 0; background-color: #ecfdf5; border-radius: 8px;">
+            <tr>
+              <td style="padding: 15px; color: #065f46; border-bottom: 1px solid #a7f3d0;">Invoice Number</td>
+              <td style="padding: 15px; color: #1f2937; font-weight: 600; text-align: right; border-bottom: 1px solid #a7f3d0;">${data.invoiceNumber}</td>
+            </tr>
+            <tr>
+              <td style="padding: 15px; color: #065f46; border-bottom: 1px solid #a7f3d0;">Amount Paid</td>
+              <td style="padding: 15px; color: #1f2937; font-weight: bold; font-size: 20px; text-align: right; border-bottom: 1px solid #a7f3d0;">$${data.amountPaid}</td>
+            </tr>
+            <tr>
+              <td style="padding: 15px; color: #065f46; border-bottom: 1px solid #a7f3d0;">Payment Method</td>
+              <td style="padding: 15px; color: #1f2937; text-align: right; border-bottom: 1px solid #a7f3d0;">${data.paymentMethod}</td>
+            </tr>
+            <tr>
+              <td style="padding: 15px; color: #065f46;">Payment Date</td>
+              <td style="padding: 15px; color: #1f2937; text-align: right;">${formattedPaidAt}</td>
+            </tr>
+          </table>
+
+          <p style="color: #6b7280; margin: 30px 0 20px 0; font-size: 14px;">
+            If you have any questions about this payment, please contact us at <strong>(484) 643-2225</strong>.
+          </p>
+
+          <div style="margin-top: 30px; text-align: center;">
+            <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+              Absolute Pest Services<br>
+              <a href="http://absolutepestservices.com" style="color: #eab308; text-decoration: none;">Visit Our Website</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const text = `
+Payment Received — Invoice #${data.invoiceNumber}
+
+Dear ${data.clientName},
+
+We have received your payment. Thank you for your business!
+
+Invoice Number: ${data.invoiceNumber}
+Amount Paid: $${data.amountPaid}
+Payment Method: ${data.paymentMethod}
+Payment Date: ${formattedPaidAt}
+
+If you have any questions about this payment, please contact us at (484) 643-2225.
+
+Absolute Pest Services
+  `;
+
+  return await sendEmail({
+    to: data.clientEmail,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text,
+  });
+}

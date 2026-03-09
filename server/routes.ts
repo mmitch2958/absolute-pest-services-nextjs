@@ -1,13 +1,18 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema, insertServiceContractSchema, insertJobLogPhotoSchema } from "@shared/schema";
+import { insertContactSchema, insertInspectionSchema, insertServiceRequestSchema, loginSchema, registerSchema, insertClientSchema, insertProjectSchema, insertMilestoneSchema, insertDashboardSchema, insertBlogPostSchema, insertFieldEmployeeSchema, insertJobLogSchema, insertJobLogCustomFieldSchema, insertFieldCustomerSchema, insertSiteLocationSchema, insertServicedAreaSchema, insertServiceContractSchema, insertJobLogPhotoSchema, insertInvoiceSchema, insertInvoiceLineItemSchema, type InvoiceStatus } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
-import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail, sendJobLogNotification } from "./email";
+import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail, sendJobLogNotification, sendInvoiceEmail, sendInvoiceOverdueEmail, sendPaymentConfirmationEmail } from "./email";
+import { assertTransition, isTransitionAllowed } from "./invoiceStateMachine";
 import Parser from "rss-parser";
 import { verifyTurnstile } from "./turnstile";
 import { cloudinary } from "./cloudinary";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import path from "path";
+import fs from "fs";
 
 declare module 'express-session' {
   interface SessionData {
@@ -2074,6 +2079,570 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching admin photos:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // ==========================================
+  // Invoice Routes (SC-INV-001)
+  // ==========================================
+
+  // GET /api/admin/invoices — List all invoices
+  app.get("/api/admin/invoices", requireAdmin, async (req, res) => {
+    try {
+      const filters: {
+        clientId?: number;
+        status?: InvoiceStatus;
+        fromDate?: Date;
+        toDate?: Date;
+        page?: number;
+        limit?: number;
+      } = {};
+      if (req.query.clientId) filters.clientId = parseInt(req.query.clientId as string);
+      if (req.query.status) filters.status = req.query.status as InvoiceStatus;
+      if (req.query.fromDate) filters.fromDate = new Date(req.query.fromDate as string);
+      if (req.query.toDate) filters.toDate = new Date(req.query.toDate as string);
+      if (req.query.page) filters.page = parseInt(req.query.page as string);
+      if (req.query.limit) filters.limit = parseInt(req.query.limit as string);
+
+      const invoices = await storage.listInvoices(filters);
+      res.json({ success: true, invoices });
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/invoices/stats — Invoice summary stats
+  app.get("/api/admin/invoices/stats", requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getInvoiceStats();
+      res.json({ success: true, stats });
+    } catch (error) {
+      console.error("Error fetching invoice stats:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/invoices/:id — Get single invoice with details
+  app.get("/api/admin/invoices/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoice = await storage.getInvoice(id);
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+
+      const client = await storage.getClient(invoice.clientId);
+      const lineItems = await storage.getLineItemsByInvoice(id);
+      const statusLogs = await storage.getInvoiceStatusLog(id);
+
+      res.json({
+        success: true,
+        invoice: {
+          ...invoice,
+          client,
+          lineItems,
+          statusLogs,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching invoice:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/admin/invoices — Create new invoice (draft)
+  app.post("/api/admin/invoices", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertInvoiceSchema.parse(req.body);
+      const userId = req.session.userId!;
+      const invoice = await storage.createInvoice({
+        ...validatedData,
+        createdBy: userId,
+      });
+
+      // Create line items if provided
+      if (req.body.lineItems && Array.isArray(req.body.lineItems)) {
+        for (const item of req.body.lineItems) {
+          const lineItemData = insertInvoiceLineItemSchema.parse({
+            ...item,
+            invoiceId: invoice.id,
+          });
+          await storage.createLineItem(lineItemData);
+        }
+
+        // Recalculate totals
+        const lineItems = await storage.getLineItemsByInvoice(invoice.id);
+        let subtotal = 0;
+        let taxTotal = 0;
+        for (const item of lineItems) {
+          subtotal += parseFloat(String(item.lineTotal));
+          taxTotal += parseFloat(String(item.lineTax));
+        }
+
+        await storage.updateInvoice(invoice.id, {
+          subtotal: subtotal.toFixed(2),
+          taxTotal: taxTotal.toFixed(2),
+          total: (subtotal + taxTotal).toFixed(2),
+        });
+      }
+
+      // Fetch the updated invoice with details
+      const updatedInvoice = await storage.getInvoice(invoice.id);
+      const lineItems = await storage.getLineItemsByInvoice(invoice.id);
+
+      res.status(201).json({
+        success: true,
+        message: "Invoice created successfully",
+        invoice: { ...updatedInvoice, lineItems },
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid invoice data", errors: error.errors });
+      } else {
+        console.error("Error creating invoice:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  // PUT /api/admin/invoices/:id — Update invoice (draft only)
+  app.put("/api/admin/invoices/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoice = await storage.getInvoice(id);
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+
+      // Only allow editing in draft state
+      if (invoice.status !== 'draft') {
+        return res.status(400).json({ success: false, message: "Can only edit invoices in draft status" });
+      }
+
+      // Remove status from body to enforce state machine (prevents BUG-003)
+      const { status: _status, ...bodyWithoutStatus } = req.body;
+      const validatedData = insertInvoiceSchema.partial().parse(bodyWithoutStatus);
+      await storage.updateInvoice(id, validatedData as any);
+
+      // Update line items if provided
+      if (req.body.lineItems !== undefined) {
+        // Delete existing line items
+        const existingItems = await storage.getLineItemsByInvoice(id);
+        for (const item of existingItems) {
+          await storage.deleteLineItem(item.id);
+        }
+
+        // Create new line items
+        if (Array.isArray(req.body.lineItems)) {
+          for (const item of req.body.lineItems) {
+            const lineItemData = insertInvoiceLineItemSchema.parse({
+              ...item,
+              invoiceId: id,
+            });
+            await storage.createLineItem(lineItemData);
+          }
+        }
+
+        // Recalculate totals
+        const lineItems = await storage.getLineItemsByInvoice(id);
+        let subtotal = 0;
+        let taxTotal = 0;
+        for (const item of lineItems) {
+          subtotal += parseFloat(String(item.lineTotal));
+          taxTotal += parseFloat(String(item.lineTax));
+        }
+
+        await storage.updateInvoice(id, {
+          subtotal: subtotal.toFixed(2),
+          taxTotal: taxTotal.toFixed(2),
+          total: (subtotal + taxTotal).toFixed(2),
+        });
+      }
+
+      const updatedInvoice = await storage.getInvoice(id);
+      const lineItems = await storage.getLineItemsByInvoice(id);
+      const statusLogs = await storage.getInvoiceStatusLog(id);
+
+      res.json({
+        success: true,
+        message: "Invoice updated successfully",
+        invoice: { ...updatedInvoice, lineItems, statusLogs },
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid invoice data", errors: error.errors });
+      } else {
+        console.error("Error updating invoice:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  // POST /api/admin/invoices/:id/send — Send invoice to customer (draft → sent)
+  app.post("/api/admin/invoices/:id/send", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoice = await storage.getInvoice(id);
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+
+      // Validate transition
+      try {
+        assertTransition(invoice.status as InvoiceStatus, 'sent');
+      } catch (e: any) {
+        return res.status(400).json({ success: false, message: e.message });
+      }
+
+      const client = await storage.getClient(invoice.clientId);
+      if (!client || !client.email) {
+        return res.status(400).json({ success: false, message: "Client email not found" });
+      }
+
+      // Update status to sent
+      await storage.updateInvoiceStatus(id, 'sent', `admin:${req.session.userId}`, 'Invoice sent to customer');
+
+      // Send email
+      await sendInvoiceEmail({
+        clientEmail: client.email,
+        clientName: client.name,
+        invoiceNumber: invoice.invoiceNumber,
+        invoiceDate: new Date(invoice.issueDate),
+        dueDate: new Date(invoice.dueDate),
+        total: String(invoice.total),
+        viewToken: invoice.viewToken!,
+      });
+
+      const updatedInvoice = await storage.getInvoice(id);
+      const lineItems = await storage.getLineItemsByInvoice(id);
+      const statusLogs = await storage.getInvoiceStatusLog(id);
+
+      res.json({
+        success: true,
+        message: "Invoice sent successfully",
+        invoice: { ...updatedInvoice, lineItems, statusLogs },
+      });
+    } catch (error) {
+      console.error("Error sending invoice:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/admin/invoices/:id/mark-paid — Mark invoice as paid
+  app.post("/api/admin/invoices/:id/mark-paid", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { paymentMethod, paymentAmount, paymentNote } = req.body;
+
+      const invoice = await storage.getInvoice(id);
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+
+      // Validate transition
+      try {
+        assertTransition(invoice.status as InvoiceStatus, 'paid');
+      } catch (e: any) {
+        return res.status(400).json({ success: false, message: e.message });
+      }
+
+      // Update invoice with payment details
+      await storage.updateInvoice(id, {
+        paymentMethod: paymentMethod || 'other',
+        paymentAmount: paymentAmount || invoice.total,
+        paymentNote,
+      } as any);
+
+      // Update status
+      await storage.updateInvoiceStatus(id, 'paid', `admin:${req.session.userId}`, 'Payment recorded');
+
+      // Send confirmation email
+      const client = await storage.getClient(invoice.clientId);
+      if (client?.email) {
+        await sendPaymentConfirmationEmail({
+          clientEmail: client.email,
+          clientName: client.name,
+          invoiceNumber: invoice.invoiceNumber,
+          amountPaid: String(paymentAmount || invoice.total),
+          paidAt: new Date(),
+          paymentMethod: paymentMethod || 'other',
+        });
+      }
+
+      const updatedInvoice = await storage.getInvoice(id);
+      const lineItems = await storage.getLineItemsByInvoice(id);
+      const statusLogs = await storage.getInvoiceStatusLog(id);
+
+      res.json({
+        success: true,
+        message: "Invoice marked as paid",
+        invoice: { ...updatedInvoice, lineItems, statusLogs },
+      });
+    } catch (error) {
+      console.error("Error marking invoice as paid:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/admin/invoices/:id/void — Void invoice
+  app.post("/api/admin/invoices/:id/void", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { reason } = req.body;
+
+      const invoice = await storage.getInvoice(id);
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+
+      // Validate transition
+      try {
+        assertTransition(invoice.status as InvoiceStatus, 'void');
+      } catch (e: any) {
+        return res.status(400).json({ success: false, message: e.message });
+      }
+
+      // Update with void reason
+      await storage.updateInvoice(id, { voidReason: reason } as any);
+
+      // Update status
+      await storage.updateInvoiceStatus(id, 'void', `admin:${req.session.userId}`, reason || 'Invoice voided');
+
+      const updatedInvoice = await storage.getInvoice(id);
+      const lineItems = await storage.getLineItemsByInvoice(id);
+      const statusLogs = await storage.getInvoiceStatusLog(id);
+
+      res.json({
+        success: true,
+        message: "Invoice voided",
+        invoice: { ...updatedInvoice, lineItems, statusLogs },
+      });
+    } catch (error) {
+      console.error("Error voiding invoice:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/admin/invoices/:id/log — Get status log for invoice
+  app.get("/api/admin/invoices/:id/log", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const logs = await storage.getInvoiceStatusLog(id);
+      res.json({ success: true, logs });
+    } catch (error) {
+      console.error("Error fetching invoice logs:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/admin/invoices/from-job/:jobLogId — Create invoice from job log
+  app.post("/api/admin/invoices/from-job/:jobLogId", requireAdmin, async (req, res) => {
+    try {
+      const jobLogId = parseInt(req.params.jobLogId);
+      const { dueDate } = req.body;
+
+      if (!dueDate) {
+        return res.status(400).json({ success: false, message: "dueDate is required" });
+      }
+
+      const userId = req.session.userId!;
+      const invoice = await storage.createInvoiceFromJobLog(
+        jobLogId,
+        new Date(dueDate),
+        userId
+      );
+
+      const lineItems = await storage.getLineItemsByInvoice(invoice.id);
+      const statusLogs = await storage.getInvoiceStatusLog(invoice.id);
+
+      res.status(201).json({
+        success: true,
+        message: "Invoice created from job log",
+        invoice: { ...invoice, lineItems, statusLogs },
+      });
+    } catch (error: any) {
+      console.error("Error creating invoice from job log:", error);
+      res.status(400).json({ success: false, message: error.message || "Internal server error" });
+    }
+  });
+
+  // GET /api/invoices/view/:token — Public customer view (no auth)
+  app.get("/api/invoices/view/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+      const invoice = await storage.getInvoiceByToken(token);
+      
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+
+      // If invoice is 'sent', transition to 'viewed'
+      if (invoice.status === 'sent') {
+        await storage.updateInvoiceStatus(invoice.id, 'viewed', 'customer', 'Customer viewed invoice');
+        const updated = await storage.getInvoice(invoice.id);
+        Object.assign(invoice, updated);
+      }
+
+      // Get client info (without sensitive data)
+      const client = await storage.getClient(invoice.clientId);
+      const lineItems = await storage.getLineItemsByInvoice(invoice.id);
+
+      res.json({
+        success: true,
+        invoice: {
+          id: invoice.id,
+          invoiceNumber: invoice.invoiceNumber,
+          status: invoice.status,
+          issueDate: invoice.issueDate,
+          dueDate: invoice.dueDate,
+          subtotal: invoice.subtotal,
+          taxTotal: invoice.taxTotal,
+          total: invoice.total,
+          notes: invoice.notes,
+          pdfUrl: invoice.pdfUrl,
+          client: client ? { name: client.name, email: client.email, address: client.address, phone: client.phone } : undefined,
+          lineItems,
+        },
+      });
+    } catch (error) {
+      console.error("Error viewing invoice:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/admin/invoices/mark-overdue — Manually trigger overdue check (admin)
+  app.post("/api/admin/invoices/mark-overdue", requireAdmin, async (req, res) => {
+    try {
+      const count = await storage.markInvoicesOverdue();
+      res.json({ success: true, message: `${count} invoices marked as overdue`, count });
+    } catch (error) {
+      console.error("Error marking invoices overdue:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/admin/invoices/:id/generate-pdf — Generate PDF for invoice (BUG-001 fix)
+  app.post("/api/admin/invoices/:id/generate-pdf", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoice = await storage.getInvoice(id);
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+
+      const client = await storage.getClient(invoice.clientId);
+      const lineItems = await storage.getLineItemsByInvoice(id);
+
+      if (!client) {
+        return res.status(400).json({ success: false, message: "Client not found" });
+      }
+
+      // Generate PDF using jsPDF
+      const doc = new jsPDF();
+      
+      // Header
+      doc.setFontSize(24);
+      doc.setTextColor(40, 40, 40);
+      doc.text("INVOICE", 20, 30);
+      
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Invoice #: ${invoice.invoiceNumber}`, 20, 45);
+      doc.text(`Date: ${new Date(invoice.issueDate).toLocaleDateString()}`, 20, 52);
+      doc.text(`Due Date: ${new Date(invoice.dueDate).toLocaleDateString()}`, 20, 59);
+      
+      // Company info
+      doc.setFontSize(10);
+      doc.text("From:", 120, 40);
+      doc.setFontSize(11);
+      doc.text("Absolute Pest Services", 120, 46);
+      doc.setFontSize(9);
+      doc.text("rob@absolutepestservices.com", 120, 52);
+      
+      // Bill To
+      doc.setFontSize(10);
+      doc.text("Bill To:", 20, 75);
+      doc.setFontSize(11);
+      doc.text(client.name, 20, 81);
+      doc.setFontSize(9);
+      if (client.address) doc.text(client.address, 20, 87);
+      if (client.email) doc.text(client.email, 20, 93);
+      
+      // Line items table
+      const tableData = lineItems.map(item => [
+        item.description,
+        item.quantity.toString(),
+        `$${item.unitRate}`,
+        `$${item.lineTotal}`
+      ]);
+      
+      autoTable(doc, {
+        startY: 105,
+        head: [['Description', 'Qty', 'Unit Price', 'Total']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [66, 66, 66] },
+      });
+      
+      // Get final Y position after table
+      const finalY = (doc as any).lastAutoTable?.finalY || 150;
+      
+      // Totals
+      doc.setFontSize(10);
+      doc.text(`Subtotal: $${invoice.subtotal}`, 140, finalY + 15);
+      doc.text(`Tax: $${invoice.taxTotal}`, 140, finalY + 22);
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Total: $${invoice.total}`, 140, finalY + 30);
+      
+      // Notes
+      if (invoice.notes) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.text("Notes:", 20, finalY + 45);
+        doc.text(invoice.notes, 20, finalY + 51);
+      }
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text("Thank you for your business!", 20, 280);
+      
+      // Save PDF to file
+      const pdfDir = path.join(process.cwd(), 'generated-pdfs');
+      if (!fs.existsSync(pdfDir)) {
+        fs.mkdirSync(pdfDir, { recursive: true });
+      }
+      
+      const pdfFileName = `invoice-${invoice.invoiceNumber.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
+      const pdfPath = path.join(pdfDir, pdfFileName);
+      
+      const pdfBuffer = doc.output('arraybuffer');
+      fs.writeFileSync(pdfPath, Buffer.from(pdfBuffer));
+      
+      // Upload to Cloudinary
+      const cloudinaryUpload = await cloudinary.uploader.upload(`data:application/pdf;base64,${Buffer.from(pdfBuffer).toString('base64')}`, {
+        folder: 'invoices',
+        resource_type: 'raw',
+        public_id: pdfFileName.replace('.pdf', '')
+      });
+      
+      const pdfUrl = cloudinaryUpload.secure_url;
+      
+      // Update invoice with PDF URL
+      await storage.updateInvoice(id, { pdfUrl });
+      
+      const updatedInvoice = await storage.getInvoice(id);
+      
+      res.json({
+        success: true,
+        message: "PDF generated successfully",
+        invoice: updatedInvoice,
+      });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      res.status(500).json({ success: false, message: "Failed to generate PDF" });
     }
   });
 
