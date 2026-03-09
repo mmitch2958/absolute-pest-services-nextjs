@@ -253,6 +253,8 @@ export const fieldEmployees = pgTable("field_employees", {
   pin: text("pin").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   canManageEmployees: boolean("can_manage_employees").default(false).notNull(),
+  hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
+  externalPayrollId: text("external_payroll_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -363,6 +365,8 @@ export type CustomerMessage = typeof customerMessages.$inferSelect;
 export const insertFieldEmployeeSchema = createInsertSchema(fieldEmployees).omit({
   id: true,
   createdAt: true,
+}).extend({
+  hourlyRate: z.union([z.string(), z.number()]).transform(val => val === undefined ? undefined : String(val)).optional(),
 });
 
 export const insertJobLogSchema = createInsertSchema(jobLogs).omit({
@@ -761,3 +765,151 @@ export const DEFAULT_REVIEW_SETTINGS: Omit<ReviewSettings, 'id' | 'updatedAt'> =
   triggerInvoicePaid: false,
   customMessage: "",
 };
+
+// ============================================
+// Time Tracking Tables (SC-TIME-001)
+// ============================================
+
+export type ShiftStatus = 'open' | 'closed' | 'flagged';
+export type TimeBlockType = 'job' | 'travel' | 'admin';
+export type BreakType = 'rest' | 'meal';
+export type GpsStatus = 'captured' | 'denied' | 'timeout';
+
+export interface GpsData {
+  lat: number;
+  lng: number;
+  accuracy: number;
+  status: GpsStatus;
+}
+
+export const shifts = pgTable("shifts", {
+  id: serial("id").primaryKey(),
+  employeeId: integer("employee_id").notNull().references(() => fieldEmployees.id),
+  clockInAt: timestamp("clock_in_at").notNull(),
+  clockOutAt: timestamp("clock_out_at"),
+  clockInGps: jsonb("clock_in_gps"), // { lat, lng, accuracy, status }
+  clockOutGps: jsonb("clock_out_gps"),
+  clockInNotes: text("clock_in_notes"),
+  clockOutNotes: text("clock_out_notes"),
+  totalShiftMinutes: integer("total_shift_minutes"), // computed on clock-out
+  status: text("status").notNull().default("open"), // open, closed, flagged
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const shiftTimeBlocks = pgTable("shift_time_blocks", {
+  id: serial("id").primaryKey(),
+  shiftId: integer("shift_id").notNull().references(() => shifts.id, { onDelete: "cascade" }),
+  employeeId: integer("employee_id").notNull().references(() => fieldEmployees.id),
+  blockType: text("block_type").notNull(), // job, travel, admin
+  jobLogId: integer("job_log_id").references(() => jobLogs.id), // required when blockType = job
+  startedAt: timestamp("started_at").notNull(),
+  endedAt: timestamp("ended_at"),
+  durationMinutes: integer("duration_minutes"), // computed on end
+  arrivalGps: jsonb("arrival_gps"),
+  departureGps: jsonb("departure_gps"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const shiftBreaks = pgTable("shift_breaks", {
+  id: serial("id").primaryKey(),
+  shiftId: integer("shift_id").notNull().references(() => shifts.id, { onDelete: "cascade" }),
+  employeeId: integer("employee_id").notNull().references(() => fieldEmployees.id),
+  breakType: text("break_type").notNull(), // rest, meal
+  isPaid: boolean("is_paid").notNull().default(false), // derived from break type at creation
+  breakStartAt: timestamp("break_start_at").notNull(),
+  breakEndAt: timestamp("break_end_at"),
+  breakMinutes: integer("break_minutes"), // computed on end
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const timeEntryAuditLog = pgTable("time_entry_audit_log", {
+  id: serial("id").primaryKey(),
+  entityType: text("entity_type").notNull(), // shift, shift_time_block, shift_break
+  entityId: integer("entity_id").notNull(),
+  actorId: integer("actor_id").notNull(), // users.id or field_employees.id
+  actorType: text("actor_type").notNull(), // admin, employee, system
+  fieldChanged: text("field_changed").notNull(),
+  oldValue: text("old_value"),
+  newValue: text("new_value"),
+  reason: text("reason"),
+  correctedAt: timestamp("corrected_at").defaultNow().notNull(),
+});
+
+// Zod schemas for time tracking
+export const insertShiftSchema = createInsertSchema(shifts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  totalShiftMinutes: true,
+}).extend({
+  clockInAt: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  clockOutAt: z.union([z.date(), z.string(), z.null()]).transform(val => val === null ? null : typeof val === 'string' ? new Date(val) : val).optional(),
+  clockInGps: z.object({
+    lat: z.number(),
+    lng: z.number(),
+    accuracy: z.number(),
+    status: z.enum(['captured', 'denied', 'timeout']),
+  }).optional(),
+  clockOutGps: z.object({
+    lat: z.number(),
+    lng: z.number(),
+    accuracy: z.number(),
+    status: z.enum(['captured', 'denied', 'timeout']),
+  }).optional(),
+});
+
+export const insertShiftTimeBlockSchema = createInsertSchema(shiftTimeBlocks).omit({
+  id: true,
+  createdAt: true,
+  durationMinutes: true,
+}).extend({
+  startedAt: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  endedAt: z.union([z.date(), z.string(), z.null()]).transform(val => val === null ? null : typeof val === 'string' ? new Date(val) : val).optional(),
+  arrivalGps: z.object({
+    lat: z.number(),
+    lng: z.number(),
+    accuracy: z.number(),
+    status: z.enum(['captured', 'denied', 'timeout']),
+  }).optional(),
+  departureGps: z.object({
+    lat: z.number(),
+    lng: z.number(),
+    accuracy: z.number(),
+    status: z.enum(['captured', 'denied', 'timeout']),
+  }).optional(),
+});
+
+export const insertShiftBreakSchema = createInsertSchema(shiftBreaks).omit({
+  id: true,
+  createdAt: true,
+  breakMinutes: true,
+}).extend({
+  breakStartAt: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val),
+  breakEndAt: z.union([z.date(), z.string(), z.null()]).transform(val => val === null ? null : typeof val === 'string' ? new Date(val) : val).optional(),
+  isPaid: z.boolean().optional().default(false),
+});
+
+export const insertTimeEntryAuditLogSchema = createInsertSchema(timeEntryAuditLog).omit({
+  id: true,
+  correctedAt: true,
+});
+
+// Time tracking types
+export type InsertShift = z.infer<typeof insertShiftSchema>;
+export type Shift = typeof shifts.$inferSelect;
+export type InsertShiftTimeBlock = z.infer<typeof insertShiftTimeBlockSchema>;
+export type ShiftTimeBlock = typeof shiftTimeBlocks.$inferSelect;
+export type InsertShiftBreak = z.infer<typeof insertShiftBreakSchema>;
+export type ShiftBreak = typeof shiftBreaks.$inferSelect;
+export type InsertTimeEntryAuditLog = z.infer<typeof insertTimeEntryAuditLogSchema>;
+export type TimeEntryAuditLog = typeof timeEntryAuditLog.$inferSelect;
+
+// Shift with relations
+export interface ShiftWithDetails extends Shift {
+  employee?: { id: number; name: string };
+  timeBlocks?: ShiftTimeBlock[];
+  breaks?: ShiftBreak[];
+}
