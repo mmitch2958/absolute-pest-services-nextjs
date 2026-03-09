@@ -82,6 +82,10 @@ export const payments = pgTable("payments", {
 // Admin Portal Entities
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
+  // userId links a registered portal user (users.id) to this client record.
+  // Nullable — not all clients have portal accounts (cash/walk-in customers).
+  // Set by admin via PATCH /api/admin/users/:id/client-link.
+  userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
@@ -194,6 +198,11 @@ export const insertClientSchema = createInsertSchema(clients).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+// Schema for admin linking a user account to a client record
+export const linkClientToUserSchema = z.object({
+  userId: z.number().int().positive().nullable(),
 });
 
 export const insertProjectSchema = createInsertSchema(projects).omit({
@@ -326,6 +335,29 @@ export const serviceContracts = pgTable("service_contracts", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// ─── Customer Portal Messaging ───────────────────────────────────────────────
+// One message thread per customer. direction distinguishes who sent the message.
+export const customerMessages = pgTable("customer_messages", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  direction: text("direction").notNull(), // 'customer_to_admin' | 'admin_to_customer'
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  readAt: timestamp("read_at"),
+  sentByAdminId: integer("sent_by_admin_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertCustomerMessageSchema = createInsertSchema(customerMessages).omit({
+  id: true,
+  createdAt: true,
+  readAt: true,
+  isRead: true,
+});
+
+export type InsertCustomerMessage = z.infer<typeof insertCustomerMessageSchema>;
+export type CustomerMessage = typeof customerMessages.$inferSelect;
 
 export const insertFieldEmployeeSchema = createInsertSchema(fieldEmployees).omit({
   id: true,
