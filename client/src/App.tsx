@@ -32,6 +32,7 @@ import { AdminFieldData } from "@/pages/admin/admin-field-data";
 import { AdminContracts } from "@/pages/admin/AdminContracts";
 import { AdminCalendar } from "@/pages/admin/AdminCalendar";
 import AdminScheduling from "@/pages/admin/admin-scheduling";
+import AdminInvoices from "@/pages/admin/AdminInvoices";
 import FieldLogin from "@/pages/field-login";
 import FieldLog from "@/pages/field-log";
 import FieldMyJobs from "@/pages/field/field-my-jobs";
@@ -132,6 +133,11 @@ function Router() {
       <Route path="/admin/scheduling">
         <AdminLayout>
           <AdminScheduling />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/invoices">
+        <AdminLayout>
+          <AdminInvoices />
         </AdminLayout>
       </Route>
       
