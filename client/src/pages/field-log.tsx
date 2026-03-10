@@ -41,6 +41,8 @@ const jobLogSchema = z.object({
   servicedArea: z.string().min(1, "Serviced area is required"),
   workPerformed: z.string().min(1, "Work performed is required"),
   jobDate: z.string().min(1, "Job date is required"),
+  serviceRateId: z.number().nullable().optional(),
+  amount: z.string().optional(),
 });
 
 type JobLogFormData = z.infer<typeof jobLogSchema>;
@@ -404,6 +406,13 @@ export default function FieldLog() {
     retry: false,
   });
 
+  const { data: serviceRatesData } = useQuery<{ success: boolean; rates: Array<{ id: number; name: string; description: string | null; defaultRate: string }> }>({
+    queryKey: ["/api/field/service-rates"],
+    enabled: !!employee,
+    retry: false,
+  });
+  const serviceRates = serviceRatesData?.rates || [];
+
   const form = useForm<JobLogFormData>({
     resolver: zodResolver(jobLogSchema),
     defaultValues: {
@@ -414,6 +423,8 @@ export default function FieldLog() {
       servicedArea: "",
       workPerformed: "",
       jobDate: new Date().toISOString().split("T")[0],
+      serviceRateId: null,
+      amount: "200.00",
     },
   });
 
@@ -604,6 +615,8 @@ export default function FieldLog() {
         ...data,
         employeeId: employee.id,
         jobDate: data.jobDate,
+        serviceRateId: data.serviceRateId || null,
+        amount: data.amount || "200.00",
         customFields: Object.keys(customFieldValues).length > 0 ? customFieldValues : undefined,
         propertyType: customerPropertyType,
         isNewCustomer: customerAddingNew,
@@ -655,6 +668,8 @@ export default function FieldLog() {
           servicedArea: "",
           workPerformed: "",
           jobDate: new Date().toISOString().split("T")[0],
+          serviceRateId: null,
+          amount: "200.00",
         });
         setCustomerAddingNew(false);
         setLocationAddingNew(false);
@@ -703,6 +718,8 @@ export default function FieldLog() {
           servicedArea: data.servicedArea,
           workPerformed: data.workPerformed,
           jobDate: data.jobDate,
+          serviceRateId: data.serviceRateId || null,
+          amount: data.amount || "200.00",
           status: 'completed',
           customFields: Object.keys(customFieldValues).length > 0 ? customFieldValues : undefined,
           photos: photos.map(p => ({
@@ -728,6 +745,8 @@ export default function FieldLog() {
           servicedArea: "",
           workPerformed: "",
           jobDate: new Date().toISOString().split("T")[0],
+          serviceRateId: null,
+          amount: "200.00",
         });
         setCustomerAddingNew(false);
         setLocationAddingNew(false);
@@ -983,6 +1002,58 @@ export default function FieldLog() {
                     </FormItem>
                   )}
                 />
+
+                {/* ── Service Type & Amount ── */}
+                <div className="grid grid-cols-5 gap-3">
+                  <div className="col-span-3 space-y-1">
+                    <FormLabel>Service Type</FormLabel>
+                    <Select
+                      value={form.watch("serviceRateId") ? String(form.watch("serviceRateId")) : "none"}
+                      onValueChange={(val) => {
+                        if (val === "none") {
+                          form.setValue("serviceRateId", null);
+                          return;
+                        }
+                        const rateId = parseInt(val);
+                        form.setValue("serviceRateId", rateId);
+                        const rate = serviceRates.find(r => r.id === rateId);
+                        if (rate) form.setValue("amount", rate.defaultRate);
+                      }}
+                    >
+                      <SelectTrigger className="h-12 text-base">
+                        <SelectValue placeholder="Select service..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No service type</SelectItem>
+                        {serviceRates.map((r) => (
+                          <SelectItem key={r.id} value={String(r.id)}>
+                            {r.name} — ${r.defaultRate}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Amount ($)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="200.00"
+                            className="h-12 text-base text-right font-semibold"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 {/* ── Photo Upload Section (Leia spec: below Work Performed) ── */}
                 <PhotoUploadSection
