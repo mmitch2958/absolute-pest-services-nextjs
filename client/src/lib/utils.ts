@@ -23,3 +23,16 @@ export function displayDate(dateValue: string | Date): string {
   const str = String(dateValue).slice(0, 10);
   return new Date(str + "T12:00:00").toLocaleDateString();
 }
+
+export function displayDateTime(dateValue: string | Date): string {
+  const d = new Date(String(dateValue));
+  if (isNaN(d.getTime())) return String(dateValue);
+  return d.toLocaleString("en-US", {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
