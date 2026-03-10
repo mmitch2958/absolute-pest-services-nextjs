@@ -1442,15 +1442,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
         locationAreas[key].sort((a, b) => a.localeCompare(b));
       }
 
+      const allClientRecords = await storage.getClients();
+      const clientsForField = allClientRecords.map(c => ({
+        id: c.id,
+        name: c.name,
+        address: c.address ?? null,
+        propertyType: c.propertyType ?? "residential",
+      }));
+
       res.json({
         success: true,
         customers: mergedCustomers,
         customerLocations,
         locationAreas,
-        clients: [],
+        clients: clientsForField,
       });
     } catch (error) {
       console.error("Error fetching suggestions:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Admin version of suggestions endpoint (same data, admin auth)
+  app.get("/api/admin/suggestions", requireAdmin, async (req, res) => {
+    try {
+      const allLogs = await storage.getJobLogs();
+      const standaloneLocs = await storage.getSiteLocations();
+      const standaloneAreas = await storage.getServicedAreas();
+
+      const dedup = (items: string[]) => {
+        const seen = new Map<string, string>();
+        for (const item of items) {
+          const key = item.toLowerCase();
+          if (!seen.has(key)) seen.set(key, item);
+        }
+        return [...seen.values()].sort((a, b) => a.localeCompare(b));
+      };
+
+      const customerLocations: Record<string, string[]> = {};
+      const locationAreas: Record<string, string[]> = {};
+
+      for (const log of allLogs) {
+        const cust = log.customerName.trim();
+        const loc = log.siteLocation.trim();
+        const area = log.servicedArea.trim();
+        if (cust && loc) {
+          const custKey = cust.toLowerCase();
+          if (!customerLocations[custKey]) customerLocations[custKey] = [];
+          if (!customerLocations[custKey].some(l => l.toLowerCase() === loc.toLowerCase())) {
+            customerLocations[custKey].push(loc);
+          }
+        }
+        if (loc && area) {
+          const locKey = loc.toLowerCase();
+          if (!locationAreas[locKey]) locationAreas[locKey] = [];
+          if (!locationAreas[locKey].some(a => a.toLowerCase() === area.toLowerCase())) {
+            locationAreas[locKey].push(area);
+          }
+        }
+      }
+
+      for (const loc of standaloneLocs) {
+        const custKey = (loc.customerName || "").toLowerCase();
+        if (custKey && !customerLocations[custKey]) customerLocations[custKey] = [];
+        if (custKey && !customerLocations[custKey].some(l => l.toLowerCase() === loc.name.toLowerCase())) {
+          customerLocations[custKey].push(loc.name);
+        }
+      }
+
+      for (const area of standaloneAreas) {
+        const locKey = (area.siteLocationName || "").toLowerCase();
+        if (locKey && !locationAreas[locKey]) locationAreas[locKey] = [];
+        if (locKey && !locationAreas[locKey].some(a => a.toLowerCase() === area.name.toLowerCase())) {
+          locationAreas[locKey].push(area.name);
+        }
+      }
+
+      for (const key in customerLocations) {
+        customerLocations[key].sort((a, b) => a.localeCompare(b));
+      }
+      for (const key in locationAreas) {
+        locationAreas[key].sort((a, b) => a.localeCompare(b));
+      }
+
+      res.json({ success: true, customerLocations, locationAreas });
+    } catch (error) {
+      console.error("Error fetching admin suggestions:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });
@@ -1526,11 +1603,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Job Log routes
   app.post("/api/field/job-logs", requireFieldAuth, async (req, res) => {
     try {
+      // If this is a new customer, create a client record FIRST so it appears in the admin client list
+      let resolvedClientId = req.body.clientId || null;
+      if (req.body.isNewCustomer && req.body.customerName && !req.body.clientId) {
+        try {
+          const newClient = await storage.createClient({
+            name: req.body.customerName,
+            address: req.body.newCustomerAddress || null,
+            propertyType: req.body.propertyType || "residential",
+            clientType: "prospect",
+            status: "pending",
+          });
+          resolvedClientId = newClient.id;
+        } catch (e) {
+          console.error("Error auto-creating client from field log:", e);
+        }
+      }
+
       const data = {
         ...req.body,
         employeeId: req.session.fieldEmployeeId,
         jobDate: new Date(req.body.jobDate),
-        clientId: req.body.clientId || null,
+        clientId: resolvedClientId,
       };
       const validatedData = insertJobLogSchema.parse(data);
       const jobLog = await storage.createJobLog(validatedData);
@@ -3399,7 +3493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save the route
       const route = await storage.createOrUpdateDailyRoute({
         employeeId,
-        routeDate,
+        routeDate: routeDate.toISOString().split('T')[0],
         startAddress,
         optimizedStopOrder: optimized.stops,
         googleMapsUrl: optimized.googleMapsUrl,
@@ -3499,7 +3593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/field/route/today - Get today's route for field tech
   app.get("/api/field/route/today", requireFieldAuth, async (req, res) => {
     try {
-      const employeeId = req.session.fieldEmployeeId;
+      const employeeId = req.session.fieldEmployeeId!;
       const today = new Date();
 
       const route = await storage.getDailyRoute(employeeId, today);
@@ -3546,7 +3640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/portal/summary - Dashboard summary for customer
   app.get("/api/portal/summary", requirePortalUser, async (req, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session.userId!;
       
       // Get user's service requests and inspections
       const serviceRequests = await storage.getServiceRequestsByUser(userId);
@@ -3605,7 +3699,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/portal/appointments - All appointments (inspections + service requests)
   app.get("/api/portal/appointments", requirePortalUser, async (req, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session.userId!;
       const { status, type, search } = req.query;
       
       const [inspections, serviceRequests] = await Promise.all([
@@ -3687,7 +3781,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { type } = req.query; // 'inspection' or 'service'
-      const userId = req.session.userId;
+      const userId = req.session.userId!;
       
       if (!type || (type !== 'inspection' && type !== 'service')) {
         return res.status(400).json({ success: false, message: "Invalid or missing type parameter" });
@@ -3723,7 +3817,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST /api/portal/appointments - Create new inspection/appointment request
   app.post("/api/portal/appointments", requirePortalUser, async (req, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session.userId!;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -3806,7 +3900,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/portal/service-requests - List service requests
   app.get("/api/portal/service-requests", requirePortalUser, async (req, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session.userId!;
       const serviceRequests = await storage.getServiceRequestsByUser(userId);
       res.json({ success: true, serviceRequests });
     } catch (error) {
@@ -3818,7 +3912,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST /api/portal/service-requests - Create new service request
   app.post("/api/portal/service-requests", requirePortalUser, async (req, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session.userId!;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -3896,7 +3990,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/portal/profile - Get current user profile
   app.get("/api/portal/profile", requirePortalUser, async (req, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session.userId!;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -3923,7 +4017,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PUT /api/portal/profile - Update user profile
   app.put("/api/portal/profile", requirePortalUser, async (req, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session.userId!;
       const { firstName, lastName, phone, address } = req.body;
       
       const updates: any = {};
@@ -3959,7 +4053,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/portal/invoices - List invoices for the customer
   app.get("/api/portal/invoices", requirePortalUser, async (req, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session.userId!;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -4003,7 +4097,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/portal/invoices/:id", requirePortalUser, async (req, res) => {
     try {
       const { id } = req.params;
-      const userId = req.session.userId;
+      const userId = req.session.userId!;
       
       const user = await storage.getUser(userId);
       if (!user) {
@@ -4051,7 +4145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/portal/invoices/:id/pdf", requirePortalUser, async (req, res) => {
     try {
       const { id } = req.params;
-      const userId = req.session.userId;
+      const userId = req.session.userId!;
       
       const user = await storage.getUser(userId);
       if (!user) {
@@ -4104,9 +4198,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const employees = await storage.getFieldEmployees();
       const employeeMap = new Map(employees.map(e => [e.id, e.name]));
 
+      // Fetch client propertyType for each job that has a clientId
+      const allClients = await storage.getClients();
+      const clientPropertyMap = new Map(allClients.map(c => [c.id, c.propertyType ?? "residential"]));
+
       const jobsWithEmployees = jobs.map(job => ({
         ...job,
         employeeName: job.employeeId ? (employeeMap.get(job.employeeId) || "Unknown") : "Unassigned",
+        propertyType: job.clientId ? (clientPropertyMap.get(job.clientId) ?? "residential") : "residential",
       }));
 
       res.json({ success: true, scheduledJobs: jobsWithEmployees });
@@ -4148,17 +4247,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST /api/admin/scheduled-jobs - Create new scheduled job
   app.post("/api/admin/scheduled-jobs", requireAdmin, async (req, res) => {
     try {
-      const { customerName, clientId, siteLocation, siteAddress, servicedArea, workPerformed, jobDate, employeeId, priority, adminNotes, scheduledEndTime } = req.body;
+      const { customerName, clientId, siteLocation, siteAddress, servicedArea, workPerformed, jobDate, employeeId, priority, adminNotes, scheduledEndTime, propertyType } = req.body;
 
       // employeeId is optional - if not provided or null, job will be unassigned
       if (!customerName || !siteLocation || !servicedArea || !jobDate) {
         return res.status(400).json({ success: false, message: "Missing required fields: customerName, siteLocation, servicedArea, jobDate" });
       }
 
+      // If new customer (no clientId) and propertyType was given, create a client record
+      let resolvedClientId = clientId || null;
+      if (!clientId && propertyType && customerName) {
+        try {
+          const newClient = await storage.createClient({ name: customerName, propertyType, clientType: "prospect", status: "active" });
+          resolvedClientId = newClient.id;
+        } catch { /* non-fatal */ }
+      }
+
       const job = await storage.createScheduledJob({
         employeeId: employeeId || null,
         customerName,
-        clientId: clientId || null,
+        clientId: resolvedClientId,
         siteLocation,
         siteAddress: siteAddress || "",
         servicedArea,
@@ -4166,7 +4274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         jobDate: new Date(jobDate),
         priority: priority || "medium",
         adminNotes: adminNotes || null,
-        scheduledBy: req.session.userId,
+        scheduledBy: req.session.userId!,
         scheduledEndTime: scheduledEndTime ? new Date(scheduledEndTime) : null,
       });
 
@@ -4190,7 +4298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (employeeId !== undefined) updates.employeeId = employeeId;
       if (jobDate !== undefined) updates.jobDate = new Date(jobDate);
 
-      const job = await storage.updateJobScheduling(id, updates, req.session.userId);
+      const job = await storage.updateJobScheduling(id, updates, req.session.userId!);
       res.json({ success: true, message: "Job updated", job });
     } catch (error) {
       console.error("Error updating scheduled job:", error);
@@ -4208,7 +4316,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'employeeId is required (use null to unassign)' });
       }
       const assignTo = req.body.employeeId !== undefined ? (req.body.employeeId || null) : null;
-      const job = await storage.assignJobToTech(id, assignTo, req.session.userId);
+      const job = await storage.assignJobToTech(id, assignTo, req.session.userId!);
 
       res.json({ success: true, message: assignTo === null ? "Job unassigned" : "Job assigned to tech", job });
     } catch (error) {
@@ -4230,11 +4338,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: "jobDate is required" });
       }
 
-      const job = await storage.rescheduleJob(id, new Date(jobDate), req.session.userId);
+      const job = await storage.rescheduleJob(id, new Date(jobDate), req.session.userId!);
       
       // Also update scheduledEndTime if provided
       if (scheduledEndTime) {
-        await storage.updateJobScheduling(id, { scheduledEndTime: new Date(scheduledEndTime) }, req.session.userId);
+        await storage.updateJobScheduling(id, { scheduledEndTime: new Date(scheduledEndTime) }, req.session.userId!);
       }
 
       res.json({ success: true, message: "Job rescheduled", job });
@@ -4253,7 +4361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const { reason } = req.body;
 
-      const job = await storage.cancelScheduledJob(id, req.session.userId, reason);
+      const job = await storage.cancelScheduledJob(id, req.session.userId!, reason);
       res.json({ success: true, message: "Job cancelled", job });
     } catch (error) {
       console.error("Error cancelling job:", error);
@@ -4283,7 +4391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/field/scheduled-jobs - Get today's scheduled jobs for field tech
   app.get("/api/field/scheduled-jobs", requireFieldAuth, async (req, res) => {
     try {
-      const employeeId = req.session.fieldEmployeeId;
+      const employeeId = req.session.fieldEmployeeId!;
       const jobs = await storage.getTodaysScheduledJobs(employeeId);
       res.json({ success: true, scheduledJobs: jobs });
     } catch (error) {
@@ -4296,7 +4404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/field/scheduled-jobs/:id/start", requireFieldAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const employeeId = req.session.fieldEmployeeId;
+      const employeeId = req.session.fieldEmployeeId!;
 
       const job = await storage.startScheduledJob(id, employeeId);
       res.json({ success: true, message: "Job started", job });
@@ -4313,7 +4421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/field/scheduled-jobs/:id/complete", requireFieldAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const employeeId = req.session.fieldEmployeeId;
+      const employeeId = req.session.fieldEmployeeId!;
       const { workPerformed } = req.body;
 
       if (!workPerformed) {
@@ -4351,7 +4459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/field/jobs/:id/claim", requireFieldAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const employeeId = req.session.fieldEmployeeId;
+      const employeeId = req.session.fieldEmployeeId!;
 
       const job = await storage.claimScheduledJob(id, employeeId);
       res.json({ success: true, message: "Job claimed successfully", job });
@@ -4377,7 +4485,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/field/sync", requireFieldAuth, async (req, res) => {
     try {
       const { jobLogs, clientTimestamp } = req.body;
-      const employeeId = req.session.fieldEmployeeId;
+      const employeeId = req.session.fieldEmployeeId!;
 
       if (!Array.isArray(jobLogs) || jobLogs.length === 0) {
         return res.status(400).json({ success: false, message: "No job logs provided" });
@@ -4420,7 +4528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             status: log.status || "completed",
             customFields: log.customFields,
             clientCreatedAt: log.clientCreatedAt,
-            serverReceivedAt: now.toISOString(),
+            serverReceivedAt: now,
             needsAdminReview
           });
 
