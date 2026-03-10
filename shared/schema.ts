@@ -87,10 +87,11 @@ export const clients = pgTable("clients", {
   // Set by admin via PATCH /api/admin/users/:id/client-link.
   userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
   name: text("name").notNull(),
-  email: text("email").notNull(),
+  email: text("email"),
   phone: text("phone"),
   address: text("address"),
   contactPerson: text("contact_person"),
+  propertyType: text("property_type").default("residential"), // residential, commercial
   clientType: text("client_type").notNull().default("prospect"), // prospect, client
   status: text("status").notNull().default("active"), // active, inactive
   notes: text("notes"),
@@ -314,6 +315,7 @@ export const fieldCustomers = pgTable("field_customers", {
   address: text("address"),
   phone: text("phone"),
   email: text("email"),
+  propertyType: text("property_type").default("residential"), // residential, commercial
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -410,6 +412,8 @@ export const insertJobScheduleLogSchema = createInsertSchema(jobScheduleLogs).om
   id: true,
   createdAt: true,
 });
+export type JobScheduleLog = typeof jobScheduleLogs.$inferSelect;
+export type InsertJobScheduleLog = z.infer<typeof insertJobScheduleLogSchema>;
 
 export const insertFieldCustomerSchema = createInsertSchema(fieldCustomers).omit({
   id: true,
