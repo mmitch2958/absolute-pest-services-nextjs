@@ -18,6 +18,7 @@ import { CheckCircle2, Loader2, Camera, ImagePlus, X, AlertCircle, RefreshCw, Ho
 // Offline mode imports
 import { useConnectionStatus } from "@/lib/connection-monitor";
 import { enqueueJobLog, isQueueFull } from "@/lib/offline-queue";
+import { getLocalDateString } from "@/lib/utils";
 import { runSync } from "@/lib/sync-engine";
 
 const NEW_OPTION = "__NEW__";
@@ -422,7 +423,7 @@ export default function FieldLog() {
       siteAddress: "",
       servicedArea: "",
       workPerformed: "",
-      jobDate: new Date().toISOString().split("T")[0],
+      jobDate: getLocalDateString(),
       serviceRateId: null,
       amount: "200.00",
     },
@@ -667,7 +668,7 @@ export default function FieldLog() {
           siteAddress: matchedClient?.address || "",
           servicedArea: "",
           workPerformed: "",
-          jobDate: new Date().toISOString().split("T")[0],
+          jobDate: getLocalDateString(),
           serviceRateId: null,
           amount: "200.00",
         });
@@ -744,7 +745,7 @@ export default function FieldLog() {
           siteAddress: matchedClient?.address || "",
           servicedArea: "",
           workPerformed: "",
-          jobDate: new Date().toISOString().split("T")[0],
+          jobDate: getLocalDateString(),
           serviceRateId: null,
           amount: "200.00",
         });
