@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Pencil, Trash2, Building2, UserCheck, Filter } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2, Home, UserCheck, Filter, CheckCircle2, Clock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +29,8 @@ type ClientFormData = z.infer<typeof clientFormSchema>;
 export function ClientManagement() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [filterType, setFilterType] = useState<"all" | "prospect" | "client">("all");
+  const [filterType, setFilterType] = useState<"all" | "pending" | "prospect" | "client">("all");
+  const [filterPropertyType, setFilterPropertyType] = useState<"all" | "residential" | "commercial">("all");
   const { toast } = useToast();
 
   const form = useForm<ClientFormData>({
@@ -40,6 +41,7 @@ export function ClientManagement() {
       phone: "",
       address: "",
       contactPerson: "",
+      propertyType: "residential",
       clientType: "prospect",
       status: "active",
       notes: "",
@@ -123,10 +125,32 @@ export function ClientManagement() {
     },
   });
 
-  // Convert to client mutation
+  // Activate a pending prospect (move from pending → active prospect)
+  const activateClientMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("PUT", `/api/clients/${id}`, { status: "active" });
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({
+        title: "Prospect Activated",
+        description: "The pending prospect is now active and can be managed.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to activate prospect",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Convert to client mutation — also ensures status is active
   const convertToClientMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest("PUT", `/api/clients/${id}`, { clientType: "client" });
+      const response = await apiRequest("PUT", `/api/clients/${id}`, { clientType: "client", status: "active" });
       return await response.json();
     },
     onSuccess: () => {
@@ -158,10 +182,11 @@ export function ClientManagement() {
     setSelectedClient(client);
     form.reset({
       name: client.name,
-      email: client.email,
+      email: client.email ?? "",
       phone: client.phone ?? "",
       address: client.address ?? "",
       contactPerson: client.contactPerson ?? "",
+      propertyType: client.propertyType ?? "residential",
       clientType: client.clientType,
       status: client.status,
       notes: client.notes ?? "",
@@ -169,8 +194,14 @@ export function ClientManagement() {
     setIsDialogOpen(true);
   };
 
+  const handleActivate = (id: number) => {
+    if (confirm("Activate this pending prospect? They will become an active prospect that you can manage.")) {
+      activateClientMutation.mutate(id);
+    }
+  };
+
   const handleConvertToClient = (id: number) => {
-    if (confirm("Convert this prospect to a client?")) {
+    if (confirm("Convert this prospect to a live client?")) {
       convertToClientMutation.mutate(id);
     }
   };
@@ -194,6 +225,9 @@ export function ClientManagement() {
   };
 
   const getStatusBadge = (status: string) => {
+    if (status === "pending") {
+      return <Badge variant="outline" className="border-amber-400 text-amber-600 bg-amber-50 flex items-center gap-1 w-fit"><Clock className="w-3 h-3" />Pending Review</Badge>;
+    }
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       active: "default",
       inactive: "secondary",
@@ -210,12 +244,20 @@ export function ClientManagement() {
   };
 
   const allClients = clientsResponse || [];
-  const clients = filterType === "all" 
-    ? allClients 
-    : allClients.filter(c => c.clientType === filterType);
+  const clients = allClients
+    .filter(c => {
+      if (filterType === "pending") return c.status === "pending";
+      if (filterType === "prospect") return c.clientType === "prospect" && c.status !== "pending";
+      if (filterType === "client") return c.clientType === "client";
+      return true;
+    })
+    .filter(c => filterPropertyType === "all" || (c.propertyType ?? "residential") === filterPropertyType);
 
-  const prospectCount = allClients.filter(c => c.clientType === "prospect").length;
+  const pendingCount = allClients.filter(c => c.status === "pending").length;
+  const prospectCount = allClients.filter(c => c.clientType === "prospect" && c.status !== "pending").length;
   const clientCount = allClients.filter(c => c.clientType === "client").length;
+  const residentialCount = allClients.filter(c => (c.propertyType ?? "residential") === "residential").length;
+  const commercialCount = allClients.filter(c => c.propertyType === "commercial").length;
 
   return (
     <div className="space-y-6">
@@ -243,34 +285,81 @@ export function ClientManagement() {
                 <Filter className="w-5 h-5" />
                 Filter Clients
               </CardTitle>
-              <CardDescription>
-                {prospectCount} prospects, {clientCount} clients
+              <CardDescription className="flex items-center gap-2">
+                {pendingCount > 0 && (
+                  <span className="inline-flex items-center gap-1 text-amber-600 font-medium">
+                    <Clock className="w-3.5 h-3.5" />{pendingCount} pending review
+                  </span>
+                )}
+                {pendingCount > 0 && <span>·</span>}
+                {prospectCount} prospects · {clientCount} clients
               </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap gap-2">
             <Button
               variant={filterType === "all" ? "default" : "outline"}
               onClick={() => setFilterType("all")}
               data-testid="button-filter-all"
+              size="sm"
             >
               All ({allClients.length})
+            </Button>
+            <Button
+              variant={filterType === "pending" ? "default" : "outline"}
+              onClick={() => setFilterType("pending")}
+              data-testid="button-filter-pending"
+              size="sm"
+              className={filterType !== "pending" && pendingCount > 0 ? "border-amber-400 text-amber-600 hover:bg-amber-50" : ""}
+            >
+              <Clock className="w-3.5 h-3.5 mr-1" />
+              Pending Review ({pendingCount})
             </Button>
             <Button
               variant={filterType === "prospect" ? "default" : "outline"}
               onClick={() => setFilterType("prospect")}
               data-testid="button-filter-prospects"
+              size="sm"
             >
-              Prospects ({prospectCount})
+              Active Prospects ({prospectCount})
             </Button>
             <Button
               variant={filterType === "client" ? "default" : "outline"}
               onClick={() => setFilterType("client")}
               data-testid="button-filter-clients"
+              size="sm"
             >
-              Clients ({clientCount})
+              Live Clients ({clientCount})
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2 border-t pt-3">
+            <span className="text-xs text-muted-foreground self-center">Property:</span>
+            <Button
+              variant={filterPropertyType === "all" ? "secondary" : "outline"}
+              onClick={() => setFilterPropertyType("all")}
+              size="sm"
+            >
+              All Properties
+            </Button>
+            <Button
+              variant={filterPropertyType === "residential" ? "secondary" : "outline"}
+              onClick={() => setFilterPropertyType("residential")}
+              size="sm"
+              className="flex items-center gap-1.5"
+            >
+              <Home className="w-3.5 h-3.5" />
+              Residential ({residentialCount})
+            </Button>
+            <Button
+              variant={filterPropertyType === "commercial" ? "secondary" : "outline"}
+              onClick={() => setFilterPropertyType("commercial")}
+              size="sm"
+              className="flex items-center gap-1.5"
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              Commercial ({commercialCount})
             </Button>
           </div>
         </CardContent>
@@ -404,6 +493,38 @@ export function ClientManagement() {
                 />
                 <FormField
                   control={form.control}
+                  name="propertyType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Property Type</FormLabel>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={field.value === "residential" ? "default" : "outline"}
+                          onClick={() => field.onChange("residential")}
+                          className="flex items-center gap-1.5"
+                        >
+                          <Home className="w-3.5 h-3.5" />
+                          Residential
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={field.value === "commercial" ? "default" : "outline"}
+                          onClick={() => field.onChange("commercial")}
+                          className="flex items-center gap-1.5"
+                        >
+                          <Building2 className="w-3.5 h-3.5" />
+                          Commercial
+                        </Button>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
@@ -474,6 +595,7 @@ export function ClientManagement() {
                   <TableRow>
                     <TableHead>Company</TableHead>
                     <TableHead>Contact</TableHead>
+                    <TableHead>Property</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Phone</TableHead>
@@ -496,6 +618,14 @@ export function ClientManagement() {
                       <TableCell data-testid={`text-client-contact-${client.id}`}>
                         {client.contactPerson || "—"}
                       </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs flex items-center gap-1 w-fit whitespace-nowrap">
+                          {client.propertyType === "commercial"
+                            ? <><Building2 className="w-3 h-3" /> Commercial</>
+                            : <><Home className="w-3 h-3" /> Residential</>
+                          }
+                        </Badge>
+                      </TableCell>
                       <TableCell data-testid={`badge-client-type-${client.id}`}>
                         {getClientTypeBadge(client.clientType)}
                       </TableCell>
@@ -507,14 +637,27 @@ export function ClientManagement() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {client.clientType === "prospect" && (
+                          {client.status === "pending" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleActivate(client.id)}
+                              disabled={activateClientMutation.isPending}
+                              data-testid={`button-activate-client-${client.id}`}
+                              title="Activate Prospect"
+                              className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                            >
+                              <CheckCircle2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {client.clientType === "prospect" && client.status !== "pending" && (
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleConvertToClient(client.id)}
                               disabled={convertToClientMutation.isPending}
                               data-testid={`button-convert-client-${client.id}`}
-                              title="Convert to Client"
+                              title="Convert to Live Client"
                             >
                               <UserCheck className="w-4 h-4" />
                             </Button>
