@@ -31,9 +31,10 @@ import { AdminLogin } from "@/pages/admin/admin-login";
 import { AdminFieldData } from "@/pages/admin/admin-field-data";
 import { AdminContracts } from "@/pages/admin/AdminContracts";
 import { AdminCalendar } from "@/pages/admin/AdminCalendar";
-import { AdminScheduling } from "@/pages/admin/admin-scheduling";
+import AdminScheduling from "@/pages/admin/admin-scheduling";
 import FieldLogin from "@/pages/field-login";
 import FieldLog from "@/pages/field-log";
+import FieldMyJobs from "@/pages/field/field-my-jobs";
 import FieldHistory from "@/pages/field-history";
 import FieldEmployees from "@/pages/field-employees";
 import FieldReports from "@/pages/field-reports";
@@ -75,6 +76,7 @@ function Router() {
       {/* Field Service Routes */}
       <Route path="/field" component={FieldLogin} />
       <Route path="/field/log" component={FieldLog} />
+      <Route path="/field/my-jobs" component={FieldMyJobs} />
       <Route path="/field/history" component={FieldHistory} />
       <Route path="/field/employees" component={FieldEmployees} />
       <Route path="/field/reports" component={FieldReports} />
