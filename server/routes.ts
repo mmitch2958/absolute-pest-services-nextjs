@@ -1703,20 +1703,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Job Log routes
   app.post("/api/field/job-logs", requireFieldAuth, async (req, res) => {
     try {
-      // If this is a new customer, create a client record FIRST so it appears in the admin client list
       let resolvedClientId = req.body.clientId || null;
-      if (req.body.isNewCustomer && req.body.customerName && !req.body.clientId) {
-        try {
-          const newClient = await storage.createClient({
-            name: req.body.customerName,
-            address: req.body.newCustomerAddress || null,
-            propertyType: req.body.propertyType || "residential",
-            clientType: "prospect",
-            status: "pending",
-          });
-          resolvedClientId = newClient.id;
-        } catch (e) {
-          console.error("Error auto-creating client from field log:", e);
+      if (!resolvedClientId && req.body.customerName) {
+        const existingClients = await storage.getClients();
+        const match = existingClients.find(
+          (c: any) => c.name.toLowerCase().trim() === req.body.customerName.toLowerCase().trim()
+        );
+        if (match) {
+          resolvedClientId = match.id;
+        } else {
+          try {
+            const newClient = await storage.createClient({
+              name: req.body.customerName,
+              address: req.body.newCustomerAddress || req.body.siteAddress || null,
+              propertyType: req.body.propertyType || "residential",
+              clientType: "prospect",
+              status: "pending",
+            });
+            resolvedClientId = newClient.id;
+          } catch (e) {
+            console.error("Error auto-creating client from field log:", e);
+          }
         }
       }
 
@@ -4691,11 +4698,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const hoursDiff = Math.abs(now.getTime() - clientCreatedAt.getTime()) / (1000 * 60 * 60);
           const needsAdminReview = hoursDiff > 48;
 
-          // Create the job log
+          let resolvedClientId = log.clientId || null;
+          if (!resolvedClientId && log.customerName) {
+            const existingClients = await storage.getClients();
+            const match = existingClients.find(
+              (c: any) => c.name.toLowerCase().trim() === log.customerName.toLowerCase().trim()
+            );
+            if (match) {
+              resolvedClientId = match.id;
+            } else {
+              try {
+                const newClient = await storage.createClient({
+                  name: log.customerName,
+                  address: log.siteAddress || null,
+                  propertyType: log.propertyType || "residential",
+                  clientType: "prospect",
+                  status: "pending",
+                });
+                resolvedClientId = newClient.id;
+              } catch (e) {
+                console.error("Error auto-creating client from sync:", e);
+              }
+            }
+          }
+
           const newLog = await storage.createJobLog({
             employeeId,
             customerName: log.customerName,
-            clientId: log.clientId || null,
+            clientId: resolvedClientId,
             siteLocation: log.siteLocation,
             siteAddress: log.siteAddress || "",
             servicedArea: log.servicedArea,
