@@ -1374,6 +1374,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GET /api/field/service-rates — Active service rates for technicians
+  app.get("/api/field/service-rates", requireFieldAuth, async (req, res) => {
+    try {
+      const rates = await storage.getActiveServiceRates();
+      res.json({ success: true, rates });
+    } catch (error) {
+      console.error("Error fetching service rates:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/field/create-invoice — Technician creates invoice from completed job logs
+  app.post("/api/field/create-invoice", requireFieldAuth, async (req, res) => {
+    try {
+      const { jobLogIds, dueDate } = req.body;
+      if (!jobLogIds || !Array.isArray(jobLogIds) || jobLogIds.length === 0) {
+        return res.status(400).json({ success: false, message: "At least one job log ID is required" });
+      }
+      if (!dueDate) {
+        return res.status(400).json({ success: false, message: "Due date is required" });
+      }
+
+      const uniqueIds = [...new Set(jobLogIds.map((id: any) => parseInt(id)).filter((id: number) => !isNaN(id)))];
+      if (uniqueIds.length === 0) {
+        return res.status(400).json({ success: false, message: "Invalid job log IDs" });
+      }
+
+      const logs: JobLog[] = [];
+      let clientId: number | null = null;
+      const empId = req.session.fieldEmployeeId;
+      for (const id of uniqueIds) {
+        const log = await storage.getJobLog(id);
+        if (!log) {
+          return res.status(404).json({ success: false, message: `Job log ${id} not found` });
+        }
+        if (log.employeeId !== empId) {
+          return res.status(403).json({ success: false, message: `Job log ${id} does not belong to you` });
+        }
+        if (log.status !== "completed") {
+          return res.status(400).json({ success: false, message: `Job log ${id} is not in completed status (current: ${log.status})` });
+        }
+        if (!log.clientId) {
+          return res.status(400).json({ success: false, message: `Job log ${id} has no associated client` });
+        }
+        if (clientId && log.clientId !== clientId) {
+          return res.status(400).json({ success: false, message: "All job logs must belong to the same client" });
+        }
+        clientId = log.clientId;
+        logs.push(log);
+      }
+
+      const invoice = await storage.createInvoice({
+        clientId: clientId!,
+        dueDate: new Date(dueDate),
+        subtotal: '0',
+        taxTotal: '0',
+        total: '0',
+      });
+
+      for (const log of logs) {
+        const unitRate = String(log.amount || '200');
+        await storage.createLineItem({
+          invoiceId: invoice.id,
+          description: `${log.servicedArea} — ${log.workPerformed}`,
+          quantity: '1',
+          unitRate,
+          taxRate: '6',
+        });
+        await storage.updateJobLog(log.id, { status: 'invoiced' } as any);
+      }
+
+      const lineItems = await storage.getLineItemsByInvoice(invoice.id);
+      let subtotal = 0;
+      let taxTotal = 0;
+      for (const item of lineItems) {
+        subtotal += parseFloat(String(item.lineTotal));
+        taxTotal += parseFloat(String(item.lineTax));
+      }
+      await storage.updateInvoice(invoice.id, {
+        subtotal: subtotal.toFixed(2),
+        taxTotal: taxTotal.toFixed(2),
+        total: (subtotal + taxTotal).toFixed(2),
+      });
+
+      await storage.createInvoiceStatusLog({
+        invoiceId: invoice.id,
+        fromStatus: null,
+        toStatus: 'draft',
+        actor: `field:${req.session.fieldEmployeeId}`,
+        note: `Created from ${logs.length} job log(s) by field technician`,
+      });
+
+      const updatedInvoice = await storage.getInvoice(invoice.id);
+      res.status(201).json({ success: true, invoice: updatedInvoice });
+    } catch (error) {
+      console.error("Error creating field invoice:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Get unique values from past job logs for dropdown suggestions
   app.get("/api/field/suggestions", requireFieldAuth, async (req, res) => {
     try {
@@ -2314,6 +2414,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==========================================
   // Invoice Routes (SC-INV-001)
   // ==========================================
+
+  // ─── Admin Service Rates ──────────────────────────────────────────────────
+  app.get("/api/admin/service-rates", requireAdmin, async (req, res) => {
+    try {
+      const rates = await storage.getServiceRates();
+      res.json({ success: true, rates });
+    } catch (error) {
+      console.error("Error fetching service rates:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/service-rates", requireAdmin, async (req, res) => {
+    try {
+      const rate = await storage.createServiceRate(req.body);
+      res.status(201).json({ success: true, rate });
+    } catch (error) {
+      console.error("Error creating service rate:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/admin/service-rates/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const rate = await storage.updateServiceRate(id, req.body);
+      res.json({ success: true, rate });
+    } catch (error) {
+      console.error("Error updating service rate:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/service-rates/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteServiceRate(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting service rate:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
 
   // GET /api/admin/invoices — List all invoices
   app.get("/api/admin/invoices", requireAdmin, async (req, res) => {
