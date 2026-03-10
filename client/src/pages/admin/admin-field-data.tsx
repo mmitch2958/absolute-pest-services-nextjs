@@ -10,7 +10,164 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus, Pencil, Trash2, Users, Building2, Home, MapPin, Loader2, ClipboardList, MapPinned, Settings2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Building2, Home, MapPin, Loader2, ClipboardList, MapPinned, Settings2, DollarSign } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
+interface ServiceRate {
+  id: number;
+  name: string;
+  description: string | null;
+  defaultRate: string;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+function ServiceRatesSection() {
+  const { toast } = useToast();
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [defaultRate, setDefaultRate] = useState("200.00");
+  const [isActive, setIsActive] = useState(true);
+  const [sortOrder, setSortOrder] = useState(0);
+
+  const { data: ratesData, isLoading } = useQuery<{ success: boolean; rates: ServiceRate[] }>({
+    queryKey: ["/api/admin/service-rates"],
+  });
+  const rates = ratesData?.rates || [];
+
+  const resetForm = () => {
+    setName(""); setDescription(""); setDefaultRate("200.00"); setIsActive(true); setSortOrder(0);
+    setEditId(null); setShowForm(false);
+  };
+
+  const startEdit = (r: ServiceRate) => {
+    setEditId(r.id); setName(r.name); setDescription(r.description || "");
+    setDefaultRate(r.defaultRate); setIsActive(r.isActive); setSortOrder(r.sortOrder);
+    setShowForm(true);
+  };
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const body = { name, description: description || null, defaultRate, isActive, sortOrder };
+      if (editId) {
+        await apiRequest("PUT", `/api/admin/service-rates/${editId}`, body);
+      } else {
+        await apiRequest("POST", "/api/admin/service-rates", body);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/service-rates"] });
+      toast({ title: editId ? "Rate updated" : "Rate created" });
+      resetForm();
+    },
+    onError: () => toast({ title: "Error", description: "Failed to save rate", variant: "destructive" }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/admin/service-rates/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/service-rates"] });
+      toast({ title: "Rate deleted" });
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5" /> Service Rates & Fee Structure
+          </CardTitle>
+          <Button size="sm" onClick={() => { resetForm(); setShowForm(true); }}>
+            <Plus className="h-4 w-4 mr-1" /> Add Rate
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {showForm && (
+          <div className="border rounded-lg p-4 mb-4 space-y-3 bg-muted/30">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Service Name *</Label>
+                <Input value={name} onChange={e => setName(e.target.value)} placeholder="General Pest Control" />
+              </div>
+              <div className="space-y-1">
+                <Label>Default Rate ($) *</Label>
+                <Input type="number" min="0" step="0.01" value={defaultRate} onChange={e => setDefaultRate(e.target.value)} />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label>Description</Label>
+              <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Standard interior/exterior treatment" />
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Switch checked={isActive} onCheckedChange={setIsActive} />
+                <Label>Active</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Label>Sort Order</Label>
+                <Input type="number" className="w-20" value={sortOrder} onChange={e => setSortOrder(parseInt(e.target.value) || 0)} />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => saveMutation.mutate()} disabled={!name || !defaultRate || saveMutation.isPending}>
+                {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : editId ? "Update" : "Create"}
+              </Button>
+              <Button size="sm" variant="outline" onClick={resetForm}>Cancel</Button>
+            </div>
+          </div>
+        )}
+        {isLoading ? (
+          <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
+        ) : rates.length === 0 ? (
+          <p className="text-center text-muted-foreground py-4">No service rates configured. Add your first rate above.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Service</TableHead>
+                <TableHead>Rate</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Order</TableHead>
+                <TableHead className="w-24">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rates.map(r => (
+                <TableRow key={r.id}>
+                  <TableCell>
+                    <div>
+                      <span className="font-medium">{r.name}</span>
+                      {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-semibold">${r.defaultRate}</TableCell>
+                  <TableCell>
+                    <Badge variant={r.isActive ? "default" : "secondary"}>
+                      {r.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{r.sortOrder}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" onClick={() => startEdit(r)}><Pencil className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" className="text-destructive" onClick={() => deleteMutation.mutate(r.id)}><Trash2 className="h-4 w-4" /></Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 function EmployeeSection() {
   const { toast } = useToast();
@@ -820,6 +977,7 @@ export function AdminFieldData() {
         <p className="text-muted-foreground">Manage employees, customers, locations, serviced areas, custom fields, and edit job submissions</p>
       </div>
       <div className="space-y-6">
+        <ServiceRatesSection />
         <EmployeeSection />
         <ClientsSection />
         <SiteLocationsSection />
