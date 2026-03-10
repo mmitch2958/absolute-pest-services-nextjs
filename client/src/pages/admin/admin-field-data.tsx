@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Plus, Pencil, Trash2, Users, Building2, Home, MapPin, Loader2, ClipboardList, MapPinned, Settings2, DollarSign } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { displayDate } from "@/lib/utils";
 
 interface ServiceRate {
   id: number;
@@ -750,7 +751,7 @@ function JobLogsSection() {
               <TableBody>
                 {logs.map((log: any) => (
                   <TableRow key={log.id}>
-                    <TableCell className="whitespace-nowrap">{new Date(log.jobDate).toLocaleDateString()}</TableCell>
+                    <TableCell className="whitespace-nowrap">{displayDate(log.jobDate)}</TableCell>
                     <TableCell>{employeeMap.get(log.employeeId) || "Unknown"}</TableCell>
                     <TableCell>{log.customerName}</TableCell>
                     {editId === log.id ? (
