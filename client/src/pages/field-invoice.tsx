@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { FieldNav } from "@/components/field-nav";
+import { displayDateTime } from "@/lib/utils";
 import {
   Receipt,
   CheckCircle,
@@ -205,7 +206,7 @@ export default function FieldInvoice() {
                           <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              {new Date(String(log.jobDate).slice(0, 10) + "T12:00:00").toLocaleDateString()}
+                              {displayDateTime(log.createdAt)}
                             </span>
                             <span>{log.siteLocation}</span>
                           </div>
