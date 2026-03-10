@@ -3024,6 +3024,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==========================================
+  // General Admin Settings
+  // ==========================================
+
+  app.get("/api/admin/settings/timezone", requireAdmin, async (req, res) => {
+    try {
+      const tz = await storage.getSystemSetting("timezone");
+      res.json({ success: true, timezone: tz || "America/New_York" });
+    } catch (error) {
+      console.error("Error fetching timezone:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch timezone" });
+    }
+  });
+
+  app.patch("/api/admin/settings/timezone", requireAdmin, async (req, res) => {
+    try {
+      const { timezone } = req.body;
+      const validTimezones = [
+        "America/New_York", "America/Chicago", "America/Denver",
+        "America/Los_Angeles", "America/Anchorage", "Pacific/Honolulu"
+      ];
+      if (!timezone || typeof timezone !== "string" || !validTimezones.includes(timezone)) {
+        return res.status(400).json({ success: false, message: "Invalid timezone value" });
+      }
+      const userId = req.session?.userId;
+      await storage.setSystemSetting("timezone", timezone, userId!);
+      res.json({ success: true, timezone });
+    } catch (error) {
+      console.error("Error updating timezone:", error);
+      res.status(500).json({ success: false, message: "Failed to update timezone" });
+    }
+  });
+
+  // ==========================================
   // Reminder Admin Routes (SC-REMINDERS-001)
   // ==========================================
 
