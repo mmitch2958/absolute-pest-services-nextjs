@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { FieldNav } from "@/components/field-nav";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckCircle2, Loader2, Camera, ImagePlus, X, AlertCircle, RefreshCw } from "lucide-react";
+import { CheckCircle2, Loader2, Camera, ImagePlus, X, AlertCircle, RefreshCw, Home, Building2 } from "lucide-react";
 // Offline mode imports
 import { useConnectionStatus } from "@/lib/connection-monitor";
 import { enqueueJobLog, isQueueFull } from "@/lib/offline-queue";
@@ -144,7 +144,7 @@ interface SuggestionsData {
   customers: string[];
   customerLocations: Record<string, string[]>;
   locationAreas: Record<string, string[]>;
-  clients: { id: number; name: string; address: string | null }[];
+  clients: { id: number; name: string; address: string | null; propertyType?: string }[];
 }
 
 async function reAuthField(): Promise<boolean> {
@@ -371,6 +371,8 @@ export default function FieldLog() {
   const [customerAddingNew, setCustomerAddingNew] = useState(false);
   const [locationAddingNew, setLocationAddingNew] = useState(false);
   const [areaAddingNew, setAreaAddingNew] = useState(false);
+  const [customerPropertyType, setCustomerPropertyType] = useState("residential");
+  const [newCustomerAddress, setNewCustomerAddress] = useState("");
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, any>>({});
 
   // Photo state
@@ -603,6 +605,9 @@ export default function FieldLog() {
         employeeId: employee.id,
         jobDate: data.jobDate,
         customFields: Object.keys(customFieldValues).length > 0 ? customFieldValues : undefined,
+        propertyType: customerPropertyType,
+        isNewCustomer: customerAddingNew,
+        newCustomerAddress: customerAddingNew ? newCustomerAddress : undefined,
       };
       let response;
       try {
@@ -654,6 +659,8 @@ export default function FieldLog() {
         setCustomerAddingNew(false);
         setLocationAddingNew(false);
         setAreaAddingNew(false);
+        setCustomerPropertyType(matchedClient?.propertyType ?? "residential");
+        setNewCustomerAddress("");
         setCustomFieldValues({});
         // Clean up blob URLs and reset photos
         photos.forEach(p => URL.revokeObjectURL(p.localUrl));
@@ -666,6 +673,12 @@ export default function FieldLog() {
   });
 
   const onSubmit = async (data: JobLogFormData) => {
+    // Validate new customer required fields
+    if (customerAddingNew && !newCustomerAddress.trim()) {
+      toast({ title: "Address Required", description: "Please enter the new customer's address before submitting.", variant: "destructive" });
+      return;
+    }
+
     // Check if offline and handle accordingly
     if (!isOnline) {
       try {
@@ -719,6 +732,7 @@ export default function FieldLog() {
         setCustomerAddingNew(false);
         setLocationAddingNew(false);
         setAreaAddingNew(false);
+        setNewCustomerAddress("");
         setCustomFieldValues({});
         photos.forEach(p => URL.revokeObjectURL(p.localUrl));
         setPhotos([]);
@@ -796,6 +810,12 @@ export default function FieldLog() {
                           field.onChange(val);
                           const matchedClient = clients.find(c => c.name === val);
                           form.setValue("clientId", matchedClient?.id || null);
+                          if (matchedClient?.propertyType) {
+                            setCustomerPropertyType(matchedClient.propertyType);
+                          } else {
+                            setCustomerPropertyType("residential");
+                          }
+                          setNewCustomerAddress("");
                           form.setValue("siteLocation", "");
                           form.setValue("servicedArea", "");
                           setLocationAddingNew(false);
@@ -805,6 +825,7 @@ export default function FieldLog() {
                           const matchedClient = clients.find(c => c.name === val);
                           if (matchedClient) {
                             form.setValue("clientId", matchedClient.id);
+                            if (matchedClient.propertyType) setCustomerPropertyType(matchedClient.propertyType);
                           }
                         }}
                         placeholder="Enter new customer name"
@@ -813,6 +834,70 @@ export default function FieldLog() {
                     </FormItem>
                   )}
                 />
+
+                {/* New Customer Details — shown when adding a brand new customer */}
+                {customerAddingNew && form.watch("customerName") && (
+                  <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-4 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-primary" />
+                      <p className="text-sm font-semibold text-primary">New Customer Details</p>
+                      <span className="text-xs text-muted-foreground ml-auto">Saved to client list automatically</span>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">
+                        Property Type <span className="text-destructive">*</span>
+                      </label>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setCustomerPropertyType("residential")}
+                          className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-md border-2 text-sm font-medium transition-colors ${customerPropertyType === "residential" ? "bg-blue-600 text-white border-blue-600" : "bg-background border-input hover:bg-accent"}`}
+                        >
+                          <Home className="w-4 h-4" />
+                          Residential
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCustomerPropertyType("commercial")}
+                          className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-md border-2 text-sm font-medium transition-colors ${customerPropertyType === "commercial" ? "bg-orange-600 text-white border-orange-600" : "bg-background border-input hover:bg-accent"}`}
+                        >
+                          <Building2 className="w-4 h-4" />
+                          Commercial
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">
+                        Customer Address <span className="text-destructive">*</span>
+                      </label>
+                      <Input
+                        value={newCustomerAddress}
+                        onChange={e => {
+                          setNewCustomerAddress(e.target.value);
+                          form.setValue("siteAddress", e.target.value);
+                        }}
+                        placeholder="Street address, city, state"
+                        className="h-12 text-base"
+                      />
+                      <p className="text-xs text-muted-foreground">This will be stored on their client record and used as the site address.</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Property Type badge — shown when an existing client is selected */}
+                {!customerAddingNew && form.watch("clientId") && (
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${customerPropertyType === "commercial" ? "bg-orange-50 border-orange-200 text-orange-700" : "bg-blue-50 border-blue-200 text-blue-700"}`}>
+                      {customerPropertyType === "commercial"
+                        ? <><Building2 className="w-3 h-3" /> Commercial</>
+                        : <><Home className="w-3 h-3" /> Residential</>
+                      }
+                    </span>
+                    <span className="text-xs text-muted-foreground">from client record</span>
+                  </div>
+                )}
 
                 <FormField
                   control={form.control}
