@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { generateJobReport, generateJobReceipt } from "@/lib/pdf-report";
 import { FileDown, Search, Loader2, ClipboardList, Camera, ChevronDown, ChevronUp, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { displayDate, getLocalDateString } from "@/lib/utils";
+import { displayDateTime, getLocalDateString } from "@/lib/utils";
 
 // ─── Photo types ──────────────────────────────────────────────────────────────
 interface JobLogPhoto {
@@ -498,7 +498,7 @@ export function AdminReports() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
+                      <TableHead>Date & Time</TableHead>
                       <TableHead>Technician</TableHead>
                       <TableHead>Customer</TableHead>
                       <TableHead>Location</TableHead>
@@ -511,7 +511,7 @@ export function AdminReports() {
                   <TableBody>
                     {logs.map((log: any) => (
                       <TableRow key={log.id}>
-                        <TableCell className="whitespace-nowrap">{displayDate(log.jobDate)}</TableCell>
+                        <TableCell className="whitespace-nowrap">{displayDateTime(log.createdAt)}</TableCell>
                         <TableCell>{employeeMap.get(log.employeeId) || "Unknown"}</TableCell>
                         <TableCell>{log.customerName}</TableCell>
                         <TableCell>{log.siteLocation}</TableCell>
