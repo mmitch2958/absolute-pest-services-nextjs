@@ -1,6 +1,6 @@
 import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, reminderLogs, reminderOptOuts, systemSettings, DEFAULT_REMINDER_SETTINGS, reviewSettings, reviewRequestLogs, DEFAULT_REVIEW_SETTINGS, shifts, shiftTimeBlocks, shiftBreaks, timeEntryAuditLog, geocache, dailyRoutes, jobScheduleLogs, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails, type InsertReminderLog, type ReminderLog, type InsertReminderOptOut, type ReminderOptOut, type InsertSystemSetting, type SystemSetting, type ReminderSettings, type ReminderType, type AppointmentType, type ReminderChannel, type ReviewSettings, type ReviewRequestLog, type InsertReviewRequestLog, type InsertGeocache, type GeocacheEntry, type InsertDailyRoute, type DailyRoute, type RouteStop, type DailyRouteWithDetails, type JobScheduleLog, type InsertJobScheduleLog } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, or, desc, gte, lte, lt, ilike, sql, sum } from "drizzle-orm";
+import { eq, and, or, desc, gte, lte, lt, ilike, sql, sum, isNull } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { sendInvoiceOverdueEmail } from "./email";
@@ -317,7 +317,7 @@ export interface IStorage {
   // Update job with scheduling fields (admin)
   updateJobScheduling(id: number, updates: { priority?: string; adminNotes?: string; scheduledEndTime?: Date; employeeId?: number; jobDate?: Date }, performedBy: number): Promise<JobLog>;
   // Assign job to different tech (admin)
-  assignJobToTech(jobLogId: number, employeeId: number, performedBy: number): Promise<JobLog>;
+  assignJobToTech(jobLogId: number, employeeId: number | null, performedBy: number): Promise<JobLog>;
   // Reschedule a job (admin)
   rescheduleJob(jobLogId: number, newJobDate: Date, performedBy: number): Promise<JobLog>;
   // Cancel a scheduled job (admin)
@@ -2417,7 +2417,7 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async assignJobToTech(jobLogId: number, employeeId: number, performedBy: number): Promise<JobLog> {
+  async assignJobToTech(jobLogId: number, employeeId: number | null, performedBy: number): Promise<JobLog> {
     const existing = await this.getJobLog(jobLogId);
     if (!existing) {
       throw new Error("Job log not found");
@@ -2434,7 +2434,7 @@ export class DatabaseStorage implements IStorage {
     // Log the assignment in schedule audit
     await this.createJobScheduleLog({
       jobLogId,
-      action: "assigned",
+      action: employeeId === null ? "unassigned" : "assigned",
       performedBy,
       previousValue: { employeeId: previousEmployeeId },
       newValue: { employeeId },
@@ -2529,7 +2529,7 @@ export class DatabaseStorage implements IStorage {
 
   async getUnassignedScheduledJobs(filters?: { dateFrom?: Date; dateTo?: Date; status?: string }): Promise<JobLog[]> {
     // Get jobs where employeeId is NULL (unassigned)
-    const conditions = [eq(jobLogs.employeeId, null)];
+    const conditions = [isNull(jobLogs.employeeId)];
     
     if (filters?.dateFrom) {
       conditions.push(gte(jobLogs.jobDate, filters.dateFrom));
@@ -2571,9 +2571,9 @@ export class DatabaseStorage implements IStorage {
     await this.createJobScheduleLog({
       jobLogId,
       action: "claimed",
-      performedBy: employeeId,
+      performedBy: null,
       previousValue: { employeeId: null },
-      newValue: { employeeId },
+      newValue: { employeeId, fieldEmployeeId: employeeId },
     });
 
     return updated;
@@ -2603,9 +2603,9 @@ export class DatabaseStorage implements IStorage {
     await this.createJobScheduleLog({
       jobLogId,
       action: "started",
-      performedBy: employeeId,
+      performedBy: null,
       previousValue: { status: existing.status },
-      newValue: { status: "in_progress" },
+      newValue: { status: "in_progress", fieldEmployeeId: employeeId },
     });
 
     return updated;
@@ -2638,9 +2638,9 @@ export class DatabaseStorage implements IStorage {
     await this.createJobScheduleLog({
       jobLogId,
       action: "completed",
-      performedBy: employeeId,
+      performedBy: null,
       previousValue: { status: existing.status },
-      newValue: { status: "completed", workPerformed },
+      newValue: { status: "completed", workPerformed, fieldEmployeeId: employeeId },
     });
 
     return updated;

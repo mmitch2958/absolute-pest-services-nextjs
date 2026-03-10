@@ -289,8 +289,8 @@ export const jobLogs = pgTable("job_logs", {
 export const jobScheduleLogs = pgTable("job_schedule_logs", {
   id: serial("id").primaryKey(),
   jobLogId: integer("job_log_id").notNull().references(() => jobLogs.id, { onDelete: "cascade" }),
-  action: text("action").notNull(), // created, assigned, rescheduled, started, completed, cancelled
-  performedBy: integer("performed_by").references(() => users.id), // Admin who performed action
+  action: text("action").notNull(), // created, assigned, rescheduled, started, completed, cancelled, claimed
+  performedBy: integer("performed_by"), // Admin user ID or field employee ID (no FK - can be either)
   previousValue: jsonb("previous_value"), // JSON of previous values
   newValue: jsonb("new_value"), // JSON of new values
   createdAt: timestamp("created_at").defaultNow().notNull(),

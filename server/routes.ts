@@ -2031,17 +2031,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Scheduled jobs endpoint (for calendar view)
-  app.get("/api/admin/scheduled-jobs", requireAdmin, async (req, res) => {
-    try {
-      const contracts = await storage.getServiceContracts({ isActive: true });
-      res.json({ success: true, scheduledJobs: contracts });
-    } catch (error) {
-      console.error("Error fetching scheduled jobs:", error);
-      res.status(500).json({ success: false, message: "Internal server error" });
-    }
-  });
-
   // Generate job from contract - POST /api/admin/service-contracts/:id/generate-job
   app.post("/api/admin/service-contracts/:id/generate-job", requireAdmin, async (req, res) => {
     try {
@@ -4213,14 +4202,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/scheduled-jobs/:id/assign", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const { employeeId } = req.body;
 
-      if (!employeeId) {
-        return res.status(400).json({ success: false, message: "employeeId is required" });
+      // null = unassign, number = assign. Must explicitly pass the key.
+      if (!req.body.hasOwnProperty('employeeId')) {
+        return res.status(400).json({ success: false, message: 'employeeId is required (use null to unassign)' });
       }
+      const assignTo = req.body.employeeId !== undefined ? (req.body.employeeId || null) : null;
+      const job = await storage.assignJobToTech(id, assignTo, req.session.userId);
 
-      const job = await storage.assignJobToTech(id, employeeId, req.session.userId);
-      res.json({ success: true, message: "Job assigned to tech", job });
+      res.json({ success: true, message: assignTo === null ? "Job unassigned" : "Job assigned to tech", job });
     } catch (error) {
       console.error("Error assigning job:", error);
       if (error instanceof Error) {
