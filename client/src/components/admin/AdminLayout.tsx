@@ -92,6 +92,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       href: "/admin/invoices",
       icon: Receipt,
     },
+    {
+      title: "Settings",
+      href: "/admin/settings",
+      icon: Settings,
+    },
   ];
 
   const isActiveRoute = (href: string) => {
