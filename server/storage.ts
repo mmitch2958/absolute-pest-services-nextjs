@@ -1,4 +1,4 @@
-import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, reminderLogs, reminderOptOuts, systemSettings, DEFAULT_REMINDER_SETTINGS, reviewSettings, reviewRequestLogs, DEFAULT_REVIEW_SETTINGS, shifts, shiftTimeBlocks, shiftBreaks, timeEntryAuditLog, geocache, dailyRoutes, jobScheduleLogs, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails, type InsertReminderLog, type ReminderLog, type InsertReminderOptOut, type ReminderOptOut, type InsertSystemSetting, type SystemSetting, type ReminderSettings, type ReminderType, type AppointmentType, type ReminderChannel, type ReviewSettings, type ReviewRequestLog, type InsertReviewRequestLog, type InsertGeocache, type GeocacheEntry, type InsertDailyRoute, type DailyRoute, type RouteStop, type DailyRouteWithDetails, type JobScheduleLog, type InsertJobScheduleLog } from "@shared/schema";
+import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, reminderLogs, reminderOptOuts, systemSettings, DEFAULT_REMINDER_SETTINGS, reviewSettings, reviewRequestLogs, DEFAULT_REVIEW_SETTINGS, shifts, shiftTimeBlocks, shiftBreaks, timeEntryAuditLog, geocache, dailyRoutes, jobScheduleLogs, serviceRates, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails, type InsertReminderLog, type ReminderLog, type InsertReminderOptOut, type ReminderOptOut, type InsertSystemSetting, type SystemSetting, type ReminderSettings, type ReminderType, type AppointmentType, type ReminderChannel, type ReviewSettings, type ReviewRequestLog, type InsertReviewRequestLog, type InsertGeocache, type GeocacheEntry, type InsertDailyRoute, type DailyRoute, type RouteStop, type DailyRouteWithDetails, type JobScheduleLog, type InsertJobScheduleLog, type ServiceRate, type InsertServiceRate } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, gte, lte, lt, ilike, sql, sum, isNull } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -167,6 +167,13 @@ export interface IStorage {
   getBlogPostBySlug(slug: string): Promise<BlogPost | undefined>;
   updateBlogPost(id: number, updates: Partial<InsertBlogPost>): Promise<BlogPost>;
   deleteBlogPost(id: number): Promise<void>;
+
+  // Service Rate operations
+  getServiceRates(): Promise<ServiceRate[]>;
+  getActiveServiceRates(): Promise<ServiceRate[]>;
+  createServiceRate(rate: InsertServiceRate): Promise<ServiceRate>;
+  updateServiceRate(id: number, updates: Partial<InsertServiceRate>): Promise<ServiceRate>;
+  deleteServiceRate(id: number): Promise<void>;
 
   // Field Employee operations
   createFieldEmployee(employee: InsertFieldEmployee): Promise<FieldEmployee>;
@@ -720,6 +727,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Field Employee operations
+  async getServiceRates(): Promise<ServiceRate[]> {
+    return await db.select().from(serviceRates).orderBy(serviceRates.sortOrder, serviceRates.name);
+  }
+
+  async getActiveServiceRates(): Promise<ServiceRate[]> {
+    return await db.select().from(serviceRates).where(eq(serviceRates.isActive, true)).orderBy(serviceRates.sortOrder, serviceRates.name);
+  }
+
+  async createServiceRate(rate: InsertServiceRate): Promise<ServiceRate> {
+    const [created] = await db.insert(serviceRates).values(rate).returning();
+    return created;
+  }
+
+  async updateServiceRate(id: number, updates: Partial<InsertServiceRate>): Promise<ServiceRate> {
+    const [updated] = await db.update(serviceRates).set(updates).where(eq(serviceRates.id, id)).returning();
+    return updated;
+  }
+
+  async deleteServiceRate(id: number): Promise<void> {
+    await db.delete(serviceRates).where(eq(serviceRates.id, id));
+  }
+
   async createFieldEmployee(insertEmployee: InsertFieldEmployee): Promise<FieldEmployee> {
     const [employee] = await db
       .insert(fieldEmployees)
@@ -1425,10 +1454,9 @@ export class DatabaseStorage implements IStorage {
       createdBy,
     });
 
-    // Create line item from job log - use default rate since jobLog doesn't have cost fields
-    const unitRate = '0'; // Job log doesn't have finalCost/estimatedCost
+    const unitRate = String(jobLog.amount || '200');
     const quantity = '1';
-    const taxRate = '6'; // PA sales tax default
+    const taxRate = '6';
 
     await this.createLineItem({
       invoiceId: invoice.id,
