@@ -38,7 +38,10 @@ export default function FieldInvoice() {
   const [dueDate, setDueDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 30);
-    return d.toISOString().slice(0, 10);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
   });
 
   const employee = (() => {
@@ -55,7 +58,7 @@ export default function FieldInvoice() {
   });
 
   const allLogs = logsData?.jobLogs || [];
-  const completedLogs = allLogs.filter(l => l.status === "completed" && l.clientId);
+  const completedLogs = allLogs.filter(l => l.status === "completed");
 
   const grouped = useMemo(() => {
     const map: Record<string, JobLog[]> = {};
@@ -68,6 +71,8 @@ export default function FieldInvoice() {
   }, [completedLogs]);
 
   const toggle = (id: number) => {
+    const log = completedLogs.find(l => l.id === id);
+    if (!log?.clientId) return;
     setSelectedIds(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -77,13 +82,15 @@ export default function FieldInvoice() {
   };
 
   const selectAllForCustomer = (logs: JobLog[]) => {
+    const linkable = logs.filter(l => l.clientId);
+    if (linkable.length === 0) return;
     setSelectedIds(prev => {
       const next = new Set(prev);
-      const allSelected = logs.every(l => next.has(l.id));
+      const allSelected = linkable.every(l => next.has(l.id));
       if (allSelected) {
-        logs.forEach(l => next.delete(l.id));
+        linkable.forEach(l => next.delete(l.id));
       } else {
-        logs.forEach(l => next.add(l.id));
+        linkable.forEach(l => next.add(l.id));
       }
       return next;
     });
@@ -167,43 +174,51 @@ export default function FieldInvoice() {
                       className="text-xs"
                       onClick={() => selectAllForCustomer(logs)}
                     >
-                      {logs.every(l => selectedIds.has(l.id)) ? "Deselect All" : "Select All"}
+                      {logs.filter(l => l.clientId).length > 0 && logs.filter(l => l.clientId).every(l => selectedIds.has(l.id)) ? "Deselect All" : "Select All"}
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {logs.map((log) => (
-                    <div
-                      key={log.id}
-                      className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedIds.has(log.id) ? "bg-primary/10 border-primary" : "hover:bg-muted/50"
-                      }`}
-                      onClick={() => toggle(log.id)}
-                    >
-                      <Checkbox
-                        checked={selectedIds.has(log.id)}
-                        onCheckedChange={() => toggle(log.id)}
-                        className="mt-0.5"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 text-sm font-medium">
-                          <MapPin className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                          <span className="truncate">{log.servicedArea}</span>
+                  {logs.map((log) => {
+                    const hasClient = !!log.clientId;
+                    return (
+                      <div
+                        key={log.id}
+                        className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
+                          !hasClient ? "opacity-60 cursor-not-allowed bg-muted/30" :
+                          selectedIds.has(log.id) ? "bg-primary/10 border-primary cursor-pointer" : "hover:bg-muted/50 cursor-pointer"
+                        }`}
+                        onClick={() => toggle(log.id)}
+                      >
+                        <Checkbox
+                          checked={selectedIds.has(log.id)}
+                          onCheckedChange={() => toggle(log.id)}
+                          disabled={!hasClient}
+                          className="mt-0.5"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <MapPin className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate">{log.servicedArea}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{log.workPerformed}</p>
+                          <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {new Date(String(log.jobDate).slice(0, 10) + "T12:00:00").toLocaleDateString()}
+                            </span>
+                            <span>{log.siteLocation}</span>
+                          </div>
+                          {!hasClient && (
+                            <p className="text-xs text-amber-600 mt-1 font-medium">No client linked — ask admin to link this customer</p>
+                          )}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{log.workPerformed}</p>
-                        <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(String(log.jobDate).slice(0, 10) + "T12:00:00").toLocaleDateString()}
-                          </span>
-                          <span>{log.siteLocation}</span>
+                        <div className="text-right flex-shrink-0">
+                          <span className="font-bold text-sm">${parseFloat(String(log.amount || "200")).toFixed(2)}</span>
                         </div>
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <span className="font-bold text-sm">${parseFloat(String(log.amount || "200")).toFixed(2)}</span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </CardContent>
               </Card>
             ))}
