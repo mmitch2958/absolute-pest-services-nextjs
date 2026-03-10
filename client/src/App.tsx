@@ -36,6 +36,7 @@ import AdminInvoices from "@/pages/admin/AdminInvoices";
 import AdminInvoiceNew from "@/pages/admin/AdminInvoiceNew";
 import FieldLogin from "@/pages/field-login";
 import FieldLog from "@/pages/field-log";
+import FieldInvoice from "@/pages/field-invoice";
 import FieldMyJobs from "@/pages/field/field-my-jobs";
 import FieldHistory from "@/pages/field-history";
 import FieldEmployees from "@/pages/field-employees";
@@ -80,6 +81,7 @@ function Router() {
       <Route path="/field/log" component={FieldLog} />
       <Route path="/field/my-jobs" component={FieldMyJobs} />
       <Route path="/field/history" component={FieldHistory} />
+      <Route path="/field/invoice" component={FieldInvoice} />
       <Route path="/field/employees" component={FieldEmployees} />
       <Route path="/field/reports" component={FieldReports} />
       
