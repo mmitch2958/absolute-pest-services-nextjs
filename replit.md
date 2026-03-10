@@ -54,12 +54,21 @@ Preferred communication style: Simple, everyday language.
 - **Calendar View**: Full filter bar — toggle Jobs/Contracts, Past/Upcoming/All dates, Residential/Commercial, and filter by technician. Active filter count displayed in header
 - Backend: `/api/field/suggestions` now returns real clients with `propertyType`; `/api/admin/scheduled-jobs` includes `propertyType` (joined from clients table)
 
+### Service Rates & Job-to-Invoice Flow
+- `service_rates` table stores admin-configurable service types (name, description, defaultRate, isActive, sortOrder)
+- `job_logs` table has `serviceRateId` (FK to service_rates, nullable) and `amount` (decimal, default $200)
+- Admin manages rates from **Field Data → Service Rates & Fee Structure** section (CRUD with inline form)
+- Field log form: technicians pick a service type from dropdown which auto-fills the amount; amount is editable
+- **Field Invoice Creation** (`/field/invoice`): technicians select completed jobs grouped by customer, see running total with 6% PA tax, and create a draft invoice. Authorization enforced (only own jobs, completed status, same client)
+- API: `GET/POST/PUT/DELETE /api/admin/service-rates`, `GET /api/field/service-rates`, `POST /api/field/create-invoice`
+- 8 default service rates seeded (General Pest Control $200, Termite $500, Bed Bug $350, etc.)
+
 ### Data Layer
 - **ORM**: Drizzle ORM for type-safe operations
 - **Database**: PostgreSQL (configured for Neon serverless)
 - **Migrations**: Drizzle Kit (`npm run db:push`)
 - **Shared Schema**: TypeScript types for client/server consistency
-- **Core Tables**: Users, Contact Submissions, Service Requests, Inspection Schedules, Payments, Clients, Projects, Milestones, Dashboards, Blog Posts, Field Employees, Job Logs, Job Log Custom Fields, Job Log Photos, Field Customers, Site Locations, Serviced Areas, Service Contracts, Customer Messages, Invoices, Invoice Line Items, Invoice Status Logs, Time Entries, Review Requests, Reminders, System Settings, Geocache, Daily Routes.
+- **Core Tables**: Users, Contact Submissions, Service Requests, Inspection Schedules, Payments, Clients, Projects, Milestones, Dashboards, Blog Posts, Field Employees, Job Logs, Job Log Custom Fields, Job Log Photos, Field Customers, Site Locations, Serviced Areas, Service Contracts, Customer Messages, Invoices, Invoice Line Items, Invoice Status Logs, Time Entries, Review Requests, Reminders, System Settings, Geocache, Daily Routes, Service Rates.
 
 ### UI/UX Design
 - Modern, responsive, mobile-first design approach.
