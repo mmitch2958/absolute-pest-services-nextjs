@@ -259,9 +259,19 @@ export const fieldEmployees = pgTable("field_employees", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const serviceRates = pgTable("service_rates", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  defaultRate: decimal("default_rate", { precision: 10, scale: 2 }).notNull().default("200.00"),
+  isActive: boolean("is_active").default(true).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const jobLogs = pgTable("job_logs", {
   id: serial("id").primaryKey(),
-  employeeId: integer("employee_id").references(() => fieldEmployees.id), // nullable for unassigned jobs
+  employeeId: integer("employee_id").references(() => fieldEmployees.id),
   customerName: text("customer_name").notNull(),
   clientId: integer("client_id").references(() => clients.id),
   siteLocation: text("site_location").notNull(),
@@ -269,7 +279,9 @@ export const jobLogs = pgTable("job_logs", {
   servicedArea: text("serviced_area").notNull(),
   workPerformed: text("work_performed").notNull(),
   jobDate: timestamp("job_date").notNull(),
-  status: text("status").notNull().default("completed"), // scheduled, in_progress, completed, invoiced, paid
+  status: text("status").notNull().default("completed"),
+  serviceRateId: integer("service_rate_id").references(() => serviceRates.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).default("200.00"),
   customFields: jsonb("custom_fields"),
   // Admin scheduling fields (SC-SCHEDULING-001)
   priority: text("priority").default("medium"), // low, medium, high, urgent
@@ -387,6 +399,15 @@ export const insertCustomerMessageSchema = createInsertSchema(customerMessages).
 export type InsertCustomerMessage = z.infer<typeof insertCustomerMessageSchema>;
 export type CustomerMessage = typeof customerMessages.$inferSelect;
 
+export const insertServiceRateSchema = createInsertSchema(serviceRates).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  defaultRate: z.union([z.string(), z.number()]).transform(val => String(val)),
+});
+export type InsertServiceRate = z.infer<typeof insertServiceRateSchema>;
+export type ServiceRate = typeof serviceRates.$inferSelect;
+
 export const insertFieldEmployeeSchema = createInsertSchema(fieldEmployees).omit({
   id: true,
   createdAt: true,
@@ -405,6 +426,8 @@ export const insertJobLogSchema = createInsertSchema(jobLogs).omit({
   cancelledBy: z.number().int().positive().optional().nullable(),
   jobDate: z.union([z.date(), z.string()]).transform(val => typeof val === 'string' ? new Date(val) : val),
   scheduledEndTime: z.union([z.date(), z.string(), z.null()]).transform(val => val === null ? null : typeof val === 'string' ? new Date(val) : val).optional().nullable(),
+  serviceRateId: z.number().int().positive().optional().nullable(),
+  amount: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
 });
 
 // Insert schema for job schedule logs (SC-SCHEDULING-001)
