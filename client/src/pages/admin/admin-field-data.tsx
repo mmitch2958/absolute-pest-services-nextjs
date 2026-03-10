@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus, Pencil, Trash2, Users, Building2, MapPin, Loader2, ClipboardList, MapPinned, Settings2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Building2, Home, MapPin, Loader2, ClipboardList, MapPinned, Settings2 } from "lucide-react";
 
 function EmployeeSection() {
   const { toast } = useToast();
@@ -150,7 +150,8 @@ function ClientsSection() {
   const { toast } = useToast();
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
-  const [form, setForm] = useState({ name: "", address: "", phone: "", email: "" });
+  const emptyForm = { name: "", address: "", phone: "", email: "", propertyType: "residential" };
+  const [form, setForm] = useState(emptyForm);
 
   const { data, isLoading } = useQuery<{ success: boolean; customers: any[] }>({
     queryKey: ["/api/admin/field-customers"],
@@ -159,13 +160,13 @@ function ClientsSection() {
 
   const addMutation = useMutation({
     mutationFn: async (data: any) => { const res = await apiRequest("POST", "/api/admin/field-customers", data); return res.json(); },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/admin/field-customers"] }); setShowAdd(false); setForm({ name: "", address: "", phone: "", email: "" }); toast({ title: "Customer added" }); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/admin/field-customers"] }); setShowAdd(false); setForm(emptyForm); toast({ title: "Customer added" }); },
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => { const res = await apiRequest("PATCH", `/api/admin/field-customers/${id}`, data); return res.json(); },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/admin/field-customers"] }); setEditId(null); setForm({ name: "", address: "", phone: "", email: "" }); toast({ title: "Customer updated" }); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/admin/field-customers"] }); setEditId(null); setForm(emptyForm); toast({ title: "Customer updated" }); },
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
@@ -178,7 +179,7 @@ function ClientsSection() {
   const startEdit = (c: any) => {
     setEditId(c.id);
     setShowAdd(false);
-    setForm({ name: c.name || "", address: c.address || "", phone: c.phone || "", email: c.email || "" });
+    setForm({ name: c.name || "", address: c.address || "", phone: c.phone || "", email: c.email || "", propertyType: c.propertyType || "residential" });
   };
 
   return (
@@ -188,7 +189,7 @@ function ClientsSection() {
           <Building2 className="w-4 h-4" />
           Customers
         </CardTitle>
-        <Button size="sm" onClick={() => { setShowAdd(true); setEditId(null); setForm({ name: "", address: "", phone: "", email: "" }); }}>
+        <Button size="sm" onClick={() => { setShowAdd(true); setEditId(null); setForm(emptyForm); }}>
           <Plus className="w-4 h-4 mr-1" /> Add Customer
         </Button>
       </CardHeader>
@@ -196,10 +197,29 @@ function ClientsSection() {
         {(showAdd || editId !== null) && (
           <div className="border rounded-lg p-4 mb-4 bg-muted/30 space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div><Label>Name</Label><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Customer name" className="mt-1" /></div>
+              <div><Label>Name <span className="text-destructive">*</span></Label><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Customer name" className="mt-1" /></div>
               <div><Label>Address</Label><Input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} placeholder="Address" className="mt-1" /></div>
               <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="Phone" className="mt-1" /></div>
               <div><Label>Email</Label><Input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="Email" className="mt-1" /></div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Property Type <span className="text-destructive">*</span></Label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, propertyType: "residential" })}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-md border-2 text-sm font-medium transition-colors ${form.propertyType === "residential" ? "bg-blue-600 text-white border-blue-600" : "bg-background border-input hover:bg-accent"}`}
+                >
+                  <Home className="w-4 h-4" /> Residential
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, propertyType: "commercial" })}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-md border-2 text-sm font-medium transition-colors ${form.propertyType === "commercial" ? "bg-orange-600 text-white border-orange-600" : "bg-background border-input hover:bg-accent"}`}
+                >
+                  <Building2 className="w-4 h-4" /> Commercial
+                </button>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button size="sm" disabled={!form.name} onClick={() => editId !== null ? updateMutation.mutate({ id: editId, data: form }) : addMutation.mutate(form)}>
@@ -216,6 +236,7 @@ function ClientsSection() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
+                <TableHead>Property</TableHead>
                 <TableHead>Address</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Email</TableHead>
@@ -226,6 +247,11 @@ function ClientsSection() {
               {clients.map((c: any) => (
                 <TableRow key={c.id}>
                   <TableCell className="font-medium">{c.name}</TableCell>
+                  <TableCell>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${(c.propertyType || "residential") === "commercial" ? "bg-orange-50 border-orange-200 text-orange-700" : "bg-blue-50 border-blue-200 text-blue-700"}`}>
+                      {(c.propertyType || "residential") === "commercial" ? <><Building2 className="w-3 h-3" />Commercial</> : <><Home className="w-3 h-3" />Residential</>}
+                    </span>
+                  </TableCell>
                   <TableCell>{c.address || "-"}</TableCell>
                   <TableCell>{c.phone || "-"}</TableCell>
                   <TableCell>{c.email || "-"}</TableCell>
@@ -240,7 +266,7 @@ function ClientsSection() {
                 </TableRow>
               ))}
               {clients.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-6">No customers yet</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">No customers yet</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
