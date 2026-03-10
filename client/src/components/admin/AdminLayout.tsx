@@ -82,6 +82,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       href: "/admin/calendar",
       icon: CalendarDays,
     },
+    {
+      title: "Scheduling",
+      href: "/admin/scheduling",
+      icon: CalendarDays,
+    },
   ];
 
   const isActiveRoute = (href: string) => {
