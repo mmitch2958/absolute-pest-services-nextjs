@@ -1,4 +1,4 @@
-import { ClipboardList, History, Users, LogOut } from "lucide-react";
+import { ClipboardList, History, Users, LogOut, Receipt } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -22,6 +22,7 @@ export function FieldNav({ canManageEmployees }: FieldNavProps) {
   const items = [
     { href: "/field/log", icon: ClipboardList, label: "Log Job" },
     { href: "/field/history", icon: History, label: "History" },
+    { href: "/field/invoice", icon: Receipt, label: "Invoice" },
     ...(canManageEmployees
       ? [{ href: "/field/employees", icon: Users, label: "Team" }]
       : []),
