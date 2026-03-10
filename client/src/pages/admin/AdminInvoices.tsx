@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useLocation } from "wouter"; 
-import { 
+import { useLocation } from "wouter";
+import {
   FileText,
   Search,
   Plus,
@@ -36,8 +36,17 @@ interface Invoice {
   clientName?: string;
 }
 
+function safeFormat(dateStr: string | null | undefined, fmt: string): string {
+  if (!dateStr) return "—";
+  try {
+    return format(new Date(String(dateStr).slice(0, 10) + "T12:00:00"), fmt);
+  } catch {
+    return "—";
+  }
+}
+
 export default function AdminInvoices() {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,30 +129,28 @@ export default function AdminInvoices() {
     }
   };
 
-  const isOverdue = (dueDate: string, status: string) => {
+  const isOverdue = (dueDate: string | null | undefined, status: string) => {
+    if (!dueDate) return false;
     return status !== 'paid' && new Date(dueDate) < new Date();
   };
 
-  // Filter invoices
   const filteredInvoices = invoices.filter(invoice => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (invoice.clientName && invoice.clientName.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === 'all' || invoice.status.toLowerCase() === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  // Calculate totals
   const outstandingTotal = filteredInvoices
     .filter(inv => inv.status !== 'paid')
-    .reduce((sum, inv) => sum + parseFloat(String(inv.total)), 0);
-  
+    .reduce((sum, inv) => sum + parseFloat(String(inv.total) || '0'), 0);
+
   const overdueCount = filteredInvoices.filter(inv => isOverdue(inv.dueDate, inv.status)).length;
   const paidCount = filteredInvoices.filter(inv => inv.status === 'paid').length;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Invoices</h1>
@@ -155,7 +162,6 @@ export default function AdminInvoices() {
         </Button>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
@@ -192,7 +198,6 @@ export default function AdminInvoices() {
         </Card>
       </div>
 
-      {/* Filters */}
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4">
@@ -223,7 +228,6 @@ export default function AdminInvoices() {
         </CardContent>
       </Card>
 
-      {/* Invoices List */}
       {loading ? (
         <div className="flex items-center justify-center min-h-[300px]">
           <div className="animate-spin w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full" />
@@ -234,7 +238,7 @@ export default function AdminInvoices() {
             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">No Invoices Found</h3>
             <p className="text-muted-foreground">
-              {searchTerm || statusFilter !== 'all' 
+              {searchTerm || statusFilter !== 'all'
                 ? "Try adjusting your search or filter criteria"
                 : "Get started by creating your first invoice"}
             </p>
@@ -243,8 +247,8 @@ export default function AdminInvoices() {
       ) : (
         <div className="grid gap-4">
           {filteredInvoices.map((invoice) => (
-            <Card 
-              key={invoice.id} 
+            <Card
+              key={invoice.id}
               className={`hover:bg-accent/50 transition-colors cursor-pointer ${
                 isOverdue(invoice.dueDate, invoice.status) ? 'border-red-300' : ''
               }`}
@@ -254,8 +258,8 @@ export default function AdminInvoices() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className={`p-3 rounded-lg ${
-                      invoice.status === 'paid' 
-                        ? 'bg-green-100' 
+                      invoice.status === 'paid'
+                        ? 'bg-green-100'
                         : isOverdue(invoice.dueDate, invoice.status)
                           ? 'bg-red-100'
                           : 'bg-yellow-100'
@@ -270,9 +274,7 @@ export default function AdminInvoices() {
                     </div>
                     <div>
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-semibold">
-                          #{invoice.invoiceNumber}
-                        </h3>
+                        <h3 className="text-lg font-semibold">#{invoice.invoiceNumber}</h3>
                         <Badge variant="outline" className={getStatusColor(invoice.status)}>
                           {invoice.status}
                         </Badge>
@@ -281,15 +283,15 @@ export default function AdminInvoices() {
                         {invoice.clientName && (
                           <span className="font-medium">{invoice.clientName}</span>
                         )}
-                        <span>Issued: {format(new Date(invoice.issueDate), 'MMM d, yyyy')}</span>
-                        <span>Due: {format(new Date(invoice.dueDate), 'MMM d, yyyy')}</span>
+                        <span>Issued: {safeFormat(invoice.issueDate, 'MMM d, yyyy')}</span>
+                        <span>Due: {safeFormat(invoice.dueDate, 'MMM d, yyyy')}</span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <p className={`text-xl font-bold ${
-                      invoice.status === 'paid' 
-                        ? 'text-green-600' 
+                      invoice.status === 'paid'
+                        ? 'text-green-600'
                         : isOverdue(invoice.dueDate, invoice.status)
                           ? 'text-red-600'
                           : ''
@@ -299,16 +301,16 @@ export default function AdminInvoices() {
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                       {invoice.status !== 'paid' && (
                         <>
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={(e) => handleSendInvoice(invoice.id, e)}
                             title="Send to customer"
                           >
                             <Send className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={(e) => handleMarkPaid(invoice.id, e)}
                             title="Mark as paid"
@@ -317,8 +319,8 @@ export default function AdminInvoices() {
                           </Button>
                         </>
                       )}
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => setLocation(`/admin/invoices/${invoice.id}`)}
                         title="View details"
