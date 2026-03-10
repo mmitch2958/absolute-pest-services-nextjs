@@ -550,14 +550,14 @@ export class DatabaseStorage implements IStorage {
       });
     }
     
-    // Create new prospect
+    // Create new prospect — status "pending" until admin reviews
     return await this.createClient({
       name: data.name,
       email: data.email,
       phone: data.phone,
       address: data.address,
       clientType: "prospect",
-      status: "active",
+      status: "pending",
       notes: data.notes,
     });
   }
@@ -1547,9 +1547,9 @@ export class DatabaseStorage implements IStorage {
       if (value !== undefined) {
         // Parse based on expected type
         if (key === 'reminder_time_hour') {
-          settings[key as keyof ReminderSettings] = parseInt(value, 10) as any;
+          (settings as any)[key] = parseInt(value, 10);
         } else if (key.endsWith('_enabled')) {
-          settings[key as keyof ReminderSettings] = (value === 'true') as any;
+          (settings as any)[key] = (value === 'true');
         } else {
           (settings as any)[key] = value;
         }
@@ -2101,7 +2101,7 @@ export class DatabaseStorage implements IStorage {
       .map(r => ({
         type: 'request' as const,
         id: Number(r.id),
-        date: new Date(r.scheduledDate),
+        date: r.scheduledDate ? new Date(r.scheduledDate) : new Date(),
         customerName: `${r.firstName || ''} ${r.lastName || ''}`.trim(),
         serviceType: r.serviceType || 'Service Request',
       }));
@@ -2250,7 +2250,7 @@ export class DatabaseStorage implements IStorage {
     const dateStr = route.routeDate.toString().split('T')[0];
 
     // First try to get existing route
-    const existing = await this.getDailyRoute(route.employeeId, route.routeDate);
+    const existing = await this.getDailyRoute(route.employeeId, new Date(route.routeDate));
 
     if (existing) {
       // Update existing route
@@ -2514,12 +2514,13 @@ export class DatabaseStorage implements IStorage {
     if (filters?.dateTo) {
       conditions.push(lte(jobLogs.jobDate, filters.dateTo));
     }
-    if (filters?.status) {
+    if (filters?.status && filters.status !== 'all') {
       conditions.push(eq(jobLogs.status, filters.status));
-    } else {
-      // Default to showing scheduled/in_progress jobs if no status filter
+    } else if (!filters?.status) {
+      // Default to showing scheduled/in_progress jobs for the scheduling list view
       conditions.push(or(eq(jobLogs.status, 'scheduled'), eq(jobLogs.status, 'in_progress')));
     }
+    // status === 'all' → no status filter applied, returns every status
 
     if (conditions.length > 0) {
       return await db.select().from(jobLogs).where(and(...conditions)).orderBy(jobLogs.jobDate);
