@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { generateJobReport } from "@/lib/pdf-report";
 import { FieldNav } from "@/components/field-nav";
 import { FileDown, Search, Loader2, Calendar, MapPin, Wrench } from "lucide-react";
-import { displayDate, getLocalDateString } from "@/lib/utils";
+import { displayDateTime, getLocalDateString } from "@/lib/utils";
 
 export default function FieldReports() {
   const [, setLocation] = useLocation();
@@ -156,7 +156,7 @@ export default function FieldReports() {
                     <h3 className="font-semibold">{log.customerName}</h3>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
-                      {displayDate(log.jobDate)}
+                      {displayDateTime(log.createdAt)}
                     </span>
                   </div>
                   <div className="space-y-1 text-sm text-muted-foreground">
