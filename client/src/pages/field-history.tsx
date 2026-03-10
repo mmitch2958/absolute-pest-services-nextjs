@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { FieldNav } from "@/components/field-nav";
-import { displayDate } from "@/lib/utils";
+import { displayDateTime } from "@/lib/utils";
 import { MapPin, Calendar, Wrench, Building2, Loader2, Camera, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -209,7 +209,7 @@ export default function FieldHistory() {
                     <h3 className="font-semibold text-base">{log.customerName}</h3>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
-                      {displayDate(log.jobDate)}
+                      {displayDateTime(log.createdAt)}
                     </span>
                   </div>
                   <div className="space-y-1.5 text-sm text-muted-foreground">
