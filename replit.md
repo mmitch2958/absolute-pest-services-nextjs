@@ -56,9 +56,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Service Rates & Job-to-Invoice Flow
 - `service_rates` table stores admin-configurable service types (name, description, defaultRate, isActive, sortOrder)
-- `job_logs` table has `serviceRateId` (FK to service_rates, nullable) and `amount` (decimal, default $200)
+- `job_logs` table has `serviceRateId` (FK to service_rates, nullable), `amount` (decimal, default $200), and `materials` (jsonb)
 - Admin manages rates from **Field Data → Service Rates & Fee Structure** section (CRUD with inline form)
 - Field log form: technicians pick a service type from dropdown which auto-fills the amount; amount is editable
+- **Materials Tracking**: Each job log can record materials used — either a product (name + volume in oz/gallons) or supplies (list of items with quantities). Materials are stored as jsonb on `job_logs.materials` and carried to `invoice_line_items.materials` when invoices are created, displayed on the public invoice view under each line item.
 - **Field Invoice Creation** (`/field/invoice`): technicians select completed jobs grouped by customer, see running total with 6% PA tax, and create a draft invoice. Authorization enforced (only own jobs, completed status, same client)
 - API: `GET/POST/PUT/DELETE /api/admin/service-rates`, `GET /api/field/service-rates`, `POST /api/field/create-invoice`
 - 8 default service rates seeded (General Pest Control $200, Termite $500, Bed Bug $350, etc.)
