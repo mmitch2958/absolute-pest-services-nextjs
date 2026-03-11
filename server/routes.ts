@@ -5008,6 +5008,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   seedAdminUser();
   seedFieldMaterials();
+  seedServiceRates();
 
   const httpServer = createServer(app);
   return httpServer;
@@ -5059,6 +5060,35 @@ async function seedFieldMaterials() {
     console.log(`Seeded ${products.length + supplies.length} field materials`);
   } catch (error) {
     console.error("Error seeding field materials:", error);
+  }
+}
+
+async function seedServiceRates() {
+  try {
+    const existing = await storage.getServiceRates();
+    if (existing.length > 0) return;
+    const defaults = [
+      { name: "General Pest Control", description: "Standard interior/exterior treatment", defaultRate: "200.00", isActive: true, sortOrder: 0 },
+      { name: "Termite Treatment", description: "Liquid treatment or bait system", defaultRate: "500.00", isActive: true, sortOrder: 1 },
+      { name: "Bed Bug Treatment", description: "Heat or chemical bed bug elimination", defaultRate: "350.00", isActive: true, sortOrder: 2 },
+      { name: "Rodent Control", description: "Trapping and exclusion services", defaultRate: "250.00", isActive: true, sortOrder: 3 },
+      { name: "Mosquito Treatment", description: "Yard spray and larvicide application", defaultRate: "150.00", isActive: true, sortOrder: 4 },
+      { name: "Wildlife Removal", description: "Humane trapping and relocation", defaultRate: "300.00", isActive: true, sortOrder: 5 },
+      { name: "Cockroach Treatment", description: "Gel bait and residual spray application", defaultRate: "175.00", isActive: true, sortOrder: 6 },
+      { name: "Ant Treatment", description: "Interior/exterior ant colony elimination", defaultRate: "150.00", isActive: true, sortOrder: 7 },
+      { name: "Wasp / Hornet Removal", description: "Nest removal and preventive treatment", defaultRate: "175.00", isActive: true, sortOrder: 8 },
+      { name: "Flea & Tick Treatment", description: "Interior treatment for fleas and ticks", defaultRate: "200.00", isActive: true, sortOrder: 9 },
+      { name: "Spider Treatment", description: "Web removal and perimeter treatment", defaultRate: "150.00", isActive: true, sortOrder: 10 },
+      { name: "Commercial Pest Control", description: "Scheduled commercial property service", defaultRate: "350.00", isActive: true, sortOrder: 11 },
+      { name: "Crawl Space Treatment", description: "Encapsulation and pest treatment", defaultRate: "400.00", isActive: true, sortOrder: 12 },
+      { name: "Initial Inspection", description: "Full property inspection and assessment", defaultRate: "125.00", isActive: true, sortOrder: 13 },
+    ];
+    for (const rate of defaults) {
+      await storage.createServiceRate(rate);
+    }
+    console.log(`Seeded ${defaults.length} service rates`);
+  } catch (error) {
+    console.error("Error seeding service rates:", error);
   }
 }
 
