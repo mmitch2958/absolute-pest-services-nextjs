@@ -283,6 +283,7 @@ export const jobLogs = pgTable("job_logs", {
   serviceRateId: integer("service_rate_id").references(() => serviceRates.id),
   amount: decimal("amount", { precision: 10, scale: 2 }).default("200.00"),
   customFields: jsonb("custom_fields"),
+  materials: jsonb("materials"),
   // Admin scheduling fields (SC-SCHEDULING-001)
   priority: text("priority").default("medium"), // low, medium, high, urgent
   adminNotes: text("admin_notes"), // Administrative notes for the job
@@ -579,6 +580,7 @@ export const invoiceLineItems = pgTable("invoice_line_items", {
   taxRate: decimal("tax_rate", { precision: 5, scale: 2 }).notNull().default("0"),
   lineTotal: decimal("line_total", { precision: 10, scale: 2 }).notNull(),
   lineTax: decimal("line_tax", { precision: 10, scale: 2 }).notNull().default("0"),
+  materials: jsonb("materials"),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
