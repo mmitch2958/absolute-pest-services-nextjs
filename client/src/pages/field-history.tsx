@@ -17,7 +17,7 @@ import {
   Camera, X, ChevronLeft, ChevronRight, Pencil, Lock,
   DollarSign, Package, Boxes, Plus, Trash2, Search,
 } from "lucide-react";
-import { MaterialsData, PEST_CONTROL_SUPPLIES } from "./field-log";
+import { MaterialsData, PEST_CONTROL_SUPPLIES, PEST_CONTROL_PRODUCTS } from "./field-log";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface JobLogPhoto {
@@ -77,12 +77,18 @@ function MaterialsDisplay({ materials }: { materials: MaterialsData }) {
 
 // ─── Edit Materials Section ───────────────────────────────────────────────────
 function EditMaterialsSection({ value, onChange }: { value: MaterialsData; onChange: (v: MaterialsData) => void }) {
+  const [productSearch, setProductSearch] = useState(value?.type === "product" ? value.productName : "");
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [supplySearch, setSupplySearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
 
   const mode = value?.type ?? "none";
   const product = value?.type === "product" ? value : null;
   const supplies = value?.type === "supplies" ? value : null;
+
+  const filteredProducts = PEST_CONTROL_PRODUCTS.filter(p =>
+    p.toLowerCase().includes(productSearch.toLowerCase())
+  );
 
   function setMode(m: "none" | "product" | "supplies") {
     if (m === "none") { onChange(null); return; }
@@ -133,9 +139,37 @@ function EditMaterialsSection({ value, onChange }: { value: MaterialsData; onCha
 
       {mode === "product" && (
         <div className="space-y-3 p-3 bg-muted/40 rounded-lg border">
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 relative">
             <label className="text-xs font-medium text-muted-foreground">Product / Solution Name</label>
-            <Input value={product?.productName ?? ""} onChange={e => updateProduct({ productName: e.target.value })} placeholder="e.g. Termidor SC..." />
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              <input
+                type="text"
+                value={productSearch}
+                onChange={e => { setProductSearch(e.target.value); setShowProductDropdown(true); updateProduct({ productName: e.target.value }); }}
+                onFocus={() => setShowProductDropdown(true)}
+                onBlur={() => setTimeout(() => setShowProductDropdown(false), 150)}
+                placeholder="Search or type a product..."
+                className="w-full h-10 pl-9 pr-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+            {showProductDropdown && (
+              <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                {filteredProducts.map(p => (
+                  <button key={p} type="button" onMouseDown={() => { updateProduct({ productName: p }); setProductSearch(p); setShowProductDropdown(false); }}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-muted">{p}</button>
+                ))}
+                {productSearch.trim() && !PEST_CONTROL_PRODUCTS.some(p => p.toLowerCase() === productSearch.trim().toLowerCase()) && (
+                  <button type="button" onMouseDown={() => { updateProduct({ productName: productSearch.trim() }); setShowProductDropdown(false); }}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-primary/10 flex items-center gap-2 border-t font-medium text-primary">
+                    <Plus className="w-3.5 h-3.5" />Add custom: "{productSearch.trim()}"
+                  </button>
+                )}
+                {!productSearch.trim() && filteredProducts.length === 0 && (
+                  <p className="px-3 py-2 text-sm text-muted-foreground">Type a name to search products</p>
+                )}
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
