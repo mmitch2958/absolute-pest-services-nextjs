@@ -82,11 +82,29 @@ function EditMaterialsSection({ value, onChange }: { value: MaterialsData; onCha
   const [supplySearch, setSupplySearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
 
+  const { data: productsData } = useQuery<{ success: boolean; materials: { id: number; name: string }[] }>({
+    queryKey: ["/api/field/materials", "product"],
+    queryFn: async () => {
+      const res = await fetch("/api/field/materials?category=product", { credentials: "include" });
+      return res.json();
+    },
+  });
+  const { data: suppliesData } = useQuery<{ success: boolean; materials: { id: number; name: string }[] }>({
+    queryKey: ["/api/field/materials", "supply"],
+    queryFn: async () => {
+      const res = await fetch("/api/field/materials?category=supply", { credentials: "include" });
+      return res.json();
+    },
+  });
+
+  const productList = productsData?.materials?.map(m => m.name) ?? PEST_CONTROL_PRODUCTS;
+  const supplyList = suppliesData?.materials?.map(m => m.name) ?? PEST_CONTROL_SUPPLIES;
+
   const mode = value?.type ?? "none";
   const product = value?.type === "product" ? value : null;
   const supplies = value?.type === "supplies" ? value : null;
 
-  const filteredProducts = PEST_CONTROL_PRODUCTS.filter(p =>
+  const filteredProducts = productList.filter(p =>
     p.toLowerCase().includes(productSearch.toLowerCase())
   );
 
@@ -120,7 +138,7 @@ function EditMaterialsSection({ value, onChange }: { value: MaterialsData; onCha
     onChange({ ...value, items: value.items.filter((_, i) => i !== idx) });
   }
 
-  const filtered = PEST_CONTROL_SUPPLIES.filter(s =>
+  const filtered = supplyList.filter(s =>
     s.toLowerCase().includes(supplySearch.toLowerCase()) &&
     !(supplies?.items || []).find(i => i.name === s)
   );
@@ -159,7 +177,7 @@ function EditMaterialsSection({ value, onChange }: { value: MaterialsData; onCha
                   <button key={p} type="button" onMouseDown={() => { updateProduct({ productName: p }); setProductSearch(p); setShowProductDropdown(false); }}
                     className="w-full text-left px-3 py-2 text-sm hover:bg-muted">{p}</button>
                 ))}
-                {productSearch.trim() && !PEST_CONTROL_PRODUCTS.some(p => p.toLowerCase() === productSearch.trim().toLowerCase()) && (
+                {productSearch.trim() && !productList.some(p => p.toLowerCase() === productSearch.trim().toLowerCase()) && (
                   <button type="button" onMouseDown={() => { updateProduct({ productName: productSearch.trim() }); setShowProductDropdown(false); }}
                     className="w-full text-left px-3 py-2 text-sm hover:bg-primary/10 flex items-center gap-2 border-t font-medium text-primary">
                     <Plus className="w-3.5 h-3.5" />Add custom: "{productSearch.trim()}"
@@ -205,7 +223,7 @@ function EditMaterialsSection({ value, onChange }: { value: MaterialsData; onCha
                 {filtered.map(s => (
                   <button key={s} type="button" onMouseDown={() => addSupply(s)} className="w-full text-left px-3 py-2 text-sm hover:bg-muted">{s}</button>
                 ))}
-                {supplySearch.trim() && !PEST_CONTROL_SUPPLIES.some(s => s.toLowerCase() === supplySearch.trim().toLowerCase()) && (
+                {supplySearch.trim() && !supplyList.some(s => s.toLowerCase() === supplySearch.trim().toLowerCase()) && (
                   <button type="button" onMouseDown={() => addSupply(supplySearch.trim())} className="w-full text-left px-3 py-2 text-sm hover:bg-primary/10 flex items-center gap-2 border-t font-medium text-primary">
                     <Plus className="w-3.5 h-3.5" />Add custom: "{supplySearch.trim()}"
                   </button>
