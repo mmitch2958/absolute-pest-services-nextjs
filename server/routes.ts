@@ -2512,6 +2512,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Invoice Routes (SC-INV-001)
   // ==========================================
 
+  // ─── Admin Field Materials (Products & Supplies) ─────────────────────────
+  app.get("/api/admin/field-materials", requireAdmin, async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const materials = await storage.getFieldMaterials(category);
+      res.json({ success: true, materials });
+    } catch (error) {
+      console.error("Error fetching field materials:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/field-materials", requireAdmin, async (req, res) => {
+    try {
+      const material = await storage.createFieldMaterial(req.body);
+      res.json({ success: true, material });
+    } catch (error) {
+      console.error("Error creating field material:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/admin/field-materials/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const material = await storage.updateFieldMaterial(id, req.body);
+      res.json({ success: true, material });
+    } catch (error) {
+      console.error("Error updating field material:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/field-materials/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteFieldMaterial(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting field material:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Field employee access to materials list (active only)
+  app.get("/api/field/materials", async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const allMaterials = await storage.getFieldMaterials(category);
+      const active = allMaterials.filter(m => m.isActive);
+      res.json({ success: true, materials: active });
+    } catch (error) {
+      console.error("Error fetching field materials:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // ─── Admin Service Rates ──────────────────────────────────────────────────
   app.get("/api/admin/service-rates", requireAdmin, async (req, res) => {
     try {
@@ -4950,9 +5007,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   seedAdminUser();
+  seedFieldMaterials();
 
   const httpServer = createServer(app);
   return httpServer;
+}
+
+async function seedFieldMaterials() {
+  try {
+    const existing = await storage.getFieldMaterials();
+    if (existing.length > 0) return;
+    const products = [
+      "Termidor SC", "Termidor HE", "Termidor Foam", "Phantom II",
+      "Alpine WSG", "Alpine Foam", "Temprid FX", "Temprid SC",
+      "Demand CS", "Suspend Polyzone", "Suspend SC", "Talstar P",
+      "Bifen I/T", "Cy-Kick CS", "Cy-Kick Aerosol", "Demon WP", "Demon Max",
+      "Advion Cockroach Gel", "Advion Ant Gel", "Advion WDG",
+      "Vendetta Plus Gel", "InVict Gold Gel",
+      "Maxforce FC Magnum", "Maxforce Quantum", "Maxforce Complete",
+      "Avert Dry Flowable", "Gentrol IGR", "Gentrol Point Source",
+      "NyGuard IGR", "Precor IGR", "Tekko Pro IGR",
+      "Crossfire Concentrate", "Crossfire Aerosol", "Bedlam Plus",
+      "Transport Mikron", "Cimexa Dust", "Delta Dust", "Drione Dust",
+      "Tempo 1% Dust", "D-Fense Dust", "Taurus SC",
+      "Sentricon Bait", "Advance Termite Bait",
+      "Contrac Blox", "Final Blox", "Fastrac Blox",
+      "Generation Mini Block", "Ditrac All-Weather", "Rozol Tracking Powder",
+      "Zenprox EC", "PT 221L Residual", "PT Alpine Flea & Bed Bug",
+      "Stryker Wasp & Hornet", "Wasp-Freeze",
+      "EcoVia EC", "Essentria IC3", "Nisus DSV",
+      "BorActin Dust", "Boracare", "Tim-Bor",
+      "Altriset", "Arilon", "Fuse Insecticide",
+      "Optigard Ant Gel", "Optigard Flex", "Tandem",
+      "Trelona ATBS", "Master Line Bifenthrin",
+    ];
+    const supplies = [
+      "Glue Board (Small)", "Glue Board (Large)", "Snap Trap",
+      "Rodent Bait Station", "Tamper-Resistant Bait Station",
+      "Termite Bait Station", "Insect Bait Station",
+      "Pheromone Trap", "Fly Paper / Strip", "Fly Light Trap",
+      "Mosquito Trap", "Catch-All Trap", "Tick Tube",
+      "Bed Bug Monitor", "Aerosol Applicator Tip",
+      "Duster", "Granule Spreader",
+    ];
+    for (let i = 0; i < products.length; i++) {
+      await storage.createFieldMaterial({ name: products[i], category: "product", isActive: true, sortOrder: i });
+    }
+    for (let i = 0; i < supplies.length; i++) {
+      await storage.createFieldMaterial({ name: supplies[i], category: "supply", isActive: true, sortOrder: i });
+    }
+    console.log(`Seeded ${products.length + supplies.length} field materials`);
+  } catch (error) {
+    console.error("Error seeding field materials:", error);
+  }
 }
 
 async function seedAdminUser() {
