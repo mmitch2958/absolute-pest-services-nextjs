@@ -47,18 +47,23 @@ interface EmailParams {
   subject: string;
   text?: string;
   html?: string;
+  attachments?: Array<{ content: string; filename: string; type: string; disposition: string }>;
 }
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
     console.log(`[Email] Sending to ${params.to} | Subject: ${params.subject}`);
-    await mailService.send({
+    const msg: any = {
       to: params.to,
       from: params.from,
       subject: params.subject,
       text: params.text || '',
       html: params.html || '',
-    });
+    };
+    if (params.attachments && params.attachments.length > 0) {
+      msg.attachments = params.attachments;
+    }
+    await mailService.send(msg);
     console.log(`[Email] Successfully sent to ${params.to}`);
     return true;
   } catch (error: any) {
@@ -617,12 +622,14 @@ export async function sendInvoiceEmail(data: {
   total: string;
   viewToken: string;
   pdfUrl?: string;
+  baseUrl?: string;
+  pdfBuffer?: Buffer;
 }): Promise<boolean> {
-  const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-    ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
-    : 'http://localhost:5000';
+  const resolvedBase = data.baseUrl
+    || process.env.APP_BASE_URL
+    || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000');
 
-  const viewUrl = `${baseUrl}/api/invoices/view/${data.viewToken}`;
+  const viewUrl = `${resolvedBase}/invoice/${data.viewToken}`;
   const formattedInvoiceDate = data.invoiceDate.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -680,7 +687,7 @@ export async function sendInvoiceEmail(data: {
             <a href="${viewUrl}" style="display: inline-block; background-color: #eab308; color: white; padding: 14px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">View Invoice</a>
           </div>
 
-          ${data.pdfUrl ? `
+          ${data.pdfBuffer ? `
           <p style="color: #6b7280; margin: 20px 0; font-size: 14px; text-align: center;">
             A PDF copy is also attached to this email.
           </p>
@@ -699,7 +706,7 @@ export async function sendInvoiceEmail(data: {
           <div style="margin-top: 30px; text-align: center;">
             <p style="color: #9ca3af; margin: 0; font-size: 12px;">
               Absolute Pest Services<br>
-              <a href="${baseUrl}" style="color: #eab308; text-decoration: none;">Visit Our Website</a>
+              <a href="${resolvedBase}" style="color: #eab308; text-decoration: none;">Visit Our Website</a>
             </p>
           </div>
         </div>
@@ -730,6 +737,16 @@ If you have any questions, please contact us at (484) 643-2225.
 Absolute Pest Services
   `;
 
+  const attachments: any[] = [];
+  if (data.pdfBuffer) {
+    attachments.push({
+      content: data.pdfBuffer.toString("base64"),
+      filename: `Invoice-${data.invoiceNumber}.pdf`,
+      type: "application/pdf",
+      disposition: "attachment",
+    });
+  }
+
   // Send to customer
   const customerSent = await sendEmail({
     to: data.clientEmail,
@@ -737,6 +754,7 @@ Absolute Pest Services
     subject,
     html,
     text,
+    attachments: attachments.length > 0 ? attachments : undefined,
   });
 
   // Send CC to business
@@ -758,12 +776,13 @@ export async function sendInvoiceOverdueEmail(data: {
   dueDate: Date;
   total: string;
   viewToken: string;
+  baseUrl?: string;
 }): Promise<boolean> {
-  const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-    ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
-    : 'http://localhost:5000';
+  const resolvedBase = data.baseUrl
+    || process.env.APP_BASE_URL
+    || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000');
 
-  const viewUrl = `${baseUrl}/api/invoices/view/${data.viewToken}`;
+  const viewUrl = `${resolvedBase}/invoice/${data.viewToken}`;
   const formattedDueDate = data.dueDate.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -817,7 +836,7 @@ export async function sendInvoiceOverdueEmail(data: {
           <div style="margin-top: 30px; text-align: center;">
             <p style="color: #9ca3af; margin: 0; font-size: 12px;">
               Absolute Pest Services<br>
-              <a href="${baseUrl}" style="color: #eab308; text-decoration: none;">Visit Our Website</a>
+              <a href="${resolvedBase}" style="color: #eab308; text-decoration: none;">Visit Our Website</a>
             </p>
           </div>
         </div>
@@ -1215,4 +1234,111 @@ Absolute Pest Services
     html,
     text,
   });
+}
+
+export async function sendJobStatusNotification(data: {
+  customerEmail: string;
+  customerName: string;
+  oldStatus: string;
+  newStatus: string;
+  jobDate: string;
+  siteLocation: string;
+  servicedArea: string;
+  workPerformed?: string;
+  technicianName?: string;
+}) {
+  const statusLabels: Record<string, string> = {
+    scheduled: "Scheduled",
+    in_progress: "In Progress",
+    completed: "Completed",
+    cancelled: "Cancelled",
+    invoiced: "Invoiced",
+    paid: "Paid",
+  };
+
+  const newLabel = statusLabels[data.newStatus] || data.newStatus;
+  const subject = `Job Update: ${newLabel} — Absolute Pest Services`;
+
+  let statusMessage = "";
+  switch (data.newStatus) {
+    case "scheduled":
+      statusMessage = "Your service has been scheduled. Our team will be there as planned.";
+      break;
+    case "in_progress":
+      statusMessage = "Our technician has arrived and your service is now in progress.";
+      break;
+    case "completed":
+      statusMessage = "Great news! Your service has been completed. If you have any questions about the work performed, please don't hesitate to reach out.";
+      break;
+    case "cancelled":
+      statusMessage = "Your scheduled service has been cancelled. If you did not request this or have questions, please contact us.";
+      break;
+    case "invoiced":
+      statusMessage = "An invoice has been generated for your recent service. You will receive the invoice details separately.";
+      break;
+    default:
+      statusMessage = `Your job status has been updated to: ${newLabel}.`;
+  }
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #1a365d; padding: 20px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 22px;">Absolute Pest Services</h1>
+      </div>
+      <div style="padding: 30px; background-color: #ffffff; border: 1px solid #e2e8f0;">
+        <h2 style="color: #1a365d; margin-top: 0;">Job Status Update</h2>
+        <p>Dear ${data.customerName},</p>
+        <p>${statusMessage}</p>
+        <div style="background-color: #f7fafc; border-left: 4px solid #1a365d; padding: 15px; margin: 20px 0;">
+          <p style="margin: 5px 0;"><strong>Status:</strong> <span style="color: #2b6cb0; font-weight: bold;">${newLabel}</span></p>
+          <p style="margin: 5px 0;"><strong>Service Date:</strong> ${data.jobDate}</p>
+          <p style="margin: 5px 0;"><strong>Location:</strong> ${data.siteLocation}</p>
+          <p style="margin: 5px 0;"><strong>Area:</strong> ${data.servicedArea}</p>
+          ${data.technicianName ? `<p style="margin: 5px 0;"><strong>Technician:</strong> ${data.technicianName}</p>` : ""}
+          ${data.workPerformed && data.newStatus === "completed" ? `<p style="margin: 5px 0;"><strong>Work Performed:</strong> ${data.workPerformed}</p>` : ""}
+        </div>
+        <p>If you have any questions, please call us at <strong>(484) 643-2225</strong> or reply to this email.</p>
+        <p>Thank you for choosing Absolute Pest Services!</p>
+        <p style="color: #718096; font-size: 12px; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+          Absolute Pest Services | (484) 643-2225 | rob@absolutepestservices.com
+        </p>
+      </div>
+    </div>
+  `;
+
+  const text = `
+Job Status Update — Absolute Pest Services
+
+Dear ${data.customerName},
+
+${statusMessage}
+
+Service Details:
+- Status: ${newLabel}
+- Service Date: ${data.jobDate}
+- Location: ${data.siteLocation}
+- Area: ${data.servicedArea}
+${data.technicianName ? `- Technician: ${data.technicianName}` : ""}
+${data.workPerformed && data.newStatus === "completed" ? `- Work Performed: ${data.workPerformed}` : ""}
+
+Questions? Call us at (484) 643-2225.
+
+Thank you for choosing Absolute Pest Services!
+  `;
+
+  const customerSent = await sendEmail({
+    to: data.customerEmail,
+    from: FROM_EMAIL,
+    subject,
+    html,
+    text,
+  });
+
+  await sendBusinessNotifications(
+    `[Job ${newLabel}] ${data.customerName} — ${data.siteLocation}`,
+    html,
+    text
+  );
+
+  return customerSent;
 }
