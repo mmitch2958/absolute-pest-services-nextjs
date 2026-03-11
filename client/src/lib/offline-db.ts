@@ -27,6 +27,7 @@ export interface OfflineJobLog {
   jobDate: string;
   status: 'pending' | 'completed' | 'callback';
   customFields?: Record<string, string | number | boolean>;
+  materials?: any;
   photos: OfflinePhoto[];
   createdAt: string;
   syncStatus: 'pending' | 'syncing' | 'synced' | 'error';
