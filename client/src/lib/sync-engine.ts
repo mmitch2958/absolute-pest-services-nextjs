@@ -126,6 +126,7 @@ async function syncJobLogs(employeeId: number): Promise<SyncResult[]> {
           jobDate: log.jobDate,
           status: log.status,
           customFields: log.customFields,
+          materials: log.materials,
           clientCreatedAt: log.createdAt
         }],
         clientTimestamp: new Date().toISOString()
