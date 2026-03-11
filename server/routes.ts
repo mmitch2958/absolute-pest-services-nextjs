@@ -2847,17 +2847,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: "Client email not found" });
       }
 
-      // Update status to sent
-      await storage.updateInvoiceStatus(id, 'sent', `admin:${req.session.userId}`, 'Invoice sent to customer');
-
-      // Generate PDF and send email
+      // Generate PDF and send email first, then update status
       const adminBaseUrl = await getAppBaseUrl();
       const lineItems = await storage.getLineItemsByInvoice(id);
       let pdfBuffer: Buffer | undefined;
       try {
         pdfBuffer = generateInvoicePdf({
           invoiceNumber: invoice.invoiceNumber,
-          status: invoice.status,
+          status: 'sent',
           issueDate: String(invoice.issueDate),
           dueDate: String(invoice.dueDate),
           subtotal: String(invoice.subtotal),
@@ -2880,9 +2877,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             materials: li.materials,
           })),
         });
-      } catch (e) { console.error("PDF generation failed:", e); }
+      } catch (e) { console.error(`[Invoice ${invoice.invoiceNumber}] PDF generation failed:`, e); }
 
-      await sendInvoiceEmail({
+      const emailSent = await sendInvoiceEmail({
         clientEmail: client.email,
         clientName: client.name,
         invoiceNumber: invoice.invoiceNumber,
@@ -2894,6 +2891,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pdfBuffer,
       });
 
+      if (!emailSent) {
+        return res.status(500).json({ success: false, message: "Failed to send invoice email. Invoice status was not changed." });
+      }
+
+      await storage.updateInvoiceStatus(id, 'sent', `admin:${req.session.userId}`, 'Invoice sent to customer');
       const updatedInvoice = await storage.getInvoice(id);
       const statusLogs = await storage.getInvoiceStatusLog(id);
 
@@ -2927,7 +2929,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!emailRegex.test(recipientEmail)) {
         return res.status(400).json({ success: false, message: "Invalid email address format." });
       }
-      await storage.updateInvoiceStatus(id, 'sent', `field:${req.session.fieldEmployeeId}`, `Invoice sent by field technician to ${recipientEmail}`);
       const fieldBaseUrl = await getAppBaseUrl();
       const fieldLineItems = await storage.getLineItemsByInvoice(id);
       let fieldPdfBuffer: Buffer | undefined;
@@ -2957,8 +2958,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             materials: li.materials,
           })),
         });
-      } catch (e) { console.error("PDF generation failed:", e); }
-      await sendInvoiceEmail({
+      } catch (e) { console.error(`[Invoice ${invoice.invoiceNumber}] PDF generation failed:`, e); }
+      const fieldEmailSent = await sendInvoiceEmail({
         clientEmail: recipientEmail,
         clientName: recipientName,
         invoiceNumber: invoice.invoiceNumber,
@@ -2969,6 +2970,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         baseUrl: fieldBaseUrl,
         pdfBuffer: fieldPdfBuffer,
       });
+      if (!fieldEmailSent) {
+        return res.status(500).json({ success: false, message: "Failed to send invoice email. Please try again." });
+      }
+      await storage.updateInvoiceStatus(id, 'sent', `field:${req.session.fieldEmployeeId}`, `Invoice sent by field technician to ${recipientEmail}`);
       res.json({ success: true, message: `Invoice emailed to ${recipientEmail}` });
     } catch (error) {
       console.error("Error sending field invoice:", error);
