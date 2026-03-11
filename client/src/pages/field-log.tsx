@@ -70,6 +70,77 @@ export interface SuppliesMaterial {
 
 export type MaterialsData = ProductMaterial | SuppliesMaterial | null;
 
+export const PEST_CONTROL_PRODUCTS: string[] = [
+  "Termidor SC",
+  "Termidor HE",
+  "Termidor Foam",
+  "Phantom II",
+  "Alpine WSG",
+  "Alpine Foam",
+  "Temprid FX",
+  "Temprid SC",
+  "Demand CS",
+  "Suspend Polyzone",
+  "Suspend SC",
+  "Talstar P",
+  "Bifen I/T",
+  "Cy-Kick CS",
+  "Cy-Kick Aerosol",
+  "Demon WP",
+  "Demon Max",
+  "Advion Cockroach Gel",
+  "Advion Ant Gel",
+  "Advion WDG",
+  "Vendetta Plus Gel",
+  "InVict Gold Gel",
+  "Maxforce FC Magnum",
+  "Maxforce Quantum",
+  "Maxforce Complete",
+  "Avert Dry Flowable",
+  "Gentrol IGR",
+  "Gentrol Point Source",
+  "NyGuard IGR",
+  "Precor IGR",
+  "Tekko Pro IGR",
+  "Crossfire Concentrate",
+  "Crossfire Aerosol",
+  "Bedlam Plus",
+  "Transport Mikron",
+  "Cimexa Dust",
+  "Delta Dust",
+  "Drione Dust",
+  "Tempo 1% Dust",
+  "D-Fense Dust",
+  "Taurus SC",
+  "Sentricon Bait",
+  "Advance Termite Bait",
+  "Contrac Blox",
+  "Final Blox",
+  "Fastrac Blox",
+  "Generation Mini Block",
+  "Ditrac All-Weather",
+  "Rozol Tracking Powder",
+  "Zenprox EC",
+  "PT 221L Residual",
+  "PT Alpine Flea & Bed Bug",
+  "Stryker Wasp & Hornet",
+  "Wasp-Freeze",
+  "EcoVia EC",
+  "Essentria IC3",
+  "Nisus DSV",
+  "BorActin Dust",
+  "Boracare",
+  "Tim-Bor",
+  "Altriset",
+  "Arilon",
+  "Fuse Insecticide",
+  "Optigard Ant Gel",
+  "Optigard Flex",
+  "Tandem",
+  "Trelona ATBS",
+  "Master Line Bifenthrin",
+];
+
 export const PEST_CONTROL_SUPPLIES: string[] = [
   "Glue Board (Small)",
   "Glue Board (Large)",
@@ -103,11 +174,16 @@ function MaterialsSection({ value, onChange }: MaterialsSectionProps) {
   const [productSearch, setProductSearch] = useState(
     value?.type === "product" ? value.productName : ""
   );
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [supplySearch, setSupplySearch] = useState("");
   const [showSupplyDropdown, setShowSupplyDropdown] = useState(false);
 
   const product = value?.type === "product" ? value : null;
   const supplies = value?.type === "supplies" ? value : null;
+
+  const filteredProducts = PEST_CONTROL_PRODUCTS.filter(p =>
+    p.toLowerCase().includes(productSearch.toLowerCase())
+  );
 
   function setModeAndClear(m: MaterialsType) {
     setMode(m);
@@ -175,21 +251,58 @@ function MaterialsSection({ value, onChange }: MaterialsSectionProps) {
       {/* Product mode */}
       {mode === "product" && (
         <div className="space-y-3 p-3 bg-muted/40 rounded-lg border">
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 relative">
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Product / Solution Name</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
-                value={product?.productName ?? ""}
+                value={productSearch}
                 onChange={e => {
-                  updateProduct({ productName: e.target.value });
                   setProductSearch(e.target.value);
+                  setShowProductDropdown(true);
+                  updateProduct({ productName: e.target.value });
                 }}
-                placeholder="e.g. Termidor SC, Alpine WSG..."
+                onFocus={() => setShowProductDropdown(true)}
+                onBlur={() => setTimeout(() => setShowProductDropdown(false), 150)}
+                placeholder="Search or type a product..."
                 className="w-full h-11 pl-9 pr-3 text-base border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
+            {showProductDropdown && (
+              <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {filteredProducts.map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    onMouseDown={() => {
+                      updateProduct({ productName: p });
+                      setProductSearch(p);
+                      setShowProductDropdown(false);
+                    }}
+                    className="w-full text-left px-3 py-2.5 text-sm hover:bg-muted transition-colors"
+                  >
+                    {p}
+                  </button>
+                ))}
+                {productSearch.trim() && !PEST_CONTROL_PRODUCTS.some(p => p.toLowerCase() === productSearch.trim().toLowerCase()) && (
+                  <button
+                    type="button"
+                    onMouseDown={() => {
+                      updateProduct({ productName: productSearch.trim() });
+                      setShowProductDropdown(false);
+                    }}
+                    className="w-full text-left px-3 py-2.5 text-sm hover:bg-primary/10 transition-colors flex items-center gap-2 border-t font-medium text-primary"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Add custom: "{productSearch.trim()}"
+                  </button>
+                )}
+                {!productSearch.trim() && filteredProducts.length === 0 && (
+                  <p className="px-3 py-2.5 text-sm text-muted-foreground">Type a name to search products</p>
+                )}
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
