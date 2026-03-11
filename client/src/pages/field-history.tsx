@@ -168,13 +168,17 @@ function EditMaterialsSection({ value, onChange }: { value: MaterialsData; onCha
             </div>
             {showDropdown && (
               <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                {filtered.length > 0 ? filtered.map(s => (
+                {filtered.map(s => (
                   <button key={s} type="button" onMouseDown={() => addSupply(s)} className="w-full text-left px-3 py-2 text-sm hover:bg-muted">{s}</button>
-                )) : supplySearch.trim() ? (
-                  <button type="button" onMouseDown={() => addSupply(supplySearch.trim())} className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center gap-2">
-                    <Plus className="w-3.5 h-3.5 text-primary" />Add "{supplySearch.trim()}"
+                ))}
+                {supplySearch.trim() && !PEST_CONTROL_SUPPLIES.some(s => s.toLowerCase() === supplySearch.trim().toLowerCase()) && (
+                  <button type="button" onMouseDown={() => addSupply(supplySearch.trim())} className="w-full text-left px-3 py-2 text-sm hover:bg-primary/10 flex items-center gap-2 border-t font-medium text-primary">
+                    <Plus className="w-3.5 h-3.5" />Add custom: "{supplySearch.trim()}"
                   </button>
-                ) : <p className="px-3 py-2 text-sm text-muted-foreground">No supplies found</p>}
+                )}
+                {!supplySearch.trim() && filtered.length === 0 && (
+                  <p className="px-3 py-2 text-sm text-muted-foreground">Type a name to add a custom supply</p>
+                )}
               </div>
             )}
           </div>
