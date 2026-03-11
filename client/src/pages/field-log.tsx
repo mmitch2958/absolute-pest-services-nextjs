@@ -161,6 +161,108 @@ export const PEST_CONTROL_SUPPLIES: string[] = [
   "Granule Spreader",
 ];
 
+// ─── ServiceTypeSelector Component ────────────────────────────────────────────
+interface ServiceTypeSelectorProps {
+  serviceRates: Array<{ id: number; name: string; description: string | null; defaultRate: string }>;
+  selectedRateId: number | null | undefined;
+  amount: string;
+  onSelect: (rateId: number | null, rateName: string, defaultRate?: string) => void;
+  onAmountChange: (val: string) => void;
+}
+
+function ServiceTypeSelector({ serviceRates, selectedRateId, amount, onSelect, onAmountChange }: ServiceTypeSelectorProps) {
+  const selectedRate = serviceRates.find(r => r.id === selectedRateId);
+  const [search, setSearch] = useState(selectedRate?.name || "");
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    if (selectedRate) setSearch(selectedRate.name);
+  }, [selectedRate]);
+
+  const filtered = serviceRates.filter(r =>
+    r.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const isCustom = search.trim() && !serviceRates.some(r => r.name.toLowerCase() === search.trim().toLowerCase());
+
+  return (
+    <div className="grid grid-cols-5 gap-3">
+      <div className="col-span-3 space-y-1 relative">
+        <label className="text-sm font-medium">Service Type</label>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            value={search}
+            onChange={e => { setSearch(e.target.value); setShowDropdown(true); }}
+            onFocus={() => setShowDropdown(true)}
+            onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+            placeholder="Search or type service..."
+            className="w-full h-12 pl-9 pr-3 text-base border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
+        </div>
+        {showDropdown && (
+          <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+            <button
+              type="button"
+              onMouseDown={() => { onSelect(null, ""); setSearch(""); setShowDropdown(false); }}
+              className="w-full text-left px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted transition-colors"
+            >
+              No service type
+            </button>
+            {filtered.map(r => (
+              <button
+                key={r.id}
+                type="button"
+                onMouseDown={() => {
+                  onSelect(r.id, r.name, r.defaultRate);
+                  setSearch(r.name);
+                  setShowDropdown(false);
+                }}
+                className="w-full text-left px-3 py-2.5 text-sm hover:bg-muted transition-colors"
+              >
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">{r.name}</span>
+                  <span className="text-muted-foreground">${r.defaultRate}</span>
+                </div>
+                {r.description && <p className="text-xs text-muted-foreground mt-0.5">{r.description}</p>}
+              </button>
+            ))}
+            {isCustom && (
+              <button
+                type="button"
+                onMouseDown={() => {
+                  onSelect(null, search.trim());
+                  setShowDropdown(false);
+                }}
+                className="w-full text-left px-3 py-2.5 text-sm hover:bg-primary/10 transition-colors flex items-center gap-2 border-t font-medium text-primary"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Add custom: "{search.trim()}"
+              </button>
+            )}
+            {!search.trim() && filtered.length === 0 && (
+              <p className="px-3 py-2.5 text-sm text-muted-foreground">No service types available</p>
+            )}
+          </div>
+        )}
+      </div>
+      <div className="col-span-2 space-y-1">
+        <label className="text-sm font-medium">Amount ($)</label>
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          value={amount}
+          onChange={e => onAmountChange(e.target.value)}
+          placeholder="200.00"
+          className="w-full h-12 px-3 text-base text-right font-semibold border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+        />
+      </div>
+    </div>
+  );
+}
+
 // ─── MaterialsSection Component ───────────────────────────────────────────────
 interface MaterialsSectionProps {
   value: MaterialsData;
@@ -1419,56 +1521,16 @@ export default function FieldLog() {
                 <MaterialsSection value={materials} onChange={setMaterials} />
 
                 {/* ── Service Type & Amount ── */}
-                <div className="grid grid-cols-5 gap-3">
-                  <div className="col-span-3 space-y-1">
-                    <FormLabel>Service Type</FormLabel>
-                    <Select
-                      value={form.watch("serviceRateId") ? String(form.watch("serviceRateId")) : "none"}
-                      onValueChange={(val) => {
-                        if (val === "none") {
-                          form.setValue("serviceRateId", null);
-                          return;
-                        }
-                        const rateId = parseInt(val);
-                        form.setValue("serviceRateId", rateId);
-                        const rate = serviceRates.find(r => r.id === rateId);
-                        if (rate) form.setValue("amount", rate.defaultRate);
-                      }}
-                    >
-                      <SelectTrigger className="h-12 text-base">
-                        <SelectValue placeholder="Select service..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No service type</SelectItem>
-                        {serviceRates.map((r) => (
-                          <SelectItem key={r.id} value={String(r.id)}>
-                            {r.name} — ${r.defaultRate}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                      <FormItem className="col-span-2">
-                        <FormLabel>Amount ($)</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            placeholder="200.00"
-                            className="h-12 text-base text-right font-semibold"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <ServiceTypeSelector
+                  serviceRates={serviceRates}
+                  selectedRateId={form.watch("serviceRateId")}
+                  amount={form.watch("amount")}
+                  onSelect={(rateId, rateName, defaultRate) => {
+                    form.setValue("serviceRateId", rateId);
+                    if (defaultRate) form.setValue("amount", defaultRate);
+                  }}
+                  onAmountChange={(val) => form.setValue("amount", val)}
+                />
 
                 {/* ── Photo Upload Section (Leia spec: below Work Performed) ── */}
                 <PhotoUploadSection
