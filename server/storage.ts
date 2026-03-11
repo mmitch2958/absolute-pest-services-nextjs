@@ -1,4 +1,4 @@
-import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, reminderLogs, reminderOptOuts, systemSettings, DEFAULT_REMINDER_SETTINGS, reviewSettings, reviewRequestLogs, DEFAULT_REVIEW_SETTINGS, shifts, shiftTimeBlocks, shiftBreaks, timeEntryAuditLog, geocache, dailyRoutes, jobScheduleLogs, serviceRates, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails, type InsertReminderLog, type ReminderLog, type InsertReminderOptOut, type ReminderOptOut, type InsertSystemSetting, type SystemSetting, type ReminderSettings, type ReminderType, type AppointmentType, type ReminderChannel, type ReviewSettings, type ReviewRequestLog, type InsertReviewRequestLog, type InsertGeocache, type GeocacheEntry, type InsertDailyRoute, type DailyRoute, type RouteStop, type DailyRouteWithDetails, type JobScheduleLog, type InsertJobScheduleLog, type ServiceRate, type InsertServiceRate } from "@shared/schema";
+import { users, contactSubmissions, inspectionSchedules, serviceRequests, payments, clients, projects, milestones, dashboards, blogPosts, fieldEmployees, jobLogs, jobLogCustomFields, fieldCustomers, siteLocations, servicedAreas, serviceContracts, jobLogPhotos, invoices, invoiceLineItems, invoiceStatusLogs, reminderLogs, reminderOptOuts, systemSettings, DEFAULT_REMINDER_SETTINGS, reviewSettings, reviewRequestLogs, DEFAULT_REVIEW_SETTINGS, shifts, shiftTimeBlocks, shiftBreaks, timeEntryAuditLog, geocache, dailyRoutes, jobScheduleLogs, serviceRates, type User, type InsertUser, type ContactSubmission, type InsertContact, type InspectionSchedule, type InsertInspection, type ServiceRequest, type InsertServiceRequest, type Payment, type InsertPayment, type Client, type InsertClient, type Project, type InsertProject, type Milestone, type InsertMilestone, type Dashboard, type InsertDashboard, type BlogPost, type InsertBlogPost, type FieldEmployee, type InsertFieldEmployee, type JobLog, type InsertJobLog, type JobLogCustomField, type InsertJobLogCustomField, type FieldCustomer, type InsertFieldCustomer, type SiteLocation, type InsertSiteLocation, type ServicedArea, type InsertServicedArea, type ServiceContract, type InsertServiceContract, type JobLogPhoto, type InsertJobLogPhoto, type Invoice, type InsertInvoice, type InvoiceLineItem, type InsertInvoiceLineItem, type InvoiceStatusLog, type InsertInvoiceStatusLog, type InvoiceStatus, type InvoiceStats, type InvoiceWithDetails, type InsertReminderLog, type ReminderLog, type InsertReminderOptOut, type ReminderOptOut, type InsertSystemSetting, type SystemSetting, type ReminderSettings, type ReminderType, type AppointmentType, type ReminderChannel, type ReviewSettings, type ReviewRequestLog, type InsertReviewRequestLog, type InsertGeocache, type GeocacheEntry, type InsertDailyRoute, type DailyRoute, type RouteStop, type DailyRouteWithDetails, type JobScheduleLog, type InsertJobScheduleLog, type ServiceRate, type InsertServiceRate, type FieldMaterial, type InsertFieldMaterial, fieldMaterials } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, gte, lte, lt, ilike, sql, sum, isNull } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -167,6 +167,12 @@ export interface IStorage {
   getBlogPostBySlug(slug: string): Promise<BlogPost | undefined>;
   updateBlogPost(id: number, updates: Partial<InsertBlogPost>): Promise<BlogPost>;
   deleteBlogPost(id: number): Promise<void>;
+
+  // Field Material operations
+  getFieldMaterials(category?: string): Promise<FieldMaterial[]>;
+  createFieldMaterial(material: InsertFieldMaterial): Promise<FieldMaterial>;
+  updateFieldMaterial(id: number, updates: Partial<InsertFieldMaterial>): Promise<FieldMaterial>;
+  deleteFieldMaterial(id: number): Promise<void>;
 
   // Service Rate operations
   getServiceRates(): Promise<ServiceRate[]>;
@@ -724,6 +730,30 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBlogPost(id: number): Promise<void> {
     await db.delete(blogPosts).where(eq(blogPosts.id, id));
+  }
+
+  // Field Material operations
+  async getFieldMaterials(category?: string): Promise<FieldMaterial[]> {
+    if (category) {
+      return await db.select().from(fieldMaterials)
+        .where(eq(fieldMaterials.category, category))
+        .orderBy(fieldMaterials.sortOrder, fieldMaterials.name);
+    }
+    return await db.select().from(fieldMaterials).orderBy(fieldMaterials.category, fieldMaterials.sortOrder, fieldMaterials.name);
+  }
+
+  async createFieldMaterial(material: InsertFieldMaterial): Promise<FieldMaterial> {
+    const [created] = await db.insert(fieldMaterials).values(material).returning();
+    return created;
+  }
+
+  async updateFieldMaterial(id: number, updates: Partial<InsertFieldMaterial>): Promise<FieldMaterial> {
+    const [updated] = await db.update(fieldMaterials).set(updates).where(eq(fieldMaterials.id, id)).returning();
+    return updated;
+  }
+
+  async deleteFieldMaterial(id: number): Promise<void> {
+    await db.delete(fieldMaterials).where(eq(fieldMaterials.id, id));
   }
 
   // Field Employee operations
