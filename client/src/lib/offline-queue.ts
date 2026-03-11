@@ -29,6 +29,7 @@ export interface QueuedJobLog {
   jobDate: string;
   status: 'pending' | 'completed' | 'callback';
   customFields?: Record<string, string | number | boolean>;
+  materials?: any;
   photos: Array<{
     localId: string;
     file: File;
