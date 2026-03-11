@@ -259,6 +259,15 @@ export const fieldEmployees = pgTable("field_employees", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const fieldMaterials = pgTable("field_materials", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // "product" or "supply"
+  isActive: boolean("is_active").default(true).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const serviceRates = pgTable("service_rates", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -399,6 +408,13 @@ export const insertCustomerMessageSchema = createInsertSchema(customerMessages).
 
 export type InsertCustomerMessage = z.infer<typeof insertCustomerMessageSchema>;
 export type CustomerMessage = typeof customerMessages.$inferSelect;
+
+export const insertFieldMaterialSchema = createInsertSchema(fieldMaterials).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertFieldMaterial = z.infer<typeof insertFieldMaterialSchema>;
+export type FieldMaterial = typeof fieldMaterials.$inferSelect;
 
 export const insertServiceRateSchema = createInsertSchema(serviceRates).omit({
   id: true,
