@@ -23,7 +23,7 @@ interface ServiceRate {
   sortOrder: number;
 }
 
-function ServiceRatesSection() {
+export function ServiceRatesSection() {
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
