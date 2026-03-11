@@ -29,11 +29,13 @@ import { AdminBlog } from "@/pages/admin/AdminBlog";
 import { AdminReports } from "@/pages/admin/admin-reports";
 import { AdminLogin } from "@/pages/admin/admin-login";
 import { AdminFieldData } from "@/pages/admin/admin-field-data";
+import { AdminServiceTypes } from "@/pages/admin/admin-service-types";
 import { AdminContracts } from "@/pages/admin/AdminContracts";
 import { AdminCalendar } from "@/pages/admin/AdminCalendar";
 import AdminScheduling from "@/pages/admin/admin-scheduling";
 import AdminInvoices from "@/pages/admin/AdminInvoices";
 import AdminInvoiceNew from "@/pages/admin/AdminInvoiceNew";
+import AdminInvoiceDetail from "@/pages/admin/AdminInvoiceDetail";
 import AdminSettings from "@/pages/admin/admin-settings";
 import FieldLogin from "@/pages/field-login";
 import FieldLog from "@/pages/field-log";
@@ -53,6 +55,7 @@ import PortalNewServiceRequest from "@/pages/portal/PortalNewServiceRequest";
 import PortalInvoices from "@/pages/portal/PortalInvoices";
 import PortalInvoiceDetail from "@/pages/portal/PortalInvoiceDetail";
 import PortalProfile from "@/pages/portal/PortalProfile";
+import InvoiceView from "@/pages/InvoiceView";
 
 function Router() {
   // Track page views when routes change - Google Analytics integration
@@ -61,6 +64,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/invoice/:token" component={InvoiceView} />
       <Route path="/auth" component={Auth} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/request-service" component={RequestService} />
@@ -119,6 +123,11 @@ function Router() {
           <AdminReports />
         </AdminLayout>
       </Route>
+      <Route path="/admin/service-types">
+        <AdminLayout>
+          <AdminServiceTypes />
+        </AdminLayout>
+      </Route>
       <Route path="/admin/field-data">
         <AdminLayout>
           <AdminFieldData />
@@ -142,6 +151,11 @@ function Router() {
       <Route path="/admin/invoices/new">
         <AdminLayout>
           <AdminInvoiceNew />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/invoices/:id">
+        <AdminLayout>
+          <AdminInvoiceDetail />
         </AdminLayout>
       </Route>
       <Route path="/admin/invoices">
