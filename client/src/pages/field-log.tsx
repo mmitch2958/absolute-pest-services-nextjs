@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { FieldNav } from "@/components/field-nav";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckCircle2, Loader2, Camera, ImagePlus, X, AlertCircle, RefreshCw, Home, Building2 } from "lucide-react";
+import { CheckCircle2, Loader2, Camera, ImagePlus, X, AlertCircle, RefreshCw, Home, Building2, Package, Boxes, Plus, Trash2, Search, ChevronDown } from "lucide-react";
 // Offline mode imports
 import { useConnectionStatus } from "@/lib/connection-monitor";
 import { enqueueJobLog, isQueueFull } from "@/lib/offline-queue";
@@ -47,6 +47,269 @@ const jobLogSchema = z.object({
 });
 
 type JobLogFormData = z.infer<typeof jobLogSchema>;
+
+// ─── Materials Types & Constants ──────────────────────────────────────────────
+export type MaterialsType = "none" | "product" | "supplies";
+
+export interface ProductMaterial {
+  type: "product";
+  productName: string;
+  volume: number | "";
+  unit: "oz" | "gallons";
+}
+
+export interface SupplyItem {
+  name: string;
+  quantity: number | "";
+}
+
+export interface SuppliesMaterial {
+  type: "supplies";
+  items: SupplyItem[];
+}
+
+export type MaterialsData = ProductMaterial | SuppliesMaterial | null;
+
+export const PEST_CONTROL_SUPPLIES: string[] = [
+  "Glue Board (Small)",
+  "Glue Board (Large)",
+  "Snap Trap",
+  "Rodent Bait Station",
+  "Tamper-Resistant Bait Station",
+  "Termite Bait Station",
+  "Insect Bait Station",
+  "Pheromone Trap",
+  "Fly Paper / Strip",
+  "Fly Light Trap",
+  "Mosquito Trap",
+  "Catch-All Trap",
+  "Tick Tube",
+  "Bed Bug Monitor",
+  "Aerosol Applicator Tip",
+  "Duster",
+  "Granule Spreader",
+];
+
+// ─── MaterialsSection Component ───────────────────────────────────────────────
+interface MaterialsSectionProps {
+  value: MaterialsData;
+  onChange: (val: MaterialsData) => void;
+}
+
+function MaterialsSection({ value, onChange }: MaterialsSectionProps) {
+  const [mode, setMode] = useState<MaterialsType>(
+    value?.type === "product" ? "product" : value?.type === "supplies" ? "supplies" : "none"
+  );
+  const [productSearch, setProductSearch] = useState(
+    value?.type === "product" ? value.productName : ""
+  );
+  const [supplySearch, setSupplySearch] = useState("");
+  const [showSupplyDropdown, setShowSupplyDropdown] = useState(false);
+
+  const product = value?.type === "product" ? value : null;
+  const supplies = value?.type === "supplies" ? value : null;
+
+  function setModeAndClear(m: MaterialsType) {
+    setMode(m);
+    if (m === "none") { onChange(null); return; }
+    if (m === "product") onChange({ type: "product", productName: "", volume: "", unit: "oz" });
+    if (m === "supplies") onChange({ type: "supplies", items: [] });
+  }
+
+  function updateProduct(patch: Partial<ProductMaterial>) {
+    if (value?.type !== "product") return;
+    onChange({ ...value, ...patch } as ProductMaterial);
+  }
+
+  function addSupplyItem(name: string) {
+    const current = supplies?.items || [];
+    if (current.find(i => i.name === name)) return; // already added
+    onChange({ type: "supplies", items: [...current, { name, quantity: "" }] });
+    setSupplySearch("");
+    setShowSupplyDropdown(false);
+  }
+
+  function updateSupplyQty(index: number, qty: number | "") {
+    if (value?.type !== "supplies") return;
+    const items = [...value.items];
+    items[index] = { ...items[index], quantity: qty };
+    onChange({ ...value, items });
+  }
+
+  function removeSupplyItem(index: number) {
+    if (value?.type !== "supplies") return;
+    const items = value.items.filter((_, i) => i !== index);
+    onChange({ ...value, items });
+  }
+
+  const filteredSupplies = PEST_CONTROL_SUPPLIES.filter(s =>
+    s.toLowerCase().includes(supplySearch.toLowerCase()) &&
+    !(supplies?.items || []).find(i => i.name === s)
+  );
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Package className="w-4 h-4 text-muted-foreground" />
+        <span className="text-sm font-medium">Materials Used</span>
+      </div>
+
+      {/* Type toggle */}
+      <div className="grid grid-cols-3 gap-2">
+        {(["none", "product", "supplies"] as MaterialsType[]).map(m => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setModeAndClear(m)}
+            className={`py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+              mode === m
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background text-muted-foreground border-border hover:border-primary/50"
+            }`}
+          >
+            {m === "none" ? "None" : m === "product" ? "Product" : "Supplies"}
+          </button>
+        ))}
+      </div>
+
+      {/* Product mode */}
+      {mode === "product" && (
+        <div className="space-y-3 p-3 bg-muted/40 rounded-lg border">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Product / Solution Name</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              <input
+                type="text"
+                value={product?.productName ?? ""}
+                onChange={e => {
+                  updateProduct({ productName: e.target.value });
+                  setProductSearch(e.target.value);
+                }}
+                placeholder="e.g. Termidor SC, Alpine WSG..."
+                className="w-full h-11 pl-9 pr-3 text-base border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Volume</label>
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={product?.volume ?? ""}
+                onChange={e => updateProduct({ volume: e.target.value === "" ? "" : parseFloat(e.target.value) })}
+                placeholder="0.0"
+                className="w-full h-11 px-3 text-base border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 text-right"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Unit</label>
+              <div className="grid grid-cols-2 gap-1.5 h-11">
+                {(["oz", "gallons"] as const).map(u => (
+                  <button
+                    key={u}
+                    type="button"
+                    onClick={() => updateProduct({ unit: u })}
+                    className={`rounded-md text-sm font-medium border transition-colors ${
+                      product?.unit === u
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-muted-foreground border-border"
+                    }`}
+                  >
+                    {u}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Supplies mode */}
+      {mode === "supplies" && (
+        <div className="space-y-3 p-3 bg-muted/40 rounded-lg border">
+          {/* Supply selector */}
+          <div className="space-y-1.5 relative">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Add Supply</label>
+            <div className="relative">
+              <Boxes className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              <input
+                type="text"
+                value={supplySearch}
+                onChange={e => { setSupplySearch(e.target.value); setShowSupplyDropdown(true); }}
+                onFocus={() => setShowSupplyDropdown(true)}
+                onBlur={() => setTimeout(() => setShowSupplyDropdown(false), 150)}
+                placeholder="Search or type a supply..."
+                className="w-full h-11 pl-9 pr-3 text-base border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+            {showSupplyDropdown && (
+              <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {filteredSupplies.length > 0 ? filteredSupplies.map(s => (
+                  <button
+                    key={s}
+                    type="button"
+                    onMouseDown={() => addSupplyItem(s)}
+                    className="w-full text-left px-3 py-2.5 text-sm hover:bg-muted transition-colors"
+                  >
+                    {s}
+                  </button>
+                )) : supplySearch.trim() ? (
+                  <button
+                    type="button"
+                    onMouseDown={() => addSupplyItem(supplySearch.trim())}
+                    className="w-full text-left px-3 py-2.5 text-sm hover:bg-muted transition-colors flex items-center gap-2"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-primary" />
+                    Add "{supplySearch.trim()}"
+                  </button>
+                ) : (
+                  <p className="px-3 py-2.5 text-sm text-muted-foreground">No supplies found</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Selected supplies list */}
+          {supplies && supplies.items.length > 0 && (
+            <div className="space-y-2">
+              {supplies.items.map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2 bg-background rounded-md border p-2">
+                  <span className="flex-1 text-sm font-medium">{item.name}</span>
+                  <div className="flex items-center gap-1.5">
+                    <label className="text-xs text-muted-foreground">Qty:</label>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={item.quantity}
+                      onChange={e => updateSupplyQty(idx, e.target.value === "" ? "" : parseInt(e.target.value))}
+                      className="w-16 h-8 px-2 text-sm text-right border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      placeholder="0"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeSupplyItem(idx)}
+                    className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {supplies && supplies.items.length === 0 && (
+            <p className="text-xs text-center text-muted-foreground py-2">No supplies added yet — search above to add</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── Photo Upload Types ───────────────────────────────────────────────────────
 type PhotoStatus = "pending" | "uploading" | "done" | "error";
@@ -91,51 +354,61 @@ function SmartField({ label, newLabel, options, value, onChange, placeholder, on
     }
   }, [isAddingNew]);
 
-  const selectValue = options.includes(value) ? value : isAddingNew ? NEW_OPTION : "";
+  const hasOptions = options.length > 0;
+  const matchedOption = options.includes(value);
+  const selectValue = matchedOption ? value : isAddingNew ? NEW_OPTION : undefined;
+
+  useEffect(() => {
+    if (!hasOptions && !isAddingNew) {
+      onSetAddingNew(true);
+    }
+  }, [hasOptions, isAddingNew, onSetAddingNew]);
 
   return (
     <div className="space-y-2">
       <FormLabel>{label}</FormLabel>
-      <Select
-        value={selectValue}
-        onValueChange={(val) => {
-          if (val === NEW_OPTION) {
-            onSetAddingNew(true);
-            setNewValue("");
-            onChange("");
-          } else {
-            onSetAddingNew(false);
-            setNewValue("");
-            onChange(val);
-            onSelectOption?.(val);
-          }
-        }}
-      >
-        <SelectTrigger className="h-12">
-          <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((opt) => (
-            <SelectItem key={opt} value={opt}>
-              {opt}
+      {hasOptions ? (
+        <Select
+          value={selectValue}
+          onValueChange={(val) => {
+            if (val === NEW_OPTION) {
+              onSetAddingNew(true);
+              setNewValue("");
+              onChange("");
+            } else {
+              onSetAddingNew(false);
+              setNewValue("");
+              onChange(val);
+              onSelectOption?.(val);
+            }
+          }}
+        >
+          <SelectTrigger className="h-12">
+            <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((opt) => (
+              <SelectItem key={opt} value={opt}>
+                {opt}
+              </SelectItem>
+            ))}
+            <SelectItem value={NEW_OPTION} className="text-primary font-medium border-t mt-1 pt-1">
+              + {newLabel}
             </SelectItem>
-          ))}
-          <SelectItem value={NEW_OPTION} className="text-primary font-medium border-t mt-1 pt-1">
-            + {newLabel}
-          </SelectItem>
-        </SelectContent>
-      </Select>
+          </SelectContent>
+        </Select>
+      ) : null}
 
-      {isAddingNew && (
+      {(isAddingNew || !hasOptions) && (
         <Input
-          value={newValue}
+          value={isAddingNew ? newValue : value}
           onChange={(e) => {
             setNewValue(e.target.value);
             onChange(e.target.value);
           }}
-          placeholder={placeholder}
+          placeholder={placeholder || `Enter ${label.toLowerCase()}`}
           className="h-12 text-base"
-          autoFocus
+          autoFocus={hasOptions}
         />
       )}
     </div>
@@ -377,6 +650,7 @@ export default function FieldLog() {
   const [customerPropertyType, setCustomerPropertyType] = useState("residential");
   const [newCustomerAddress, setNewCustomerAddress] = useState("");
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, any>>({});
+  const [materials, setMaterials] = useState<MaterialsData>(null);
 
   // Photo state
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
@@ -619,6 +893,7 @@ export default function FieldLog() {
         serviceRateId: data.serviceRateId || null,
         amount: data.amount || "200.00",
         customFields: Object.keys(customFieldValues).length > 0 ? customFieldValues : undefined,
+        materials: materials || undefined,
         propertyType: customerPropertyType,
         isNewCustomer: customerAddingNew,
         newCustomerAddress: customerAddingNew ? newCustomerAddress : undefined,
@@ -678,6 +953,7 @@ export default function FieldLog() {
         setCustomerPropertyType(matchedClient?.propertyType ?? "residential");
         setNewCustomerAddress("");
         setCustomFieldValues({});
+        setMaterials(null);
         // Clean up blob URLs and reset photos
         photos.forEach(p => URL.revokeObjectURL(p.localUrl));
         setPhotos([]);
@@ -723,6 +999,7 @@ export default function FieldLog() {
           amount: data.amount || "200.00",
           status: 'completed',
           customFields: Object.keys(customFieldValues).length > 0 ? customFieldValues : undefined,
+          materials: materials || undefined,
           photos: photos.map(p => ({
             localId: p.id,
             file: p.file,
@@ -754,6 +1031,7 @@ export default function FieldLog() {
         setAreaAddingNew(false);
         setNewCustomerAddress("");
         setCustomFieldValues({});
+        setMaterials(null);
         photos.forEach(p => URL.revokeObjectURL(p.localUrl));
         setPhotos([]);
         
@@ -1003,6 +1281,9 @@ export default function FieldLog() {
                     </FormItem>
                   )}
                 />
+
+                {/* ── Materials ── */}
+                <MaterialsSection value={materials} onChange={setMaterials} />
 
                 {/* ── Service Type & Amount ── */}
                 <div className="grid grid-cols-5 gap-3">
