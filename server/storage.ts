@@ -1489,6 +1489,21 @@ export class DatabaseStorage implements IStorage {
     const quantity = '1';
     const taxRate = '6';
 
+    let techName: string | undefined;
+    let serviceTypeName: string | undefined;
+    try {
+      if (jobLog.employeeId) {
+        const employees = await this.getFieldEmployees();
+        const emp = employees.find(e => e.id === jobLog.employeeId);
+        if (emp) techName = emp.name;
+      }
+      if (jobLog.serviceRateId) {
+        const rates = await this.getServiceRates();
+        const rate = rates.find(r => r.id === jobLog.serviceRateId);
+        if (rate) serviceTypeName = rate.name;
+      }
+    } catch {}
+
     await this.createLineItem({
       invoiceId: invoice.id,
       description: jobLog.workPerformed,
@@ -1496,6 +1511,12 @@ export class DatabaseStorage implements IStorage {
       unitRate,
       taxRate,
       materials: jobLog.materials || null,
+      serviceDate: jobLog.jobDate ? String(jobLog.jobDate).slice(0, 10) : undefined,
+      technicianName: techName,
+      serviceType: serviceTypeName,
+      serviceAddress: jobLog.siteAddress || undefined,
+      servicedArea: jobLog.servicedArea || undefined,
+      jobLogId: jobLog.id,
     });
 
     // Recalculate totals
