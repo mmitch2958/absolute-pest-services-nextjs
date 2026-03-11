@@ -266,6 +266,11 @@ export function AdminReports() {
     return params.toString();
   };
 
+  // Lightweight query for dropdown filter options
+  const filterOptionsQuery = useQuery<{ success: boolean; customers: string[]; locations: string[]; areas: string[]; employees: any[] }>({
+    queryKey: ["/api/admin/job-logs/filter-options"],
+  });
+
   const { data, isLoading } = useQuery<{ success: boolean; jobLogs: any[]; employees: any[] }>({
     queryKey: ["/api/admin/job-logs", dateFrom, dateTo, selectedCustomer, selectedEmployee, selectedLocation, selectedArea, selectedStatus, searchTriggered],
     queryFn: async () => {
@@ -276,21 +281,12 @@ export function AdminReports() {
     enabled: searchTriggered,
   });
 
-  const allLogsQuery = useQuery<{ success: boolean; jobLogs: any[]; employees: any[] }>({
-    queryKey: ["/api/admin/job-logs", "all"],
-    queryFn: async () => {
-      const res = await fetch("/api/admin/job-logs", { credentials: "include" });
-      return res.json();
-    },
-  });
-
   const logs = data?.jobLogs || [];
-  const employees = data?.employees || allLogsQuery.data?.employees || [];
-  const allLogs = allLogsQuery.data?.jobLogs || [];
+  const employees = data?.employees || filterOptionsQuery.data?.employees || [];
 
-  const uniqueCustomers = Array.from(new Set(allLogs.map((l: any) => l.customerName?.trim()).filter(Boolean))).sort();
-  const uniqueLocations = Array.from(new Set(allLogs.map((l: any) => l.siteLocation?.trim()).filter(Boolean))).sort();
-  const uniqueAreas = Array.from(new Set(allLogs.map((l: any) => l.servicedArea?.trim()).filter(Boolean))).sort();
+  const uniqueCustomers = filterOptionsQuery.data?.customers || [];
+  const uniqueLocations = filterOptionsQuery.data?.locations || [];
+  const uniqueAreas = filterOptionsQuery.data?.areas || [];
 
   const handleSearch = () => {
     setSearchTriggered(true);
