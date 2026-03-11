@@ -247,7 +247,7 @@ function MaterialsSection({ value, onChange }: MaterialsSectionProps) {
             </div>
             {showSupplyDropdown && (
               <div className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                {filteredSupplies.length > 0 ? filteredSupplies.map(s => (
+                {filteredSupplies.map(s => (
                   <button
                     key={s}
                     type="button"
@@ -256,17 +256,19 @@ function MaterialsSection({ value, onChange }: MaterialsSectionProps) {
                   >
                     {s}
                   </button>
-                )) : supplySearch.trim() ? (
+                ))}
+                {supplySearch.trim() && !PEST_CONTROL_SUPPLIES.some(s => s.toLowerCase() === supplySearch.trim().toLowerCase()) && (
                   <button
                     type="button"
                     onMouseDown={() => addSupplyItem(supplySearch.trim())}
-                    className="w-full text-left px-3 py-2.5 text-sm hover:bg-muted transition-colors flex items-center gap-2"
+                    className="w-full text-left px-3 py-2.5 text-sm hover:bg-primary/10 transition-colors flex items-center gap-2 border-t font-medium text-primary"
                   >
-                    <Plus className="w-3.5 h-3.5 text-primary" />
-                    Add "{supplySearch.trim()}"
+                    <Plus className="w-3.5 h-3.5" />
+                    Add custom: "{supplySearch.trim()}"
                   </button>
-                ) : (
-                  <p className="px-3 py-2.5 text-sm text-muted-foreground">No supplies found</p>
+                )}
+                {!supplySearch.trim() && filteredSupplies.length === 0 && (
+                  <p className="px-3 py-2.5 text-sm text-muted-foreground">Type a name to add a custom supply</p>
                 )}
               </div>
             )}
