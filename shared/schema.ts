@@ -598,6 +598,12 @@ export const invoiceLineItems = pgTable("invoice_line_items", {
   lineTax: decimal("line_tax", { precision: 10, scale: 2 }).notNull().default("0"),
   materials: jsonb("materials"),
   sortOrder: integer("sort_order").notNull().default(0),
+  serviceDate: text("service_date"),
+  technicianName: text("technician_name"),
+  serviceType: text("service_type"),
+  serviceAddress: text("service_address"),
+  servicedArea: text("serviced_area"),
+  jobLogId: integer("job_log_id").references(() => jobLogs.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
