@@ -178,10 +178,28 @@ function MaterialsSection({ value, onChange }: MaterialsSectionProps) {
   const [supplySearch, setSupplySearch] = useState("");
   const [showSupplyDropdown, setShowSupplyDropdown] = useState(false);
 
+  const { data: productsData } = useQuery<{ success: boolean; materials: { id: number; name: string }[] }>({
+    queryKey: ["/api/field/materials", "product"],
+    queryFn: async () => {
+      const res = await fetch("/api/field/materials?category=product", { credentials: "include" });
+      return res.json();
+    },
+  });
+  const { data: suppliesData } = useQuery<{ success: boolean; materials: { id: number; name: string }[] }>({
+    queryKey: ["/api/field/materials", "supply"],
+    queryFn: async () => {
+      const res = await fetch("/api/field/materials?category=supply", { credentials: "include" });
+      return res.json();
+    },
+  });
+
+  const productList = productsData?.materials?.map(m => m.name) ?? PEST_CONTROL_PRODUCTS;
+  const supplyList = suppliesData?.materials?.map(m => m.name) ?? PEST_CONTROL_SUPPLIES;
+
   const product = value?.type === "product" ? value : null;
   const supplies = value?.type === "supplies" ? value : null;
 
-  const filteredProducts = PEST_CONTROL_PRODUCTS.filter(p =>
+  const filteredProducts = productList.filter(p =>
     p.toLowerCase().includes(productSearch.toLowerCase())
   );
 
@@ -218,7 +236,7 @@ function MaterialsSection({ value, onChange }: MaterialsSectionProps) {
     onChange({ ...value, items });
   }
 
-  const filteredSupplies = PEST_CONTROL_SUPPLIES.filter(s =>
+  const filteredSupplies = supplyList.filter(s =>
     s.toLowerCase().includes(supplySearch.toLowerCase()) &&
     !(supplies?.items || []).find(i => i.name === s)
   );
@@ -285,7 +303,7 @@ function MaterialsSection({ value, onChange }: MaterialsSectionProps) {
                     {p}
                   </button>
                 ))}
-                {productSearch.trim() && !PEST_CONTROL_PRODUCTS.some(p => p.toLowerCase() === productSearch.trim().toLowerCase()) && (
+                {productSearch.trim() && !productList.some(p => p.toLowerCase() === productSearch.trim().toLowerCase()) && (
                   <button
                     type="button"
                     onMouseDown={() => {
@@ -370,7 +388,7 @@ function MaterialsSection({ value, onChange }: MaterialsSectionProps) {
                     {s}
                   </button>
                 ))}
-                {supplySearch.trim() && !PEST_CONTROL_SUPPLIES.some(s => s.toLowerCase() === supplySearch.trim().toLowerCase()) && (
+                {supplySearch.trim() && !supplyList.some(s => s.toLowerCase() === supplySearch.trim().toLowerCase()) && (
                   <button
                     type="button"
                     onMouseDown={() => addSupplyItem(supplySearch.trim())}
