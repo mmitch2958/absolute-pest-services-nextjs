@@ -6,7 +6,7 @@ import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import session from "express-session";
-import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail, sendJobLogNotification, sendInvoiceEmail, sendInvoiceOverdueEmail, sendPaymentConfirmationEmail } from "./email";
+import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail, sendJobLogNotification, sendInvoiceEmail, sendInvoiceOverdueEmail, sendPaymentConfirmationEmail, sendJobStatusNotification } from "./email";
 import { sendReviewRequestNow, scheduleReviewRequestForJobLog, scheduleReviewRequestForInvoice, cancelReviewRequestForInvoice } from "./reviews";
 import { assertTransition, isTransitionAllowed } from "./invoiceStateMachine";
 import Parser from "rss-parser";
@@ -1297,6 +1297,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   };
 
+  async function notifyJobStatusChange(jobLog: any, oldStatus: string, newStatus: string) {
+    try {
+      if (oldStatus === newStatus) return;
+      if (!jobLog.clientId) return;
+      const client = await storage.getClient(jobLog.clientId);
+      if (!client?.email) return;
+      let techName: string | undefined;
+      if (jobLog.employeeId) {
+        const emp = await storage.getFieldEmployee(jobLog.employeeId);
+        techName = emp?.name;
+      }
+      const dateStr = new Date(jobLog.jobDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+      const sent = await sendJobStatusNotification({
+        customerEmail: client.email,
+        customerName: client.name,
+        oldStatus,
+        newStatus,
+        jobDate: dateStr,
+        siteLocation: jobLog.siteLocation,
+        servicedArea: jobLog.servicedArea,
+        workPerformed: jobLog.workPerformed,
+        technicianName: techName,
+      });
+      if (!sent) {
+        console.warn(`[JobStatusNotification] Email failed to send for job ${jobLog.id}, client ${client.id} (${oldStatus} → ${newStatus})`);
+      }
+    } catch (err) {
+      console.error("[JobStatusNotification] Error sending notification:", err);
+    }
+  }
+
   const requireFieldManager = (req: any, res: any, next: any) => {
     if (!req.session.fieldEmployeeId) {
       return res.status(401).json({ success: false, message: "Field authentication required" });
@@ -1401,7 +1432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: "Invalid job log IDs" });
       }
 
-      const logs: JobLog[] = [];
+      const logs: any[] = [];
       let clientId: number | null = null;
       const empId = req.session.fieldEmployeeId;
       for (const id of uniqueIds) {
@@ -1441,6 +1472,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           quantity: '1',
           unitRate,
           taxRate: '6',
+          materials: log.materials || null,
         });
         await storage.updateJobLog(log.id, { status: 'invoiced' } as any);
       }
@@ -1458,7 +1490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         total: (subtotal + taxTotal).toFixed(2),
       });
 
-      await storage.createInvoiceStatusLog({
+      await storage.logInvoiceStatusChange({
         invoiceId: invoice.id,
         fromStatus: null,
         toStatus: 'draft',
@@ -1467,7 +1499,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const updatedInvoice = await storage.getInvoice(invoice.id);
-      res.status(201).json({ success: true, invoice: updatedInvoice });
+      const invoiceClient = await storage.getClient(clientId!);
+      res.status(201).json({
+        success: true,
+        invoice: updatedInvoice,
+        clientEmail: invoiceClient?.email || null,
+        clientName: invoiceClient?.name || null,
+      });
     } catch (error) {
       console.error("Error creating field invoice:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
@@ -1787,6 +1825,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PATCH /api/field/job-logs/:id — Field employee edits their own job log
+  app.patch("/api/field/job-logs/:id", requireFieldAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const existing = await storage.getJobLog(id);
+      if (!existing || existing.employeeId !== req.session.fieldEmployeeId) {
+        return res.status(403).json({ success: false, message: "Access denied" });
+      }
+      // Only allow editing jobs that haven't been invoiced
+      if (existing.status === "invoiced" || existing.status === "paid") {
+        return res.status(400).json({ success: false, message: "Cannot edit a job that has already been invoiced." });
+      }
+      const { customerName, siteLocation, siteAddress, servicedArea, workPerformed, jobDate, serviceRateId, amount, materials } = req.body;
+      const updates: Record<string, any> = {};
+      if (customerName !== undefined) updates.customerName = customerName;
+      if (siteLocation !== undefined) updates.siteLocation = siteLocation;
+      if (siteAddress !== undefined) updates.siteAddress = siteAddress;
+      if (servicedArea !== undefined) updates.servicedArea = servicedArea;
+      if (workPerformed !== undefined) updates.workPerformed = workPerformed;
+      if (jobDate !== undefined) updates.jobDate = new Date(jobDate);
+      if (serviceRateId !== undefined) updates.serviceRateId = serviceRateId === "none" || serviceRateId === "" ? null : Number(serviceRateId);
+      if (amount !== undefined) updates.amount = String(amount);
+      if (materials !== undefined) updates.materials = materials || null;
+      const updated = await storage.updateJobLog(id, updates as any);
+      res.json({ success: true, jobLog: updated });
+    } catch (error) {
+      console.error("Error updating field job log:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Admin job logs endpoint
   app.get("/api/admin/job-logs", requireAdmin, async (req, res) => {
     try {
@@ -1887,7 +1956,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const jobLog = await storage.updateJobLog(id, updates);
       
-      // Trigger review request when status changes to 'completed'
+      if (oldStatus && newStatus && oldStatus !== newStatus) {
+        notifyJobStatusChange(jobLog, oldStatus, newStatus).catch(err => {
+          console.error("[JobStatusNotification] Failed for admin job update", id, err);
+        });
+      }
+      
       if (oldStatus !== 'completed' && newStatus === 'completed') {
         scheduleReviewRequestForJobLog(id).catch(err => {
           console.error("[ReviewRequest] Error scheduling review request on job completion:", err);
@@ -2683,6 +2757,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateInvoiceStatus(id, 'sent', `admin:${req.session.userId}`, 'Invoice sent to customer');
 
       // Send email
+      const adminBaseUrl = await getAppBaseUrl();
       await sendInvoiceEmail({
         clientEmail: client.email,
         clientName: client.name,
@@ -2691,6 +2766,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         dueDate: new Date(invoice.dueDate),
         total: String(invoice.total),
         viewToken: invoice.viewToken!,
+        baseUrl: adminBaseUrl,
       });
 
       const updatedInvoice = await storage.getInvoice(id);
@@ -2704,6 +2780,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error sending invoice:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // POST /api/field/invoices/:id/send — Field employee sends invoice email to customer
+  app.post("/api/field/invoices/:id/send", requireFieldAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { overrideEmail } = req.body || {};
+      const invoice = await storage.getInvoice(id);
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: "Invoice not found" });
+      }
+      const client = await storage.getClient(invoice.clientId);
+      const recipientEmail: string = overrideEmail?.trim() || client?.email || '';
+      const recipientName: string = client?.name || 'Valued Customer';
+      if (!recipientEmail) {
+        return res.status(400).json({ success: false, message: "No email address provided. Enter an email address to send the invoice." });
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(recipientEmail)) {
+        return res.status(400).json({ success: false, message: "Invalid email address format." });
+      }
+      await storage.updateInvoiceStatus(id, 'sent', `field:${req.session.fieldEmployeeId}`, `Invoice sent by field technician to ${recipientEmail}`);
+      const fieldBaseUrl = await getAppBaseUrl();
+      await sendInvoiceEmail({
+        clientEmail: recipientEmail,
+        clientName: recipientName,
+        invoiceNumber: invoice.invoiceNumber,
+        invoiceDate: new Date(invoice.issueDate),
+        dueDate: new Date(invoice.dueDate),
+        total: String(invoice.total),
+        viewToken: invoice.viewToken!,
+        baseUrl: fieldBaseUrl,
+      });
+      res.json({ success: true, message: `Invoice emailed to ${recipientEmail}` });
+    } catch (error) {
+      console.error("Error sending field invoice:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });
@@ -3033,6 +3147,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==========================================
   // General Admin Settings
   // ==========================================
+
+  async function getAppBaseUrl(): Promise<string> {
+    const stored = await storage.getSystemSetting("app_base_url");
+    if (stored && stored.trim()) return stored.trim().replace(/\/$/, "");
+    if (process.env.APP_BASE_URL) return process.env.APP_BASE_URL.replace(/\/$/, "");
+    if (process.env.REPLIT_DEV_DOMAIN) return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+    return "http://localhost:5000";
+  }
+
+  // GET /api/admin/settings/app-url — Get configured public app URL
+  app.get("/api/admin/settings/app-url", requireAdmin, async (req, res) => {
+    try {
+      const appUrl = await storage.getSystemSetting("app_base_url");
+      res.json({ success: true, appUrl: appUrl || "" });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch app URL" });
+    }
+  });
+
+  // PATCH /api/admin/settings/app-url — Save public app URL
+  app.patch("/api/admin/settings/app-url", requireAdmin, async (req, res) => {
+    try {
+      const { appUrl } = req.body;
+      if (typeof appUrl !== "string") {
+        return res.status(400).json({ success: false, message: "Invalid value" });
+      }
+      const trimmed = appUrl.trim().replace(/\/$/, "");
+      const userId = req.session?.userId;
+      await storage.setSystemSetting("app_base_url", trimmed, userId!);
+      res.json({ success: true, appUrl: trimmed });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to save app URL" });
+    }
+  });
 
   app.get("/api/admin/settings/timezone", requireAdmin, async (req, res) => {
     try {
@@ -4544,7 +4692,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const { reason } = req.body;
 
+      const existingJob = await storage.getJobLogById(id);
+      const oldStatus = existingJob?.status || "scheduled";
       const job = await storage.cancelScheduledJob(id, req.session.userId!, reason);
+      notifyJobStatusChange(job, oldStatus, "cancelled").catch(err => {
+        console.error("[JobStatusNotification] Failed for cancelled job", id, err);
+      });
       res.json({ success: true, message: "Job cancelled", job });
     } catch (error) {
       console.error("Error cancelling job:", error);
@@ -4589,7 +4742,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const employeeId = req.session.fieldEmployeeId!;
 
+      const existingJob = await storage.getJobLogById(id);
+      const oldStatus = existingJob?.status || "scheduled";
       const job = await storage.startScheduledJob(id, employeeId);
+      notifyJobStatusChange(job, oldStatus, "in_progress").catch(err => {
+        console.error("[JobStatusNotification] Failed for started job", id, err);
+      });
       res.json({ success: true, message: "Job started", job });
     } catch (error) {
       console.error("Error starting scheduled job:", error);
@@ -4611,7 +4769,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: "workPerformed is required" });
       }
 
+      const existingJob = await storage.getJobLogById(id);
+      const oldStatus = existingJob?.status || "in_progress";
       const job = await storage.completeScheduledJob(id, employeeId, workPerformed);
+      notifyJobStatusChange(job, oldStatus, "completed").catch(err => {
+        console.error("[JobStatusNotification] Failed for completed job", id, err);
+      });
       res.json({ success: true, message: "Job completed", job });
     } catch (error) {
       console.error("Error completing scheduled job:", error);
@@ -4733,6 +4896,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             jobDate: log.jobDate,
             status: log.status || "completed",
             customFields: log.customFields,
+            materials: log.materials || null,
             clientCreatedAt: log.clientCreatedAt,
             serverReceivedAt: now,
             needsAdminReview
