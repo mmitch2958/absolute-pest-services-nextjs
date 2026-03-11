@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import session from "express-session";
 import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail, sendJobLogNotification, sendInvoiceEmail, sendInvoiceOverdueEmail, sendPaymentConfirmationEmail, sendJobStatusNotification } from "./email";
+import { generateInvoicePdf } from "./invoice-pdf";
 import { sendReviewRequestNow, scheduleReviewRequestForJobLog, scheduleReviewRequestForInvoice, cancelReviewRequestForInvoice } from "./reviews";
 import { assertTransition, isTransitionAllowed } from "./invoiceStateMachine";
 import Parser from "rss-parser";
@@ -1466,6 +1467,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const log of logs) {
         const unitRate = String(log.amount || '200');
+        let techName: string | undefined;
+        let serviceTypeName: string | undefined;
+        try {
+          if (log.employeeId) {
+            const employees = await storage.getFieldEmployees();
+            const emp = employees.find(e => e.id === log.employeeId);
+            if (emp) techName = emp.name;
+          }
+          if (log.serviceRateId) {
+            const rates = await storage.getServiceRates();
+            const rate = rates.find(r => r.id === log.serviceRateId);
+            if (rate) serviceTypeName = rate.name;
+          }
+        } catch {}
         await storage.createLineItem({
           invoiceId: invoice.id,
           description: `${log.servicedArea} — ${log.workPerformed}`,
@@ -1473,6 +1488,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           unitRate,
           taxRate: '6',
           materials: log.materials || null,
+          serviceDate: log.jobDate ? String(log.jobDate).slice(0, 10) : undefined,
+          technicianName: techName,
+          serviceType: serviceTypeName,
+          serviceAddress: log.siteAddress || undefined,
+          servicedArea: log.servicedArea || undefined,
+          jobLogId: log.id,
         });
         await storage.updateJobLog(log.id, { status: 'invoiced' } as any);
       }
@@ -2829,8 +2850,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update status to sent
       await storage.updateInvoiceStatus(id, 'sent', `admin:${req.session.userId}`, 'Invoice sent to customer');
 
-      // Send email
+      // Generate PDF and send email
       const adminBaseUrl = await getAppBaseUrl();
+      const lineItems = await storage.getLineItemsByInvoice(id);
+      let pdfBuffer: Buffer | undefined;
+      try {
+        pdfBuffer = generateInvoicePdf({
+          invoiceNumber: invoice.invoiceNumber,
+          status: invoice.status,
+          issueDate: String(invoice.issueDate),
+          dueDate: String(invoice.dueDate),
+          subtotal: String(invoice.subtotal),
+          taxTotal: String(invoice.taxTotal),
+          total: String(invoice.total),
+          notes: invoice.notes,
+          client: { name: client.name, email: client.email, address: client.address, phone: client.phone, propertyType: (client as any).propertyType },
+          lineItems: lineItems.map(li => ({
+            description: li.description,
+            quantity: String(li.quantity),
+            unitRate: String(li.unitRate),
+            taxRate: String(li.taxRate),
+            lineTotal: String(li.lineTotal),
+            lineTax: String(li.lineTax),
+            serviceDate: (li as any).serviceDate,
+            technicianName: (li as any).technicianName,
+            serviceType: (li as any).serviceType,
+            serviceAddress: (li as any).serviceAddress,
+            servicedArea: (li as any).servicedArea,
+            materials: li.materials,
+          })),
+        });
+      } catch (e) { console.error("PDF generation failed:", e); }
+
       await sendInvoiceEmail({
         clientEmail: client.email,
         clientName: client.name,
@@ -2840,10 +2891,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         total: String(invoice.total),
         viewToken: invoice.viewToken!,
         baseUrl: adminBaseUrl,
+        pdfBuffer,
       });
 
       const updatedInvoice = await storage.getInvoice(id);
-      const lineItems = await storage.getLineItemsByInvoice(id);
       const statusLogs = await storage.getInvoiceStatusLog(id);
 
       res.json({
@@ -2878,6 +2929,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       await storage.updateInvoiceStatus(id, 'sent', `field:${req.session.fieldEmployeeId}`, `Invoice sent by field technician to ${recipientEmail}`);
       const fieldBaseUrl = await getAppBaseUrl();
+      const fieldLineItems = await storage.getLineItemsByInvoice(id);
+      let fieldPdfBuffer: Buffer | undefined;
+      try {
+        fieldPdfBuffer = generateInvoicePdf({
+          invoiceNumber: invoice.invoiceNumber,
+          status: 'sent',
+          issueDate: String(invoice.issueDate),
+          dueDate: String(invoice.dueDate),
+          subtotal: String(invoice.subtotal),
+          taxTotal: String(invoice.taxTotal),
+          total: String(invoice.total),
+          notes: invoice.notes,
+          client: client ? { name: client.name, email: client.email, address: client.address, phone: client.phone, propertyType: (client as any).propertyType } : { name: recipientName },
+          lineItems: fieldLineItems.map(li => ({
+            description: li.description,
+            quantity: String(li.quantity),
+            unitRate: String(li.unitRate),
+            taxRate: String(li.taxRate),
+            lineTotal: String(li.lineTotal),
+            lineTax: String(li.lineTax),
+            serviceDate: (li as any).serviceDate,
+            technicianName: (li as any).technicianName,
+            serviceType: (li as any).serviceType,
+            serviceAddress: (li as any).serviceAddress,
+            servicedArea: (li as any).servicedArea,
+            materials: li.materials,
+          })),
+        });
+      } catch (e) { console.error("PDF generation failed:", e); }
       await sendInvoiceEmail({
         clientEmail: recipientEmail,
         clientName: recipientName,
@@ -2887,6 +2967,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         total: String(invoice.total),
         viewToken: invoice.viewToken!,
         baseUrl: fieldBaseUrl,
+        pdfBuffer: fieldPdfBuffer,
       });
       res.json({ success: true, message: `Invoice emailed to ${recipientEmail}` });
     } catch (error) {
@@ -3059,6 +3140,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const client = await storage.getClient(invoice.clientId);
       const lineItems = await storage.getLineItemsByInvoice(invoice.id);
 
+      // Fetch photos for linked job logs
+      const jobLogIds = lineItems.map(li => (li as any).jobLogId).filter(Boolean) as number[];
+      const uniqueJobLogIds = [...new Set(jobLogIds)];
+      let photos: any[] = [];
+      for (const jlId of uniqueJobLogIds) {
+        try {
+          const jlPhotos = await storage.getJobLogPhotos(jlId);
+          photos.push(...jlPhotos.map(p => ({ ...p, jobLogId: jlId })));
+        } catch {}
+      }
+
       res.json({
         success: true,
         invoice: {
@@ -3072,8 +3164,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           total: invoice.total,
           notes: invoice.notes,
           pdfUrl: invoice.pdfUrl,
-          client: client ? { name: client.name, email: client.email, address: client.address, phone: client.phone } : undefined,
+          client: client ? { name: client.name, email: client.email, address: client.address, phone: client.phone, propertyType: (client as any).propertyType } : undefined,
           lineItems,
+          photos,
         },
       });
     } catch (error) {
@@ -3225,6 +3318,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const stored = await storage.getSystemSetting("app_base_url");
     if (stored && stored.trim()) return stored.trim().replace(/\/$/, "");
     if (process.env.APP_BASE_URL) return process.env.APP_BASE_URL.replace(/\/$/, "");
+    const replitDomains = process.env.REPLIT_DOMAINS;
+    if (replitDomains) {
+      const primaryDomain = replitDomains.split(",")[0].trim();
+      if (primaryDomain) return `https://${primaryDomain}`;
+    }
     if (process.env.REPLIT_DEV_DOMAIN) return `https://${process.env.REPLIT_DEV_DOMAIN}`;
     return "http://localhost:5000";
   }
