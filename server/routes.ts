@@ -1856,6 +1856,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: lightweight filter options for reports dropdowns
+  app.get("/api/admin/job-logs/filter-options", requireAdmin, async (req, res) => {
+    try {
+      const allLogs = await storage.getJobLogs();
+      const employees = await storage.getFieldEmployees();
+      const customers = Array.from(new Set(allLogs.map(l => l.customerName?.trim()).filter(Boolean))).sort();
+      const locations = Array.from(new Set(allLogs.map(l => l.siteLocation?.trim()).filter(Boolean))).sort();
+      const areas = Array.from(new Set(allLogs.map(l => l.servicedArea?.trim()).filter(Boolean))).sort();
+      res.json({ success: true, customers, locations, areas, employees });
+    } catch (error) {
+      console.error("Error fetching filter options:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   // Admin job logs endpoint
   app.get("/api/admin/job-logs", requireAdmin, async (req, res) => {
     try {
@@ -1867,6 +1882,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.query.dateTo) filters.dateTo = new Date(req.query.dateTo as string);
       if (req.query.siteLocation) filters.siteLocation = req.query.siteLocation as string;
       if (req.query.servicedArea) filters.servicedArea = req.query.servicedArea as string;
+      if (req.query.status) filters.status = req.query.status as string;
 
       const logs = await storage.getJobLogs(filters);
       const employees = await storage.getFieldEmployees();
