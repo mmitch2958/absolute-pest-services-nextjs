@@ -1097,14 +1097,15 @@ export class DatabaseStorage implements IStorage {
 
   private async generateInvoiceNumber(): Promise<string> {
     const year = new Date().getFullYear();
-    const seqName = `invoice_seq_${year}`;
-    
-    // Create sequence if it doesn't exist (using raw SQL)
-    await db.execute(sql`CREATE SEQUENCE IF NOT EXISTS ${sql.identifier(seqName)} START 1`);
-    
-    // Get next value
-    const result = await db.execute(sql`SELECT nextval(${sql.identifier(seqName)}) as n`);
-    const n = String(result.rows[0].n).padStart(4, '0');
+    const yearStart = new Date(`${year}-01-01`);
+    const yearEnd = new Date(`${year + 1}-01-01`);
+    const existing = await db
+      .select()
+      .from(invoices)
+      .where(
+        sql`${invoices.createdAt} >= ${yearStart} AND ${invoices.createdAt} < ${yearEnd}`
+      );
+    const n = String(existing.length + 1).padStart(4, '0');
     return `INV-${year}-${n}`;
   }
 
@@ -1464,6 +1465,7 @@ export class DatabaseStorage implements IStorage {
       quantity,
       unitRate,
       taxRate,
+      materials: jobLog.materials || null,
     });
 
     // Recalculate totals
