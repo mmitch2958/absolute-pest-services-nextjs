@@ -15,6 +15,10 @@ import WildlifeControl from "@/pages/wildlife-control";
 import BedBugTreatment from "@/pages/bed-bug-treatment";
 import TermiteTreatment from "@/pages/termite-treatment";
 import BatRemoval from "@/pages/bat-removal";
+import Termites from "@/pages/termites";
+import BedBugs from "@/pages/bed-bugs";
+import Rodents from "@/pages/rodents";
+import Wildlife from "@/pages/wildlife";
 import ServiceAreas from "@/pages/service-areas";
 import ChesterCountyPA from "@/pages/service-areas/chester-county-pa";
 import DelawareCountyPA from "@/pages/service-areas/delaware-county-pa";
@@ -78,6 +82,11 @@ function Router() {
       <Route path="/bed-bug-treatment" component={BedBugTreatment} />
       <Route path="/termite-treatment" component={TermiteTreatment} />
       <Route path="/bat-removal" component={BatRemoval} />
+      {/* New SEO landing pages targeting high-intent keywords */}
+      <Route path="/termites" component={Termites} />
+      <Route path="/bed-bugs" component={BedBugs} />
+      <Route path="/rodents" component={Rodents} />
+      <Route path="/wildlife" component={Wildlife} />
       <Route path="/service-areas" component={ServiceAreas} />
       <Route path="/service-areas/chester-county-pa" component={ChesterCountyPA} />
       <Route path="/service-areas/delaware-county-pa" component={DelawareCountyPA} />
