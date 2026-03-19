@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,9 +12,96 @@ import GoogleBusinessIntegration, { GoogleBusinessSchema } from "@/components/go
 import GoogleReviewRequest from "@/components/google-review-request";
 import SeasonalAlerts from "@/components/seasonal-alerts";
 import pestControlTeamImage from "@assets/istockphoto-594474798-612x612_1758123737181.jpg";
+import { trackPhoneClick, trackCtaClick } from "@/lib/analytics";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const schemaRef = useRef<HTMLScriptElement[]>([]);
+
+  useEffect(() => {
+    // WebSite schema with SearchAction
+    const websiteSchema = {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "https://absolutepestservices.com",
+      "name": "Absolute Pest Services",
+      "description": "Professional pest control in Chester County, Delaware County & Montgomery County PA, New Castle County DE, and Northeast MD.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://absolutepestservices.com/blog?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    };
+
+    // FAQPage schema for homepage
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Does Absolute Pest Services serve Chester County, PA?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Absolute Pest Services is based in West Grove, PA and serves all of Chester County including West Chester, Kennett Square, Malvern, Coatesville, Downingtown, Phoenixville, and surrounding areas."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What pest control services do you offer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We offer termite treatment, bed bug extermination, rodent control, wildlife removal, bat removal, and general pest control for residential and commercial properties in PA, DE, and MD."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you offer same-day pest control service?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Absolute Pest Services offers same-day service for urgent pest problems. Call us at 484-643-2225 and we will do our best to schedule you the same day."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are your pest control treatments safe for children and pets?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We use EPA-registered products applied by licensed technicians. We always discuss any precautions needed (such as vacating during treatment) and use the least toxic effective methods available."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I schedule a free pest inspection?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Call us at 484-643-2225, use our online contact form, or click 'Schedule Inspection' on our website. We offer free inspections throughout Chester County, Delaware County, Montgomery County PA, and New Castle County DE."
+          }
+        }
+      ]
+    };
+
+    const addSchema = (data: object, schemaId: string) => {
+      document.querySelector(`script[data-schema="${schemaId}"]`)?.remove();
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.setAttribute('data-schema', schemaId);
+      script.textContent = JSON.stringify(data);
+      document.head.appendChild(script);
+      schemaRef.current.push(script);
+    };
+
+    addSchema(websiteSchema, 'website-home');
+    addSchema(faqSchema, 'faq-home');
+
+    return () => {
+      schemaRef.current.forEach(el => el.remove());
+      schemaRef.current = [];
+    };
+  }, []);
 
   const services = [
     {
@@ -166,10 +253,14 @@ export default function Home() {
               termite control, and bat removal — licensed and insured.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-[hsl(132,48%,35%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(132,48%,25%)]">
+              <a
+                href="tel:+14846432225"
+                onClick={() => trackPhoneClick('484-643-2225')}
+                className="inline-flex items-center justify-center bg-[hsl(132,48%,35%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(132,48%,25%)] rounded-md transition-colors"
+              >
                 <Phone className="mr-2 h-5 w-5" />
                 Call Now: 484-643-2225
-              </Button>
+              </a>
               <ScheduleInspectionModal>
                 <Button className="bg-[hsl(36,100%,47%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(36,100%,37%)]">
                   <Calendar className="mr-2 h-5 w-5" />
@@ -256,9 +347,12 @@ export default function Home() {
             <div>
               <img 
                 src={pestControlTeamImage} 
-                alt="Professional pest control team" 
+                alt="Professional pest control team serving Chester County PA" 
                 className="rounded-xl shadow-lg object-cover"
                 style={{ width: '300px', height: '400px', minWidth: '100px', flexShrink: 0 }}
+                loading="lazy"
+                width="300"
+                height="400"
               />
             </div>
             
