@@ -1,20 +1,139 @@
+import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Calendar, ArrowLeft, Shield, Bed, Clock, CheckCircle, Bug, Zap } from "lucide-react";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
 import QuoteRequestModal from "@/components/quote-request-modal";
-import LocalSEO from "@/components/local-seo";
 
 export default function BedBugTreatment() {
+  useEffect(() => {
+    // Service schema
+    const serviceSchema = {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Bed Bug Treatment",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Absolute Pest Services",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "21 Sheffield Dr",
+          "addressLocality": "West Grove",
+          "addressRegion": "PA",
+          "postalCode": "19390"
+        },
+        "telephone": "+1-610-325-4000"
+      },
+      "areaServed": "Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE",
+      "serviceType": "Pest Control"
+    };
+    const svcScript = document.createElement('script');
+    svcScript.type = 'application/ld+json';
+    svcScript.setAttribute('data-schema', 'service-bedbug');
+    svcScript.textContent = JSON.stringify(serviceSchema);
+    document.head.appendChild(svcScript);
+
+    // FAQ schema
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I know if I have bed bugs?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Common signs include red itchy bite marks (often in clusters or lines), small rust-colored blood stains on sheets, dark excrement spots on mattresses, a musty-sweet odor, or visible eggshells and shed skins in mattress seams."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What bed bug treatment methods do you use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We use a combination of heat treatment, EPA-approved chemical applications, and steam treatment. Heat treatment raises room temperatures to levels lethal for bed bugs and their eggs without chemicals."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How many treatments are needed to eliminate bed bugs?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Most infestations are resolved in 1–2 treatments. Our integrated approach targets all life stages. We include a follow-up inspection to ensure complete elimination."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are bed bug treatments safe for my family and pets?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We use family- and pet-safe methods. Our technicians provide specific preparation and re-entry guidelines to ensure the safety of all household members."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How quickly can you schedule a bed bug inspection?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We offer same-day and next-day appointments throughout Chester County, Delaware County, Montgomery County PA, and New Castle County DE. Call 610-869-3000 for immediate assistance."
+          }
+        }
+      ]
+    };
+    const faqScript = document.createElement('script');
+    faqScript.type = 'application/ld+json';
+    faqScript.setAttribute('data-schema', 'faq-bedbug');
+    faqScript.textContent = JSON.stringify(faqSchema);
+    document.head.appendChild(faqScript);
+
+    // Breadcrumb schema
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://absolutepestservices.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Bed Bug Treatment",
+          "item": "https://absolutepestservices.com/bed-bug-treatment"
+        }
+      ]
+    };
+    const breadcrumbScript = document.createElement('script');
+    breadcrumbScript.type = 'application/ld+json';
+    breadcrumbScript.setAttribute('data-schema', 'breadcrumb-bedbug');
+    breadcrumbScript.textContent = JSON.stringify(breadcrumbSchema);
+    document.head.appendChild(breadcrumbScript);
+
+    return () => {
+      document.querySelector('script[data-schema="service-bedbug"]')?.remove();
+      document.querySelector('script[data-schema="faq-bedbug"]')?.remove();
+      document.querySelector('script[data-schema="breadcrumb-bedbug"]')?.remove();
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
-      <LocalSEO 
-        title="Professional Bed Bug Treatment & Extermination Services"
-        description="Expert bed bug treatment and extermination services in PA, DE, MD. Comprehensive inspections, heat treatments, and effective elimination of bed bugs. Licensed professionals with proven results."
-        serviceName="Bed Bug Treatment"
-        serviceArea="Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE"
-      />
+      <Helmet>
+        <title>Professional Bed Bug Treatment &amp; Extermination | Absolute Pest Services PA, DE, MD</title>
+        <meta name="description" content="Expert bed bug treatment in PA, DE &amp; MD. Heat treatment, chemical &amp; steam methods for complete bed bug elimination. Licensed exterminators. Same-day service available. Call 610-869-3000." />
+        <link rel="canonical" href="https://absolutepestservices.com/bed-bug-treatment" />
+        <meta property="og:title" content="Professional Bed Bug Treatment &amp; Extermination | Absolute Pest Services" />
+        <meta property="og:description" content="Expert bed bug elimination in PA, DE &amp; MD. Heat treatment, chemical &amp; steam methods. Licensed professionals with proven results and same-day service." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://absolutepestservices.com/bed-bug-treatment" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Bed Bug Treatment &amp; Extermination | Absolute Pest Services" />
+        <meta name="twitter:description" content="Expert bed bug elimination in PA, DE &amp; MD. Heat treatment &amp; chemical methods. Same-day service available." />
+      </Helmet>
       {/* Header */}
       <header className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

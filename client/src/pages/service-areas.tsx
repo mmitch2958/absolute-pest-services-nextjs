@@ -1,4 +1,4 @@
-import LocalSEO from '@/components/local-seo';
+import { Helmet } from 'react-helmet-async';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Phone, MapPin, Clock, CheckCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -42,11 +42,18 @@ export default function ServiceAreas() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
-      <LocalSEO 
-        title="Service Areas - Professional Pest Control Coverage"
-        description="Absolute Pest Services provides professional pest control throughout Chester County, Delaware County, Montgomery County PA, New Castle County DE, and Northeast MD. Local phone numbers and emergency services available."
-        serviceArea="Pennsylvania, Delaware, Maryland"
-      />
+      <Helmet>
+        <title>Service Areas - Pest Control in PA, DE &amp; MD | Absolute Pest Services</title>
+        <meta name="description" content="Absolute Pest Services covers Chester County, Delaware County &amp; Montgomery County PA, New Castle County DE, and Northeast MD. Local phone numbers &amp; 24/7 emergency pest control service." />
+        <link rel="canonical" href="https://absolutepestservices.com/service-areas" />
+        <meta property="og:title" content="Service Areas - Pest Control in PA, DE &amp; MD | Absolute Pest Services" />
+        <meta property="og:description" content="Professional pest control covering Chester County, Delaware County &amp; Montgomery County PA, New Castle County DE, and Northeast MD." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://absolutepestservices.com/service-areas" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Service Areas | Absolute Pest Services" />
+        <meta name="twitter:description" content="Professional pest control covering PA, DE &amp; MD. Local phone numbers &amp; 24/7 emergency service." />
+      </Helmet>
       
       <Header />
       

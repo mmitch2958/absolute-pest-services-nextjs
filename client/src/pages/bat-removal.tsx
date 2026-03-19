@@ -1,20 +1,131 @@
+import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Calendar, ArrowLeft, Shield, Moon, Clock, CheckCircle, AlertTriangle, Eye } from "lucide-react";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
 import QuoteRequestModal from "@/components/quote-request-modal";
-import LocalSEO from "@/components/local-seo";
 
 export default function BatRemoval() {
+  useEffect(() => {
+    // Service schema
+    const serviceSchema = {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Bat Removal",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Absolute Pest Services",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "21 Sheffield Dr",
+          "addressLocality": "West Grove",
+          "addressRegion": "PA",
+          "postalCode": "19390"
+        },
+        "telephone": "+1-610-325-4000"
+      },
+      "areaServed": "Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE",
+      "serviceType": "Pest Control"
+    };
+    const svcScript = document.createElement('script');
+    svcScript.type = 'application/ld+json';
+    svcScript.setAttribute('data-schema', 'service-bat');
+    svcScript.textContent = JSON.stringify(serviceSchema);
+    document.head.appendChild(svcScript);
+
+    // FAQ schema
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is bat removal legal in Pennsylvania?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, but bats are protected wildlife and removal must follow state and federal regulations. Exclusion cannot be performed during maternity season (typically May–August) when flightless pups are present. Our licensed specialists ensure full legal compliance."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do you remove bats from my home?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We use one-way exclusion devices that allow bats to exit naturally but prevent re-entry. Once all bats have left, we permanently seal all entry points and perform a full cleanup of guano and contaminated materials."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are bats dangerous to my family?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Bats can carry rabies and their droppings (guano) can cause histoplasmosis, a respiratory illness. Never handle a bat directly. Call our team immediately for safe, professional removal."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long does bat exclusion take?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The exclusion process typically takes 1–2 weeks to ensure all bats have vacated before we seal entry points. The initial inspection and device installation can often be completed in one visit."
+          }
+        }
+      ]
+    };
+    const faqScript = document.createElement('script');
+    faqScript.type = 'application/ld+json';
+    faqScript.setAttribute('data-schema', 'faq-bat');
+    faqScript.textContent = JSON.stringify(faqSchema);
+    document.head.appendChild(faqScript);
+
+    // Breadcrumb schema
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://absolutepestservices.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Bat Removal",
+          "item": "https://absolutepestservices.com/bat-removal"
+        }
+      ]
+    };
+    const breadcrumbScript = document.createElement('script');
+    breadcrumbScript.type = 'application/ld+json';
+    breadcrumbScript.setAttribute('data-schema', 'breadcrumb-bat');
+    breadcrumbScript.textContent = JSON.stringify(breadcrumbSchema);
+    document.head.appendChild(breadcrumbScript);
+
+    return () => {
+      document.querySelector('script[data-schema="service-bat"]')?.remove();
+      document.querySelector('script[data-schema="faq-bat"]')?.remove();
+      document.querySelector('script[data-schema="breadcrumb-bat"]')?.remove();
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
-      <LocalSEO 
-        title="Professional Bat Removal Services - Safe & Humane"
-        description="Professional bat removal and exclusion services in PA, DE, MD. Safe, humane bat removal with proper exclusion techniques. Protect your home from bats with licensed wildlife control specialists."
-        serviceName="Bat Removal"
-        serviceArea="Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE"
-      />
+      <Helmet>
+        <title>Professional Bat Removal &amp; Exclusion Services | Absolute Pest Services PA, DE, MD</title>
+        <meta name="description" content="Safe, humane &amp; legal bat removal in PA, DE &amp; MD. One-way exclusion devices, guano cleanup &amp; permanent sealing. Licensed bat exclusion specialists. Call 610-869-3000 for an inspection." />
+        <link rel="canonical" href="https://absolutepestservices.com/bat-removal" />
+        <meta property="og:title" content="Professional Bat Removal &amp; Exclusion Services | Absolute Pest Services" />
+        <meta property="og:description" content="Safe, humane &amp; legal bat removal in PA, DE &amp; MD. One-way exclusion devices, guano cleanup &amp; permanent sealing by licensed specialists." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://absolutepestservices.com/bat-removal" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Bat Removal &amp; Exclusion Services | Absolute Pest Services" />
+        <meta name="twitter:description" content="Safe, humane &amp; legal bat removal in PA, DE &amp; MD. Licensed specialists with one-way exclusion &amp; permanent sealing." />
+      </Helmet>
       {/* Header */}
       <header className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

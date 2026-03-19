@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, Bug, Home, Shield, Zap } from "lucide-react";
 import { useLocation } from "wouter";
-import LocalSEO from "@/components/local-seo";
+import { Helmet } from "react-helmet-async";
 import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function RequestService() {
@@ -110,12 +110,18 @@ export default function RequestService() {
 
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
-      <LocalSEO 
-        title="Request Pest Control Service - Professional Extermination"
-        description="Request professional pest control services in PA, DE, MD. Fast response times, licensed technicians, and comprehensive pest management solutions. Get a free quote today."
-        serviceName="Pest Control Service Request"
-        serviceArea="Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE"
-      />
+      <Helmet>
+        <title>Request Pest Control Service | Absolute Pest Services PA, DE, MD</title>
+        <meta name="description" content="Request professional pest control service in PA, DE &amp; MD. Fast response times, licensed technicians &amp; comprehensive pest management. Get a free quote from Absolute Pest Services today." />
+        <link rel="canonical" href="https://absolutepestservices.com/request-service" />
+        <meta property="og:title" content="Request Pest Control Service | Absolute Pest Services" />
+        <meta property="og:description" content="Request professional pest control in PA, DE &amp; MD. Fast response, licensed technicians &amp; comprehensive pest management. Free quotes available." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://absolutepestservices.com/request-service" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Request Service | Absolute Pest Services" />
+        <meta name="twitter:description" content="Request professional pest control in PA, DE &amp; MD. Fast response &amp; free quotes." />
+      </Helmet>
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

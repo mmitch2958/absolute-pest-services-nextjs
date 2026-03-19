@@ -1,20 +1,131 @@
+import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Calendar, ArrowLeft, Shield, Home, Clock, CheckCircle, AlertTriangle, Search } from "lucide-react";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
 import QuoteRequestModal from "@/components/quote-request-modal";
-import LocalSEO from "@/components/local-seo";
 
 export default function TermiteTreatment() {
+  useEffect(() => {
+    // Service schema
+    const serviceSchema = {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Termite Treatment",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Absolute Pest Services",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "21 Sheffield Dr",
+          "addressLocality": "West Grove",
+          "addressRegion": "PA",
+          "postalCode": "19390"
+        },
+        "telephone": "+1-610-325-4000"
+      },
+      "areaServed": "Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE",
+      "serviceType": "Pest Control"
+    };
+    const svcScript = document.createElement('script');
+    svcScript.type = 'application/ld+json';
+    svcScript.setAttribute('data-schema', 'service-termite');
+    svcScript.textContent = JSON.stringify(serviceSchema);
+    document.head.appendChild(svcScript);
+
+    // FAQ schema
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I know if I have termites?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Warning signs include mud tubes along your foundation, hollow-sounding wood, discarded wings near windowsills, small sawdust-like frass near wood structures, and doors or windows that suddenly stick."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What termite treatment options do you offer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We offer liquid barrier treatments, termite baiting systems, direct wood treatment, and ongoing monitoring programs. Our licensed technicians recommend the best solution based on your specific situation."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long does termite treatment last?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Liquid barrier treatments typically last 5–10 years. Baiting systems provide ongoing protection with regular monitoring. We offer annual inspection and maintenance programs for continued peace of mind."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you provide termite inspection reports for home sales?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We provide official termite inspection reports (WDI reports) commonly required for real estate transactions throughout PA, DE, and MD."
+          }
+        }
+      ]
+    };
+    const faqScript = document.createElement('script');
+    faqScript.type = 'application/ld+json';
+    faqScript.setAttribute('data-schema', 'faq-termite');
+    faqScript.textContent = JSON.stringify(faqSchema);
+    document.head.appendChild(faqScript);
+
+    // Breadcrumb schema
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://absolutepestservices.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Termite Treatment",
+          "item": "https://absolutepestservices.com/termite-treatment"
+        }
+      ]
+    };
+    const breadcrumbScript = document.createElement('script');
+    breadcrumbScript.type = 'application/ld+json';
+    breadcrumbScript.setAttribute('data-schema', 'breadcrumb-termite');
+    breadcrumbScript.textContent = JSON.stringify(breadcrumbSchema);
+    document.head.appendChild(breadcrumbScript);
+
+    return () => {
+      document.querySelector('script[data-schema="service-termite"]')?.remove();
+      document.querySelector('script[data-schema="faq-termite"]')?.remove();
+      document.querySelector('script[data-schema="breadcrumb-termite"]')?.remove();
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
-      <LocalSEO 
-        title="Termite Inspection & Treatment Services - Licensed Professionals"
-        description="Professional termite inspection, treatment, and prevention services in PA, DE, MD. Protect your home from termite damage with comprehensive solutions and ongoing monitoring. Licensed and experienced technicians."
-        serviceName="Termite Treatment"
-        serviceArea="Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE"
-      />
+      <Helmet>
+        <title>Termite Inspection &amp; Treatment Services | Absolute Pest Services PA, DE, MD</title>
+        <meta name="description" content="Licensed termite inspection, treatment &amp; prevention in PA, DE &amp; MD. Liquid barriers, baiting systems &amp; ongoing monitoring. Protect your home from costly termite damage. Call 610-869-3000." />
+        <link rel="canonical" href="https://absolutepestservices.com/termite-treatment" />
+        <meta property="og:title" content="Termite Inspection &amp; Treatment Services | Absolute Pest Services" />
+        <meta property="og:description" content="Licensed termite inspection, treatment &amp; prevention in PA, DE &amp; MD. Liquid barriers, baiting systems &amp; ongoing monitoring to protect your home." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://absolutepestservices.com/termite-treatment" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Termite Inspection &amp; Treatment | Absolute Pest Services" />
+        <meta name="twitter:description" content="Licensed termite inspection, treatment &amp; prevention in PA, DE &amp; MD. Protect your home from costly damage." />
+      </Helmet>
       {/* Header */}
       <header className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
