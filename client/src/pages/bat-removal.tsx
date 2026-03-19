@@ -87,7 +87,9 @@ export default function BatRemoval() {
               <p className="text-lg text-gray-600 mb-8">
                 We use one-way exclusion devices that allow bats to leave naturally but prevent their 
                 return. Our methods comply with federal and state regulations while effectively solving 
-                your bat problem without harming these beneficial animals.
+                your bat problem without harming these beneficial animals. We provide professional bat 
+                removal services across Pennsylvania, Delaware, and Maryland, including the greater 
+                Philadelphia tri-state region.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -16,6 +16,11 @@ import BedBugTreatment from "@/pages/bed-bug-treatment";
 import TermiteTreatment from "@/pages/termite-treatment";
 import BatRemoval from "@/pages/bat-removal";
 import ServiceAreas from "@/pages/service-areas";
+import ChesterCountyPA from "@/pages/service-areas/chester-county-pa";
+import DelawareCountyPA from "@/pages/service-areas/delaware-county-pa";
+import NewCastleCountyDE from "@/pages/service-areas/new-castle-county-de";
+import MontgomeryCountyPA from "@/pages/service-areas/montgomery-county-pa";
+import NortheastMaryland from "@/pages/service-areas/northeast-maryland";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
 import CostCalculator from "@/pages/CostCalculator";
@@ -74,6 +79,11 @@ function Router() {
       <Route path="/termite-treatment" component={TermiteTreatment} />
       <Route path="/bat-removal" component={BatRemoval} />
       <Route path="/service-areas" component={ServiceAreas} />
+      <Route path="/service-areas/chester-county-pa" component={ChesterCountyPA} />
+      <Route path="/service-areas/delaware-county-pa" component={DelawareCountyPA} />
+      <Route path="/service-areas/new-castle-county-de" component={NewCastleCountyDE} />
+      <Route path="/service-areas/montgomery-county-pa" component={MontgomeryCountyPA} />
+      <Route path="/service-areas/northeast-maryland" component={NortheastMaryland} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/cost-calculator" component={CostCalculator} />

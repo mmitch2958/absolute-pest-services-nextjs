@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Calendar, MapPin, Clock, Mail, Check, Bug, Bed, Home as HomeIcon, Crown, Facebook, Twitter, Instagram, User } from "lucide-react";
@@ -7,8 +8,7 @@ import ContactForm from "@/components/contact-form";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
 import QuoteRequestModal from "@/components/quote-request-modal";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
-import LocalSEO from "@/components/local-seo";
-import GoogleBusinessIntegration from "@/components/google-business-integration";
+import GoogleBusinessIntegration, { GoogleBusinessSchema } from "@/components/google-business-integration";
 import GoogleReviewRequest from "@/components/google-review-request";
 import SeasonalAlerts from "@/components/seasonal-alerts";
 import pestControlTeamImage from "@assets/istockphoto-594474798-612x612_1758123737181.jpg";
@@ -95,12 +95,20 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
-      <LocalSEO 
-        title="Professional Pest Control Services in PA, DE, MD"
-        description="Expert pest control services in Chester County, Delaware County, Montgomery County PA, New Castle County DE, and Northeast MD. Humane wildlife control, bed bug treatment, termite control, and bat removal. Licensed and insured with emergency service."
-        serviceName="Pest Control Services"
-        serviceArea="Pennsylvania, Delaware, Maryland"
-      />
+      <Helmet>
+        <title>Absolute Pest Services - Professional Pest Control in PA, DE, MD</title>
+        <meta name="description" content="Expert pest control in Chester County, Delaware County &amp; Montgomery County PA, New Castle County DE, and Northeast MD. Wildlife control, bed bug treatment, termite control &amp; bat removal. Licensed, insured, 24/7 emergency service." />
+        <link rel="canonical" href="https://absolutepestservices.com/" />
+        <meta property="og:title" content="Absolute Pest Services - Professional Pest Control in PA, DE, MD" />
+        <meta property="og:description" content="Expert pest control across PA, DE &amp; MD. Humane wildlife control, bed bug treatment, termite protection &amp; bat removal. Licensed, insured &amp; available 24/7." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://absolutepestservices.com/" />
+        <meta property="og:image" content="https://absolutepestservices.com/images/og-image.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Absolute Pest Services - Professional Pest Control in PA, DE, MD" />
+        <meta name="twitter:description" content="Expert pest control in PA, DE &amp; MD. Humane wildlife control, bed bug treatment, termite protection &amp; bat removal." />
+      </Helmet>
+      <GoogleBusinessSchema />
       {/* Header */}
       <header className="bg-white shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -149,12 +157,13 @@ export default function Home() {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white max-w-4xl mx-auto px-4">
             <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Professional Pest Control <br />
-              <span className="text-[hsl(36,100%,47%)]">You Can Trust</span>
+              Professional Pest Control Services in <br />
+              <span className="text-[hsl(36,100%,47%)]">Chester County, PA & Northern Delaware</span>
             </h1>
             <p className="text-xl lg:text-2xl mb-8 leading-relaxed">
-              Serving Pennsylvania and Delaware with expert pest control services. 
-              Available for all your pest control needs.
+              Expert pest control services across Chester County, Delaware County, Montgomery County PA, 
+              New Castle County DE, and Northeast MD. Humane wildlife control, bed bug treatment, 
+              termite control, and bat removal — licensed and insured.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button className="bg-[hsl(132,48%,35%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(132,48%,25%)]">
@@ -393,20 +402,21 @@ export default function Home() {
             <div>
               <h4 className="text-lg font-semibold mb-4">Services</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Wildlife Control</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Bed Bug Treatment</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Termite Treatment</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Bat Removal</a></li>
+                <li><a href="/wildlife-control" className="hover:text-white transition-colors">Wildlife Control</a></li>
+                <li><a href="/bed-bug-treatment" className="hover:text-white transition-colors">Bed Bug Treatment</a></li>
+                <li><a href="/termite-treatment" className="hover:text-white transition-colors">Termite Treatment</a></li>
+                <li><a href="/bat-removal" className="hover:text-white transition-colors">Bat Removal</a></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="text-lg font-semibold mb-4">Contact</h4>
+              <h4 className="text-lg font-semibold mb-4">Service Areas</h4>
               <ul className="space-y-2 text-gray-400">
-                <li>610-869-3000</li>
-                <li>610-325-4000</li>
-                <li>302-235-1975</li>
-                <li>484-643-2225</li>
+                <li><a href="/service-areas/chester-county-pa" className="hover:text-white transition-colors">Chester County, PA</a></li>
+                <li><a href="/service-areas/delaware-county-pa" className="hover:text-white transition-colors">Delaware County, PA</a></li>
+                <li><a href="/service-areas/new-castle-county-de" className="hover:text-white transition-colors">New Castle County, DE</a></li>
+                <li><a href="/service-areas/montgomery-county-pa" className="hover:text-white transition-colors">Montgomery County, PA</a></li>
+                <li><a href="/service-areas/northeast-maryland" className="hover:text-white transition-colors">Northeast Maryland</a></li>
               </ul>
             </div>
           </div>

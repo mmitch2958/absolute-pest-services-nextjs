@@ -87,7 +87,8 @@ export default function BedBugTreatment() {
               <p className="text-lg text-gray-600 mb-8">
                 We use heat treatment, chemical applications, and integrated pest management techniques 
                 to target bed bugs at all life stages. Our treatments are safe for families and pets 
-                while being deadly effective against bed bugs.
+                while being deadly effective against bed bugs. We proudly serve West Chester, Wilmington, 
+                Norristown, and communities throughout Chester County, Delaware County, and beyond.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

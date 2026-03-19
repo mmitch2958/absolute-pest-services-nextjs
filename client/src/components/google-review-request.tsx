@@ -32,20 +32,21 @@ export default function GoogleReviewRequest() {
         
         <div className="space-y-2">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Share Your Experience
+            Help Us Reach 200 Reviews! 🎯
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            Help other customers discover our professional pest control services by leaving a review on Google
+            Join <strong>156+ happy customers</strong> who left a review. Your feedback helps us appear in Google Maps 
+            and helps other homeowners find quality pest control services.
           </p>
         </div>
         
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button 
             onClick={handleReviewClick}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white"
+            className="bg-yellow-600 hover:bg-yellow-700 text-white px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
           >
-            <Star className="h-4 w-4 mr-2" />
-            Leave a Review
+            <Star className="h-5 w-5 mr-2" />
+            Leave a Google Review
           </Button>
           <Button 
             onClick={handleReviewClick}
@@ -53,9 +54,13 @@ export default function GoogleReviewRequest() {
             className="border-yellow-600 text-yellow-600 hover:bg-yellow-50"
           >
             <ExternalLink className="h-4 w-4 mr-2" />
-            View Reviews
+            View All Reviews
           </Button>
         </div>
+        
+        <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+          ⭐ Reviews on Google help other homeowners discover our services and improve local search visibility
+        </p>
         
         <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-yellow-200 dark:border-yellow-700">
           <div className="text-center">
@@ -75,15 +80,11 @@ export default function GoogleReviewRequest() {
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 text-yellow-600">
               <Star className="h-4 w-4" />
-              <span className="text-sm font-medium">Results</span>
+              <span className="text-sm font-medium">5.0 ⭐</span>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Guaranteed</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Google Rating</p>
           </div>
         </div>
-        
-        <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-          "Your feedback helps us improve and helps others find quality pest control services"
-        </p>
       </CardContent>
     </Card>
   );

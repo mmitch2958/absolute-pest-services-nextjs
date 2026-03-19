@@ -1,6 +1,6 @@
 import LocalSEO from '@/components/local-seo';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Phone, MapPin, Clock, CheckCircle } from 'lucide-react';
+import { Phone, MapPin, Clock, CheckCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import ScheduleInspectionModal from '@/components/schedule-inspection-modal';
@@ -108,6 +108,79 @@ export default function ServiceAreas() {
         {/* Google Business Integration */}
         <div className="mb-12">
           <GoogleBusinessIntegration />
+        </div>
+
+        {/* County-Specific Pages Links */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
+            Browse Pest Control by County
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Link href="/service-areas/chester-county-pa">
+              <Card className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-105">
+                <CardContent className="p-6 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Chester County, PA</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">West Grove, Kennett Square, Oxford, Avondale</p>
+                    <p className="text-sm font-medium text-emerald-600 mt-1">484-643-2225</p>
+                  </div>
+                  <ArrowRight className="h-6 w-6 text-emerald-600" />
+                </CardContent>
+              </Card>
+            </Link>
+            
+            <Link href="/service-areas/delaware-county-pa">
+              <Card className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-105">
+                <CardContent className="p-6 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Delaware County, PA</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Media, Newtown Square, Chester, Aston</p>
+                    <p className="text-sm font-medium text-blue-600 mt-1">610-325-4000</p>
+                  </div>
+                  <ArrowRight className="h-6 w-6 text-blue-600" />
+                </CardContent>
+              </Card>
+            </Link>
+            
+            <Link href="/service-areas/new-castle-county-de">
+              <Card className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-105">
+                <CardContent className="p-6 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">New Castle County, DE</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Hockessin, Newark, Wilmington, Bear</p>
+                    <p className="text-sm font-medium text-red-600 mt-1">302-235-1975</p>
+                  </div>
+                  <ArrowRight className="h-6 w-6 text-red-600" />
+                </CardContent>
+              </Card>
+            </Link>
+            
+            <Link href="/service-areas/montgomery-county-pa">
+              <Card className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-105">
+                <CardContent className="p-6 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Montgomery County, PA</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Norristown, King of Prussia, Collegeville</p>
+                    <p className="text-sm font-medium text-amber-600 mt-1">484-643-2225</p>
+                  </div>
+                  <ArrowRight className="h-6 w-6 text-amber-600" />
+                </CardContent>
+              </Card>
+            </Link>
+            
+            <Link href="/service-areas/northeast-maryland">
+              <Card className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-105">
+                <CardContent className="p-6 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Northeast Maryland</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Elkton, North East, Perryville, Rising Sun</p>
+                    <p className="text-sm font-medium text-teal-600 mt-1">610-325-4000</p>
+                  </div>
+                  <ArrowRight className="h-6 w-6 text-teal-600" />
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
         </div>
 
         {/* Business Hours & Contact */}

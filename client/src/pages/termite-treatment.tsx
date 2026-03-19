@@ -87,7 +87,8 @@ export default function TermiteTreatment() {
               <p className="text-lg text-gray-600 mb-8">
                 We use the latest technology including liquid barriers, baiting systems, and monitoring 
                 stations to create a complete protection system around your property. Our licensed 
-                technicians provide detailed reports and recommendations for long-term protection.
+                technicians provide detailed reports and recommendations for long-term protection 
+                throughout Chester County, Delaware County, and the greater tri-state area.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

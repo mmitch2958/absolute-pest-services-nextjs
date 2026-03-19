@@ -1,20 +1,139 @@
+import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Calendar, ArrowLeft, Shield, Heart, Clock, CheckCircle } from "lucide-react";
 import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
 import QuoteRequestModal from "@/components/quote-request-modal";
-import LocalSEO from "@/components/local-seo";
 
 export default function WildlifeControl() {
+  useEffect(() => {
+    // LocalBusiness + Service schema
+    const businessSchema = {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Wildlife Control",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Absolute Pest Services",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "21 Sheffield Dr",
+          "addressLocality": "West Grove",
+          "addressRegion": "PA",
+          "postalCode": "19390"
+        },
+        "telephone": "+1-610-325-4000"
+      },
+      "areaServed": "Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE",
+      "serviceType": "Pest Control"
+    };
+    const bizScript = document.createElement('script');
+    bizScript.type = 'application/ld+json';
+    bizScript.setAttribute('data-schema', 'service-wildlife');
+    bizScript.textContent = JSON.stringify(businessSchema);
+    document.head.appendChild(bizScript);
+
+    // FAQ schema
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What types of wildlife do you remove?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We handle raccoons, squirrels, opossums, skunks, bats, birds, groundhogs, and other nuisance wildlife using humane, non-lethal methods."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is your wildlife removal humane?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We exclusively use non-kill, non-lethal extraction methods. Animals are safely captured and relocated away from your property."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do you prevent wildlife from returning?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "After removal we seal all entry points, install exclusion barriers, and provide a full property assessment to identify and close potential re-entry locations."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you offer emergency wildlife removal?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We provide 24/7 emergency wildlife removal services throughout Chester County, Delaware County, Montgomery County PA, and New Castle County DE."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are you licensed to perform wildlife removal in Pennsylvania and Delaware?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Absolute Pest Services is fully licensed and insured for wildlife control operations in Pennsylvania, Delaware, and Maryland."
+          }
+        }
+      ]
+    };
+    const faqScript = document.createElement('script');
+    faqScript.type = 'application/ld+json';
+    faqScript.setAttribute('data-schema', 'faq-wildlife');
+    faqScript.textContent = JSON.stringify(faqSchema);
+    document.head.appendChild(faqScript);
+
+    // Breadcrumb schema
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://absolutepestservices.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Wildlife Control",
+          "item": "https://absolutepestservices.com/wildlife-control"
+        }
+      ]
+    };
+    const breadcrumbScript = document.createElement('script');
+    breadcrumbScript.type = 'application/ld+json';
+    breadcrumbScript.setAttribute('data-schema', 'breadcrumb-wildlife');
+    breadcrumbScript.textContent = JSON.stringify(breadcrumbSchema);
+    document.head.appendChild(breadcrumbScript);
+
+    return () => {
+      document.querySelector('script[data-schema="service-wildlife"]')?.remove();
+      document.querySelector('script[data-schema="faq-wildlife"]')?.remove();
+      document.querySelector('script[data-schema="breadcrumb-wildlife"]')?.remove();
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
-      <LocalSEO 
-        title="Humane Wildlife Control Services - Non-Kill Extraction"
-        description="Professional humane wildlife control and removal services in PA, DE, MD. Non-kill extraction methods for raccoons, squirrels, opossums, skunks, and other wildlife. Safe, effective, and ethical wildlife management solutions."
-        serviceName="Wildlife Control"
-        serviceArea="Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE"
-      />
+      <Helmet>
+        <title>Humane Wildlife Control &amp; Removal Services | Absolute Pest Services PA, DE, MD</title>
+        <meta name="description" content="Professional humane wildlife removal in PA, DE &amp; MD. Non-kill extraction for raccoons, squirrels, opossums, skunks &amp; more. Licensed wildlife control specialists. Call 610-869-3000." />
+        <link rel="canonical" href="https://absolutepestservices.com/wildlife-control" />
+        <meta property="og:title" content="Humane Wildlife Control &amp; Removal Services | Absolute Pest Services" />
+        <meta property="og:description" content="Professional humane wildlife removal in PA, DE &amp; MD. Non-kill extraction for raccoons, squirrels, opossums, skunks &amp; more. Licensed wildlife control specialists." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://absolutepestservices.com/wildlife-control" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Humane Wildlife Control &amp; Removal | Absolute Pest Services" />
+        <meta name="twitter:description" content="Professional humane wildlife removal in PA, DE &amp; MD. Non-kill extraction for raccoons, squirrels, opossums &amp; more." />
+      </Helmet>
       {/* Header */}
       <header className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -87,7 +206,8 @@ export default function WildlifeControl() {
               <p className="text-lg text-gray-600 mb-8">
                 Using proven exclusion techniques and safe removal methods, we ensure that animals 
                 are relocated safely while preventing future intrusions through comprehensive 
-                property assessments and repairs.
+                property assessments and repairs. Our wildlife control services cover Chester County, 
+                Kennett Square, Hockessin, and surrounding communities in Pennsylvania and Delaware.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
