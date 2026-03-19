@@ -115,6 +115,16 @@ export const trackPageView = (url: string) => {
   });
 };
 
+// Convenience: track phone click-to-call taps
+export const trackPhoneClick = (phoneNumber: string) => {
+  trackEvent('phone_click', 'engagement', phoneNumber);
+};
+
+// Convenience: track primary CTA clicks
+export const trackCtaClick = (ctaLabel: string, location?: string) => {
+  trackEvent('cta_click', 'engagement', location ? `${ctaLabel}:${location}` : ctaLabel);
+};
+
 // Track events
 export const trackEvent = (
   action: string, 
