@@ -1,4 +1,4 @@
-import { Building2, FolderOpen, Target, BarChart3, Settings, LogOut, Home, BookOpen, FileText, Wrench, CalendarDays, ScrollText, ClipboardList, Receipt, Tags } from "lucide-react";
+import { Building2, FolderOpen, Target, BarChart3, Settings, LogOut, Home, BookOpen, FileText, Wrench, CalendarDays, ScrollText, ClipboardList, Receipt, Tags, Loader2 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,14 +6,29 @@ import { Separator } from "@/components/ui/separator";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[hsl(132,48%,35%)]" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || (user && user.role !== 'admin')) {
+    setLocation('/auth');
+    return null;
+  }
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
