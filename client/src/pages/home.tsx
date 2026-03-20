@@ -253,31 +253,19 @@ export default function Home() {
           </div>
         )}
       </header>
-
       {/* Hero Section */}
       <section id="home" className="relative h-screen overflow-hidden">
         <HeroSlider />
         
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white max-w-4xl mx-auto px-4">
-            <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Professional Pest Control Services in <br />
-              <span className="text-[hsl(36,100%,47%)]">Chester County, PA & Northern Delaware</span>
+            <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight text-[#f09000]">
+              <span className="text-[hsl(36,100%,47%)]">Greater Philadelphia Area's</span> Trusted Pest Experts.
             </h1>
             <p className="text-xl lg:text-2xl mb-8 leading-relaxed">
-              Expert pest control services across Chester County, Delaware County, Montgomery County PA, 
-              New Castle County DE, and Northeast MD. Humane wildlife control, bed bug treatment, 
-              termite control, and bat removal — licensed and insured.
+              Your trusted local experts for professional pest control in the greater Philadelphia and northern Delaware area. Say goodbye to bugs, rodents, and long-term commitments.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="tel:+14846432225"
-                onClick={() => trackPhoneClick('484-643-2225')}
-                className="inline-flex items-center justify-center bg-[hsl(132,48%,35%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(132,48%,25%)] rounded-md transition-colors"
-              >
-                <Phone className="mr-2 h-5 w-5" />
-                Call Now: 484-643-2225
-              </a>
               <ScheduleInspectionModal>
                 <Button className="bg-[hsl(36,100%,47%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(36,100%,37%)]">
                   <Calendar className="mr-2 h-5 w-5" />
@@ -295,7 +283,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* Services Section */}
       <section id="services" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -326,7 +313,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* Service Areas Section */}
       <section id="areas" className="py-20 bg-gradient-to-br from-[hsl(132,48%,35%)] to-[hsl(132,48%,25%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -356,7 +342,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* About Section */}
       <section id="about" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -403,7 +388,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* Contact Section */}
       <section id="contact" className="py-20 bg-[hsl(210,13%,28%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -483,7 +467,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

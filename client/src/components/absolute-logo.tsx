@@ -30,7 +30,7 @@ export const AbsoluteLogoSimple = ({ className = "" }: { className?: string }) =
     <img
       src={logoImage}
       alt="Absolute Pest Services"
-      className="h-20 w-auto object-contain"
+      className="h-[6rem] w-auto object-contain"
     />
   </div>
 );
