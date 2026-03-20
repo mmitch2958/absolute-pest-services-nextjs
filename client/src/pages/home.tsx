@@ -236,6 +236,22 @@ export default function Home() {
             </button>
           </div>
         </div>
+
+        {isMenuOpen && (
+          <div className="md:hidden bg-white border-t">
+            <div className="px-4 py-4 space-y-3">
+              <button onClick={() => { scrollToSection('home'); setIsMenuOpen(false); }} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">Home</button>
+              <button onClick={() => { scrollToSection('services'); setIsMenuOpen(false); }} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">Services</button>
+              <button onClick={() => { window.location.href = '/service-areas'; }} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">Service Areas</button>
+              <button onClick={() => { window.location.href = '/blog'; }} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">Blog</button>
+              <button onClick={() => { scrollToSection('about'); setIsMenuOpen(false); }} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">About</button>
+              <button onClick={() => { scrollToSection('contact'); setIsMenuOpen(false); }} className="block w-full text-left text-[hsl(210,13%,28%)] hover:text-[hsl(132,48%,35%)] transition-colors font-medium py-2">Contact</button>
+              <div className="pt-2 border-t">
+                <a href="tel:484-643-2225" className="block text-[hsl(132,48%,35%)] font-semibold py-2">Call: 484-643-2225</a>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
