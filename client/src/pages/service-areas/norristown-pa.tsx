@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, MapPin, Clock, CheckCircle, ArrowLeft } from 'lucide-react';
@@ -46,28 +47,7 @@ export default function NorristownPA() {
           })}
         </script>
       </Helmet>
-
-      <header className="bg-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center cursor-pointer" onClick={() => window.location.href = '/'}>
-              <AbsoluteLogoSimple />
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/service-areas">
-                <Button variant="outline" className="flex items-center">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  All Service Areas
-                </Button>
-              </Link>
-              <div className="hidden lg:flex flex-col text-right">
-                <span className="text-sm text-[hsl(210,13%,28%)]">24/7 Emergency Service</span>
-                <span className="text-lg font-semibold text-[hsl(132,48%,35%)]">484-643-2225</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <section className="bg-gradient-to-r from-[hsl(132,48%,35%)] to-[hsl(132,48%,25%)] py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -78,7 +58,7 @@ export default function NorristownPA() {
             Expert pest control for Norristown and Montgomery County. Serving the Schuylkill River corridor, borough neighborhoods, and surrounding townships with licensed, effective pest management.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="tel:+14846432225" className="bg-white text-[hsl(132,48%,35%)] px-8 py-4 text-lg font-semibold hover:bg-gray-100">
+            <a href="tel:+14846432225" className="inline-flex items-center bg-white text-[hsl(132,48%,35%)] px-8 py-4 text-lg font-semibold hover:bg-gray-100 rounded-md">
               <Phone className="mr-2 h-5 w-5" />
               Call Now: 484-643-2225
             </a>

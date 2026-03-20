@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Phone, Calendar, ArrowLeft, Shield, Search, AlertTriangle, CheckCircle, Bug } from "lucide-react";
@@ -147,33 +148,7 @@ export default function Termites() {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://absolutepestservices.com/termites" />
       </Helmet>
-
-      {/* Header */}
-      <header className="bg-white shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center cursor-pointer" onClick={() => window.location.href = '/'}>
-              <AbsoluteLogoSimple />
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" onClick={() => window.location.href = '/'} className="hidden sm:flex items-center">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Home
-              </Button>
-              <div className="hidden lg:flex flex-col text-right">
-                <span className="text-sm text-gray-500">Same-Day Service Available</span>
-                <span className="text-lg font-semibold text-[hsl(132,48%,35%)]">{PHONE_NUMBER}</span>
-              </div>
-              <a
-                href={PHONE_HREF}
-                onClick={() => trackPhoneClick(PHONE_NUMBER)}
-                className="flex items-center gap-2 bg-[hsl(132,48%,35%)] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[hsl(132,48%,25%)] transition-colors"
-              >
-                <Phone className="h-4 w-4" /> Call Now
-              </a>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-[hsl(36,100%,47%)] to-orange-600 py-20">
