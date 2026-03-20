@@ -56,6 +56,7 @@ export default function CostCalculator() {
       <Helmet>
         <title>Pest Control Cost Calculator - Free Estimate | Absolute Pest Services</title>
         <meta name="description" content="Calculate pest control costs instantly. Get free estimates for termite treatment, bed bug removal, wildlife control, and more. Serving PA, DE, and MD." />
+        <link rel="canonical" href="https://absolutepestservices.com/cost-calculator" />
         <meta property="og:title" content="Pest Control Cost Calculator - Free Estimate | Absolute Pest Services" />
         <meta property="og:description" content="Calculate pest control costs instantly. Get free estimates for various pest control services." />
       </Helmet>

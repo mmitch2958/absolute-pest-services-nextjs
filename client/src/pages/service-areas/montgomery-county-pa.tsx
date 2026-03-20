@@ -33,6 +33,7 @@ export default function MontgomeryCountyPA() {
       <Helmet>
         <title>Montgomery County PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Montgomery County PA: Expert pest control in Norristown, King of Prussia, Collegeville, Pottstown. Licensed, insured, emergency service available." />
+        <link rel="canonical" href="https://absolutepestservices.com/service-areas/montgomery-county-pa" />
       </Helmet>
 
       {/* Header */}
@@ -70,10 +71,10 @@ export default function MontgomeryCountyPA() {
             with safe, effective treatments.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-white text-[hsl(36,100%,47%)] px-8 py-4 text-lg font-semibold hover:bg-gray-100">
+            <a href="tel:+14846432225" className="bg-white text-[hsl(36,100%,47%)] px-8 py-4 text-lg font-semibold hover:bg-gray-100">
               <Phone className="mr-2 h-5 w-5" />
               Call Now: 484-643-2225
-            </Button>
+            </a>
             <ScheduleInspectionModal>
               <Button className="bg-[hsl(132,48%,35%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(132,48%,25%)]">
                 Schedule Free Inspection
@@ -144,10 +145,10 @@ export default function MontgomeryCountyPA() {
               <Link href="/wildlife-control">
                 <Button variant="outline" className="px-6 py-3">Wildlife Control</Button>
               </Link>
-              <Link href="/bed-bug-treatment">
+              <Link href="/bed-bugs">
                 <Button variant="outline" className="px-6 py-3">Bed Bug Treatment</Button>
               </Link>
-              <Link href="/termite-treatment">
+              <Link href="/termites">
                 <Button variant="outline" className="px-6 py-3">Termite Treatment</Button>
               </Link>
               <Link href="/bat-removal">

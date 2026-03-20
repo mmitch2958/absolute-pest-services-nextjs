@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, Calendar, MapPin, Clock, Mail, Check, Bug, Bed, Home as HomeIcon, Crown, Facebook, Twitter, Instagram, User } from "lucide-react";
+import { Phone, Calendar, MapPin, Clock, Mail, Check, Bug, Bed, Home as HomeIcon, Crown, Facebook, Instagram, User } from "lucide-react";
 import HeroSlider from "@/components/hero-slider";
 import ContactForm from "@/components/contact-form";
 import ScheduleInspectionModal from "@/components/schedule-inspection-modal";
@@ -120,7 +120,7 @@ export default function Home() {
       color: "bg-[hsl(207,73%,44%)]",
       textColor: "text-[hsl(207,73%,44%)]",
       hoverColor: "hover:text-[hsl(207,73%,34%)]",
-      route: "/bed-bug-treatment"
+      route: "/bed-bugs"
     },
     {
       icon: <HomeIcon className="w-8 h-8 text-white" />,
@@ -129,7 +129,7 @@ export default function Home() {
       color: "bg-[hsl(36,100%,47%)]",
       textColor: "text-[hsl(36,100%,47%)]",
       hoverColor: "hover:text-[hsl(36,100%,37%)]",
-      route: "/termite-treatment"
+      route: "/termites"
     },
     {
       icon: <Crown className="w-8 h-8 text-white" />,
@@ -190,10 +190,11 @@ export default function Home() {
         <meta property="og:description" content="Expert pest control across PA, DE &amp; MD. Humane wildlife control, bed bug treatment, termite protection &amp; bat removal. Licensed, insured &amp; available 24/7." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://absolutepestservices.com/" />
-        <meta property="og:image" content="https://absolutepestservices.com/images/og-image.jpg" />
+        <meta property="og:image" content="https://absolutepestservices.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Absolute Pest Services - Professional Pest Control in PA, DE, MD" />
         <meta name="twitter:description" content="Expert pest control in PA, DE &amp; MD. Humane wildlife control, bed bug treatment, termite protection &amp; bat removal." />
+        <meta name="twitter:image" content="https://absolutepestservices.com/og-image.png" />
       </Helmet>
       <GoogleBusinessSchema />
       {/* Header */}
@@ -481,13 +482,10 @@ export default function Home() {
                 Our experienced team is available for all your pest control needs.
               </p>
               <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <a href="https://www.facebook.com/absolutepestservices" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                   <Facebook className="w-6 h-6" />
                 </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <Twitter className="w-6 h-6" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <a href="https://www.instagram.com/absolutepestservicesPA" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                   <Instagram className="w-6 h-6" />
                 </a>
               </div>
@@ -497,8 +495,8 @@ export default function Home() {
               <h4 className="text-lg font-semibold mb-4">Services</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><a href="/wildlife-control" className="hover:text-white transition-colors">Wildlife Control</a></li>
-                <li><a href="/bed-bug-treatment" className="hover:text-white transition-colors">Bed Bug Treatment</a></li>
-                <li><a href="/termite-treatment" className="hover:text-white transition-colors">Termite Treatment</a></li>
+                <li><a href="/bed-bugs" className="hover:text-white transition-colors">Bed Bug Treatment</a></li>
+                <li><a href="/termites" className="hover:text-white transition-colors">Termite Treatment</a></li>
                 <li><a href="/bat-removal" className="hover:text-white transition-colors">Bat Removal</a></li>
               </ul>
             </div>

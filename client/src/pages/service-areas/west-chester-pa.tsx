@@ -1,22 +1,20 @@
 import { Helmet } from 'react-helmet-async';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Phone, MapPin, Clock, CheckCircle, ArrowLeft, Bug } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Phone, MapPin, Clock, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Link } from 'wouter';
 import ScheduleInspectionModal from '@/components/schedule-inspection-modal';
 import { AbsoluteLogoSimple } from '@/components/absolute-logo';
 import GoogleReviewRequest from '@/components/google-review-request';
 
-export default function ChesterCountyPA() {
+export default function WestChesterPA() {
   const cities = [
-    'West Grove',
-    'Oxford',
-    'Kennett Square',
-    'Avondale',
-    'Toughkenamon',
-    'West Chester',
-    'Chadds Ford',
-    'Landenberg'
+    'West Chester Borough',
+    'Westtown Township',
+    'West Goshen Township',
+    'East Goshen Township',
+    'West Bradford Township',
+    'Thornbury Township',
   ];
 
   const services = [
@@ -25,15 +23,52 @@ export default function ChesterCountyPA() {
     'Termite Inspection & Treatment',
     'Bat Removal Services',
     'Rodent Control',
-    'Ant & Insect Control'
+    'Ant & Insect Control',
+  ];
+
+  const faqs = [
+    {
+      q: 'Do older homes in West Chester Borough need special pest treatment?',
+      a: 'Yes. West Chester\'s historic 18th-century downtown homes have aged foundations and wall voids that create ideal entry points for rodents, carpenter ants, and termites. We tailor treatment plans to protect older structures while respecting their historic character.',
+    },
+    {
+      q: 'Are termites common in the West Chester area?',
+      a: 'Absolutely. Chester County\'s moist soil and mature tree canopy create prime termite habitat. We offer comprehensive termite inspections and treatment for both new construction near Penn State Great Valley and older properties throughout the borough.',
+    },
+    {
+      q: 'How quickly can you respond to a wildlife emergency in West Chester?',
+      a: 'We provide 24/7 emergency service throughout West Chester and surrounding townships. Most calls receive same-day response.',
+    },
+    {
+      q: 'Do you handle bat removal in historic West Chester buildings?',
+      a: 'Yes. Bat colonies are common in older stone and brick buildings in West Chester. Our licensed team performs humane exclusion that complies with Pennsylvania bat protection regulations.',
+    },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
       <Helmet>
-        <title>Chester County PA Pest Control Services | Absolute Pest Services</title>
-        <meta name="description" content="Chester County PA: Expert pest control services in West Grove, Kennett Square, Oxford, Avondale. Licensed, insured, emergency service available. 5.0 star rated." />
-        <link rel="canonical" href="https://absolutepestservices.com/service-areas/chester-county-pa" />
+        <title>West Chester PA Pest Control Services | Absolute Pest Services</title>
+        <meta name="description" content="West Chester PA pest control: expert wildlife removal, termite treatment, bed bug control, and rodent extermination. Serving West Chester Borough and surrounding townships. Call 484-643-2225." />
+        <link rel="canonical" href="https://absolutepestservices.com/service-areas/west-chester-pa" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": "Absolute Pest Services – West Chester PA",
+            "telephone": "484-643-2225",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "21 Sheffield Dr",
+              "addressLocality": "West Grove",
+              "addressRegion": "PA",
+              "postalCode": "19390",
+              "addressCountry": "US"
+            },
+            "areaServed": "West Chester, PA",
+            "url": "https://absolutepestservices.com/service-areas/west-chester-pa"
+          })}
+        </script>
       </Helmet>
 
       {/* Header */}
@@ -59,16 +94,14 @@ export default function ChesterCountyPA() {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="bg-gradient-to-r from-[hsl(132,48%,35%)] to-[hsl(132,48%,25%)] py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-5xl font-bold text-white mb-6">
-            Chester County, PA Pest Control Services
+            West Chester, PA Pest Control Services
           </h1>
           <p className="text-xl text-green-100 mb-8 max-w-3xl mx-auto">
-            Professional pest control services throughout Chester County, Pennsylvania. 
-            From West Grove to Kennett Square, we protect homes and businesses with 
-            safe, effective treatments.
+            Professional pest control for West Chester Borough and the surrounding area. From historic downtown homes to new construction near Penn State Great Valley, we protect every property with safe, effective treatments.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="tel:+14846432225" className="bg-white text-[hsl(132,48%,35%)] px-8 py-4 text-lg font-semibold hover:bg-gray-100">
@@ -88,16 +121,12 @@ export default function ChesterCountyPA() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Cities We Serve in Chester County
-            </h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Neighborhoods We Serve in West Chester</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Providing fast, reliable pest control services to homeowners and businesses 
-              throughout Chester County, PA.
+              Fast, reliable pest control throughout West Chester Borough and surrounding townships.
             </p>
           </div>
-
-          <div className="grid md:grid-cols-4 gap-6 mb-12">
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
             {cities.map((city, index) => (
               <Card key={index} className="bg-emerald-50 hover:shadow-lg transition-shadow">
                 <CardContent className="p-6 text-center">
@@ -113,18 +142,15 @@ export default function ChesterCountyPA() {
         </div>
       </section>
 
-      {/* Services Available */}
+      {/* Services */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Pest Control Services in Chester County
-            </h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Pest Control Services in West Chester</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Complete pest management solutions for your Chester County home or business.
+              Complete pest management for West Chester homes and businesses.
             </p>
           </div>
-
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, index) => (
               <Card key={index} className="bg-white hover:shadow-lg transition-shadow">
@@ -132,34 +158,39 @@ export default function ChesterCountyPA() {
                   <div className="w-12 h-12 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
                     <CheckCircle className="w-6 h-6 text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{service}</h3>
-                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">{service}</h3>
                 </CardContent>
               </Card>
             ))}
           </div>
-
           <div className="text-center mt-12">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/wildlife-control">
-                <Button variant="outline" className="px-6 py-3">Wildlife Control</Button>
-              </Link>
-              <Link href="/bed-bugs">
-                <Button variant="outline" className="px-6 py-3">Bed Bug Treatment</Button>
-              </Link>
-              <Link href="/termites">
-                <Button variant="outline" className="px-6 py-3">Termite Treatment</Button>
-              </Link>
-              <Link href="/bat-removal">
-                <Button variant="outline" className="px-6 py-3">Bat Removal</Button>
-              </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
+              <Link href="/wildlife-control"><Button variant="outline" className="px-6 py-3">Wildlife Control</Button></Link>
+              <Link href="/bed-bugs"><Button variant="outline" className="px-6 py-3">Bed Bug Treatment</Button></Link>
+              <Link href="/termites"><Button variant="outline" className="px-6 py-3">Termite Treatment</Button></Link>
+              <Link href="/bat-removal"><Button variant="outline" className="px-6 py-3">Bat Removal</Button></Link>
+              <Link href="/rodents"><Button variant="outline" className="px-6 py-3">Rodent Control</Button></Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Contact Info */}
+      {/* FAQ */}
+      <section className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-4xl font-bold text-gray-900 mb-10 text-center">West Chester Pest Control FAQs</h2>
+          <div className="space-y-6">
+            {faqs.map((faq, index) => (
+              <div key={index} className="border rounded-lg p-6 bg-emerald-50">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{faq.q}</h3>
+                <p className="text-gray-700">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact */}
       <section className="py-16 bg-[hsl(210,13%,28%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
@@ -173,19 +204,17 @@ export default function ChesterCountyPA() {
                 <p className="text-gray-600 mt-2">24/7 Emergency Service</p>
               </CardContent>
             </Card>
-
             <Card className="bg-white">
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 bg-[hsl(36,100%,47%)] rounded-full flex items-center justify-center mx-auto mb-4">
                   <Clock className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Hours</h3>
-                <p className="text-gray-600">Mon-Fri: 8:00 AM - 5:00 PM</p>
-                <p className="text-gray-600">Sat: 8:00 AM - 12:00 PM</p>
+                <p className="text-gray-600">Mon–Fri: 8:00 AM – 5:00 PM</p>
+                <p className="text-gray-600">Sat: 8:00 AM – 12:00 PM</p>
                 <p className="text-gray-600">Sun: Emergency Only</p>
               </CardContent>
             </Card>
-
             <Card className="bg-white">
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 bg-[hsl(207,73%,44%)] rounded-full flex items-center justify-center mx-auto mb-4">
@@ -200,7 +229,6 @@ export default function ChesterCountyPA() {
         </div>
       </section>
 
-      {/* Review Request */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <GoogleReviewRequest />
       </div>

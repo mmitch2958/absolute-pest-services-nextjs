@@ -33,6 +33,7 @@ export default function DelawareCountyPA() {
       <Helmet>
         <title>Delaware County PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Delaware County PA: Expert pest control in Media, Newtown Square, Chester, Aston, Brookhaven. Licensed, insured, emergency service available." />
+        <link rel="canonical" href="https://absolutepestservices.com/service-areas/delaware-county-pa" />
       </Helmet>
 
       {/* Header */}
@@ -70,10 +71,10 @@ export default function DelawareCountyPA() {
             effective, reliable treatments.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-white text-[hsl(207,73%,44%)] px-8 py-4 text-lg font-semibold hover:bg-gray-100">
+            <a href="tel:+16103254000" className="bg-white text-[hsl(207,73%,44%)] px-8 py-4 text-lg font-semibold hover:bg-gray-100">
               <Phone className="mr-2 h-5 w-5" />
               Call Now: 610-325-4000
-            </Button>
+            </a>
             <ScheduleInspectionModal>
               <Button className="bg-[hsl(36,100%,47%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(36,100%,37%)]">
                 Schedule Free Inspection
@@ -144,10 +145,10 @@ export default function DelawareCountyPA() {
               <Link href="/wildlife-control">
                 <Button variant="outline" className="px-6 py-3">Wildlife Control</Button>
               </Link>
-              <Link href="/bed-bug-treatment">
+              <Link href="/bed-bugs">
                 <Button variant="outline" className="px-6 py-3">Bed Bug Treatment</Button>
               </Link>
-              <Link href="/termite-treatment">
+              <Link href="/termites">
                 <Button variant="outline" className="px-6 py-3">Termite Treatment</Button>
               </Link>
               <Link href="/bat-removal">

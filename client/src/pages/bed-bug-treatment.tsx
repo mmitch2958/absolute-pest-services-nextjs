@@ -176,10 +176,10 @@ export default function BedBugTreatment() {
             We use the latest technology and techniques to eliminate bed bugs completely.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-white text-[hsl(207,73%,44%)] px-8 py-4 text-lg font-semibold hover:bg-gray-100">
+            <a href="tel:+16108693000" className="inline-flex items-center bg-white text-[hsl(207,73%,44%)] px-8 py-4 text-lg font-semibold hover:bg-gray-100 rounded-md">
               <Phone className="mr-2 h-5 w-5" />
               Call Now: 610-869-3000
-            </Button>
+            </a>
             <ScheduleInspectionModal>
               <Button className="bg-[hsl(36,100%,47%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(36,100%,37%)]">
                 <Calendar className="mr-2 h-5 w-5" />
@@ -391,10 +391,10 @@ export default function BedBugTreatment() {
             your bed bug problem with proven, effective treatments.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-white text-[hsl(207,73%,44%)] px-8 py-4 text-lg font-semibold hover:bg-gray-100">
+            <a href="tel:+16108693000" className="inline-flex items-center bg-white text-[hsl(207,73%,44%)] px-8 py-4 text-lg font-semibold hover:bg-gray-100 rounded-md">
               <Phone className="mr-2 h-5 w-5" />
               Call Now: 610-869-3000
-            </Button>
+            </a>
             <ScheduleInspectionModal>
               <Button className="bg-[hsl(36,100%,47%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(36,100%,37%)]">
                 <Calendar className="mr-2 h-5 w-5" />

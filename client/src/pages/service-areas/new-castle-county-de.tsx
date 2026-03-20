@@ -33,6 +33,7 @@ export default function NewCastleCountyDE() {
       <Helmet>
         <title>New Castle County DE Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="New Castle County DE: Expert pest control in Hockessin, Newark, Wilmington, Bear. Licensed, insured, emergency service available." />
+        <link rel="canonical" href="https://absolutepestservices.com/service-areas/new-castle-county-de" />
       </Helmet>
 
       {/* Header */}
@@ -70,10 +71,10 @@ export default function NewCastleCountyDE() {
             safe, effective treatments.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-white text-red-600 px-8 py-4 text-lg font-semibold hover:bg-gray-100">
+            <a href="tel:+13022351975" className="bg-white text-red-600 px-8 py-4 text-lg font-semibold hover:bg-gray-100">
               <Phone className="mr-2 h-5 w-5" />
               Call Now: 302-235-1975
-            </Button>
+            </a>
             <ScheduleInspectionModal>
               <Button className="bg-[hsl(36,100%,47%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(36,100%,37%)]">
                 Schedule Free Inspection
@@ -144,10 +145,10 @@ export default function NewCastleCountyDE() {
               <Link href="/wildlife-control">
                 <Button variant="outline" className="px-6 py-3">Wildlife Control</Button>
               </Link>
-              <Link href="/bed-bug-treatment">
+              <Link href="/bed-bugs">
                 <Button variant="outline" className="px-6 py-3">Bed Bug Treatment</Button>
               </Link>
-              <Link href="/termite-treatment">
+              <Link href="/termites">
                 <Button variant="outline" className="px-6 py-3">Termite Treatment</Button>
               </Link>
               <Link href="/bat-removal">

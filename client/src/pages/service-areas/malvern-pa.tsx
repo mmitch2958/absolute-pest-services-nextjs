@@ -1,23 +1,14 @@
 import { Helmet } from 'react-helmet-async';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Phone, MapPin, Clock, CheckCircle, ArrowLeft, Bug } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Phone, MapPin, Clock, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Link } from 'wouter';
 import ScheduleInspectionModal from '@/components/schedule-inspection-modal';
 import { AbsoluteLogoSimple } from '@/components/absolute-logo';
 import GoogleReviewRequest from '@/components/google-review-request';
 
-export default function ChesterCountyPA() {
-  const cities = [
-    'West Grove',
-    'Oxford',
-    'Kennett Square',
-    'Avondale',
-    'Toughkenamon',
-    'West Chester',
-    'Chadds Ford',
-    'Landenberg'
-  ];
+export default function MalvernPA() {
+  const cities = ["Malvern Borough", "Frazer", "Great Valley", "East Whiteland Township", "Tredyffrin Township", "Berwyn"];
 
   const services = [
     'Wildlife Control & Removal',
@@ -25,18 +16,37 @@ export default function ChesterCountyPA() {
     'Termite Inspection & Treatment',
     'Bat Removal Services',
     'Rodent Control',
-    'Ant & Insect Control'
+    'Ant & Insect Control',
   ];
+
+  const faqs = [{"q": "Are rodents common in Malvern's upscale neighborhoods?", "a": "Yes. Malvern's mature tree canopy and proximity to wooded buffers along the Paoli Pike corridor create significant rodent pressure, even in high-end neighborhoods. We use integrated rodent management that is safe for children and pets."}, {"q": "Do pharma and corporate campuses in Malvern need commercial pest control?", "a": "Absolutely. We provide commercial pest management programs tailored to the compliance needs of pharma, biotech, and office facilities throughout Great Valley."}, {"q": "How do termites affect Malvern homes?", "a": "Chester County's soil conditions support active Eastern Subterranean Termite populations. We offer thorough inspections and liquid or bait-station treatments to protect your investment."}, {"q": "Can you remove wildlife from wooded Malvern properties?", "a": "Yes. We handle groundhogs, raccoons, foxes, and other wildlife commonly found near Malvern's greenway areas and corporate campus perimeters."}];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
       <Helmet>
-        <title>Chester County PA Pest Control Services | Absolute Pest Services</title>
-        <meta name="description" content="Chester County PA: Expert pest control services in West Grove, Kennett Square, Oxford, Avondale. Licensed, insured, emergency service available. 5.0 star rated." />
-        <link rel="canonical" href="https://absolutepestservices.com/service-areas/chester-county-pa" />
+        <title>Malvern PA Pest Control Services | Absolute Pest Services</title>
+        <meta name="description" content="Malvern PA pest control: wildlife removal, termite treatment, bed bug control along the Paoli Pike corridor. Serving Malvern, Frazer, and Great Valley. Call 484-643-2225." />
+        <link rel="canonical" href="https://absolutepestservices.com/service-areas/malvern-pa" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": "Absolute Pest Services – Malvern, PA Pest Control Services",
+            "telephone": "484-643-2225",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "21 Sheffield Dr",
+              "addressLocality": "West Grove",
+              "addressRegion": "PA",
+              "postalCode": "19390",
+              "addressCountry": "US"
+            },
+            "areaServed": "Malvern, PA",
+            "url": "https://absolutepestservices.com/service-areas/malvern-pa"
+          })}
+        </script>
       </Helmet>
 
-      {/* Header */}
       <header className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
@@ -59,16 +69,13 @@ export default function ChesterCountyPA() {
         </div>
       </header>
 
-      {/* Hero Section */}
       <section className="bg-gradient-to-r from-[hsl(132,48%,35%)] to-[hsl(132,48%,25%)] py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-5xl font-bold text-white mb-6">
-            Chester County, PA Pest Control Services
+            Malvern, PA Pest Control Services
           </h1>
           <p className="text-xl text-green-100 mb-8 max-w-3xl mx-auto">
-            Professional pest control services throughout Chester County, Pennsylvania. 
-            From West Grove to Kennett Square, we protect homes and businesses with 
-            safe, effective treatments.
+            Expert pest control for Malvern's pharma and tech corridor homes and businesses. From upscale neighborhoods along Paoli Pike to Great Valley, we deliver fast and effective pest management.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="tel:+14846432225" className="bg-white text-[hsl(132,48%,35%)] px-8 py-4 text-lg font-semibold hover:bg-gray-100">
@@ -84,20 +91,15 @@ export default function ChesterCountyPA() {
         </div>
       </section>
 
-      {/* Cities Served */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Cities We Serve in Chester County
-            </h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Neighborhoods We Serve</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Providing fast, reliable pest control services to homeowners and businesses 
-              throughout Chester County, PA.
+              Fast, reliable pest control throughout the Malvern, PA area.
             </p>
           </div>
-
-          <div className="grid md:grid-cols-4 gap-6 mb-12">
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
             {cities.map((city, index) => (
               <Card key={index} className="bg-emerald-50 hover:shadow-lg transition-shadow">
                 <CardContent className="p-6 text-center">
@@ -113,18 +115,14 @@ export default function ChesterCountyPA() {
         </div>
       </section>
 
-      {/* Services Available */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Pest Control Services in Chester County
-            </h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Pest Control Services</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Complete pest management solutions for your Chester County home or business.
+              Complete pest management solutions for Malvern, PA homes and businesses.
             </p>
           </div>
-
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, index) => (
               <Card key={index} className="bg-white hover:shadow-lg transition-shadow">
@@ -132,34 +130,37 @@ export default function ChesterCountyPA() {
                   <div className="w-12 h-12 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
                     <CheckCircle className="w-6 h-6 text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{service}</h3>
-                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">{service}</h3>
                 </CardContent>
               </Card>
             ))}
           </div>
-
           <div className="text-center mt-12">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/wildlife-control">
-                <Button variant="outline" className="px-6 py-3">Wildlife Control</Button>
-              </Link>
-              <Link href="/bed-bugs">
-                <Button variant="outline" className="px-6 py-3">Bed Bug Treatment</Button>
-              </Link>
-              <Link href="/termites">
-                <Button variant="outline" className="px-6 py-3">Termite Treatment</Button>
-              </Link>
-              <Link href="/bat-removal">
-                <Button variant="outline" className="px-6 py-3">Bat Removal</Button>
-              </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
+              <Link href="/wildlife-control"><Button variant="outline" className="px-6 py-3">Wildlife Control</Button></Link>
+              <Link href="/bed-bugs"><Button variant="outline" className="px-6 py-3">Bed Bug Treatment</Button></Link>
+              <Link href="/termites"><Button variant="outline" className="px-6 py-3">Termite Treatment</Button></Link>
+              <Link href="/bat-removal"><Button variant="outline" className="px-6 py-3">Bat Removal</Button></Link>
+              <Link href="/rodents"><Button variant="outline" className="px-6 py-3">Rodent Control</Button></Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Contact Info */}
+      <section className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-4xl font-bold text-gray-900 mb-10 text-center">Frequently Asked Questions</h2>
+          <div className="space-y-6">
+            {faqs.map((faq, index) => (
+              <div key={index} className="border rounded-lg p-6 bg-emerald-50">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{faq.q}</h3>
+                <p className="text-gray-700">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 bg-[hsl(210,13%,28%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
@@ -173,19 +174,17 @@ export default function ChesterCountyPA() {
                 <p className="text-gray-600 mt-2">24/7 Emergency Service</p>
               </CardContent>
             </Card>
-
             <Card className="bg-white">
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 bg-[hsl(36,100%,47%)] rounded-full flex items-center justify-center mx-auto mb-4">
                   <Clock className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Hours</h3>
-                <p className="text-gray-600">Mon-Fri: 8:00 AM - 5:00 PM</p>
-                <p className="text-gray-600">Sat: 8:00 AM - 12:00 PM</p>
+                <p className="text-gray-600">Mon–Fri: 8:00 AM – 5:00 PM</p>
+                <p className="text-gray-600">Sat: 8:00 AM – 12:00 PM</p>
                 <p className="text-gray-600">Sun: Emergency Only</p>
               </CardContent>
             </Card>
-
             <Card className="bg-white">
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 bg-[hsl(207,73%,44%)] rounded-full flex items-center justify-center mx-auto mb-4">
@@ -200,7 +199,6 @@ export default function ChesterCountyPA() {
         </div>
       </section>
 
-      {/* Review Request */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <GoogleReviewRequest />
       </div>
