@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import cron from "node-cron";
@@ -16,6 +17,10 @@ declare module 'express-session' {
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Serve uploaded blog images
+const publicPath = path.resolve(process.cwd(), 'public');
+app.use('/uploads', express.static(path.join(publicPath, 'uploads')));
 
 // Health check endpoints - must be before any middleware or route registration
 // Deployment health checks hit these endpoints and expect fast 200 responses

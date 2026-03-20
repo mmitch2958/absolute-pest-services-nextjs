@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, Edit, Trash2, Eye, EyeOff, Rss, Mail } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Rss, Mail, Sparkles, CheckCircle, Loader2, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
@@ -10,19 +10,50 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import type { BlogPost, InsertBlogPost } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+
+interface ResearchedTopic {
+  id: number;
+  title: string;
+  category: string;
+  type: string;
+  searchVolume: number;
+  description: string;
+  keywords: string[];
+  selected?: boolean;
+}
+
+interface GeneratedArticle {
+  id?: number;
+  title: string;
+  slug?: string;
+  featuredImage?: string;
+  status: 'created' | 'error';
+  error?: string;
+}
 
 export function AdminBlog() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSyndicateOpen, setIsSyndicateOpen] = useState(false);
   const [isNewsletterOpen, setIsNewsletterOpen] = useState(false);
+  const [isAIGenerateOpen, setIsAIGenerateOpen] = useState(false);
   const [feedUrl, setFeedUrl] = useState("https://pestmgt.com/feed/");
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterSubject, setNewsletterSubject] = useState("Latest Pest Control Tips & Updates");
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [selectedPosts, setSelectedPosts] = useState<number[]>([]);
+  
+  // AI Generate state
+  const [researchedTopics, setResearchedTopics] = useState<ResearchedTopic[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<number[]>([]);
+  const [isResearching, setIsResearching] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [generatedArticles, setGeneratedArticles] = useState<GeneratedArticle[]>([]);
+  const [aiStep, setAiStep] = useState<'idle' | 'researching' | 'selecting' | 'generating' | 'complete'>('idle');
   const [formData, setFormData] = useState<InsertBlogPost>({
     title: "",
     slug: "",
@@ -280,6 +311,140 @@ export function AdminBlog() {
     });
   };
 
+  // AI Research Topics
+  const handleResearchTopics = async () => {
+    setIsResearching(true);
+    setAiStep('researching');
+    setResearchedTopics([]);
+    setSelectedTopics([]);
+    setGeneratedArticles([]);
+    
+    try {
+      const response = await fetch('/api/admin/blog/research-topics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && data.topics) {
+        setResearchedTopics(data.topics.map((t: ResearchedTopic) => ({ ...t, selected: false })));
+        setAiStep('selecting');
+        toast({ 
+          title: "Topics Researched", 
+          description: `Found ${data.topics.length} trending topics. Select up to 6 to generate articles.` 
+        });
+      } else {
+        throw new Error(data.message || 'Failed to research topics');
+      }
+    } catch (error) {
+      toast({ 
+        title: "Error", 
+        description: "Failed to research topics. Please try again.", 
+        variant: "destructive" 
+      });
+      setAiStep('idle');
+    } finally {
+      setIsResearching(false);
+    }
+  };
+
+  // Toggle topic selection
+  const toggleTopicSelection = (topicId: number) => {
+    setSelectedTopics(prev => {
+      if (prev.includes(topicId)) {
+        return prev.filter(id => id !== topicId);
+      }
+      if (prev.length >= 6) {
+        toast({ 
+          title: "Limit Reached", 
+          description: "You can generate up to 6 articles at a time.", 
+          variant: "destructive" 
+        });
+        return prev;
+      }
+      return [...prev, topicId];
+    });
+  };
+
+  // Generate selected articles
+  const handleGenerateArticles = async () => {
+    if (selectedTopics.length === 0) {
+      toast({ 
+        title: "Error", 
+        description: "Please select at least one topic", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    setAiStep('generating');
+    setGenerationProgress(0);
+    setGeneratedArticles([]);
+
+    try {
+      const topicsToGenerate = researchedTopics.filter(t => selectedTopics.includes(t.id));
+      
+      // Simulate progress updates
+      const progressInterval = setInterval(() => {
+        setGenerationProgress(prev => Math.min(prev + 5, 90));
+      }, 500);
+
+      const response = await fetch('/api/admin/blog/generate-articles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          topicIds: selectedTopics,
+          topics: topicsToGenerate 
+        })
+      });
+      
+      clearInterval(progressInterval);
+      
+      const data = await response.json();
+      
+      if (data.success && data.articles) {
+        setGeneratedArticles(data.articles);
+        setGenerationProgress(100);
+        setAiStep('complete');
+        
+        const successCount = data.articles.filter((a: GeneratedArticle) => a.status === 'created').length;
+        
+        // Refresh posts list
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/blog/posts'] });
+        
+        toast({ 
+          title: "Articles Generated!", 
+          description: `Successfully created ${successCount} blog articles with images.` 
+        });
+      } else {
+        throw new Error(data.message || 'Failed to generate articles');
+      }
+    } catch (error) {
+      toast({ 
+        title: "Error", 
+        description: "Failed to generate articles. Please try again.", 
+        variant: "destructive" 
+      });
+      setAiStep('selecting');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Reset AI panel
+  const handleResetAIPanel = () => {
+    setResearchedTopics([]);
+    setSelectedTopics([]);
+    setGeneratedArticles([]);
+    setGenerationProgress(0);
+    setAiStep('idle');
+    setIsAIGenerateOpen(false);
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -288,6 +453,252 @@ export function AdminBlog() {
           <p className="text-gray-600" data-testid="text-page-subtitle">Create and manage blog posts for SEO</p>
         </div>
         <div className="flex gap-2">
+          <Dialog open={isAIGenerateOpen} onOpenChange={setIsAIGenerateOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="default" 
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                onClick={() => { setAiStep('idle'); setResearchedTopics([]); setSelectedTopics([]); setGeneratedArticles([]); }}
+                data-testid="button-ai-generate"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                AI Research & Generate
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  AI Blog Article Generator
+                </DialogTitle>
+                <DialogDescription>
+                  Research trending pest control topics and generate SEO-optimized blog articles with images
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-6 py-4">
+                {/* Step 1: Research Topics */}
+                {aiStep === 'idle' && (
+                  <div className="text-center py-8">
+                    <div className="mb-4">
+                      <Sparkles className="w-16 h-16 mx-auto text-purple-600 mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">Ready to Research Topics</h3>
+                      <p className="text-gray-600 mb-6">
+                        AI will search for trending pest control topics based on seasonal trends, 
+                        search volume, and homeowner interests in Southeastern PA.
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={handleResearchTopics}
+                      disabled={isResearching}
+                      className="bg-gradient-to-r from-purple-600 to-blue-600"
+                      data-testid="button-start-research"
+                    >
+                      {isResearching ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Researching...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Start Topic Research
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
+                {/* Step 2: Researching */}
+                {aiStep === 'researching' && (
+                  <div className="text-center py-8">
+                    <Loader2 className="w-16 h-16 mx-auto text-purple-600 animate-spin mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Researching Trending Topics...</h3>
+                    <p className="text-gray-600">
+                      Searching Search Console data and analyzing current pest control trends
+                    </p>
+                  </div>
+                )}
+
+                {/* Step 3: Select Topics */}
+                {aiStep === 'selecting' && researchedTopics.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold">Select Topics to Generate</h3>
+                        <p className="text-sm text-gray-600">
+                          Choose up to 6 topics ({selectedTopics.length}/6 selected)
+                        </p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleResearchTopics}
+                        disabled={isResearching}
+                      >
+                        Refresh Topics
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {researchedTopics.map((topic) => (
+                        <Card 
+                          key={topic.id} 
+                          className={`cursor-pointer transition-all ${
+                            selectedTopics.includes(topic.id) 
+                              ? 'border-purple-500 border-2 bg-purple-50' 
+                              : 'hover:border-gray-300'
+                          }`}
+                          onClick={() => toggleTopicSelection(topic.id)}
+                          data-testid={`topic-card-${topic.id}`}
+                        >
+                          <CardHeader className="pb-2">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <CardTitle className="text-sm font-medium line-clamp-2">
+                                  {topic.title}
+                                </CardTitle>
+                                <div className="flex gap-2 mt-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    {topic.category}
+                                  </Badge>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {topic.type}
+                                  </Badge>
+                                </div>
+                              </div>
+                              {selectedTopics.includes(topic.id) && (
+                                <CheckCircle className="w-5 h-5 text-purple-600 flex-shrink-0" />
+                              )}
+                            </div>
+                          </CardHeader>
+                          <CardContent className="pb-3">
+                            <p className="text-xs text-gray-600 line-clamp-2">
+                              {topic.description}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-2">
+                              {topic.searchVolume?.toLocaleString()} monthly searches
+                            </p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-4 border-t">
+                      <Button variant="outline" onClick={handleResetAIPanel}>
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={handleGenerateArticles}
+                        disabled={selectedTopics.length === 0 || isGenerating}
+                        className="bg-gradient-to-r from-purple-600 to-blue-600"
+                        data-testid="button-generate-articles"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Generate {selectedTopics.length} Article{selectedTopics.length !== 1 ? 's' : ''}
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 4: Generating */}
+                {aiStep === 'generating' && (
+                  <div className="space-y-6 py-4">
+                    <div className="text-center">
+                      <Loader2 className="w-12 h-12 mx-auto text-purple-600 animate-spin mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">Generating Articles...</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Creating SEO-optimized content and generating images
+                      </p>
+                    </div>
+                    <Progress value={generationProgress} className="w-full" />
+                    <p className="text-center text-sm text-gray-500">
+                      {generationProgress < 30 ? 'Researching keywords and structure...' :
+                       generationProgress < 60 ? 'Writing article content...' :
+                       generationProgress < 90 ? 'Generating featured images...' :
+                       'Finalizing articles...'}
+                    </p>
+                  </div>
+                )}
+
+                {/* Step 5: Complete */}
+                {aiStep === 'complete' && generatedArticles.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="text-center mb-6">
+                      <CheckCircle className="w-12 h-12 mx-auto text-green-600 mb-2" />
+                      <h3 className="text-lg font-semibold">Articles Generated!</h3>
+                      <p className="text-sm text-gray-600">
+                        {generatedArticles.filter(a => a.status === 'created').length} articles created as drafts
+                      </p>
+                    </div>
+
+                    <div className="space-y-3">
+                      {generatedArticles.map((article, index) => (
+                        <Card key={index} className={article.status === 'error' ? 'border-red-300 bg-red-50' : ''}>
+                          <CardContent className="py-3">
+                            <div className="flex items-center gap-4">
+                              {article.featuredImage ? (
+                                <img 
+                                  src={article.featuredImage} 
+                                  alt="" 
+                                  className="w-16 h-12 object-cover rounded"
+                                />
+                              ) : (
+                                <div className="w-16 h-12 bg-gray-200 rounded flex items-center justify-center">
+                                  <ImageIcon className="w-6 h-6 text-gray-400" />
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm truncate">{article.title}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  {article.status === 'created' ? (
+                                    <Badge variant="default" className="text-xs bg-green-600">
+                                      <CheckCircle className="w-3 h-3 mr-1" />
+                                      Created
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="destructive" className="text-xs">
+                                      Error: {article.error}
+                                    </Badge>
+                                  )}
+                                  {article.slug && (
+                                    <span className="text-xs text-gray-400">/blog/{article.slug}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-4 border-t">
+                      <Button variant="outline" onClick={handleResetAIPanel}>
+                        Close
+                      </Button>
+                      <Button 
+                        onClick={() => {
+                          handleResetAIPanel();
+                          queryClient.invalidateQueries({ queryKey: ['/api/admin/blog/posts'] });
+                        }}
+                      >
+                        View Posts
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
           {selectedPosts.length > 0 && (
             <>
               <Button 

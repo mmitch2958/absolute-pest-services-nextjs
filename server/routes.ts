@@ -1288,6 +1288,370 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==========================================
+  // AI Blog Generation Routes
+  // ==========================================
+
+  // POST /api/admin/blog/research-topics - Research trending pest control topics
+  app.post("/api/admin/blog/research-topics", requireAdmin, async (req, res) => {
+    try {
+      // Research topics using web search simulation (pre-defined trending topics)
+      // In production, this would call Search Console API + web search
+      
+      const currentMonth = new Date().getMonth();
+      const season = currentMonth >= 2 && currentMonth <= 4 ? 'spring' :
+                     currentMonth >= 5 && currentMonth <= 7 ? 'summer' :
+                     currentMonth >= 8 && currentMonth <= 10 ? 'fall' : 'winter';
+      
+      const allTopics = [
+        // Insect/Pest specific
+        {
+          id: 1,
+          title: "10 Warning Signs You Have a Bed Bug Infestation",
+          category: "Insect Control",
+          type: "pest",
+          searchVolume: 12500,
+          description: "Homeowners want to identify bed bugs before infestations spread. Covers signs, detection tips, and when to call professionals.",
+          keywords: ["bed bugs", "bed bug signs", "bed bug infestation", "bed bug identification"]
+        },
+        {
+          id: 2,
+          title: "Ant Prevention Tips: Keep Your Chester County Home Ant-Free",
+          category: "Insect Control",
+          type: "pest",
+          searchVolume: 9800,
+          description: "Spring is prime ant season. Practical prevention tips for common Pennsylvania ant species including carpenter ants.",
+          keywords: ["ant prevention", "carpenter ants", "ant control", "Chester County pest control"]
+        },
+        {
+          id: 3,
+          title: "Tick Season Alert: Protecting Your Family in Southeastern PA",
+          category: "Insect Control",
+          type: "pest",
+          searchVolume: 15200,
+          description: "Ticks are a major concern for families with pets and children. Covers Lyme disease prevention and yard treatments.",
+          keywords: ["tick prevention", "Lyme disease", "tick control", "yard ticks"]
+        },
+        {
+          id: 4,
+          title: "Why You're Seeing More Spiders in Your Home (And What to Do)",
+          category: "Insect Control",
+          type: "pest",
+          searchVolume: 8400,
+          description: "Homeowners notice spider increases at certain times. Explains spider behavior and safe removal methods.",
+          keywords: ["spider control", "spiders in house", "spider prevention", "common spiders PA"]
+        },
+        // Wildlife prevention
+        {
+          id: 5,
+          title: "How to Keep Mice Out of Your Garage This Winter",
+          category: "Wildlife Prevention",
+          type: "wildlife",
+          searchVolume: 11000,
+          description: "Garages are prime entry points for mice. Covers exclusion techniques, sealing entry points, and prevention.",
+          keywords: ["mice prevention", "garage mice", "mouse control", "rodent exclusion"]
+        },
+        {
+          id: 6,
+          title: "Bat Exclusion 101: Safely Removing Bats from Your Attic",
+          category: "Wildlife Prevention",
+          type: "wildlife",
+          searchVolume: 7200,
+          description: "Bats are protected species in PA. Explains legal, safe exclusion methods and why DIY removal is risky.",
+          keywords: ["bat exclusion", "bats in attic", "bat removal", "Pennsylvania bat control"]
+        },
+        {
+          id: 7,
+          title: "Squirrel Problems? How to Protect Your Home from Damage",
+          category: "Wildlife Prevention",
+          type: "wildlife",
+          searchVolume: 6800,
+          description: "Squirrels cause significant home damage. Covers identification of entry points and professional exclusion.",
+          keywords: ["squirrel control", "squirrels in attic", "wildlife damage", "squirrel removal"]
+        },
+        // Seasonal
+        {
+          id: 8,
+          title: `${season.charAt(0).toUpperCase() + season.slice(1)} Pest Prep: What Chester County Homeowners Need to Know`,
+          category: "Seasonal Tips",
+          type: "seasonal",
+          searchVolume: 5500,
+          description: `Season-specific pest preparation guide for Southeastern Pennsylvania homeowners. Covers ${season} pest trends and prevention.`,
+          keywords: [`${season} pests`, "Chester County", "pest prevention", "seasonal pest control"]
+        },
+        // Product/Service
+        {
+          id: 9,
+          title: "Why Professional Termite Inspection Is Worth Every Penny",
+          category: "Services",
+          type: "product",
+          searchVolume: 8900,
+          description: "Termites cause billions in damage annually. Explains inspection process, costs vs. damage costs, and early detection value.",
+          keywords: ["termite inspection", "termite damage", "termite prevention", "professional pest control"]
+        },
+        {
+          id: 10,
+          title: "Quarterly Pest Control Plans: Are They Right for Your Home?",
+          category: "Services",
+          type: "product",
+          searchVolume: 7600,
+          description: "Compares DIY vs. professional quarterly pest control. Covers costs, benefits, and what's included in professional service.",
+          keywords: ["quarterly pest control", "pest control plan", "recurring pest service", "pest control cost"]
+        }
+      ];
+
+      // Shuffle and return 10 topics
+      const shuffled = allTopics.sort(() => Math.random() - 0.5);
+      
+      res.json({ success: true, topics: shuffled });
+    } catch (error) {
+      console.error("Error researching topics:", error);
+      res.status(500).json({ success: false, message: "Failed to research topics" });
+    }
+  });
+
+  // POST /api/admin/blog/generate-image - Generate featured image for article
+  app.post("/api/admin/blog/generate-image", requireAdmin, async (req, res) => {
+    try {
+      const { title, category } = req.body;
+      
+      if (!title) {
+        return res.status(400).json({ success: false, message: "Title is required" });
+      }
+
+      const openaiApiKey = process.env.OPENAI_API_KEY;
+      if (!openaiApiKey) {
+        return res.status(500).json({ success: false, message: "OpenAI API key not configured" });
+      }
+
+      // Create a detailed prompt for the image
+      const imagePrompt = `Professional photograph for a pest control blog article about: ${title}. 
+        Realistic style, high quality, showing a clean suburban home exterior or interior with subtle pest control context. 
+        Warm lighting, professional photography style suitable for a business blog. 
+        No text or words in the image. 
+        Aspect ratio 16:9 for web use.`;
+
+      const response = await fetch("https://api.openai.com/v1/images/generations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openaiApiKey}`
+        },
+        body: JSON.stringify({
+          model: "dall-e-3",
+          prompt: imagePrompt,
+          n: 1,
+          size: "1792x1024"
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.error) {
+        console.error("OpenAI image generation error:", data.error);
+        return res.status(500).json({ success: false, message: "Image generation failed: " + data.error.message });
+      }
+
+      const imageUrl = data.data?.[0]?.url;
+      
+      if (!imageUrl) {
+        return res.status(500).json({ success: false, message: "No image URL returned" });
+      }
+
+      // Download and save the image locally
+      const imageResponse = await fetch(imageUrl);
+      const arrayBuffer = await imageResponse.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      
+      // Create directory if it doesn't exist
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'blog-images');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      
+      // Generate filename
+      const filename = `blog-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.png`;
+      const filePath = path.join(uploadDir, filename);
+      
+      // Save the image
+      fs.writeFileSync(filePath, buffer);
+      
+      // Return the public URL path
+      const publicUrl = `/uploads/blog-images/${filename}`;
+      
+      res.json({ success: true, imageUrl: publicUrl });
+    } catch (error) {
+      console.error("Error generating image:", error);
+      res.status(500).json({ success: false, message: "Failed to generate image" });
+    }
+  });
+
+  // POST /api/admin/blog/generate-articles - Generate 6 articles from selected topics
+  app.post("/api/admin/blog/generate-articles", requireAdmin, async (req, res) => {
+    try {
+      const { topicIds, topics } = req.body;
+      
+      if (!topics || !Array.isArray(topics) || topics.length === 0) {
+        return res.status(400).json({ success: false, message: "Topics array is required" });
+      }
+
+      const openaiApiKey = process.env.OPENAI_API_KEY;
+      if (!openaiApiKey) {
+        return res.status(500).json({ success: false, message: "OpenAI API key not configured" });
+      }
+
+      const generatedArticles = [];
+      const baseUrl = process.env.REPLIT_DOMAINS?.split(',')[0] 
+        ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
+        : 'https://absolutepestservices.com';
+
+      // Generate articles for each topic
+      for (let i = 0; i < topics.length && i < 6; i++) {
+        const topic = topics[i];
+        
+        try {
+          // Generate article content using OpenAI
+          const articlePrompt = `Write a 600-800 word blog article for a pest control company serving Chester County, Pennsylvania. 
+          
+Title: ${topic.title}
+Category: ${topic.category}
+Target Keywords: ${topic.keywords?.join(', ') || topic.title}
+
+Requirements:
+- Write in HTML format with <h2> and <h3> headings
+- Include practical tips homeowners can use
+- Mention Chester County or Southeastern PA naturally
+- Include a call-to-action to contact Absolute Pest Services
+- Use professional but approachable tone
+- Structure: Introduction, 3-4 main points with tips, Conclusion with CTA
+
+Return the article as JSON with fields:
+- content: the HTML article body
+- excerpt: a 150-200 word summary for meta description
+- suggestedTags: array of 3-5 relevant tags`;
+
+          const chatResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${openaiApiKey}`
+            },
+            body: JSON.stringify({
+              model: "gpt-4o",
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a professional content writer for a pest control company. You write SEO-optimized blog articles in JSON format."
+                },
+                {
+                  role: "user",
+                  content: articlePrompt
+                }
+              ],
+              response_format: { type: "json_object" },
+              max_tokens: 2000,
+              temperature: 0.7
+            })
+          });
+
+          const chatData = await chatResponse.json();
+          
+          if (chatData.error) {
+            console.error("OpenAI article generation error:", chatData.error);
+            continue;
+          }
+
+          const articleContent = JSON.parse(chatData.choices[0].message.content);
+          
+          // Generate image for this article
+          let imageUrl = "";
+          try {
+            const imageResponse = await fetch("https://api.openai.com/v1/images/generations", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${openaiApiKey}`
+              },
+              body: JSON.stringify({
+                model: "dall-e-3",
+                prompt: `Professional photograph for a pest control blog article about: ${topic.title}. Realistic style, high quality, showing relevant pest control context. Warm lighting, professional photography. No text in image.`,
+                n: 1,
+                size: "1792x1024"
+              })
+            });
+
+            const imageData = await imageResponse.json();
+            
+            if (imageData.data?.[0]?.url) {
+              // Download and save locally
+              const imgResponse = await fetch(imageData.data[0].url);
+              const arrayBuffer = await imgResponse.arrayBuffer();
+              const buffer = Buffer.from(arrayBuffer);
+              
+              const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'blog-images');
+              if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+              }
+              
+              const filename = `blog-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.png`;
+              const filePath = path.join(uploadDir, filename);
+              fs.writeFileSync(filePath, buffer);
+              imageUrl = `/uploads/blog-images/${filename}`;
+            }
+          } catch (imgError) {
+            console.error("Image generation failed for article:", topic.title, imgError);
+          }
+
+          // Create slug from title
+          const slug = topic.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+
+          // Create the blog post
+          const blogPost = await storage.createBlogPost({
+            title: topic.title,
+            slug: `${slug}-${Date.now()}`, // Add timestamp to ensure uniqueness
+            content: articleContent.content || '',
+            excerpt: articleContent.excerpt || topic.description,
+            author: "AI Generated",
+            featuredImage: imageUrl || null,
+            category: topic.category,
+            tags: articleContent.suggestedTags || topic.keywords || [],
+            isPublished: false, // Draft by default for review
+            metaTitle: topic.title,
+            metaDescription: articleContent.excerpt?.substring(0, 160) || topic.description
+          });
+
+          generatedArticles.push({
+            id: blogPost.id,
+            title: blogPost.title,
+            slug: blogPost.slug,
+            featuredImage: blogPost.featuredImage,
+            status: 'created'
+          });
+
+        } catch (articleError) {
+          console.error("Error generating article for topic:", topic.title, articleError);
+          generatedArticles.push({
+            title: topic.title,
+            status: 'error',
+            error: articleError instanceof Error ? articleError.message : 'Unknown error'
+          });
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: `Generated ${generatedArticles.filter(a => a.status === 'created').length} articles`,
+        articles: generatedArticles 
+      });
+    } catch (error) {
+      console.error("Error generating articles:", error);
+      res.status(500).json({ success: false, message: "Failed to generate articles" });
+    }
+  });
+
+  // ==========================================
   // Field Service Routes
   // ==========================================
 
