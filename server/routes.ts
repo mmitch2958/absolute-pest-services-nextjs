@@ -27,14 +27,21 @@ declare module 'express-session' {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  if (isProduction) {
+    app.set('trust proxy', 1);
+  }
+
   // Session configuration
   app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // Set to true in production with HTTPS
+      secure: isProduction,
       httpOnly: true,
+      sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
   }));
