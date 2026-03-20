@@ -1464,28 +1464,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ success: false, message: "No image URL returned" });
       }
 
-      // Download and save the image locally
       const imageResponse = await fetch(imageUrl);
       const arrayBuffer = await imageResponse.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
+      const base64 = buffer.toString('base64');
+      const dataUrl = `data:image/png;base64,${base64}`;
       
-      // Create directory if it doesn't exist
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'blog-images');
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-      
-      // Generate filename
-      const filename = `blog-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.png`;
-      const filePath = path.join(uploadDir, filename);
-      
-      // Save the image
-      fs.writeFileSync(filePath, buffer);
-      
-      // Return the public URL path
-      const publicUrl = `/uploads/blog-images/${filename}`;
-      
-      res.json({ success: true, imageUrl: publicUrl });
+      res.json({ success: true, imageUrl: dataUrl });
     } catch (error) {
       console.error("Error generating image:", error);
       res.status(500).json({ success: false, message: "Failed to generate image" });
@@ -1589,20 +1574,11 @@ Return the article as JSON with fields:
             const imageData = await imageResponse.json();
             
             if (imageData.data?.[0]?.url) {
-              // Download and save locally
               const imgResponse = await fetch(imageData.data[0].url);
               const arrayBuffer = await imgResponse.arrayBuffer();
               const buffer = Buffer.from(arrayBuffer);
-              
-              const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'blog-images');
-              if (!fs.existsSync(uploadDir)) {
-                fs.mkdirSync(uploadDir, { recursive: true });
-              }
-              
-              const filename = `blog-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.png`;
-              const filePath = path.join(uploadDir, filename);
-              fs.writeFileSync(filePath, buffer);
-              imageUrl = `/uploads/blog-images/${filename}`;
+              const base64 = buffer.toString('base64');
+              imageUrl = `data:image/png;base64,${base64}`;
             }
           } catch (imgError) {
             console.error("Image generation failed for article:", topic.title, imgError);

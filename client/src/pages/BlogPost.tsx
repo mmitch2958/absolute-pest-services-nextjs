@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { Calendar, ArrowLeft, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
 import type { BlogPost } from "@shared/schema";
 
@@ -17,6 +18,15 @@ export default function BlogPost() {
   });
 
   const post = data?.post;
+
+  const { data: relatedData } = useQuery<{ success: boolean; posts: BlogPost[] }>({
+    queryKey: [`/api/blog/posts?category=${post?.category}`],
+    enabled: !!post?.category,
+  });
+
+  const relatedPosts = (relatedData?.posts || [])
+    .filter((p) => p.slug !== post?.slug)
+    .slice(0, 2);
 
   if (isLoading) {
     return (
@@ -70,6 +80,20 @@ export default function BlogPost() {
         {post.featuredImage && <meta property="og:image" content={post.featuredImage} />}
         <meta property="article:published_time" content={new Date(post.publishedAt || post.createdAt).toISOString()} />
         <meta property="article:author" content={post.author} />
+        <link rel="canonical" href={"https://absolutepestservices.com/blog/" + post.slug} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": post.title,
+            "description": post.excerpt,
+            "author": { "@type": "Person", "name": post.author },
+            "datePublished": post.publishedAt
+              ? new Date(post.publishedAt).toISOString()
+              : new Date(post.createdAt).toISOString(),
+            "image": post.featuredImage || undefined,
+          })}
+        </script>
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
@@ -121,6 +145,7 @@ export default function BlogPost() {
               alt={post.title}
               className="w-full h-96 object-cover rounded-lg mb-8"
               data-testid="img-featured"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           )}
 
@@ -160,6 +185,28 @@ export default function BlogPost() {
               Contact Us Today
             </Button>
           </div>
+
+          {relatedPosts.length > 0 && (
+            <div className="mt-12 border-t pt-10" data-testid="section-related-posts">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Articles</h2>
+              <div className="grid sm:grid-cols-2 gap-6">
+                {relatedPosts.map((related) => (
+                  <Card key={related.slug} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      <Badge variant="secondary" className="mb-3">{related.category}</Badge>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                        {related.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">{related.excerpt}</p>
+                      <Link href={`/blog/${related.slug}`}>
+                        <Button variant="outline" size="sm">Read Article</Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
         </article>
       </div>
     </>

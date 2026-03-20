@@ -22,6 +22,7 @@ export default function Blog() {
         <meta property="og:title" content="Pest Control Tips & Guides - Absolute Pest Services Blog" />
         <meta property="og:description" content="Expert pest control tips, seasonal advice, and comprehensive guides for homeowners in Pennsylvania, Delaware, and Maryland." />
         <meta property="og:type" content="website" />
+        <link rel="canonical" href="https://absolutepestservices.com/blog" />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
@@ -67,6 +68,7 @@ export default function Blog() {
                       alt={post.title}
                       className="w-full h-48 object-cover rounded-t-lg"
                       data-testid={`img-blog-featured-${post.id}`}
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
                   )}
                   <CardHeader>
