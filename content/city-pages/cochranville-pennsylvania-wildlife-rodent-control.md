@@ -33,7 +33,7 @@ When you call Absolute Pest Services, you're getting more than a quick spray-and
 
 We're proud to serve the Cochranville community, and we treat every home like it's our own. Our team stands behind every job with our satisfaction guarantee. Whether you're dealing with a sudden infestation or want to stay ahead of raccoons, squirrels, mice, rats, and nuisance wildlife before they become a problem, we're here to help.
 
-**Ready to protect your Cochranville home?** Call Absolute Pest Services today at [Phone Number] for a free estimate, or schedule your inspection online. We'll show you why homeowners across Chester County trust APS for wildlife and rodent removal.
+**Ready to protect your Cochranville home?** Call Absolute Pest Services today at 484-643-2225 for a free estimate, or schedule your inspection online. We'll show you why homeowners across Chester County trust APS for wildlife and rodent removal.
 
 ---
 
@@ -58,6 +58,6 @@ We understand that pest problems can't wait. Absolute Pest Services offers promp
 ---
 
 **Service Area:** Cochranville, PA (19330) | Parkesburg, West Fallowfield Township, Highland Township, Atglen  
-**Call:** [Phone Number]  
+**Call:** 484-643-2225  
 **Schedule Online:** [Book Your Free Inspection]  
 **Related Services:** [General Pest Control](/services/) | [Termite Control](/services/) | [Wildlife & Rodent Control](/services/) | [Bed Bug Treatment](/services/)

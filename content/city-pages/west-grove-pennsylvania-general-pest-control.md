@@ -33,7 +33,7 @@ When you call Absolute Pest Services, you're getting more than a quick spray-and
 
 We're proud to serve the West Grove community, and we treat every home like it's our own. Our team stands behind every job with our satisfaction guarantee. Whether you're dealing with a sudden infestation or want to stay ahead of ants, spiders, roaches, and occasional invaders before they become a problem, we're here to help.
 
-**Ready to protect your West Grove home?** Call Absolute Pest Services today at [Phone Number] for a free estimate, or schedule your inspection online. We'll show you why homeowners across Chester County trust APS for general pest control.
+**Ready to protect your West Grove home?** Call Absolute Pest Services today at 484-643-2225 for a free estimate, or schedule your inspection online. We'll show you why homeowners across Chester County trust APS for general pest control.
 
 ---
 
@@ -58,6 +58,6 @@ We understand that pest problems can't wait. Absolute Pest Services offers promp
 ---
 
 **Service Area:** West Grove, PA (19390) | Avon Grove, London Grove Township, Penn Township, southern Chester County  
-**Call:** [Phone Number]  
+**Call:** 484-643-2225  
 **Schedule Online:** [Book Your Free Inspection]  
 **Related Services:** [General Pest Control](/services/) | [Termite Control](/services/) | [Wildlife & Rodent Control](/services/) | [Bed Bug Treatment](/services/)

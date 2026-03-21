@@ -33,7 +33,7 @@ When you call Absolute Pest Services, you're getting more than a quick spray-and
 
 We're proud to serve the Hockessin community, and we treat every home like it's our own. Our team stands behind every job with our satisfaction guarantee. Whether you're dealing with a sudden infestation or want to stay ahead of ants, spiders, roaches, and occasional invaders before they become a problem, we're here to help.
 
-**Ready to protect your Hockessin home?** Call Absolute Pest Services today at [Phone Number] for a free estimate, or schedule your inspection online. We'll show you why homeowners across New Castle County trust APS for general pest control.
+**Ready to protect your Hockessin home?** Call Absolute Pest Services today at 484-643-2225 for a free estimate, or schedule your inspection online. We'll show you why homeowners across New Castle County trust APS for general pest control.
 
 ---
 
@@ -58,6 +58,6 @@ We understand that pest problems can't wait. Absolute Pest Services offers promp
 ---
 
 **Service Area:** Hockessin, DE (19707) | Mill Creek, Valley Road, Hockessin community, western New Castle County  
-**Call:** [Phone Number]  
+**Call:** 484-643-2225  
 **Schedule Online:** [Book Your Free Inspection]  
 **Related Services:** [General Pest Control](/services/) | [Termite Control](/services/) | [Wildlife & Rodent Control](/services/) | [Bed Bug Treatment](/services/)
