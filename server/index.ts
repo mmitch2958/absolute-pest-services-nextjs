@@ -32,19 +32,9 @@ app.get("/api/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-// Fast response for root path health checks
-// Replit's autoscale deployment health checks hit / and expect a quick 200
-// Health checks don't send Accept: text/html header, so we can distinguish them
-app.use((req, res, next) => {
-  if (req.method === 'GET' && req.path === '/') {
-    const acceptHeader = req.headers['accept'] || '';
-    // If this doesn't look like a browser request (no text/html), treat as health check
-    if (!acceptHeader.includes('text/html')) {
-      return res.status(200).send('OK');
-    }
-  }
-  next();
-});
+// NOTE: Homepage health checks should use /health or /api/health, not /.
+// Removed the "/" shortcut that was returning "OK" for non-browser requests,
+// which broke the homepage for crawlers, curl, and monitoring tools.
 
 app.use((req, res, next) => {
   const start = Date.now();
