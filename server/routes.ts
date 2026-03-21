@@ -5520,6 +5520,36 @@ Return the article as JSON with fields:
     }
   });
 
+  // GET /api/admin/marketing/facebook - Latest Facebook page metrics
+  app.get('/api/admin/marketing/facebook', requireAdmin, (req, res) => {
+    const filePath = findLatestDataFile('facebook_metrics_');
+    if (!filePath) {
+      return res.json({ success: true, data: null, lastFetched: null });
+    }
+    try {
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      const data = JSON.parse(raw);
+      res.json({ success: true, data, lastFetched: data.fetched_at });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Failed to read Facebook data' });
+    }
+  });
+
+  // GET /api/admin/marketing/instagram - Latest Instagram metrics
+  app.get('/api/admin/marketing/instagram', requireAdmin, (req, res) => {
+    const filePath = findLatestDataFile('instagram_metrics_');
+    if (!filePath) {
+      return res.json({ success: true, data: null, lastFetched: null });
+    }
+    try {
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      const data = JSON.parse(raw);
+      res.json({ success: true, data, lastFetched: data.fetched_at });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Failed to read Instagram data' });
+    }
+  });
+
   seedAdminUser();
   seedFieldMaterials();
   seedServiceRates();

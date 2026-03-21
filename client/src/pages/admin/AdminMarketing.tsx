@@ -16,6 +16,11 @@ import {
   Users,
   Eye,
   ExternalLink,
+  Facebook,
+  Instagram,
+  Heart,
+  MessageCircle,
+  Repeat2,
 } from "lucide-react";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -85,6 +90,72 @@ interface MarketingResponse<T> {
   success: boolean;
   data: T | null;
   lastFetched: string | null;
+}
+
+interface FacebookPost {
+  message: string;
+  created_at: string;
+  likes: number;
+  comments: number;
+  shares: number;
+}
+
+interface FacebookAccountMetrics {
+  page_name: string;
+  category: string;
+  fan_count: number;
+  followers_count: number;
+}
+
+interface FacebookEngagement {
+  post_count_7d: number;
+  total_likes: number;
+  total_comments: number;
+  total_shares: number;
+  page_impressions_unique: number;
+  page_post_engagements: number;
+  page_fan_adds_unique: number;
+}
+
+interface FacebookData {
+  fetched_at: string;
+  platform: string;
+  page_id: string;
+  status: string;
+  account_metrics: FacebookAccountMetrics;
+  engagement_7d: FacebookEngagement;
+  recent_posts: FacebookPost[];
+}
+
+interface InstagramAccountMetrics {
+  username: string;
+  name: string;
+  followers_count: number;
+  media_count: number;
+}
+
+interface InstagramEngagement {
+  impressions: number;
+  reach: number;
+  profile_views: number;
+}
+
+interface InstagramPost {
+  caption: string;
+  timestamp: string;
+  like_count: number;
+  comment_count: number;
+  media_type: string;
+  permalink: string;
+}
+
+interface InstagramData {
+  fetched_at: string;
+  platform: string;
+  status: string;
+  account_metrics: InstagramAccountMetrics;
+  engagement_7d: InstagramEngagement;
+  recent_posts: InstagramPost[];
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -191,40 +262,183 @@ function NoData({ lastFetched }: { lastFetched: string | null }) {
   );
 }
 
-function SocialCard({
-  platform,
-  icon,
-  color,
-  description,
+function FacebookCard({
+  fbData,
+  isLoading,
 }: {
-  platform: string;
-  icon: React.ReactNode;
-  color: string;
-  description: string;
+  fbData: MarketingResponse<FacebookData>;
+  isLoading: boolean;
 }) {
+  const fb = fbData.data;
+  const isConnected = fb?.status === 'live';
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6 flex flex-col items-center text-center gap-4">
+        <div className="w-14 h-14 rounded-full flex items-center justify-center bg-blue-100">
+          <Facebook className="w-7 h-7 text-blue-600" />
+        </div>
+        <div className="animate-pulse w-32 h-5 bg-gray-200 rounded" />
+        <div className="animate-pulse w-24 h-4 bg-gray-100 rounded" />
+      </div>
+    );
+  }
+
+  const totalEngagement =
+    (fb?.engagement_7d.total_likes ?? 0) +
+    (fb?.engagement_7d.total_comments ?? 0) +
+    (fb?.engagement_7d.total_shares ?? 0);
+  const fanCount = fb?.account_metrics.fan_count ?? 0;
+  const engagementRate = fanCount > 0
+    ? ((totalEngagement / fanCount) * 100).toFixed(1)
+    : '0.0';
+
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 flex flex-col items-center text-center gap-4">
-      <div
-        className="w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl"
-        style={{ backgroundColor: color }}
-      >
-        {icon}
+    <div className="bg-white rounded-lg shadow-sm p-6 flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded-full flex items-center justify-center bg-blue-600">
+          <Facebook className="w-6 h-6 text-white" />
+        </div>
+        <div>
+          <p className="font-semibold text-gray-900">
+            {isConnected ? fb.account_metrics.page_name : 'Facebook'}
+          </p>
+          <p className="text-sm text-gray-500">
+            {isConnected ? `${fb.account_metrics.fan_count.toLocaleString()} followers` : 'Not connected'}
+          </p>
+        </div>
       </div>
-      <div>
-        <p className="font-semibold text-gray-900 text-lg">{platform}</p>
-        <p className="text-sm text-gray-500 mt-1">{description}</p>
+
+      {isConnected ? (
+        <>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="bg-gray-50 rounded-lg p-3">
+              <p className="text-gray-500 text-xs">Engagement Rate</p>
+              <p className="font-semibold text-gray-900">{engagementRate}%</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <p className="text-gray-500 text-xs">Posts (7d)</p>
+              <p className="font-semibold text-gray-900">{fb.engagement_7d.post_count_7d}</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <p className="text-gray-500 text-xs flex items-center gap-1">
+                <Heart className="w-3 h-3" /> Likes
+              </p>
+              <p className="font-semibold text-gray-900">{fb.engagement_7d.total_likes.toLocaleString()}</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <p className="text-gray-500 text-xs flex items-center gap-1">
+                <MessageCircle className="w-3 h-3" /> Comments
+              </p>
+              <p className="font-semibold text-gray-900">{fb.engagement_7d.total_comments.toLocaleString()}</p>
+            </div>
+          </div>
+
+          <div className="text-xs text-gray-400 text-right">
+            Last updated: {fb.fetched_at}
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="text-sm text-gray-500">
+            Connect Facebook page to track likes, comments, and shares
+          </p>
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+            Not connected
+          </span>
+          <button
+            className="mt-1 px-4 py-2 rounded-md text-sm font-medium text-white transition-colors"
+            style={{ backgroundColor: APS_BLUE }}
+            disabled
+            title="Set FB_PAGE_ACCESS_TOKEN and FB_PAGE_ID in environment"
+          >
+            Connect
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+function InstagramCard({
+  igData,
+  isLoading,
+}: {
+  igData: MarketingResponse<InstagramData>;
+  isLoading: boolean;
+}) {
+  const ig = igData.data;
+  const isConnected = ig?.status === 'live';
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6 flex flex-col items-center text-center gap-4">
+        <div className="w-14 h-14 rounded-full flex items-center justify-center bg-pink-100">
+          <Instagram className="w-7 h-7 text-pink-600" />
+        </div>
+        <div className="animate-pulse w-32 h-5 bg-gray-200 rounded" />
+        <div className="animate-pulse w-24 h-4 bg-gray-100 rounded" />
       </div>
-      <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
-        Not connected
-      </span>
-      <button
-        className="mt-1 px-4 py-2 rounded-md text-sm font-medium text-white transition-colors"
-        style={{ backgroundColor: APS_BLUE }}
-        disabled
-        title="Coming soon"
-      >
-        Connect
-      </button>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6 flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400">
+          <Instagram className="w-6 h-6 text-white" />
+        </div>
+        <div>
+          <p className="font-semibold text-gray-900">
+            {isConnected ? `@${ig.account_metrics.username}` : 'Instagram'}
+          </p>
+          <p className="text-sm text-gray-500">
+            {isConnected
+              ? `${ig.account_metrics.followers_count.toLocaleString()} followers`
+              : ig?.status === 'not_linked'
+                ? 'Not linked to Facebook page'
+                : 'Not connected'}
+          </p>
+        </div>
+      </div>
+
+      {isConnected ? (
+        <>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="bg-gray-50 rounded-lg p-3">
+              <p className="text-gray-500 text-xs">Reach (7d)</p>
+              <p className="font-semibold text-gray-900">{(ig.engagement_7d.reach ?? 0).toLocaleString()}</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <p className="text-gray-500 text-xs">Impressions (7d)</p>
+              <p className="font-semibold text-gray-900">{(ig.engagement_7d.impressions ?? 0).toLocaleString()}</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <p className="text-gray-500 text-xs">Posts (7d)</p>
+              <p className="font-semibold text-gray-900">{ig.recent_posts.length}</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <p className="text-gray-500 text-xs">Total Media</p>
+              <p className="font-semibold text-gray-900">{ig.account_metrics.media_count.toLocaleString()}</p>
+            </div>
+          </div>
+
+          <div className="text-xs text-gray-400 text-right">
+            Last updated: {ig.fetched_at}
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="text-sm text-gray-500">
+            {ig?.status === 'not_linked'
+              ? 'Link Instagram to Facebook Page via Meta Business Suite to enable tracking.'
+              : 'Instagram metrics appear automatically when linked to your Facebook Page.'}
+          </p>
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+            {ig?.status === 'not_linked' ? 'Not linked' : 'Not connected'}
+          </span>
+        </>
+      )}
     </div>
   );
 }
@@ -667,41 +881,157 @@ function SeoTab({ ga4Data }: { ga4Data: MarketingResponse<GA4Data> }) {
 
 // ── Tab: Social Media ─────────────────────────────────────────────────────────
 
-function SocialTab() {
+function SocialTab({
+  fbData,
+  igData,
+  fbLoading,
+  igLoading,
+}: {
+  fbData: MarketingResponse<FacebookData>;
+  igData: MarketingResponse<InstagramData>;
+  fbLoading: boolean;
+  igLoading: boolean;
+}) {
+  const fb = fbData.data;
+  const ig = igData.data;
+  const fbConnected = fb?.status === 'live';
+  const igConnected = ig?.status === 'live';
+
+  // Get latest post date from Facebook
+  const lastPostDate = fb?.recent_posts?.[0]?.created_at;
+  const formattedLastPost = lastPostDate
+    ? new Date(lastPostDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : null;
+
   return (
     <div className="space-y-6">
-      <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 text-blue-800 text-sm">
-        Connect your social accounts to track posts, engagement, and audience
-        growth alongside your ads and SEO data.
+      {/* Connection status banner */}
+      {!fbConnected && !igLoading && (
+        <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 text-blue-800 text-sm">
+          <strong>Connect Facebook</strong> to start tracking page metrics, post engagement, and audience growth.
+          {ig?.status === 'not_linked' && (
+            <span className="block mt-1">
+              Instagram will connect automatically once linked via Meta Business Suite.
+            </span>
+          )}
+        </div>
+      )}
+
+      {fbConnected && (
+        <div className="rounded-lg bg-green-50 border border-green-200 p-4 text-green-800 text-sm flex items-center gap-2">
+          <Facebook className="w-4 h-4 text-green-600" />
+          <span>
+            <strong>{fb.account_metrics.page_name}</strong> connected
+            {formattedLastPost && ` • Last post: ${formattedLastPost}`}
+            {igConnected && ` • Instagram @${ig.account_metrics.username} linked`}
+          </span>
+        </div>
+      )}
+
+      {/* Social Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <FacebookCard fbData={fbData} isLoading={fbLoading} />
+        <InstagramCard igData={igData} isLoading={igLoading} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <SocialCard
-          platform="X / Twitter"
-          icon="𝕏"
-          color="#000000"
-          description="Connect X account to track posts, likes, and retweets"
-        />
-        <SocialCard
-          platform="Bluesky"
-          icon="🦋"
-          color="#0085FF"
-          description="Connect Bluesky account to track posts, likes, and reposts"
-        />
-        <SocialCard
-          platform="Facebook"
-          icon="f"
-          color="#1877F2"
-          description="Connect Facebook page to track likes, comments, and shares"
-        />
-      </div>
+      {/* Recent Facebook Posts */}
+      {fbConnected && fb.recent_posts && fb.recent_posts.length > 0 && (
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b">
+            <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+              <Facebook className="w-4 h-4 text-blue-600" />
+              Recent Facebook Posts (7d)
+            </h3>
+          </div>
+          <div className="divide-y">
+            {fb.recent_posts.map((post, i) => {
+              const postDate = post.created_at
+                ? new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : '';
+              return (
+                <div key={i} className="px-6 py-4 hover:bg-gray-50">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="text-sm text-gray-800 line-clamp-2 flex-1">
+                      {post.message || <span className="text-gray-400 italic">No text</span>}
+                    </p>
+                    <span className="text-xs text-gray-400 ml-3 whitespace-nowrap">{postDate}</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-3.5 h-3.5 text-red-400" />
+                      {post.likes.toLocaleString()}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageCircle className="w-3.5 h-3.5 text-blue-400" />
+                      {post.comments.toLocaleString()}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Repeat2 className="w-3.5 h-3.5 text-green-400" />
+                      {post.shares.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-      <div className="bg-white rounded-lg shadow-sm p-6 text-center text-gray-400 text-sm">
-        <ExternalLink className="w-6 h-6 mx-auto mb-2 opacity-30" />
-        Social media integration via bird / bsky / Facebook API coming soon.
-        <br />
-        Ask Steel City AI to enable it.
-      </div>
+      {/* Recent Instagram Posts */}
+      {igConnected && ig.recent_posts && ig.recent_posts.length > 0 && (
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b">
+            <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+              <Instagram className="w-4 h-4 text-pink-500" />
+              Recent Instagram Posts (7d)
+            </h3>
+          </div>
+          <div className="divide-y">
+            {ig.recent_posts.map((post, i) => {
+              const postDate = post.timestamp
+                ? new Date(post.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : '';
+              return (
+                <div key={i} className="px-6 py-4 hover:bg-gray-50">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="text-sm text-gray-800 line-clamp-2 flex-1">
+                      {post.caption || <span className="text-gray-400 italic">No caption</span>}
+                    </p>
+                    <span className="text-xs text-gray-400 ml-3 whitespace-nowrap">{postDate}</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-3.5 h-3.5 text-red-400" />
+                      {post.like_count.toLocaleString()}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageCircle className="w-3.5 h-3.5 text-blue-400" />
+                      {post.comment_count.toLocaleString()}
+                    </span>
+                    <span className="text-gray-400">{post.media_type}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Setup instructions */}
+      {!fbConnected && (
+        <div className="bg-white rounded-lg shadow-sm p-6 text-center text-gray-400 text-sm">
+          <ExternalLink className="w-6 h-6 mx-auto mb-2 opacity-30" />
+          <p className="font-medium text-gray-500">Facebook not connected</p>
+          <p className="mt-1">
+            To enable: set <code className="bg-gray-100 px-1 rounded">FB_PAGE_ACCESS_TOKEN</code> and{' '}
+            <code className="bg-gray-100 px-1 rounded">FB_PAGE_ID</code> environment variables, then run{' '}
+            <code className="bg-gray-100 px-1 rounded">fetch_facebook_data.py</code>.
+          </p>
+          <p className="mt-2 text-xs text-gray-400">
+            Ask Steel City AI to configure the Facebook connection.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -747,6 +1077,28 @@ export function AdminMarketing() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: fbResponse, isLoading: fbLoading } = useQuery<
+    MarketingResponse<FacebookData>
+  >({
+    queryKey: ["/api/admin/marketing/facebook"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/admin/marketing/facebook");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: igResponse, isLoading: igLoading } = useQuery<
+    MarketingResponse<InstagramData>
+  >({
+    queryKey: ["/api/admin/marketing/instagram"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/admin/marketing/instagram");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   const isLoading = adsLoading || termsLoading || ga4Loading;
 
   const emptyAds: MarketingResponse<AdsCampaignsData> = {
@@ -760,6 +1112,16 @@ export function AdminMarketing() {
     lastFetched: null,
   };
   const emptyGa4: MarketingResponse<GA4Data> = {
+    success: true,
+    data: null,
+    lastFetched: null,
+  };
+  const emptyFb: MarketingResponse<FacebookData> = {
+    success: true,
+    data: null,
+    lastFetched: null,
+  };
+  const emptyIg: MarketingResponse<InstagramData> = {
     success: true,
     data: null,
     lastFetched: null,
@@ -833,7 +1195,14 @@ export function AdminMarketing() {
               {activeTab === "seo" && (
                 <SeoTab ga4Data={ga4Response ?? emptyGa4} />
               )}
-              {activeTab === "social" && <SocialTab />}
+              {activeTab === "social" && (
+                <SocialTab
+                  fbData={fbResponse ?? emptyFb}
+                  igData={igResponse ?? emptyIg}
+                  fbLoading={fbLoading}
+                  igLoading={igLoading}
+                />
+              )}
             </>
           )}
         </div>
