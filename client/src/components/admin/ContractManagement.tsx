@@ -87,6 +87,7 @@ export function ContractManagement() {
       const res = await fetch(`/api/admin/service-contracts/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ isActive }),
       });
       if (!res.ok) throw new Error("Failed to update status");
@@ -99,7 +100,7 @@ export function ContractManagement() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/admin/service-contracts/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/service-contracts/${id}`, { method: "DELETE", credentials: "include" });
       if (!res.ok) throw new Error("Failed to delete contract");
       return res.json();
     },

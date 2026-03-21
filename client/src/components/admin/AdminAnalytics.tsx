@@ -152,15 +152,15 @@ export function AdminAnalytics() {
         topClientsRes,
         contactsRes,
       ] = await Promise.all([
-        fetch(`/api/admin/analytics/overview${params}`),
-        fetch(`/api/admin/analytics/jobs-over-time${params}&groupBy=month`),
-        fetch(`/api/admin/analytics/jobs-by-area${params}`),
-        fetch(`/api/admin/analytics/jobs-by-status${params}`),
-        fetch(`/api/admin/analytics/employee-productivity${params}`),
-        fetch(`/api/admin/analytics/contracts-summary`),
-        fetch(`/api/admin/analytics/upcoming`),
-        fetch(`/api/admin/analytics/top-clients${params}&limit=10`),
-        fetch(`/api/admin/analytics/contact-submissions${params}`),
+        fetch(`/api/admin/analytics/overview${params}`, { credentials: "include" }),
+        fetch(`/api/admin/analytics/jobs-over-time${params}&groupBy=month`, { credentials: "include" }),
+        fetch(`/api/admin/analytics/jobs-by-area${params}`, { credentials: "include" }),
+        fetch(`/api/admin/analytics/jobs-by-status${params}`, { credentials: "include" }),
+        fetch(`/api/admin/analytics/employee-productivity${params}`, { credentials: "include" }),
+        fetch(`/api/admin/analytics/contracts-summary`, { credentials: "include" }),
+        fetch(`/api/admin/analytics/upcoming`, { credentials: "include" }),
+        fetch(`/api/admin/analytics/top-clients${params}&limit=10`, { credentials: "include" }),
+        fetch(`/api/admin/analytics/contact-submissions${params}`, { credentials: "include" }),
       ]);
 
       const overviewData = await overviewRes.json();

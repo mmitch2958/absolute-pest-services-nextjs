@@ -27,11 +27,11 @@ export interface SyncProgress {
 
 async function fetchReferenceData(employeeId: number): Promise<ReferenceData> {
   const [clients, locations, areas, customFields, suggestions] = await Promise.all([
-    fetch('/api/field/clients').then(r => r.json()).catch(() => []),
-    fetch('/api/field/locations').then(r => r.json()).catch(() => []),
-    fetch('/api/field/areas').then(r => r.json()).catch(() => []),
-    fetch('/api/field/custom-fields').then(r => r.json()).catch(() => []),
-    fetch('/api/field/suggestions').then(r => r.json()).catch(() => ({ customers: [], locations: [], areas: [], workPerformed: [] }))
+    fetch('/api/field/clients', { credentials: 'include' }).then(r => r.json()).catch(() => []),
+    fetch('/api/field/locations', { credentials: 'include' }).then(r => r.json()).catch(() => []),
+    fetch('/api/field/areas', { credentials: 'include' }).then(r => r.json()).catch(() => []),
+    fetch('/api/field/custom-fields', { credentials: 'include' }).then(r => r.json()).catch(() => []),
+    fetch('/api/field/suggestions', { credentials: 'include' }).then(r => r.json()).catch(() => ({ customers: [], locations: [], areas: [], workPerformed: [] }))
   ]);
 
   return {
@@ -135,6 +135,7 @@ async function syncJobLogs(employeeId: number): Promise<SyncResult[]> {
       const response = await fetch('/api/field/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(payload)
       });
       
@@ -184,6 +185,7 @@ async function syncPhotos(log: OfflineJobLog, serverId: number): Promise<void> {
       
       const response = await fetch('/api/field/photos/upload', {
         method: 'POST',
+        credentials: 'include',
         body: formData
       });
       
@@ -205,7 +207,7 @@ async function syncPhotos(log: OfflineJobLog, serverId: number): Promise<void> {
 }
 
 async function fetchJobHistory(employeeId: number): Promise<void> {
-  const response = await fetch(`/api/field/job-logs?employeeId=${employeeId}`);
+  const response = await fetch(`/api/field/job-logs?employeeId=${employeeId}`, { credentials: 'include' });
   if (!response.ok) return;
   
   const logs = await response.json();

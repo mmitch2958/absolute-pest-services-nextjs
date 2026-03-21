@@ -33,6 +33,7 @@ function StatusBadge({ log }: { log: any; employees: any[] }) {
       const res = await fetch(`/api/admin/job-logs/${log.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) throw new Error("Failed to update status");
