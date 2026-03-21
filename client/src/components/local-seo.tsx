@@ -47,7 +47,15 @@ export default function LocalSEO({
       "https://www.yelp.com/biz/absolute-pest-services",
       "https://www.bbb.org/absolute-pest-services"
     ],
+    "email": "info@absolutepestservices.com",
     "priceRange": "$$",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "127",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
     "paymentAccepted": "Cash, Credit Card, Check",
     "currenciesAccepted": "USD",
     "areaServed": [

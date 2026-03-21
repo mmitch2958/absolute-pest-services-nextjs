@@ -5,6 +5,7 @@ import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
+import { getRouteMeta, injectSeoMeta } from "./seo-meta";
 
 const viteLogger = createLogger();
 
@@ -59,7 +60,13 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx?v=${nanoid()}"`,
       );
       const page = await vite.transformIndexHtml(url, template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+
+      // Inject route-specific SEO meta before sending to client
+      const pathname = url.split("?")[0];
+      const meta = getRouteMeta(pathname);
+      const seoPage = injectSeoMeta(page, meta);
+
+      res.status(200).set({ "Content-Type": "text/html" }).end(seoPage);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
       next(e);
@@ -78,8 +85,18 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+  // Read the built index.html once and cache it
+  const indexPath = path.resolve(distPath, "index.html");
+  const baseHtml = fs.readFileSync(indexPath, "utf-8");
+
+  // Serve index.html with injected route-specific SEO meta for ALL non-asset routes.
+  // This ensures Googlebot sees the correct <title> and <meta name="description">
+  // in the raw HTML source — not just after React/Helmet runs client-side.
+  app.use("*", (req, res) => {
+    const pathname = (req.originalUrl || req.url || "/").split("?")[0];
+    const meta = getRouteMeta(pathname);
+    const html = injectSeoMeta(baseHtml, meta);
+    res.setHeader("Content-Type", "text/html");
+    res.send(html);
   });
 }
