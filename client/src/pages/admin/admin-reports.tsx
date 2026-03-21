@@ -269,13 +269,24 @@ export function AdminReports() {
   // Lightweight query for dropdown filter options
   const filterOptionsQuery = useQuery<{ success: boolean; customers: string[]; locations: string[]; areas: string[]; employees: any[] }>({
     queryKey: ["/api/admin/job-logs/filter-options"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/job-logs/filter-options", { credentials: "include" });
+      if (!res.ok) {
+        // Return empty structure on auth/server errors so the page still renders
+        return { success: false, customers: [], locations: [], areas: [], employees: [] };
+      }
+      return res.json();
+    },
   });
 
-  const { data, isLoading } = useQuery<{ success: boolean; jobLogs: any[]; employees: any[] }>({
+  const { data, isLoading, isError } = useQuery<{ success: boolean; jobLogs: any[]; employees: any[] }>({
     queryKey: ["/api/admin/job-logs", dateFrom, dateTo, selectedCustomer, selectedEmployee, selectedLocation, selectedArea, selectedStatus, searchTriggered],
     queryFn: async () => {
       const query = buildQuery();
       const res = await fetch(`/api/admin/job-logs?${query}`, { credentials: "include" });
+      if (!res.ok) {
+        throw new Error(`Failed to load job logs: ${res.status} ${res.statusText}`);
+      }
       return res.json();
     },
     enabled: searchTriggered,
@@ -475,6 +486,12 @@ export function AdminReports() {
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : isError ? (
+        <div className="text-center py-12 text-destructive">
+          <p className="text-lg font-semibold">Failed to load job logs</p>
+          <p className="text-sm text-muted-foreground mt-1">Please check your connection or try again.</p>
+          <Button variant="outline" className="mt-4" onClick={handleSearch}>Retry</Button>
         </div>
       ) : searchTriggered ? (
         <Card>

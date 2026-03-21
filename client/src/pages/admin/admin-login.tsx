@@ -23,7 +23,7 @@ export function AdminLogin() {
       const data = await response.json();
       if (data.success && data.user.role === "admin") {
         toast({ title: "Welcome", description: `Signed in as ${data.user.firstName}` });
-        setLocation("/admin/reports");
+        setLocation("/admin/dashboards");
       } else if (data.success) {
         toast({ title: "Access Denied", description: "This account does not have admin privileges", variant: "destructive" });
       }
