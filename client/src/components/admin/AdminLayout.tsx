@@ -17,19 +17,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[hsl(132,48%,35%)]" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated || (user && user.role !== 'admin')) {
-    setLocation('/auth');
-    return null;
-  }
-
   const logoutMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/auth/logout");
@@ -50,6 +37,19 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const handleLogout = () => {
     logoutMutation.mutate();
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[hsl(132,48%,35%)]" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || (user && user.role !== 'admin')) {
+    setLocation('/auth');
+    return null;
+  }
 
   const navigationItems = [
     {
