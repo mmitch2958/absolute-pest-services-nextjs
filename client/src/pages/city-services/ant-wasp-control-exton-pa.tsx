@@ -7,12 +7,12 @@ import { Link } from 'wouter';
 import ScheduleInspectionModal from '@/components/schedule-inspection-modal';
 import GoogleReviewRequest from '@/components/google-review-request';
 
-export default function BedBugTreatmentHockessinDe() {
-  const neighborhoods = ["Hockessin","Yorklyn","Limestone Hills","Ashland","Brandywine Hundred North","Centerville"];
+export default function AntWaspControlExtonPa() {
+  const neighborhoods = ["Exton", "West Whiteland Township", "East Whiteland Township", "Uwchlan Township", "Lionville"];
 
-  const bulletPoints = ["Free bed bug inspection & identification","Heat treatment (whole-room thermal remediation)","Chemical/residual treatment programs","Mattress & box spring treatment/encasements","Multi-unit & apartment building programs","Hotel & hospitality industry services","Post-treatment inspection & follow-up","Discreet service — no logos on our vehicles"];
+  const bulletPoints = ["Ant control (carpenter ants, pavement ants, fire ants)","Wasp & hornet nest removal & prevention","Carpenter bee treatment & wood protection","Boxelder bug seasonal treatments","Stink bug prevention & exclusion","Exterior perimeter barrier program","Interior crack & crevice treatment","Seasonal pest prevention plans"];
 
-  const faqs = [{"q":"How do I know if I have bed bugs in my Hockessin home?","a":"Look for small rust-colored stains on sheets, shed skins, tiny white eggs in mattress seams, and the bugs themselves (apple seed-sized, reddish-brown). Itchy, clustered bites in lines or groups are another sign. Call us for a free inspection."},{"q":"How many treatments does it take to eliminate bed bugs in Hockessin?","a":"Our heat treatment eliminates bed bugs in a single visit in most cases. Chemical treatments typically require 2–3 visits spaced 2 weeks apart. We provide a re-treatment guarantee."},{"q":"Do you offer discreet bed bug treatment in Hockessin?","a":"Yes. We use unmarked vehicles and plain-clothed technicians upon request. We understand the sensitivity of bed bug situations and protect your privacy."},{"q":"How much does bed bug treatment cost in Hockessin, DE?","a":"Cost depends on property size, infestation severity, and treatment method. We provide free inspections and transparent quotes before any work begins. Call 484-643-2225 to schedule your inspection."}];
+  const faqs = [{"q":"What ants, wasps, and stinging insects are common in Exton?","a":"In Exton, we frequently treat carpenter ants, pavement ants, and odorous house ants. Stinging insects like yellow jackets, paper wasps, and bald-faced hornets are common in summer. Boxelder bugs and carpenter bees are also prevalent seasonal pests. Call us for a free inspection."},{"q":"When should I call for wasp and hornet nest removal in Exton?","a":"Call as soon as you spot a nest. Wasp and hornet colonies grow rapidly through summer. Early removal is safer and less expensive. We provide same-day or next-day service throughout Exton and surrounding areas."},{"q":"Do carpenter bees damage homes in Exton?","a":"Yes. Carpenter bees drill into wood siding, decks, fascia boards, and railings. Over time this causes structural damage and attracts woodpeckers. We treat existing galleries and apply preventive wood treatments to stop re-infestation."},{"q":"How much does ant and wasp control cost in Exton, PA?","a":"Cost depends on property size, infestation type, and treatment approach. We provide free inspections and transparent quotes before any work begins. Call 484-643-2225 to schedule your inspection."}];
 
   const schema = {
   "@context": "https://schema.org",
@@ -33,31 +33,31 @@ export default function BedBugTreatmentHockessinDe() {
       },
       "geo": {
         "@type": "GeoCoordinates",
-        "latitude": "39.7851",
-        "longitude": "-75.6960"
+        "latitude": "40.0301",
+        "longitude": "-75.6210"
       },
       "areaServed": {
         "@type": "City",
-        "name": "Hockessin",
+        "name": "Exton",
         "containedInPlace": {
           "@type": "AdministrativeArea",
-          "name": "New Castle County",
+          "name": "Chester County",
           "containedInPlace": {
             "@type": "State",
-            "name": "Delaware"
+            "name": "Pennsylvania"
           }
         }
       },
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
-        "name": "Bed Bug Treatment",
+        "name": "Ant & Wasp Control",
         "itemListElement": [
           {
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Bed Bug Treatment in Hockessin, DE",
-              "description": "Bed bugs don't discriminate — they infest hotels, apartments, single-family homes, and businesses across Hockessin, DE. They spread through travel, used furniture, and multi-unit dwellings. Our bed bu"
+              "name": "Ant & Wasp Control in Exton, PA",
+              "description": "Comprehensive ant, wasp, hornet, carpenter bee, and boxelder bug control for Exton, PA homes and businesses."
             }
           }
         ]
@@ -68,34 +68,34 @@ export default function BedBugTreatmentHockessinDe() {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "How do I know if I have bed bugs in my Hockessin home?",
+          "name": "What ants, wasps, and stinging insects are common in Exton?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Look for small rust-colored stains on sheets, shed skins, tiny white eggs in mattress seams, and the bugs themselves (apple seed-sized, reddish-brown). Itchy, clustered bites in lines or groups are another sign. Call us for a free inspection."
+            "text": "In Exton, we frequently treat carpenter ants, pavement ants, and odorous house ants. Stinging insects like yellow jackets, paper wasps, and bald-faced hornets are common in summer. Boxelder bugs and carpenter bees are also prevalent seasonal pests. Call us for a free inspection."
           }
         },
         {
           "@type": "Question",
-          "name": "How many treatments does it take to eliminate bed bugs in Hockessin?",
+          "name": "When should I call for wasp and hornet nest removal in Exton?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Our heat treatment eliminates bed bugs in a single visit in most cases. Chemical treatments typically require 2–3 visits spaced 2 weeks apart. We provide a re-treatment guarantee."
+            "text": "Call as soon as you spot a nest. Wasp and hornet colonies grow rapidly through summer. Early removal is safer and less expensive. We provide same-day or next-day service throughout Exton and surrounding areas."
           }
         },
         {
           "@type": "Question",
-          "name": "Do you offer discreet bed bug treatment in Hockessin?",
+          "name": "Do carpenter bees damage homes in Exton?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. We use unmarked vehicles and plain-clothed technicians upon request. We understand the sensitivity of bed bug situations and protect your privacy."
+            "text": "Yes. Carpenter bees drill into wood siding, decks, fascia boards, and railings. Over time this causes structural damage and attracts woodpeckers. We treat existing galleries and apply preventive wood treatments to stop re-infestation."
           }
         },
         {
           "@type": "Question",
-          "name": "How much does bed bug treatment cost in Hockessin, DE?",
+          "name": "How much does ant and wasp control cost in Exton, PA?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Cost depends on property size, infestation severity, and treatment method. We provide free inspections and transparent quotes before any work begins. Call 484-643-2225 to schedule your inspection."
+            "text": "Cost depends on property size, infestation type, and treatment approach. We provide free inspections and transparent quotes before any work begins. Call 484-643-2225 to schedule your inspection."
           }
         }
       ]
@@ -106,12 +106,12 @@ export default function BedBugTreatmentHockessinDe() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
       <Helmet>
-        <title>Bed Bug Treatment in Hockessin, DE | Absolute Pest Services</title>
-        <meta name="description" content="Expert bed bug treatment in Hockessin, DE. Licensed & insured. Serving New Castle County. Free inspection available. Call 484-643-2225 for fast service." />
-        <link rel="canonical" href="https://absolutepestservices.com/bed-bug-treatment-hockessin-de/" />
-        <meta property="og:title" content="Bed Bug Treatment in Hockessin, DE | Absolute Pest Services" />
-        <meta property="og:description" content="Expert bed bug treatment in Hockessin, DE. Licensed & insured. Serving New Castle County. Free inspection available. Call 484-643-2225 for fast service." />
-        <meta property="og:url" content="https://absolutepestservices.com/bed-bug-treatment-hockessin-de/" />
+        <title>Ant & Wasp Control in Exton, PA | Absolute Pest Services</title>
+        <meta name="description" content="Expert ant, wasp, hornet & carpenter bee control in Exton, PA. Licensed & insured. Serving Chester County. Free inspection available. Call 484-643-2225." />
+        <link rel="canonical" href="https://absolutepestservices.com/ant-wasp-control-exton-pa/" />
+        <meta property="og:title" content="Ant & Wasp Control in Exton, PA | Absolute Pest Services" />
+        <meta property="og:description" content="Expert ant, wasp, hornet & carpenter bee control in Exton, PA. Licensed & insured. Serving Chester County. Free inspection available. Call 484-643-2225." />
+        <meta property="og:url" content="https://absolutepestservices.com/ant-wasp-control-exton-pa/" />
         <meta property="og:type" content="website" />
         <script type="application/ld+json">{JSON.stringify(schema)}</script>
       </Helmet>
@@ -123,16 +123,16 @@ export default function BedBugTreatmentHockessinDe() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center bg-white/10 text-white text-sm font-medium px-4 py-1.5 rounded-full mb-6">
             <MapPin className="w-4 h-4 mr-2" />
-            Hockessin, DE · New Castle County
+            Exton, PA · Chester County
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-            Bed Bug Treatment in Hockessin, DE
+            Ant & Wasp Control in Exton, PA
           </h1>
           <p className="text-xl text-green-100 mb-4 max-w-3xl mx-auto">
-            Fast, Effective Bed Bug Elimination — Guaranteed
+            Ants, Wasps, Hornets, Carpenter Bees & Boxelder Bugs — Eliminated
           </p>
           <p className="text-green-200 mb-8 max-w-2xl mx-auto">
-            Hockessin's wooded, affluent neighborhoods along the Kennett Pike corridor border Brandywine Creek State Park, creating elevated wildlife and termite pressure for homeowners.
+            Exton's rapid commercial and residential development alongside preserved green corridors creates ideal conditions for carpenter bees, boxelder bugs, wasps, and hornets year-round.
           </p>
           {/* Trust signals */}
           <div className="flex flex-wrap justify-center gap-4 mb-8 text-sm text-green-100">
@@ -164,12 +164,12 @@ export default function BedBugTreatmentHockessinDe() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Bed Bug Treatment in Hockessin, DE</h2>
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Ant & Wasp Control in Exton, PA</h2>
               <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                Bed bugs don't discriminate — they infest hotels, apartments, single-family homes, and businesses across Hockessin, DE. They spread through travel, used furniture, and multi-unit dwellings. Our bed bug treatment team uses a combination of heat treatment and targeted chemical applications to eliminate every life stage — eggs, nymphs, and adults — in a single treatment visit.
+                From carpenter ants tunneling through structural wood to yellow jackets nesting in wall voids, stinging insects and invasive ants cause real damage to Exton homes and businesses. Boxelder bugs and carpenter bees are equally persistent seasonal invaders. Our technicians use targeted treatments to eliminate active infestations and establish protective barriers — keeping your property pest-free through every season.
               </p>
-              <Link href="/bed-bugs">
-                <Button variant="outline" className="px-6 py-3">Bed Bug Info →</Button>
+              <Link href="/pest-control">
+                <Button variant="outline" className="px-6 py-3">Pest Control Info →</Button>
               </Link>
             </div>
             <div>
@@ -194,10 +194,10 @@ export default function BedBugTreatmentHockessinDe() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Serving Hockessin &amp; Surrounding Neighborhoods
+              Serving Exton &amp; Surrounding Neighborhoods
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Our technicians know every neighborhood in and around Hockessin, DE.
+              Our technicians know every neighborhood in and around Exton, PA.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -222,13 +222,13 @@ export default function BedBugTreatmentHockessinDe() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-10">
-            Why Hockessin Trusts Absolute Pest Services
+            Why Exton Trusts Absolute Pest Services
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { title: 'Licensed & Certified', body: 'Fully licensed in Pennsylvania and Delaware. All technicians are state-certified pest control applicators.', color: 'bg-[hsl(132,48%,35%)]' },
               { title: 'Locally Owned', body: 'Based in West Grove, PA — your neighbors in pest control. Chester County and New Castle County specialists.', color: 'bg-[hsl(36,100%,47%)]' },
-              { title: '5.0 Star Rated', body: 'Consistent 5-star Google reviews from homeowners throughout Hockessin and surrounding communities.', color: 'bg-[hsl(207,73%,44%)]' },
+              { title: '5.0 Star Rated', body: 'Consistent 5-star Google reviews from homeowners throughout Exton and surrounding communities.', color: 'bg-[hsl(207,73%,44%)]' },
               { title: '24/7 Emergency', body: 'Pest emergencies do not keep business hours. Our team is available around the clock for urgent situations.', color: 'bg-[hsl(132,48%,25%)]' },
             ].map((card, i) => (
               <Card key={i} className="hover:shadow-lg transition-shadow">
@@ -249,7 +249,7 @@ export default function BedBugTreatmentHockessinDe() {
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">
-            Frequently Asked Questions — Bed Bug Treatment in Hockessin
+            Frequently Asked Questions — Ant & Wasp Control in Exton
           </h2>
           <div className="space-y-6">
             {faqs.map((faq, i) => (
@@ -265,8 +265,8 @@ export default function BedBugTreatmentHockessinDe() {
       {/* CTA Banner */}
       <section className="py-16 bg-gradient-to-r from-[hsl(132,48%,35%)] to-[hsl(132,48%,25%)]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Bed Bugs in Hockessin? Act Fast.</h2>
-          <p className="text-xl text-green-100 mb-8">Bed bug infestations grow exponentially if left untreated. Our Hockessin, DE team offers fast scheduling, discreet service, and guaranteed results.</p>
+          <h2 className="text-3xl font-bold text-white mb-4">Wasps, Ants, or Carpenter Bees in Exton? Act Fast.</h2>
+          <p className="text-xl text-green-100 mb-8">Stinging insect colonies and carpenter ant infestations grow quickly. Our Exton, PA team offers fast scheduling and guaranteed results.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="tel:+14846432225"
@@ -288,12 +288,12 @@ export default function BedBugTreatmentHockessinDe() {
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
-            Other Services We Offer in Hockessin, DE
+            Other Services We Offer in Exton, PA
           </h3>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link href="/termites"><Button variant="outline">Termite Treatment</Button></Link>
             <Link href="/wildlife-control"><Button variant="outline">Wildlife Control</Button></Link>
-            <Link href="/bed-bugs"><Button variant="outline">Bed Bug Treatment</Button></Link>
+            <Link href="/pest-control"><Button variant="outline">General Pest Control</Button></Link>
             <Link href="/rodents"><Button variant="outline">Rodent Control</Button></Link>
             <Link href="/bat-removal"><Button variant="outline">Bat Removal</Button></Link>
             <Link href="/service-areas"><Button variant="outline">All Service Areas</Button></Link>

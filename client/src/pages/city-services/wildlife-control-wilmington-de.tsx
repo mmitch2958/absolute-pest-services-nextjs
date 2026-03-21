@@ -132,7 +132,7 @@ export default function WildlifeRodentControlWilmingtonDe() {
             Humane Wildlife Removal & Rodent Exclusion
           </p>
           <p className="text-green-200 mb-8 max-w-2xl mx-auto">
-            Delaware's largest city, Wilmington's mix of historic row homes, commercial districts, and suburban neighborhoods creates diverse pest challenges including rodents, bed bugs, and urban wildlife.
+            Delaware's largest city, Wilmington's mix of historic row homes, commercial districts, and suburban neighborhoods creates diverse pest challenges including rodents, boxelder bugs, wasps, hornets, and urban wildlife.
           </p>
           {/* Trust signals */}
           <div className="flex flex-wrap justify-center gap-4 mb-8 text-sm text-green-100">
@@ -293,7 +293,7 @@ export default function WildlifeRodentControlWilmingtonDe() {
           <div className="flex flex-wrap gap-3 justify-center">
             <Link href="/termites"><Button variant="outline">Termite Treatment</Button></Link>
             <Link href="/wildlife-control"><Button variant="outline">Wildlife Control</Button></Link>
-            <Link href="/bed-bugs"><Button variant="outline">Bed Bug Treatment</Button></Link>
+            <Link href="/pest-control"><Button variant="outline">Ant &amp; Wasp Control</Button></Link>
             <Link href="/rodents"><Button variant="outline">Rodent Control</Button></Link>
             <Link href="/bat-removal"><Button variant="outline">Bat Removal</Button></Link>
             <Link href="/service-areas"><Button variant="outline">All Service Areas</Button></Link>

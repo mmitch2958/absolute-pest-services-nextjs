@@ -293,7 +293,7 @@ export default function GeneralPestControlDowningtownPa() {
           <div className="flex flex-wrap gap-3 justify-center">
             <Link href="/termites"><Button variant="outline">Termite Treatment</Button></Link>
             <Link href="/wildlife-control"><Button variant="outline">Wildlife Control</Button></Link>
-            <Link href="/bed-bugs"><Button variant="outline">Bed Bug Treatment</Button></Link>
+            <Link href="/pest-control"><Button variant="outline">Ant &amp; Wasp Control</Button></Link>
             <Link href="/rodents"><Button variant="outline">Rodent Control</Button></Link>
             <Link href="/bat-removal"><Button variant="outline">Bat Removal</Button></Link>
             <Link href="/service-areas"><Button variant="outline">All Service Areas</Button></Link>

@@ -7,12 +7,12 @@ import { Link } from 'wouter';
 import ScheduleInspectionModal from '@/components/schedule-inspection-modal';
 import GoogleReviewRequest from '@/components/google-review-request';
 
-export default function BedBugTreatmentLincolnUniversityPa() {
-  const neighborhoods = ["Lincoln University","Elk Township","Lower Oxford Township","Franklin Township","Nottingham"];
+export default function AntWaspControlDowningtownPa() {
+  const neighborhoods = ["Downingtown Borough", "West Bradford Township", "East Brandywine Township", "Uwchlan Township", "Caln Township"];
 
-  const bulletPoints = ["Free bed bug inspection & identification","Heat treatment (whole-room thermal remediation)","Chemical/residual treatment programs","Mattress & box spring treatment/encasements","Multi-unit & apartment building programs","Hotel & hospitality industry services","Post-treatment inspection & follow-up","Discreet service — no logos on our vehicles"];
+  const bulletPoints = ["Ant control (carpenter ants, pavement ants, fire ants)","Wasp & hornet nest removal & prevention","Carpenter bee treatment & wood protection","Boxelder bug seasonal treatments","Stink bug prevention & exclusion","Exterior perimeter barrier program","Interior crack & crevice treatment","Seasonal pest prevention plans"];
 
-  const faqs = [{"q":"How do I know if I have bed bugs in my Lincoln University home?","a":"Look for small rust-colored stains on sheets, shed skins, tiny white eggs in mattress seams, and the bugs themselves (apple seed-sized, reddish-brown). Itchy, clustered bites in lines or groups are another sign. Call us for a free inspection."},{"q":"How many treatments does it take to eliminate bed bugs in Lincoln University?","a":"Our heat treatment eliminates bed bugs in a single visit in most cases. Chemical treatments typically require 2–3 visits spaced 2 weeks apart. We provide a re-treatment guarantee."},{"q":"Do you offer discreet bed bug treatment in Lincoln University?","a":"Yes. We use unmarked vehicles and plain-clothed technicians upon request. We understand the sensitivity of bed bug situations and protect your privacy."},{"q":"How much does bed bug treatment cost in Lincoln University, PA?","a":"Cost depends on property size, infestation severity, and treatment method. We provide free inspections and transparent quotes before any work begins. Call 484-643-2225 to schedule your inspection."}];
+  const faqs = [{"q":"What ants, wasps, and stinging insects are common in Downingtown?","a":"In Downingtown, we frequently treat carpenter ants, pavement ants, and odorous house ants. Stinging insects like yellow jackets, paper wasps, and bald-faced hornets are common in summer. Boxelder bugs and carpenter bees are also prevalent seasonal pests. Call us for a free inspection."},{"q":"When should I call for wasp and hornet nest removal in Downingtown?","a":"Call as soon as you spot a nest. Wasp and hornet colonies grow rapidly through summer. Early removal is safer and less expensive. We provide same-day or next-day service throughout Downingtown and surrounding areas."},{"q":"Do carpenter bees damage homes in Downingtown?","a":"Yes. Carpenter bees drill into wood siding, decks, fascia boards, and railings. Over time this causes structural damage and attracts woodpeckers. We treat existing galleries and apply preventive wood treatments to stop re-infestation."},{"q":"How much does ant and wasp control cost in Downingtown, PA?","a":"Cost depends on property size, infestation type, and treatment approach. We provide free inspections and transparent quotes before any work begins. Call 484-643-2225 to schedule your inspection."}];
 
   const schema = {
   "@context": "https://schema.org",
@@ -33,12 +33,12 @@ export default function BedBugTreatmentLincolnUniversityPa() {
       },
       "geo": {
         "@type": "GeoCoordinates",
-        "latitude": "39.8076",
-        "longitude": "-75.9260"
+        "latitude": "40.0065",
+        "longitude": "-75.7038"
       },
       "areaServed": {
         "@type": "City",
-        "name": "Lincoln University",
+        "name": "Downingtown",
         "containedInPlace": {
           "@type": "AdministrativeArea",
           "name": "Chester County",
@@ -50,14 +50,14 @@ export default function BedBugTreatmentLincolnUniversityPa() {
       },
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
-        "name": "Bed Bug Treatment",
+        "name": "Ant & Wasp Control",
         "itemListElement": [
           {
             "@type": "Offer",
             "itemOffered": {
               "@type": "Service",
-              "name": "Bed Bug Treatment in Lincoln University, PA",
-              "description": "Bed bugs don't discriminate — they infest hotels, apartments, single-family homes, and businesses across Lincoln University, PA. They spread through travel, used furniture, and multi-unit dwellings. O"
+              "name": "Ant & Wasp Control in Downingtown, PA",
+              "description": "Comprehensive ant, wasp, hornet, carpenter bee, and boxelder bug control for Downingtown, PA homes and businesses."
             }
           }
         ]
@@ -68,34 +68,34 @@ export default function BedBugTreatmentLincolnUniversityPa() {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "How do I know if I have bed bugs in my Lincoln University home?",
+          "name": "What ants, wasps, and stinging insects are common in Downingtown?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Look for small rust-colored stains on sheets, shed skins, tiny white eggs in mattress seams, and the bugs themselves (apple seed-sized, reddish-brown). Itchy, clustered bites in lines or groups are another sign. Call us for a free inspection."
+            "text": "In Downingtown, we frequently treat carpenter ants, pavement ants, and odorous house ants. Stinging insects like yellow jackets, paper wasps, and bald-faced hornets are common in summer. Boxelder bugs and carpenter bees are also prevalent seasonal pests. Call us for a free inspection."
           }
         },
         {
           "@type": "Question",
-          "name": "How many treatments does it take to eliminate bed bugs in Lincoln University?",
+          "name": "When should I call for wasp and hornet nest removal in Downingtown?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Our heat treatment eliminates bed bugs in a single visit in most cases. Chemical treatments typically require 2–3 visits spaced 2 weeks apart. We provide a re-treatment guarantee."
+            "text": "Call as soon as you spot a nest. Wasp and hornet colonies grow rapidly through summer. Early removal is safer and less expensive. We provide same-day or next-day service throughout Downingtown and surrounding areas."
           }
         },
         {
           "@type": "Question",
-          "name": "Do you offer discreet bed bug treatment in Lincoln University?",
+          "name": "Do carpenter bees damage homes in Downingtown?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. We use unmarked vehicles and plain-clothed technicians upon request. We understand the sensitivity of bed bug situations and protect your privacy."
+            "text": "Yes. Carpenter bees drill into wood siding, decks, fascia boards, and railings. Over time this causes structural damage and attracts woodpeckers. We treat existing galleries and apply preventive wood treatments to stop re-infestation."
           }
         },
         {
           "@type": "Question",
-          "name": "How much does bed bug treatment cost in Lincoln University, PA?",
+          "name": "How much does ant and wasp control cost in Downingtown, PA?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Cost depends on property size, infestation severity, and treatment method. We provide free inspections and transparent quotes before any work begins. Call 484-643-2225 to schedule your inspection."
+            "text": "Cost depends on property size, infestation type, and treatment approach. We provide free inspections and transparent quotes before any work begins. Call 484-643-2225 to schedule your inspection."
           }
         }
       ]
@@ -106,12 +106,12 @@ export default function BedBugTreatmentLincolnUniversityPa() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
       <Helmet>
-        <title>Bed Bug Treatment in Lincoln University, PA | Absolute Pest Services</title>
-        <meta name="description" content="Expert bed bug treatment in Lincoln University, PA. Licensed & insured. Serving Chester County. Free inspection available. Call 484-643-2225 for fast service." />
-        <link rel="canonical" href="https://absolutepestservices.com/bed-bug-treatment-lincoln-university-pa/" />
-        <meta property="og:title" content="Bed Bug Treatment in Lincoln University, PA | Absolute Pest Services" />
-        <meta property="og:description" content="Expert bed bug treatment in Lincoln University, PA. Licensed & insured. Serving Chester County. Free inspection available. Call 484-643-2225 for fast service." />
-        <meta property="og:url" content="https://absolutepestservices.com/bed-bug-treatment-lincoln-university-pa/" />
+        <title>Ant & Wasp Control in Downingtown, PA | Absolute Pest Services</title>
+        <meta name="description" content="Expert ant, wasp, hornet & carpenter bee control in Downingtown, PA. Licensed & insured. Serving Chester County. Free inspection available. Call 484-643-2225." />
+        <link rel="canonical" href="https://absolutepestservices.com/ant-wasp-control-downingtown-pa/" />
+        <meta property="og:title" content="Ant & Wasp Control in Downingtown, PA | Absolute Pest Services" />
+        <meta property="og:description" content="Expert ant, wasp, hornet & carpenter bee control in Downingtown, PA. Licensed & insured. Serving Chester County. Free inspection available. Call 484-643-2225." />
+        <meta property="og:url" content="https://absolutepestservices.com/ant-wasp-control-downingtown-pa/" />
         <meta property="og:type" content="website" />
         <script type="application/ld+json">{JSON.stringify(schema)}</script>
       </Helmet>
@@ -123,16 +123,16 @@ export default function BedBugTreatmentLincolnUniversityPa() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center bg-white/10 text-white text-sm font-medium px-4 py-1.5 rounded-full mb-6">
             <MapPin className="w-4 h-4 mr-2" />
-            Lincoln University, PA · Chester County
+            Downingtown, PA · Chester County
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-            Bed Bug Treatment in Lincoln University, PA
+            Ant & Wasp Control in Downingtown, PA
           </h1>
           <p className="text-xl text-green-100 mb-4 max-w-3xl mx-auto">
-            Fast, Effective Bed Bug Elimination — Guaranteed
+            Ants, Wasps, Hornets, Carpenter Bees & Boxelder Bugs — Eliminated
           </p>
           <p className="text-green-200 mb-8 max-w-2xl mx-auto">
-            Lincoln University's historic campus and surrounding rural properties in southern Chester County experience significant wildlife and rodent pressure from adjacent wooded areas.
+            Downingtown's position along the East Branch of Brandywine Creek and its mix of suburban neighborhoods and wooded corridors make it a prime habitat for boxelder bugs, carpenter bees, and stinging insects.
           </p>
           {/* Trust signals */}
           <div className="flex flex-wrap justify-center gap-4 mb-8 text-sm text-green-100">
@@ -164,12 +164,12 @@ export default function BedBugTreatmentLincolnUniversityPa() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Bed Bug Treatment in Lincoln University, PA</h2>
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Ant & Wasp Control in Downingtown, PA</h2>
               <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                Bed bugs don't discriminate — they infest hotels, apartments, single-family homes, and businesses across Lincoln University, PA. They spread through travel, used furniture, and multi-unit dwellings. Our bed bug treatment team uses a combination of heat treatment and targeted chemical applications to eliminate every life stage — eggs, nymphs, and adults — in a single treatment visit.
+                From carpenter ants tunneling through structural wood to yellow jackets nesting in wall voids, stinging insects and invasive ants cause real damage to Downingtown homes and businesses. Boxelder bugs and carpenter bees are equally persistent seasonal invaders. Our technicians use targeted treatments to eliminate active infestations and establish protective barriers — keeping your property pest-free through every season.
               </p>
-              <Link href="/bed-bugs">
-                <Button variant="outline" className="px-6 py-3">Bed Bug Info →</Button>
+              <Link href="/pest-control">
+                <Button variant="outline" className="px-6 py-3">Pest Control Info →</Button>
               </Link>
             </div>
             <div>
@@ -194,10 +194,10 @@ export default function BedBugTreatmentLincolnUniversityPa() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Serving Lincoln University &amp; Surrounding Neighborhoods
+              Serving Downingtown &amp; Surrounding Neighborhoods
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Our technicians know every neighborhood in and around Lincoln University, PA.
+              Our technicians know every neighborhood in and around Downingtown, PA.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -222,13 +222,13 @@ export default function BedBugTreatmentLincolnUniversityPa() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-10">
-            Why Lincoln University Trusts Absolute Pest Services
+            Why Downingtown Trusts Absolute Pest Services
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { title: 'Licensed & Certified', body: 'Fully licensed in Pennsylvania and Delaware. All technicians are state-certified pest control applicators.', color: 'bg-[hsl(132,48%,35%)]' },
               { title: 'Locally Owned', body: 'Based in West Grove, PA — your neighbors in pest control. Chester County and New Castle County specialists.', color: 'bg-[hsl(36,100%,47%)]' },
-              { title: '5.0 Star Rated', body: 'Consistent 5-star Google reviews from homeowners throughout Lincoln University and surrounding communities.', color: 'bg-[hsl(207,73%,44%)]' },
+              { title: '5.0 Star Rated', body: 'Consistent 5-star Google reviews from homeowners throughout Downingtown and surrounding communities.', color: 'bg-[hsl(207,73%,44%)]' },
               { title: '24/7 Emergency', body: 'Pest emergencies do not keep business hours. Our team is available around the clock for urgent situations.', color: 'bg-[hsl(132,48%,25%)]' },
             ].map((card, i) => (
               <Card key={i} className="hover:shadow-lg transition-shadow">
@@ -249,7 +249,7 @@ export default function BedBugTreatmentLincolnUniversityPa() {
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">
-            Frequently Asked Questions — Bed Bug Treatment in Lincoln University
+            Frequently Asked Questions — Ant & Wasp Control in Downingtown
           </h2>
           <div className="space-y-6">
             {faqs.map((faq, i) => (
@@ -265,8 +265,8 @@ export default function BedBugTreatmentLincolnUniversityPa() {
       {/* CTA Banner */}
       <section className="py-16 bg-gradient-to-r from-[hsl(132,48%,35%)] to-[hsl(132,48%,25%)]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Bed Bugs in Lincoln University? Act Fast.</h2>
-          <p className="text-xl text-green-100 mb-8">Bed bug infestations grow exponentially if left untreated. Our Lincoln University, PA team offers fast scheduling, discreet service, and guaranteed results.</p>
+          <h2 className="text-3xl font-bold text-white mb-4">Wasps, Ants, or Carpenter Bees in Downingtown? Act Fast.</h2>
+          <p className="text-xl text-green-100 mb-8">Stinging insect colonies and carpenter ant infestations grow quickly. Our Downingtown, PA team offers fast scheduling and guaranteed results.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="tel:+14846432225"
@@ -288,12 +288,12 @@ export default function BedBugTreatmentLincolnUniversityPa() {
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
-            Other Services We Offer in Lincoln University, PA
+            Other Services We Offer in Downingtown, PA
           </h3>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link href="/termites"><Button variant="outline">Termite Treatment</Button></Link>
             <Link href="/wildlife-control"><Button variant="outline">Wildlife Control</Button></Link>
-            <Link href="/bed-bugs"><Button variant="outline">Bed Bug Treatment</Button></Link>
+            <Link href="/pest-control"><Button variant="outline">General Pest Control</Button></Link>
             <Link href="/rodents"><Button variant="outline">Rodent Control</Button></Link>
             <Link href="/bat-removal"><Button variant="outline">Bat Removal</Button></Link>
             <Link href="/service-areas"><Button variant="outline">All Service Areas</Button></Link>
