@@ -227,9 +227,9 @@ export default function BedBugTreatmentCoatesvillePa() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { title: 'Licensed & Certified', body: 'Fully licensed in Pennsylvania and Delaware. All technicians are state-certified pest control applicators.', color: 'bg-[hsl(132,48%,35%)]' },
-              { title: 'Locally Owned', body: 'Based in West Grove, PA — we're your neighbors. We know Chester County and New Castle County pests inside out.', color: 'bg-[hsl(36,100%,47%)]' },
+              { title: 'Locally Owned', body: 'Based in West Grove, PA — your neighbors in pest control. Chester County and New Castle County specialists.', color: 'bg-[hsl(36,100%,47%)]' },
               { title: '5.0 Star Rated', body: 'Consistent 5-star Google reviews from homeowners throughout Coatesville and surrounding communities.', color: 'bg-[hsl(207,73%,44%)]' },
-              { title: '24/7 Emergency', body: 'Pest emergencies don't keep business hours. Our team is available around the clock for urgent situations.', color: 'bg-[hsl(132,48%,25%)]' },
+              { title: '24/7 Emergency', body: 'Pest emergencies do not keep business hours. Our team is available around the clock for urgent situations.', color: 'bg-[hsl(132,48%,25%)]' },
             ].map((card, i) => (
               <Card key={i} className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-6 text-center">

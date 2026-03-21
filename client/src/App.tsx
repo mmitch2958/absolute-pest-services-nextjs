@@ -54,6 +54,78 @@ import FieldHistory from "@/pages/field-history";
 import FieldEmployees from "@/pages/field-employees";
 import FieldReports from "@/pages/field-reports";
 import PitchDeck from "@/pages/pitch-deck";
+// City-level service area pages (new)
+import CoatesvillePA from "@/pages/service-areas/coatesville-pa";
+import CochranvillePA from "@/pages/service-areas/cochranville-pa";
+import KennettSquarePA from "@/pages/service-areas/kennett-square-pa";
+import AvondalePA from "@/pages/service-areas/avondale-pa";
+import WestGrovePA from "@/pages/service-areas/west-grove-pa";
+import OxfordPA from "@/pages/service-areas/oxford-pa";
+import LincolnUniversityPA from "@/pages/service-areas/lincoln-university-pa";
+import LandenbergPA from "@/pages/service-areas/landenberg-pa";
+import ChaddsFordPA from "@/pages/service-areas/chadds-ford-pa";
+import GlenMillsPA from "@/pages/service-areas/glen-mills-pa";
+// City×Service pages — 60 programmatic SEO landing pages
+import GeneralPestControlDowningtownPa from "@/pages/city-services/pest-control-downingtown-pa";
+import TermiteControlDowningtownPa from "@/pages/city-services/termite-control-downingtown-pa";
+import WildlifeRodentControlDowningtownPa from "@/pages/city-services/wildlife-control-downingtown-pa";
+import BedBugTreatmentDowningtownPa from "@/pages/city-services/bed-bug-treatment-downingtown-pa";
+import GeneralPestControlExtonPa from "@/pages/city-services/pest-control-exton-pa";
+import TermiteControlExtonPa from "@/pages/city-services/termite-control-exton-pa";
+import WildlifeRodentControlExtonPa from "@/pages/city-services/wildlife-control-exton-pa";
+import BedBugTreatmentExtonPa from "@/pages/city-services/bed-bug-treatment-exton-pa";
+import GeneralPestControlCoatesvillePa from "@/pages/city-services/pest-control-coatesville-pa";
+import TermiteControlCoatesvillePa from "@/pages/city-services/termite-control-coatesville-pa";
+import WildlifeRodentControlCoatesvillePa from "@/pages/city-services/wildlife-control-coatesville-pa";
+import BedBugTreatmentCoatesvillePa from "@/pages/city-services/bed-bug-treatment-coatesville-pa";
+import GeneralPestControlCochranvillePa from "@/pages/city-services/pest-control-cochranville-pa";
+import TermiteControlCochranvillePa from "@/pages/city-services/termite-control-cochranville-pa";
+import WildlifeRodentControlCochranvillePa from "@/pages/city-services/wildlife-control-cochranville-pa";
+import BedBugTreatmentCochranvillePa from "@/pages/city-services/bed-bug-treatment-cochranville-pa";
+import GeneralPestControlKennettSquarePa from "@/pages/city-services/pest-control-kennett-square-pa";
+import TermiteControlKennettSquarePa from "@/pages/city-services/termite-control-kennett-square-pa";
+import WildlifeRodentControlKennettSquarePa from "@/pages/city-services/wildlife-control-kennett-square-pa";
+import BedBugTreatmentKennettSquarePa from "@/pages/city-services/bed-bug-treatment-kennett-square-pa";
+import GeneralPestControlAvondalePa from "@/pages/city-services/pest-control-avondale-pa";
+import TermiteControlAvondalePa from "@/pages/city-services/termite-control-avondale-pa";
+import WildlifeRodentControlAvondalePa from "@/pages/city-services/wildlife-control-avondale-pa";
+import BedBugTreatmentAvondalePa from "@/pages/city-services/bed-bug-treatment-avondale-pa";
+import GeneralPestControlWestGrovePa from "@/pages/city-services/pest-control-west-grove-pa";
+import TermiteControlWestGrovePa from "@/pages/city-services/termite-control-west-grove-pa";
+import WildlifeRodentControlWestGrovePa from "@/pages/city-services/wildlife-control-west-grove-pa";
+import BedBugTreatmentWestGrovePa from "@/pages/city-services/bed-bug-treatment-west-grove-pa";
+import GeneralPestControlOxfordPa from "@/pages/city-services/pest-control-oxford-pa";
+import TermiteControlOxfordPa from "@/pages/city-services/termite-control-oxford-pa";
+import WildlifeRodentControlOxfordPa from "@/pages/city-services/wildlife-control-oxford-pa";
+import BedBugTreatmentOxfordPa from "@/pages/city-services/bed-bug-treatment-oxford-pa";
+import GeneralPestControlLincolnUniversityPa from "@/pages/city-services/pest-control-lincoln-university-pa";
+import TermiteControlLincolnUniversityPa from "@/pages/city-services/termite-control-lincoln-university-pa";
+import WildlifeRodentControlLincolnUniversityPa from "@/pages/city-services/wildlife-control-lincoln-university-pa";
+import BedBugTreatmentLincolnUniversityPa from "@/pages/city-services/bed-bug-treatment-lincoln-university-pa";
+import GeneralPestControlLandenbergPa from "@/pages/city-services/pest-control-landenberg-pa";
+import TermiteControlLandenbergPa from "@/pages/city-services/termite-control-landenberg-pa";
+import WildlifeRodentControlLandenbergPa from "@/pages/city-services/wildlife-control-landenberg-pa";
+import BedBugTreatmentLandenbergPa from "@/pages/city-services/bed-bug-treatment-landenberg-pa";
+import GeneralPestControlChaddsFordPa from "@/pages/city-services/pest-control-chadds-ford-pa";
+import TermiteControlChaddsFordPa from "@/pages/city-services/termite-control-chadds-ford-pa";
+import WildlifeRodentControlChaddsFordPa from "@/pages/city-services/wildlife-control-chadds-ford-pa";
+import BedBugTreatmentChaddsFordPa from "@/pages/city-services/bed-bug-treatment-chadds-ford-pa";
+import GeneralPestControlGlenMillsPa from "@/pages/city-services/pest-control-glen-mills-pa";
+import TermiteControlGlenMillsPa from "@/pages/city-services/termite-control-glen-mills-pa";
+import WildlifeRodentControlGlenMillsPa from "@/pages/city-services/wildlife-control-glen-mills-pa";
+import BedBugTreatmentGlenMillsPa from "@/pages/city-services/bed-bug-treatment-glen-mills-pa";
+import GeneralPestControlHockessinDe from "@/pages/city-services/pest-control-hockessin-de";
+import TermiteControlHockessinDe from "@/pages/city-services/termite-control-hockessin-de";
+import WildlifeRodentControlHockessinDe from "@/pages/city-services/wildlife-control-hockessin-de";
+import BedBugTreatmentHockessinDe from "@/pages/city-services/bed-bug-treatment-hockessin-de";
+import GeneralPestControlNewarkDe from "@/pages/city-services/pest-control-newark-de";
+import TermiteControlNewarkDe from "@/pages/city-services/termite-control-newark-de";
+import WildlifeRodentControlNewarkDe from "@/pages/city-services/wildlife-control-newark-de";
+import BedBugTreatmentNewarkDe from "@/pages/city-services/bed-bug-treatment-newark-de";
+import GeneralPestControlWilmingtonDe from "@/pages/city-services/pest-control-wilmington-de";
+import TermiteControlWilmingtonDe from "@/pages/city-services/termite-control-wilmington-de";
+import WildlifeRodentControlWilmingtonDe from "@/pages/city-services/wildlife-control-wilmington-de";
+import BedBugTreatmentWilmingtonDe from "@/pages/city-services/bed-bug-treatment-wilmington-de";
 import PortalLayout from "@/pages/portal/PortalLayout";
 import PortalDashboard from "@/pages/portal/PortalDashboard";
 import PortalAppointments from "@/pages/portal/PortalAppointments";
@@ -93,6 +165,78 @@ function Router() {
       <Route path="/service-areas/new-castle-county-de" component={NewCastleCountyDE} />
       <Route path="/service-areas/montgomery-county-pa" component={MontgomeryCountyPA} />
       <Route path="/service-areas/northeast-maryland" component={NortheastMaryland} />
+      {/* Additional city-level service area pages */}
+      <Route path="/service-areas/coatesville-pa" component={CoatesvillePA} />
+      <Route path="/service-areas/cochranville-pa" component={CochranvillePA} />
+      <Route path="/service-areas/kennett-square-pa" component={KennettSquarePA} />
+      <Route path="/service-areas/avondale-pa" component={AvondalePA} />
+      <Route path="/service-areas/west-grove-pa" component={WestGrovePA} />
+      <Route path="/service-areas/oxford-pa" component={OxfordPA} />
+      <Route path="/service-areas/lincoln-university-pa" component={LincolnUniversityPA} />
+      <Route path="/service-areas/landenberg-pa" component={LandenbergPA} />
+      <Route path="/service-areas/chadds-ford-pa" component={ChaddsFordPA} />
+      <Route path="/service-areas/glen-mills-pa" component={GlenMillsPA} />
+      {/* City×Service programmatic SEO pages — 60 pages */}
+      <Route path="/pest-control-downingtown-pa/" component={GeneralPestControlDowningtownPa} />
+      <Route path="/termite-control-downingtown-pa/" component={TermiteControlDowningtownPa} />
+      <Route path="/wildlife-control-downingtown-pa/" component={WildlifeRodentControlDowningtownPa} />
+      <Route path="/bed-bug-treatment-downingtown-pa/" component={BedBugTreatmentDowningtownPa} />
+      <Route path="/pest-control-exton-pa/" component={GeneralPestControlExtonPa} />
+      <Route path="/termite-control-exton-pa/" component={TermiteControlExtonPa} />
+      <Route path="/wildlife-control-exton-pa/" component={WildlifeRodentControlExtonPa} />
+      <Route path="/bed-bug-treatment-exton-pa/" component={BedBugTreatmentExtonPa} />
+      <Route path="/pest-control-coatesville-pa/" component={GeneralPestControlCoatesvillePa} />
+      <Route path="/termite-control-coatesville-pa/" component={TermiteControlCoatesvillePa} />
+      <Route path="/wildlife-control-coatesville-pa/" component={WildlifeRodentControlCoatesvillePa} />
+      <Route path="/bed-bug-treatment-coatesville-pa/" component={BedBugTreatmentCoatesvillePa} />
+      <Route path="/pest-control-cochranville-pa/" component={GeneralPestControlCochranvillePa} />
+      <Route path="/termite-control-cochranville-pa/" component={TermiteControlCochranvillePa} />
+      <Route path="/wildlife-control-cochranville-pa/" component={WildlifeRodentControlCochranvillePa} />
+      <Route path="/bed-bug-treatment-cochranville-pa/" component={BedBugTreatmentCochranvillePa} />
+      <Route path="/pest-control-kennett-square-pa/" component={GeneralPestControlKennettSquarePa} />
+      <Route path="/termite-control-kennett-square-pa/" component={TermiteControlKennettSquarePa} />
+      <Route path="/wildlife-control-kennett-square-pa/" component={WildlifeRodentControlKennettSquarePa} />
+      <Route path="/bed-bug-treatment-kennett-square-pa/" component={BedBugTreatmentKennettSquarePa} />
+      <Route path="/pest-control-avondale-pa/" component={GeneralPestControlAvondalePa} />
+      <Route path="/termite-control-avondale-pa/" component={TermiteControlAvondalePa} />
+      <Route path="/wildlife-control-avondale-pa/" component={WildlifeRodentControlAvondalePa} />
+      <Route path="/bed-bug-treatment-avondale-pa/" component={BedBugTreatmentAvondalePa} />
+      <Route path="/pest-control-west-grove-pa/" component={GeneralPestControlWestGrovePa} />
+      <Route path="/termite-control-west-grove-pa/" component={TermiteControlWestGrovePa} />
+      <Route path="/wildlife-control-west-grove-pa/" component={WildlifeRodentControlWestGrovePa} />
+      <Route path="/bed-bug-treatment-west-grove-pa/" component={BedBugTreatmentWestGrovePa} />
+      <Route path="/pest-control-oxford-pa/" component={GeneralPestControlOxfordPa} />
+      <Route path="/termite-control-oxford-pa/" component={TermiteControlOxfordPa} />
+      <Route path="/wildlife-control-oxford-pa/" component={WildlifeRodentControlOxfordPa} />
+      <Route path="/bed-bug-treatment-oxford-pa/" component={BedBugTreatmentOxfordPa} />
+      <Route path="/pest-control-lincoln-university-pa/" component={GeneralPestControlLincolnUniversityPa} />
+      <Route path="/termite-control-lincoln-university-pa/" component={TermiteControlLincolnUniversityPa} />
+      <Route path="/wildlife-control-lincoln-university-pa/" component={WildlifeRodentControlLincolnUniversityPa} />
+      <Route path="/bed-bug-treatment-lincoln-university-pa/" component={BedBugTreatmentLincolnUniversityPa} />
+      <Route path="/pest-control-landenberg-pa/" component={GeneralPestControlLandenbergPa} />
+      <Route path="/termite-control-landenberg-pa/" component={TermiteControlLandenbergPa} />
+      <Route path="/wildlife-control-landenberg-pa/" component={WildlifeRodentControlLandenbergPa} />
+      <Route path="/bed-bug-treatment-landenberg-pa/" component={BedBugTreatmentLandenbergPa} />
+      <Route path="/pest-control-chadds-ford-pa/" component={GeneralPestControlChaddsFordPa} />
+      <Route path="/termite-control-chadds-ford-pa/" component={TermiteControlChaddsFordPa} />
+      <Route path="/wildlife-control-chadds-ford-pa/" component={WildlifeRodentControlChaddsFordPa} />
+      <Route path="/bed-bug-treatment-chadds-ford-pa/" component={BedBugTreatmentChaddsFordPa} />
+      <Route path="/pest-control-glen-mills-pa/" component={GeneralPestControlGlenMillsPa} />
+      <Route path="/termite-control-glen-mills-pa/" component={TermiteControlGlenMillsPa} />
+      <Route path="/wildlife-control-glen-mills-pa/" component={WildlifeRodentControlGlenMillsPa} />
+      <Route path="/bed-bug-treatment-glen-mills-pa/" component={BedBugTreatmentGlenMillsPa} />
+      <Route path="/pest-control-hockessin-de/" component={GeneralPestControlHockessinDe} />
+      <Route path="/termite-control-hockessin-de/" component={TermiteControlHockessinDe} />
+      <Route path="/wildlife-control-hockessin-de/" component={WildlifeRodentControlHockessinDe} />
+      <Route path="/bed-bug-treatment-hockessin-de/" component={BedBugTreatmentHockessinDe} />
+      <Route path="/pest-control-newark-de/" component={GeneralPestControlNewarkDe} />
+      <Route path="/termite-control-newark-de/" component={TermiteControlNewarkDe} />
+      <Route path="/wildlife-control-newark-de/" component={WildlifeRodentControlNewarkDe} />
+      <Route path="/bed-bug-treatment-newark-de/" component={BedBugTreatmentNewarkDe} />
+      <Route path="/pest-control-wilmington-de/" component={GeneralPestControlWilmingtonDe} />
+      <Route path="/termite-control-wilmington-de/" component={TermiteControlWilmingtonDe} />
+      <Route path="/wildlife-control-wilmington-de/" component={WildlifeRodentControlWilmingtonDe} />
+      <Route path="/bed-bug-treatment-wilmington-de/" component={BedBugTreatmentWilmingtonDe} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/cost-calculator" component={CostCalculator} />
