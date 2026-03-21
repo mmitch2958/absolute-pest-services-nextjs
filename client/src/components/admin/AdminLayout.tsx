@@ -1,4 +1,4 @@
-import { Building2, FolderOpen, Target, BarChart3, Settings, LogOut, Home, BookOpen, FileText, Wrench, CalendarDays, ScrollText, ClipboardList, Receipt, Tags, Loader2 } from "lucide-react";
+import { Building2, FolderOpen, Target, BarChart3, Settings, LogOut, Home, BookOpen, FileText, Wrench, CalendarDays, ScrollText, ClipboardList, Receipt, Tags, Loader2, TrendingUp } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -71,6 +71,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       title: "Dashboards",
       href: "/admin/dashboards",
       icon: BarChart3,
+    },
+    {
+      title: "Marketing",
+      href: "/admin/marketing",
+      icon: TrendingUp,
     },
     {
       title: "Blog",

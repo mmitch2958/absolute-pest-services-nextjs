@@ -5456,6 +5456,70 @@ Return the article as JSON with fields:
     }
   });
 
+  // ==========================================
+  // Marketing Dashboard Routes
+  // ==========================================
+
+  const MARKETING_DATA_DIR = '/data/.openclaw/workspace/projects/absolute-pest-services/data';
+
+  // Helper: find latest data file matching a prefix pattern
+  const findLatestDataFile = (prefix: string): string | null => {
+    try {
+      const files = fs.readdirSync(MARKETING_DATA_DIR)
+        .filter(f => f.startsWith(prefix) && f.endsWith('.json'))
+        .sort()
+        .reverse();
+      return files.length > 0 ? path.join(MARKETING_DATA_DIR, files[0]) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  // GET /api/admin/marketing/ads-campaigns - Latest Google Ads campaigns data
+  app.get('/api/admin/marketing/ads-campaigns', requireAdmin, (req, res) => {
+    const filePath = findLatestDataFile('ads_campaigns_');
+    if (!filePath) {
+      return res.json({ success: true, data: null, lastFetched: null });
+    }
+    try {
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      const data = JSON.parse(raw);
+      res.json({ success: true, data, lastFetched: data.fetched_at });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Failed to read ads campaigns data' });
+    }
+  });
+
+  // GET /api/admin/marketing/ads-search-terms - Latest search terms data
+  app.get('/api/admin/marketing/ads-search-terms', requireAdmin, (req, res) => {
+    const filePath = findLatestDataFile('ads_search_terms_');
+    if (!filePath) {
+      return res.json({ success: true, data: null, lastFetched: null });
+    }
+    try {
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      const data = JSON.parse(raw);
+      res.json({ success: true, data, lastFetched: data.fetched_at });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Failed to read search terms data' });
+    }
+  });
+
+  // GET /api/admin/marketing/ga4-overview - Latest GA4 overview data
+  app.get('/api/admin/marketing/ga4-overview', requireAdmin, (req, res) => {
+    const filePath = findLatestDataFile('ga4_overview_');
+    if (!filePath) {
+      return res.json({ success: true, data: null, lastFetched: null });
+    }
+    try {
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      const data = JSON.parse(raw);
+      res.json({ success: true, data, lastFetched: data.fetched_at });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Failed to read GA4 overview data' });
+    }
+  });
+
   seedAdminUser();
   seedFieldMaterials();
   seedServiceRates();
