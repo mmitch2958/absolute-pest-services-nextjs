@@ -162,6 +162,76 @@ With `trust proxy` set to `1` in production (required because Replit's load bala
 
 ---
 
+## 10. Facebook Token Handling — Multi-Source Fallback
+
+**Problem:** Replit secrets sometimes don't propagate to the running Node process after being updated. The Facebook token expires periodically (every 60 days for long-lived tokens) and must be refreshed.
+
+**Solution:** The `getFBToken()` function in `server/routes.ts` reads from three sources in priority order:
+1. `/tmp/fb_token.txt` — runtime override file (written by the connect-social endpoint or manually)
+2. `/run/secrets/FB_PAGE_ACCESS_TOKEN` — Replit's secrets filesystem
+3. `process.env.FB_PAGE_ACCESS_TOKEN` — standard environment variable
+
+**How to update the token:**
+1. Generate a new Page Access Token from [Facebook Graph API Explorer](https://developers.facebook.com/tools/explorer/)
+   - Select the app (SteelCity Social)
+   - Set "User or Page" to "Absolute Pest Services"
+   - Permissions needed: `pages_read_engagement`, `pages_read_user_content`, `pages_manage_posts`, `pages_manage_engagement`, `instagram_manage_insights`, `instagram_content_publish`
+   - Click "Generate Access Token"
+2. Update the `FB_PAGE_ACCESS_TOKEN` secret in Replit
+3. Restart the workflow — or just click the Connect button on the Social Media tab (it will use the updated secret)
+
+**Facebook Page ID:** `298835070139713` (Absolute Pest Services)
+
+**Token expiry:** Short-lived tokens last ~1 hour. For long-lived tokens (60 days), use the [Access Token Debugger](https://developers.facebook.com/tools/debug/accesstoken/) to exchange.
+
+**Rule:** Never hardcode tokens in source code. Always use environment secrets or the runtime file fallback.
+
+---
+
+## 11. Google Ads API — Version and Customer ID
+
+**Problem:** Google Ads REST API was returning 404 errors because the wrong API version and customer ID were being used.
+
+**Root cause:** The dev team's code used `v17` and customer ID `1038095551`. The correct values are `v23` and customer ID `6800190976`.
+
+**How the fix was discovered:**
+1. Used Maton control API to find the active connection: `GET https://ctrl.maton.ai/connections?app=google-ads&status=ACTIVE`
+2. Used Maton gateway to list accessible customers: `GET https://gateway.maton.ai/google-ads/v23/customers:listAccessibleCustomers`
+3. Response: `{"resourceNames":["customers/6800190976"]}`
+
+**Current values in `server/routes.ts`:**
+```ts
+const GOOGLE_ADS_CUSTOMER_ID = '6800190976';
+const GOOGLE_ADS_API_VERSION = 'v23';
+```
+
+**If Google Ads stops working (404 errors):**
+1. Check if the API version has been deprecated: [Google Ads API Release Notes](https://developers.google.com/google-ads/api/docs/release-notes)
+2. Update `GOOGLE_ADS_API_VERSION` in `server/routes.ts`
+3. Test with: `POST https://gateway.maton.ai/google-ads/{version}/customers/6800190976/googleAds:search`
+
+---
+
+## 12. Marketing Dashboard Data Flow
+
+**Architecture:** All marketing data fetches happen server-side and are cached as JSON files in `data/marketing/`. The frontend reads from API endpoints that return cached data or trigger fresh fetches.
+
+**Data sources and endpoints:**
+
+| Source | Endpoint | Backend Function | Cache File Prefix |
+|--------|----------|-----------------|-------------------|
+| GA4 | `GET /api/admin/marketing/ga4-overview` | `fetchGA4Data()` | `ga4_overview_` |
+| Google Ads Campaigns | `GET /api/admin/marketing/ads-campaigns` | `fetchGoogleAdsData()` | `ads_campaigns_` |
+| Google Ads Search Terms | `GET /api/admin/marketing/ads-search-terms` | (included in above) | `ads_search_terms_` |
+| Facebook | `GET /api/admin/marketing/facebook` | `fetchFacebookData()` | `facebook_metrics_` |
+| Instagram | `GET /api/admin/marketing/instagram` | `fetchInstagramData()` | `instagram_metrics_` |
+| Connect Social | `POST /api/admin/marketing/connect-social` | Triggers FB+IG fetch | — |
+| Refresh All | `POST /api/admin/marketing/refresh-all` | All four sources | — |
+
+**Cache behavior:** Each endpoint first checks for a cached JSON file. If found and fresh (< 1 hour), returns cached data. Otherwise triggers a live API fetch, caches the result, and returns it. Maximum 5 snapshots kept per data type.
+
+---
+
 ## Quick Checklist Before Submitting Code
 
 - [ ] All hooks are before any early returns in every component
@@ -170,3 +240,6 @@ With `trust proxy` set to `1` in production (required because Replit's load bala
 - [ ] No new dependencies that push bundle over 5MB
 - [ ] Tested with a fresh login (don't rely on existing sessions)
 - [ ] Environment variables referenced in code are documented above
+- [ ] Google Ads API version (`v23`) still works — test before pushing
+- [ ] Facebook token is not expired — check with [Token Debugger](https://developers.facebook.com/tools/debug/accesstoken/)
+- [ ] Marketing dashboard shows data on all four tabs after changes

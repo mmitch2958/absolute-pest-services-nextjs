@@ -5495,6 +5495,10 @@ Return the article as JSON with fields:
       const content = fs.readFileSync('/tmp/fb_token.txt', 'utf8').trim();
       if (content) return content;
     } catch {}
+    try {
+      const envContent = fs.readFileSync('/run/secrets/FB_PAGE_ACCESS_TOKEN', 'utf8').trim();
+      if (envContent) return envContent;
+    } catch {}
     return process.env.FB_PAGE_ACCESS_TOKEN;
   }
 
@@ -5948,6 +5952,9 @@ Return the article as JSON with fields:
 
   app.post('/api/admin/marketing/connect-social', requireAdmin, async (req, res) => {
     try {
+      if (req.body?.token) {
+        try { fs.writeFileSync('/tmp/fb_token.txt', req.body.token.trim()); } catch {}
+      }
       const [fb, ig] = await Promise.all([fetchFacebookData(), fetchInstagramData()]);
       res.json({
         success: true,
