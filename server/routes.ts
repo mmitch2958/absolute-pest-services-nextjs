@@ -5938,6 +5938,21 @@ Return the article as JSON with fields:
     }
   });
 
+  app.post('/api/admin/marketing/connect-social', requireAdmin, async (req, res) => {
+    try {
+      const [fb, ig] = await Promise.all([fetchFacebookData(), fetchInstagramData()]);
+      res.json({
+        success: true,
+        message: fb ? 'Facebook connected successfully' : 'Facebook connection failed — check FB_PAGE_ACCESS_TOKEN and FB_PAGE_ID secrets',
+        facebook: fb ? 'connected' : 'unavailable',
+        instagram: ig ? 'connected' : 'unavailable',
+      });
+    } catch (err) {
+      console.error('Social connect error:', err);
+      res.status(500).json({ success: false, message: 'Failed to connect social accounts' });
+    }
+  });
+
   app.post('/api/admin/marketing/refresh-social', requireAdmin, async (req, res) => {
     try {
       const [fb, ig] = await Promise.all([fetchFacebookData(), fetchInstagramData()]);

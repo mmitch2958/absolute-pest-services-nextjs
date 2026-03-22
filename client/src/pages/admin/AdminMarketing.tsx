@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useState } from "react";
 import {
   TrendingUp,
@@ -265,9 +265,13 @@ function NoData({ lastFetched }: { lastFetched: string | null }) {
 function FacebookCard({
   fbData,
   isLoading,
+  onConnect,
+  isConnecting,
 }: {
   fbData: MarketingResponse<FacebookData>;
   isLoading: boolean;
+  onConnect: () => void;
+  isConnecting: boolean;
 }) {
   const fb = fbData.data;
   const isConnected = fb?.status === 'live';
@@ -347,12 +351,12 @@ function FacebookCard({
             Not connected
           </span>
           <button
-            className="mt-1 px-4 py-2 rounded-md text-sm font-medium text-white transition-colors"
+            className="mt-1 px-4 py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-50"
             style={{ backgroundColor: APS_BLUE }}
-            disabled
-            title="Set FB_PAGE_ACCESS_TOKEN and FB_PAGE_ID in environment"
+            onClick={onConnect}
+            disabled={isConnecting}
           >
-            Connect
+            {isConnecting ? 'Connecting...' : 'Connect'}
           </button>
         </>
       )}
@@ -884,11 +888,17 @@ function SocialTab({
   igData,
   fbLoading,
   igLoading,
+  onConnectFacebook,
+  isConnectingFb,
+  connectError,
 }: {
   fbData: MarketingResponse<FacebookData>;
   igData: MarketingResponse<InstagramData>;
   fbLoading: boolean;
   igLoading: boolean;
+  onConnectFacebook: () => void;
+  isConnectingFb: boolean;
+  connectError: string | null;
 }) {
   const fb = fbData.data;
   const ig = igData.data;
@@ -926,9 +936,16 @@ function SocialTab({
         </div>
       )}
 
+      {connectError && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-red-800 text-sm">
+          <AlertTriangle className="w-4 h-4 inline mr-2" />
+          {connectError}
+        </div>
+      )}
+
       {/* Social Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <FacebookCard fbData={fbData} isLoading={fbLoading} />
+        <FacebookCard fbData={fbData} isLoading={fbLoading} onConnect={onConnectFacebook} isConnecting={isConnectingFb} />
         <InstagramCard igData={igData} isLoading={igLoading} />
       </div>
 
@@ -1015,18 +1032,12 @@ function SocialTab({
         </div>
       )}
 
-      {/* Setup instructions */}
       {!fbConnected && (
         <div className="bg-white rounded-lg shadow-sm p-6 text-center text-gray-400 text-sm">
           <ExternalLink className="w-6 h-6 mx-auto mb-2 opacity-30" />
           <p className="font-medium text-gray-500">Facebook not connected</p>
           <p className="mt-1">
-            To enable: set <code className="bg-gray-100 px-1 rounded">FB_PAGE_ACCESS_TOKEN</code> and{' '}
-            <code className="bg-gray-100 px-1 rounded">FB_PAGE_ID</code> environment variables, then run{' '}
-            <code className="bg-gray-100 px-1 rounded">fetch_facebook_data.py</code>.
-          </p>
-          <p className="mt-2 text-xs text-gray-400">
-            Ask Steel City AI to configure the Facebook connection.
+            Click the Connect button above to pull in your Facebook page data.
           </p>
         </div>
       )}
@@ -1095,6 +1106,26 @@ export function AdminMarketing() {
       return res.json();
     },
     staleTime: 5 * 60 * 1000,
+  });
+
+  const [connectError, setConnectError] = useState<string | null>(null);
+  const connectFbMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/admin/marketing/connect-social");
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      if (data.facebook === 'connected') {
+        setConnectError(null);
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/marketing/facebook"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/marketing/instagram"] });
+      } else {
+        setConnectError(data.message || 'Connection failed');
+      }
+    },
+    onError: () => {
+      setConnectError('Failed to connect. Please try again.');
+    },
   });
 
   const isLoading = adsLoading || termsLoading || ga4Loading;
@@ -1199,6 +1230,9 @@ export function AdminMarketing() {
                   igData={igResponse ?? emptyIg}
                   fbLoading={fbLoading}
                   igLoading={igLoading}
+                  onConnectFacebook={() => connectFbMutation.mutate()}
+                  isConnectingFb={connectFbMutation.isPending}
+                  connectError={connectError}
                 />
               )}
             </>
