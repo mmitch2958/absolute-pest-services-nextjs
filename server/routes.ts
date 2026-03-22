@@ -5460,9 +5460,11 @@ Return the article as JSON with fields:
   // Marketing Dashboard Routes
   // ==========================================
 
-  const MARKETING_DATA_DIR = '/data/.openclaw/workspace/projects/absolute-pest-services/data';
+  const MARKETING_DATA_DIR = path.join(process.cwd(), 'data', 'marketing');
+  if (!fs.existsSync(MARKETING_DATA_DIR)) {
+    fs.mkdirSync(MARKETING_DATA_DIR, { recursive: true });
+  }
 
-  // Helper: find latest data file matching a prefix pattern
   const findLatestDataFile = (prefix: string): string | null => {
     try {
       const files = fs.readdirSync(MARKETING_DATA_DIR)
@@ -5475,7 +5477,177 @@ Return the article as JSON with fields:
     }
   };
 
-  // GET /api/admin/marketing/ads-campaigns - Latest Google Ads campaigns data
+  const saveMarketingData = (prefix: string, data: any) => {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filePath = path.join(MARKETING_DATA_DIR, `${prefix}${timestamp}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    const files = fs.readdirSync(MARKETING_DATA_DIR)
+      .filter(f => f.startsWith(prefix) && f.endsWith('.json'))
+      .sort()
+      .reverse();
+    files.slice(5).forEach(f => {
+      try { fs.unlinkSync(path.join(MARKETING_DATA_DIR, f)); } catch {}
+    });
+  };
+
+  async function fetchFacebookData(): Promise<any> {
+    const pageId = process.env.FB_PAGE_ID;
+    const token = process.env.FB_PAGE_ACCESS_TOKEN;
+    if (!pageId || !token) return null;
+
+    try {
+      const pageRes = await fetch(
+        `https://graph.facebook.com/v19.0/${pageId}?fields=name,category,fan_count,followers_count&access_token=${token}`
+      );
+      const pageData = await pageRes.json();
+      if (pageData.error) {
+        console.error('Facebook API error (page):', pageData.error.message);
+        return null;
+      }
+
+      let engagement = {
+        post_count_7d: 0, total_likes: 0, total_comments: 0, total_shares: 0,
+        page_impressions_unique: 0, page_post_engagements: 0, page_fan_adds_unique: 0,
+      };
+      try {
+        const insightsRes = await fetch(
+          `https://graph.facebook.com/v19.0/${pageId}/insights?metric=page_impressions_unique,page_post_engagements,page_fan_adds_unique&period=week&access_token=${token}`
+        );
+        const insightsData = await insightsRes.json();
+        if (insightsData.data) {
+          for (const metric of insightsData.data) {
+            const val = metric.values?.[metric.values.length - 1]?.value || 0;
+            if (metric.name === 'page_impressions_unique') engagement.page_impressions_unique = val;
+            if (metric.name === 'page_post_engagements') engagement.page_post_engagements = val;
+            if (metric.name === 'page_fan_adds_unique') engagement.page_fan_adds_unique = val;
+          }
+        }
+      } catch (e) {
+        console.error('Facebook insights fetch error:', e);
+      }
+
+      const postsRes = await fetch(
+        `https://graph.facebook.com/v19.0/${pageId}/posts?fields=message,created_time,likes.summary(true),comments.summary(true),shares&limit=10&access_token=${token}`
+      );
+      const postsData = await postsRes.json();
+      const recentPosts = (postsData.data || []).map((p: any) => {
+        const likes = p.likes?.summary?.total_count || 0;
+        const comments = p.comments?.summary?.total_count || 0;
+        const shares = p.shares?.count || 0;
+        engagement.total_likes += likes;
+        engagement.total_comments += comments;
+        engagement.total_shares += shares;
+        return {
+          message: p.message || '(No text)',
+          created_at: p.created_time,
+          likes, comments, shares,
+        };
+      });
+
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      engagement.post_count_7d = recentPosts.filter((p: any) => new Date(p.created_at) >= sevenDaysAgo).length;
+
+      const result = {
+        fetched_at: new Date().toISOString(),
+        platform: 'facebook',
+        page_id: pageId,
+        status: 'live',
+        account_metrics: {
+          page_name: pageData.name || 'Absolute Pest Services',
+          category: pageData.category || 'Pest Control Service',
+          fan_count: pageData.fan_count || 0,
+          followers_count: pageData.followers_count || 0,
+        },
+        engagement_7d: engagement,
+        recent_posts: recentPosts,
+      };
+
+      saveMarketingData('facebook_metrics_', result);
+      return result;
+    } catch (error) {
+      console.error('Facebook fetch error:', error);
+      return null;
+    }
+  }
+
+  async function fetchInstagramData(): Promise<any> {
+    const pageId = process.env.FB_PAGE_ID;
+    const token = process.env.FB_PAGE_ACCESS_TOKEN;
+    if (!pageId || !token) return null;
+
+    try {
+      const igAccountRes = await fetch(
+        `https://graph.facebook.com/v19.0/${pageId}?fields=instagram_business_account&access_token=${token}`
+      );
+      const igAccountData = await igAccountRes.json();
+      const igId = igAccountData.instagram_business_account?.id;
+      if (!igId) {
+        console.log('No Instagram business account linked to this Facebook page');
+        return null;
+      }
+
+      const profileRes = await fetch(
+        `https://graph.facebook.com/v19.0/${igId}?fields=username,name,followers_count,media_count&access_token=${token}`
+      );
+      const profile = await profileRes.json();
+      if (profile.error) {
+        console.error('Instagram API error:', profile.error.message);
+        return null;
+      }
+
+      let engagement = { impressions: 0, reach: 0, profile_views: 0 };
+      try {
+        const insightsRes = await fetch(
+          `https://graph.facebook.com/v19.0/${igId}/insights?metric=impressions,reach,profile_views&period=day&metric_type=total_value&access_token=${token}`
+        );
+        const insightsData = await insightsRes.json();
+        if (insightsData.data) {
+          for (const metric of insightsData.data) {
+            const val = metric.total_value?.value || metric.values?.[metric.values.length - 1]?.value || 0;
+            if (metric.name === 'impressions') engagement.impressions = val;
+            if (metric.name === 'reach') engagement.reach = val;
+            if (metric.name === 'profile_views') engagement.profile_views = val;
+          }
+        }
+      } catch (e) {
+        console.error('Instagram insights fetch error:', e);
+      }
+
+      const mediaRes = await fetch(
+        `https://graph.facebook.com/v19.0/${igId}/media?fields=caption,timestamp,like_count,comments_count,media_type,permalink&limit=10&access_token=${token}`
+      );
+      const mediaData = await mediaRes.json();
+      const recentPosts = (mediaData.data || []).map((m: any) => ({
+        caption: m.caption || '',
+        timestamp: m.timestamp,
+        like_count: m.like_count || 0,
+        comment_count: m.comments_count || 0,
+        media_type: m.media_type || 'IMAGE',
+        permalink: m.permalink || '',
+      }));
+
+      const result = {
+        fetched_at: new Date().toISOString(),
+        platform: 'instagram',
+        status: 'live',
+        account_metrics: {
+          username: profile.username || '',
+          name: profile.name || '',
+          followers_count: profile.followers_count || 0,
+          media_count: profile.media_count || 0,
+        },
+        engagement_7d: engagement,
+        recent_posts: recentPosts,
+      };
+
+      saveMarketingData('instagram_metrics_', result);
+      return result;
+    } catch (error) {
+      console.error('Instagram fetch error:', error);
+      return null;
+    }
+  }
+
   app.get('/api/admin/marketing/ads-campaigns', requireAdmin, (req, res) => {
     const filePath = findLatestDataFile('ads_campaigns_');
     if (!filePath) {
@@ -5490,7 +5662,6 @@ Return the article as JSON with fields:
     }
   });
 
-  // GET /api/admin/marketing/ads-search-terms - Latest search terms data
   app.get('/api/admin/marketing/ads-search-terms', requireAdmin, (req, res) => {
     const filePath = findLatestDataFile('ads_search_terms_');
     if (!filePath) {
@@ -5505,7 +5676,6 @@ Return the article as JSON with fields:
     }
   });
 
-  // GET /api/admin/marketing/ga4-overview - Latest GA4 overview data
   app.get('/api/admin/marketing/ga4-overview', requireAdmin, (req, res) => {
     const filePath = findLatestDataFile('ga4_overview_');
     if (!filePath) {
@@ -5520,33 +5690,68 @@ Return the article as JSON with fields:
     }
   });
 
-  // GET /api/admin/marketing/facebook - Latest Facebook page metrics
-  app.get('/api/admin/marketing/facebook', requireAdmin, (req, res) => {
+  app.get('/api/admin/marketing/facebook', requireAdmin, async (req, res) => {
     const filePath = findLatestDataFile('facebook_metrics_');
-    if (!filePath) {
-      return res.json({ success: true, data: null, lastFetched: null });
+    if (filePath) {
+      try {
+        const raw = fs.readFileSync(filePath, 'utf-8');
+        const data = JSON.parse(raw);
+        const fetchedAt = new Date(data.fetched_at).getTime();
+        if (Date.now() - fetchedAt < 60 * 60 * 1000) {
+          return res.json({ success: true, data, lastFetched: data.fetched_at });
+        }
+      } catch {}
     }
     try {
-      const raw = fs.readFileSync(filePath, 'utf-8');
-      const data = JSON.parse(raw);
-      res.json({ success: true, data, lastFetched: data.fetched_at });
+      const data = await fetchFacebookData();
+      if (data) {
+        res.json({ success: true, data, lastFetched: data.fetched_at });
+      } else {
+        res.json({ success: true, data: null, lastFetched: null });
+      }
     } catch (err) {
-      res.status(500).json({ success: false, message: 'Failed to read Facebook data' });
+      console.error('Facebook marketing endpoint error:', err);
+      res.status(500).json({ success: false, message: 'Failed to fetch Facebook data' });
     }
   });
 
-  // GET /api/admin/marketing/instagram - Latest Instagram metrics
-  app.get('/api/admin/marketing/instagram', requireAdmin, (req, res) => {
+  app.get('/api/admin/marketing/instagram', requireAdmin, async (req, res) => {
     const filePath = findLatestDataFile('instagram_metrics_');
-    if (!filePath) {
-      return res.json({ success: true, data: null, lastFetched: null });
+    if (filePath) {
+      try {
+        const raw = fs.readFileSync(filePath, 'utf-8');
+        const data = JSON.parse(raw);
+        const fetchedAt = new Date(data.fetched_at).getTime();
+        if (Date.now() - fetchedAt < 60 * 60 * 1000) {
+          return res.json({ success: true, data, lastFetched: data.fetched_at });
+        }
+      } catch {}
     }
     try {
-      const raw = fs.readFileSync(filePath, 'utf-8');
-      const data = JSON.parse(raw);
-      res.json({ success: true, data, lastFetched: data.fetched_at });
+      const data = await fetchInstagramData();
+      if (data) {
+        res.json({ success: true, data, lastFetched: data.fetched_at });
+      } else {
+        res.json({ success: true, data: null, lastFetched: null });
+      }
     } catch (err) {
-      res.status(500).json({ success: false, message: 'Failed to read Instagram data' });
+      console.error('Instagram marketing endpoint error:', err);
+      res.status(500).json({ success: false, message: 'Failed to fetch Instagram data' });
+    }
+  });
+
+  app.post('/api/admin/marketing/refresh-social', requireAdmin, async (req, res) => {
+    try {
+      const [fb, ig] = await Promise.all([fetchFacebookData(), fetchInstagramData()]);
+      res.json({
+        success: true,
+        message: 'Social data refreshed',
+        facebook: fb ? 'updated' : 'unavailable',
+        instagram: ig ? 'updated' : 'unavailable',
+      });
+    } catch (err) {
+      console.error('Social refresh error:', err);
+      res.status(500).json({ success: false, message: 'Failed to refresh social data' });
     }
   });
 
