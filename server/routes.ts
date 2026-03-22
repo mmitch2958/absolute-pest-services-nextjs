@@ -5490,9 +5490,17 @@ Return the article as JSON with fields:
     });
   };
 
+  function getFBToken(): string | undefined {
+    try {
+      const content = fs.readFileSync('/tmp/fb_token.txt', 'utf8').trim();
+      if (content) return content;
+    } catch {}
+    return process.env.FB_PAGE_ACCESS_TOKEN;
+  }
+
   async function fetchFacebookData(): Promise<any> {
     const pageId = process.env.FB_PAGE_ID;
-    const token = process.env.FB_PAGE_ACCESS_TOKEN;
+    const token = getFBToken();
     if (!pageId || !token) return null;
 
     try {
@@ -5572,7 +5580,7 @@ Return the article as JSON with fields:
 
   async function fetchInstagramData(): Promise<any> {
     const pageId = process.env.FB_PAGE_ID;
-    const token = process.env.FB_PAGE_ACCESS_TOKEN;
+    const token = getFBToken();
     if (!pageId || !token) return null;
 
     try {
