@@ -5772,15 +5772,17 @@ Return the article as JSON with fields:
         return null;
       }
 
-      const campaigns = (campaignData.results || []).map((r: any) => ({
-        campaign_name: r.campaign?.name || 'Unknown',
-        campaign_status: r.campaign?.status || 'UNKNOWN',
-        cost_micros: parseInt(r.metrics?.costMicros || '0'),
-        spend_usd: parseInt(r.metrics?.costMicros || '0') / 1_000_000,
-        clicks: parseInt(r.metrics?.clicks || '0'),
-        impressions: parseInt(r.metrics?.impressions || '0'),
-        conversions: parseFloat(r.metrics?.conversions || '0'),
-      }));
+      const campaigns = (campaignData.results || [])
+        .map((r: any) => ({
+          campaign_name: r.campaign?.name || 'Unknown',
+          campaign_status: r.campaign?.status || 'UNKNOWN',
+          cost_micros: parseInt(r.metrics?.costMicros || '0'),
+          spend_usd: parseInt(r.metrics?.costMicros || '0') / 1_000_000,
+          clicks: parseInt(r.metrics?.clicks || '0'),
+          impressions: parseInt(r.metrics?.impressions || '0'),
+          conversions: parseFloat(r.metrics?.conversions || '0'),
+        }))
+        .filter((c) => c.campaign_status !== 'REMOVED');
 
       const result = {
         fetched_at: new Date().toISOString(),
