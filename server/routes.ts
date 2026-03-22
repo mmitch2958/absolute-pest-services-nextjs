@@ -5460,7 +5460,7 @@ Return the article as JSON with fields:
   // Marketing Dashboard Routes
   // ==========================================
 
-  const MARKETING_DATA_DIR = path.join(process.cwd(), 'data', 'marketing');
+  const MARKETING_DATA_DIR = process.env.MARKETING_DATA_DIR || path.join(process.cwd(), 'data', 'marketing');
   if (!fs.existsSync(MARKETING_DATA_DIR)) {
     fs.mkdirSync(MARKETING_DATA_DIR, { recursive: true });
   }
