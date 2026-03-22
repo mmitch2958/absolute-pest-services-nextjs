@@ -103,7 +103,11 @@ const DATA_DIR = path.join(process.cwd(), 'data', 'marketing');
 **Currently connected via Maton:**
 - `google-analytics-data` — GA4 reporting (property ID: `507471089`)
 - `google-analytics-admin` — GA4 account management
-- `google-ads` — Pending connection in Maton dashboard
+- `google-ads` — Customer ID: `6800190976`, API version: `v23`
+
+**Important — Google Ads API version:** The Google Ads REST API version changes frequently. As of March 2026, `v23` is the working version through Maton. If it stops working (404 errors), check the [Google Ads API changelog](https://developers.google.com/google-ads/api/docs/release-notes) and update `GOOGLE_ADS_API_VERSION` in `server/routes.ts`.
+
+**Maton control API:** Use `https://ctrl.maton.ai/connections?app=google-ads&status=ACTIVE` (with Bearer token) to verify connections are active. Use `https://gateway.maton.ai/google-ads/v23/customers:listAccessibleCustomers` to find customer IDs.
 
 **Facebook/Instagram** use direct Graph API calls with `FB_PAGE_ID` and `FB_PAGE_ACCESS_TOKEN` env vars (not through Maton).
 

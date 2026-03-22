@@ -5731,88 +5731,84 @@ Return the article as JSON with fields:
     }
   }
 
+  const GOOGLE_ADS_CUSTOMER_ID = '6800190976';
+  const GOOGLE_ADS_API_VERSION = 'v23';
+
   async function fetchGoogleAdsData(): Promise<any> {
     const apiKey = process.env.MATON_API_KEY;
     if (!apiKey) return null;
 
     try {
       const headers = { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' };
-      const customerIds = ['1038095551'];
+      const searchUrl = `${MATON_GATEWAY}/google-ads/${GOOGLE_ADS_API_VERSION}/customers/${GOOGLE_ADS_CUSTOMER_ID}/googleAds:search`;
 
-      for (const customerId of customerIds) {
-        for (const ver of ['v17', 'v16', 'v15']) {
-          try {
-            const url = `${MATON_GATEWAY}/google-ads/${ver}/customers/${customerId}/googleAds:search`;
-            const campaignRes = await fetch(url, {
-              method: 'POST', headers,
-              body: JSON.stringify({
-                query: `SELECT campaign.name, campaign.status, metrics.cost_micros, metrics.clicks, metrics.impressions, metrics.conversions FROM campaign WHERE segments.date DURING LAST_7_DAYS ORDER BY metrics.cost_micros DESC`,
-              }),
-            });
-            if (campaignRes.status === 404) continue;
-            const campaignData = await campaignRes.json();
-            if (campaignData.error) {
-              console.error(`Google Ads API error (${ver}):`, campaignData.error);
-              continue;
-            }
+      const campaignRes = await fetch(searchUrl, {
+        method: 'POST', headers,
+        body: JSON.stringify({
+          query: `SELECT campaign.name, campaign.status, metrics.cost_micros, metrics.clicks, metrics.impressions, metrics.conversions FROM campaign WHERE segments.date DURING LAST_7_DAYS ORDER BY metrics.cost_micros DESC`,
+        }),
+      });
 
-            const campaigns = (campaignData.results || []).map((r: any) => ({
-              campaign_name: r.campaign?.name || 'Unknown',
-              campaign_status: r.campaign?.status || 'UNKNOWN',
-              cost_micros: parseInt(r.metrics?.costMicros || '0'),
-              spend_usd: parseInt(r.metrics?.costMicros || '0') / 1_000_000,
-              clicks: parseInt(r.metrics?.clicks || '0'),
-              impressions: parseInt(r.metrics?.impressions || '0'),
-              conversions: parseFloat(r.metrics?.conversions || '0'),
-            }));
-
-            const result = {
-              fetched_at: new Date().toISOString(),
-              customer_id: customerId,
-              campaign_count: campaigns.length,
-              campaigns,
-            };
-            saveMarketingData('ads_campaigns_', result);
-
-            const termsUrl = `${MATON_GATEWAY}/google-ads/${ver}/customers/${customerId}/googleAds:search`;
-            try {
-              const termsRes = await fetch(termsUrl, {
-                method: 'POST', headers,
-                body: JSON.stringify({
-                  query: `SELECT search_term_view.search_term, metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions FROM search_term_view WHERE segments.date DURING LAST_7_DAYS ORDER BY metrics.clicks DESC LIMIT 50`,
-                }),
-              });
-              if (termsRes.ok) {
-                const termsData = await termsRes.json();
-                const search_terms = (termsData.results || []).map((r: any) => ({
-                  search_term: r.searchTermView?.searchTerm || '',
-                  clicks: parseInt(r.metrics?.clicks || '0'),
-                  impressions: parseInt(r.metrics?.impressions || '0'),
-                  cost_micros: parseInt(r.metrics?.costMicros || '0'),
-                  spend_usd: parseInt(r.metrics?.costMicros || '0') / 1_000_000,
-                  conversions: parseFloat(r.metrics?.conversions || '0'),
-                }));
-                const termsResult = {
-                  fetched_at: new Date().toISOString(),
-                  customer_id: customerId,
-                  campaign_id: 'all',
-                  term_count: search_terms.length,
-                  search_terms,
-                };
-                saveMarketingData('ads_search_terms_', termsResult);
-              }
-            } catch (e) {
-              console.error('Google Ads search terms fetch error:', e);
-            }
-
-            return result;
-          } catch (e) {
-            continue;
-          }
-        }
+      if (!campaignRes.ok) {
+        console.error(`Google Ads API error: ${campaignRes.status}`);
+        return null;
       }
-      console.log('Google Ads: no working API version found through Maton gateway');
-      return null;
+
+      const campaignData = await campaignRes.json();
+      if (campaignData.error) {
+        console.error('Google Ads API error:', campaignData.error);
+        return null;
+      }
+
+      const campaigns = (campaignData.results || []).map((r: any) => ({
+        campaign_name: r.campaign?.name || 'Unknown',
+        campaign_status: r.campaign?.status || 'UNKNOWN',
+        cost_micros: parseInt(r.metrics?.costMicros || '0'),
+        spend_usd: parseInt(r.metrics?.costMicros || '0') / 1_000_000,
+        clicks: parseInt(r.metrics?.clicks || '0'),
+        impressions: parseInt(r.metrics?.impressions || '0'),
+        conversions: parseFloat(r.metrics?.conversions || '0'),
+      }));
+
+      const result = {
+        fetched_at: new Date().toISOString(),
+        customer_id: GOOGLE_ADS_CUSTOMER_ID,
+        campaign_count: campaigns.length,
+        campaigns,
+      };
+      saveMarketingData('ads_campaigns_', result);
+
+      try {
+        const termsRes = await fetch(searchUrl, {
+          method: 'POST', headers,
+          body: JSON.stringify({
+            query: `SELECT search_term_view.search_term, metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions FROM search_term_view WHERE segments.date DURING LAST_7_DAYS ORDER BY metrics.clicks DESC LIMIT 50`,
+          }),
+        });
+        if (termsRes.ok) {
+          const termsData = await termsRes.json();
+          const search_terms = (termsData.results || []).map((r: any) => ({
+            search_term: r.searchTermView?.searchTerm || '',
+            clicks: parseInt(r.metrics?.clicks || '0'),
+            impressions: parseInt(r.metrics?.impressions || '0'),
+            cost_micros: parseInt(r.metrics?.costMicros || '0'),
+            spend_usd: parseInt(r.metrics?.costMicros || '0') / 1_000_000,
+            conversions: parseFloat(r.metrics?.conversions || '0'),
+          }));
+          const termsResult = {
+            fetched_at: new Date().toISOString(),
+            customer_id: GOOGLE_ADS_CUSTOMER_ID,
+            campaign_id: 'all',
+            term_count: search_terms.length,
+            search_terms,
+          };
+          saveMarketingData('ads_search_terms_', termsResult);
+        }
+      } catch (e) {
+        console.error('Google Ads search terms fetch error:', e);
+      }
+
+      return result;
     } catch (error) {
       console.error('Google Ads fetch error:', error);
       return null;

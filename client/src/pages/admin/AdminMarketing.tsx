@@ -544,11 +544,9 @@ function OverviewTab({
         </div>
       )}
 
-      {/* Data freshness note */}
       {!ads && (
         <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 text-amber-800 text-sm">
-          ⚠ No Google Ads data available. Run{" "}
-          <code className="font-mono">fetch_ads_data.py</code> to populate.
+          Google Ads data is loading. Try refreshing the page, or check the Google Ads tab for details.
         </div>
       )}
     </div>
