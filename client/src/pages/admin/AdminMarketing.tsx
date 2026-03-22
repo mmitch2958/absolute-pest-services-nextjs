@@ -165,6 +165,7 @@ const COMPETITOR_KEYWORDS = [
   "green pest",
   "presto pest",
   "terminix",
+  "1 800 terminix",
   "orkin",
   "dominion",
 ];
