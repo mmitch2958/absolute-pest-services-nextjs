@@ -5460,7 +5460,7 @@ Return the article as JSON with fields:
   // Marketing Dashboard Routes
   // ==========================================
 
-  const MARKETING_DATA_DIR = process.env.MARKETING_DATA_DIR || path.join(process.cwd(), 'data', 'marketing');
+  const MARKETING_DATA_DIR = path.join(process.cwd(), 'data', 'marketing');
   if (!fs.existsSync(MARKETING_DATA_DIR)) {
     fs.mkdirSync(MARKETING_DATA_DIR, { recursive: true });
   }
@@ -5648,45 +5648,247 @@ Return the article as JSON with fields:
     }
   }
 
-  app.get('/api/admin/marketing/ads-campaigns', requireAdmin, (req, res) => {
+  const GA4_PROPERTY_ID = '507471089';
+  const MATON_GATEWAY = 'https://gateway.maton.ai';
+
+  async function fetchGA4Data(): Promise<any> {
+    const apiKey = process.env.MATON_API_KEY;
+    if (!apiKey) return null;
+
+    try {
+      const headers = { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' };
+      const baseUrl = `${MATON_GATEWAY}/google-analytics-data/v1beta/properties/${GA4_PROPERTY_ID}:runReport`;
+
+      const [totalsRes, pagesRes, sourcesRes] = await Promise.all([
+        fetch(baseUrl, {
+          method: 'POST', headers,
+          body: JSON.stringify({
+            dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
+            metrics: [{ name: 'sessions' }, { name: 'totalUsers' }, { name: 'screenPageViews' }],
+          }),
+        }),
+        fetch(baseUrl, {
+          method: 'POST', headers,
+          body: JSON.stringify({
+            dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
+            dimensions: [{ name: 'pagePath' }],
+            metrics: [{ name: 'screenPageViews' }],
+            orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
+            limit: 20,
+          }),
+        }),
+        fetch(baseUrl, {
+          method: 'POST', headers,
+          body: JSON.stringify({
+            dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
+            dimensions: [{ name: 'sessionDefaultChannelGroup' }],
+            metrics: [{ name: 'sessions' }, { name: 'totalUsers' }, { name: 'screenPageViews' }],
+          }),
+        }),
+      ]);
+
+      const [totalsData, pagesData, sourcesData] = await Promise.all([
+        totalsRes.json(), pagesRes.json(), sourcesRes.json(),
+      ]);
+
+      const totals = {
+        sessions: parseInt(totalsData.rows?.[0]?.metricValues?.[0]?.value || '0'),
+        users: parseInt(totalsData.rows?.[0]?.metricValues?.[1]?.value || '0'),
+        pageviews: parseInt(totalsData.rows?.[0]?.metricValues?.[2]?.value || '0'),
+      };
+
+      const top_pages = (pagesData.rows || []).map((row: any) => ({
+        page_path: row.dimensionValues[0].value,
+        pageviews: parseInt(row.metricValues[0].value),
+      }));
+
+      const traffic_sources: Record<string, any> = {};
+      for (const row of (sourcesData.rows || [])) {
+        const channel = row.dimensionValues[0].value;
+        const key = channel.toLowerCase().replace(/[\s-]+/g, '_');
+        traffic_sources[key] = {
+          sessions: parseInt(row.metricValues[0].value),
+          users: parseInt(row.metricValues[1].value),
+          pageviews: parseInt(row.metricValues[2].value),
+        };
+      }
+
+      const result = {
+        fetched_at: new Date().toISOString(),
+        property_id: GA4_PROPERTY_ID,
+        date_range: 'last_7_days',
+        totals,
+        top_pages,
+        traffic_sources,
+        row_count: pagesData.rowCount || top_pages.length,
+      };
+
+      saveMarketingData('ga4_overview_', result);
+      return result;
+    } catch (error) {
+      console.error('GA4 fetch error:', error);
+      return null;
+    }
+  }
+
+  async function fetchGoogleAdsData(): Promise<any> {
+    const apiKey = process.env.MATON_API_KEY;
+    if (!apiKey) return null;
+
+    try {
+      const headers = { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' };
+      const customerIds = ['1038095551'];
+
+      for (const customerId of customerIds) {
+        for (const ver of ['v17', 'v16', 'v15']) {
+          try {
+            const url = `${MATON_GATEWAY}/google-ads/${ver}/customers/${customerId}/googleAds:search`;
+            const campaignRes = await fetch(url, {
+              method: 'POST', headers,
+              body: JSON.stringify({
+                query: `SELECT campaign.name, campaign.status, metrics.cost_micros, metrics.clicks, metrics.impressions, metrics.conversions FROM campaign WHERE segments.date DURING LAST_7_DAYS ORDER BY metrics.cost_micros DESC`,
+              }),
+            });
+            if (campaignRes.status === 404) continue;
+            const campaignData = await campaignRes.json();
+            if (campaignData.error) {
+              console.error(`Google Ads API error (${ver}):`, campaignData.error);
+              continue;
+            }
+
+            const campaigns = (campaignData.results || []).map((r: any) => ({
+              campaign_name: r.campaign?.name || 'Unknown',
+              campaign_status: r.campaign?.status || 'UNKNOWN',
+              cost_micros: parseInt(r.metrics?.costMicros || '0'),
+              spend_usd: parseInt(r.metrics?.costMicros || '0') / 1_000_000,
+              clicks: parseInt(r.metrics?.clicks || '0'),
+              impressions: parseInt(r.metrics?.impressions || '0'),
+              conversions: parseFloat(r.metrics?.conversions || '0'),
+            }));
+
+            const result = {
+              fetched_at: new Date().toISOString(),
+              customer_id: customerId,
+              campaign_count: campaigns.length,
+              campaigns,
+            };
+            saveMarketingData('ads_campaigns_', result);
+
+            const termsUrl = `${MATON_GATEWAY}/google-ads/${ver}/customers/${customerId}/googleAds:search`;
+            try {
+              const termsRes = await fetch(termsUrl, {
+                method: 'POST', headers,
+                body: JSON.stringify({
+                  query: `SELECT search_term_view.search_term, metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions FROM search_term_view WHERE segments.date DURING LAST_7_DAYS ORDER BY metrics.clicks DESC LIMIT 50`,
+                }),
+              });
+              if (termsRes.ok) {
+                const termsData = await termsRes.json();
+                const search_terms = (termsData.results || []).map((r: any) => ({
+                  search_term: r.searchTermView?.searchTerm || '',
+                  clicks: parseInt(r.metrics?.clicks || '0'),
+                  impressions: parseInt(r.metrics?.impressions || '0'),
+                  cost_micros: parseInt(r.metrics?.costMicros || '0'),
+                  spend_usd: parseInt(r.metrics?.costMicros || '0') / 1_000_000,
+                  conversions: parseFloat(r.metrics?.conversions || '0'),
+                }));
+                const termsResult = {
+                  fetched_at: new Date().toISOString(),
+                  customer_id: customerId,
+                  campaign_id: 'all',
+                  term_count: search_terms.length,
+                  search_terms,
+                };
+                saveMarketingData('ads_search_terms_', termsResult);
+              }
+            } catch (e) {
+              console.error('Google Ads search terms fetch error:', e);
+            }
+
+            return result;
+          } catch (e) {
+            continue;
+          }
+        }
+      }
+      console.log('Google Ads: no working API version found through Maton gateway');
+      return null;
+    } catch (error) {
+      console.error('Google Ads fetch error:', error);
+      return null;
+    }
+  }
+
+  app.get('/api/admin/marketing/ads-campaigns', requireAdmin, async (req, res) => {
     const filePath = findLatestDataFile('ads_campaigns_');
-    if (!filePath) {
-      return res.json({ success: true, data: null, lastFetched: null });
+    if (filePath) {
+      try {
+        const raw = fs.readFileSync(filePath, 'utf-8');
+        const data = JSON.parse(raw);
+        const fetchedAt = new Date(data.fetched_at).getTime();
+        if (Date.now() - fetchedAt < 60 * 60 * 1000) {
+          return res.json({ success: true, data, lastFetched: data.fetched_at });
+        }
+      } catch {}
     }
     try {
-      const raw = fs.readFileSync(filePath, 'utf-8');
-      const data = JSON.parse(raw);
-      res.json({ success: true, data, lastFetched: data.fetched_at });
+      const data = await fetchGoogleAdsData();
+      res.json({ success: true, data: data || null, lastFetched: data?.fetched_at || null });
     } catch (err) {
-      res.status(500).json({ success: false, message: 'Failed to read ads campaigns data' });
+      console.error('Ads campaigns endpoint error:', err);
+      res.status(500).json({ success: false, message: 'Failed to fetch ads data' });
     }
   });
 
-  app.get('/api/admin/marketing/ads-search-terms', requireAdmin, (req, res) => {
+  app.get('/api/admin/marketing/ads-search-terms', requireAdmin, async (req, res) => {
     const filePath = findLatestDataFile('ads_search_terms_');
-    if (!filePath) {
-      return res.json({ success: true, data: null, lastFetched: null });
+    if (filePath) {
+      try {
+        const raw = fs.readFileSync(filePath, 'utf-8');
+        const data = JSON.parse(raw);
+        const fetchedAt = new Date(data.fetched_at).getTime();
+        if (Date.now() - fetchedAt < 60 * 60 * 1000) {
+          return res.json({ success: true, data, lastFetched: data.fetched_at });
+        }
+      } catch {}
     }
     try {
-      const raw = fs.readFileSync(filePath, 'utf-8');
-      const data = JSON.parse(raw);
-      res.json({ success: true, data, lastFetched: data.fetched_at });
+      await fetchGoogleAdsData();
+      const filePath2 = findLatestDataFile('ads_search_terms_');
+      if (filePath2) {
+        const raw = fs.readFileSync(filePath2, 'utf-8');
+        const data = JSON.parse(raw);
+        return res.json({ success: true, data, lastFetched: data.fetched_at });
+      }
+      res.json({ success: true, data: null, lastFetched: null });
     } catch (err) {
-      res.status(500).json({ success: false, message: 'Failed to read search terms data' });
+      console.error('Ads search terms endpoint error:', err);
+      res.status(500).json({ success: false, message: 'Failed to fetch search terms data' });
     }
   });
 
-  app.get('/api/admin/marketing/ga4-overview', requireAdmin, (req, res) => {
+  app.get('/api/admin/marketing/ga4-overview', requireAdmin, async (req, res) => {
     const filePath = findLatestDataFile('ga4_overview_');
-    if (!filePath) {
-      return res.json({ success: true, data: null, lastFetched: null });
+    if (filePath) {
+      try {
+        const raw = fs.readFileSync(filePath, 'utf-8');
+        const data = JSON.parse(raw);
+        const fetchedAt = new Date(data.fetched_at).getTime();
+        if (Date.now() - fetchedAt < 60 * 60 * 1000) {
+          return res.json({ success: true, data, lastFetched: data.fetched_at });
+        }
+      } catch {}
     }
     try {
-      const raw = fs.readFileSync(filePath, 'utf-8');
-      const data = JSON.parse(raw);
-      res.json({ success: true, data, lastFetched: data.fetched_at });
+      const data = await fetchGA4Data();
+      if (data) {
+        res.json({ success: true, data, lastFetched: data.fetched_at });
+      } else {
+        res.json({ success: true, data: null, lastFetched: null });
+      }
     } catch (err) {
-      res.status(500).json({ success: false, message: 'Failed to read GA4 overview data' });
+      console.error('GA4 overview endpoint error:', err);
+      res.status(500).json({ success: false, message: 'Failed to fetch GA4 data' });
     }
   });
 
@@ -5752,6 +5954,25 @@ Return the article as JSON with fields:
     } catch (err) {
       console.error('Social refresh error:', err);
       res.status(500).json({ success: false, message: 'Failed to refresh social data' });
+    }
+  });
+
+  app.post('/api/admin/marketing/refresh-all', requireAdmin, async (req, res) => {
+    try {
+      const [ga4, ads, fb, ig] = await Promise.all([
+        fetchGA4Data(), fetchGoogleAdsData(), fetchFacebookData(), fetchInstagramData(),
+      ]);
+      res.json({
+        success: true,
+        message: 'All marketing data refreshed',
+        ga4: ga4 ? 'updated' : 'unavailable',
+        google_ads: ads ? 'updated' : 'unavailable',
+        facebook: fb ? 'updated' : 'unavailable',
+        instagram: ig ? 'updated' : 'unavailable',
+      });
+    } catch (err) {
+      console.error('Marketing refresh error:', err);
+      res.status(500).json({ success: false, message: 'Failed to refresh marketing data' });
     }
   });
 
