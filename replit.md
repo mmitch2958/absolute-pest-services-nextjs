@@ -93,6 +93,30 @@ Preferred communication style: Simple, everyday language.
 - Accessibility focus using Radix UI primitives.
 - Company branding integrated into logo and PDF reports.
 
+### GitHub Repository & Team Coordination
+- **Repo**: `SteelCity-ai/AbsolutePestServices.com` (main branch)
+- **Latest synced SHA**: `9406155` (March 22, 2026)
+- **Team workflow**: Dev team pushes to GitHub → Replit pulls changes → validates → publishes
+- **Important**: Always pull latest from GitHub before making changes. After local changes, push back to GitHub so all teams stay in sync.
+
+### Recent Changes Log (March 2026)
+1. **React hooks fix (AdminLayout)** — `useMutation` was called after conditional early returns, violating React's Rules of Hooks. Caused "Minified React error #310" crash on admin login. Fixed by moving all hooks above early return statements.
+2. **PWA cache limit** — Increased `maximumFileSizeToCacheInBytes` to 5MB in `vite.config.ts` to prevent publish errors from large JS bundle (3.16MB).
+3. **Admin auth guard** — `AdminLayout` checks `user.role === 'admin'` and redirects unauthenticated/non-admin users to `/auth`.
+4. **Blog image storage** — AI-generated blog images stored as base64 data URIs in DB instead of filesystem paths (which are ephemeral on deploy).
+5. **Session store** — Still using MemoryStore (sessions wiped on redeploy). Long-term fix needed: connect-pg-simple for persistent sessions.
+6. **Google Ads tag** (AW-1038095551) and **GA4 tag** (G-0PXFRNKQW5) integrated.
+7. **60 city×service SEO pages** (15 cities × 4 services) with server-side meta injection and expanded sitemap.
+8. **Marketing Dashboard** with Facebook API integration (`FB_PAGE_ID=298835070139713`).
+9. **Mobile hamburger menu** dropdown fixed (state toggled but no dropdown rendered).
+10. **Homepage hero** updated: "Greater Philadelphia Area's Trusted Pest Experts." headline, "Call Now" button removed.
+
+### Known Issues
+- **JS bundle size**: 3.16MB — code splitting not yet implemented.
+- **Phone number inconsistency**: wildlife-control and bat-removal pages use `610-869-3000`; most pages use `484-643-2225`.
+- **Session persistence**: MemoryStore in production means sessions lost on redeploy.
+- **Service worker caching**: After publish, users may need hard refresh (Ctrl+Shift+R) to get new bundle.
+
 ## External Dependencies
 
 - **Database**: PostgreSQL, @neondatabase/serverless
