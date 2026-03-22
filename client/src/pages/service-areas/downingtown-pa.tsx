@@ -28,24 +28,64 @@ export default function DowningtownPA() {
         <title>Downingtown PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Downingtown PA pest control: wildlife removal, termite treatment, bed bug control near Marsh Creek State Park and East Brandywine. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/downingtown-pa" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "LocalBusiness",
-            "name": "Absolute Pest Services – Downingtown, PA Pest Control Services",
-            "telephone": "484-643-2225",
-            "address": {
-              "@type": "PostalAddress",
-              "streetAddress": "21 Sheffield Dr",
-              "addressLocality": "West Grove",
-              "addressRegion": "PA",
-              "postalCode": "19390",
-              "addressCountry": "US"
-            },
-            "areaServed": "Downingtown, PA",
-            "url": "https://absolutepestservices.com/service-areas/downingtown-pa"
-          })}
-        </script>
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Absolute Pest Services",
+      "telephone": "484-643-2225",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "21 Sheffield Dr",
+        "addressLocality": "West Grove",
+        "addressRegion": "PA",
+        "postalCode": "19390",
+        "addressCountry": "US"
+      },
+      "url": "https://absolutepestservices.com/service-areas/downingtown-pa"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Does proximity to Marsh Creek State Park increase pest risk?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Properties near Marsh Creek see elevated activity from deer, raccoons, groundhogs, and geese. We offer wildlife exclusion and deterrent programs for park-adjacent homes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are stink bugs a major problem in Downingtown?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Stink bugs are very common in Chester County, especially in the fall. We provide exterior barrier treatments that dramatically reduce stink bug intrusion."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do older Downingtown Borough homes need termite inspections?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Many borough homes date to the early 1900s and have wood foundations or aged framing that makes them vulnerable to termite damage. Call us for a free inspection."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How quickly can you respond to a wildlife call in Downingtown?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We offer same-day response for most wildlife emergencies throughout Downingtown and surrounding townships."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
       </Helmet>
       <Header />
 
@@ -178,6 +218,161 @@ export default function DowningtownPA() {
           </div>
         </div>
       </section>
+      <!-- Nearby Service Areas -->
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Nearby Service Areas — Pest Control Near Downingtown
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              We serve Downingtown and surrounding communities throughout the region.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/service-areas/exton-pa">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Exton, PA</span>
+                  </CardContent>
+                </Card>
+              </Link>
+<Link href="/service-areas/coatesville-pa">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Coatesville, PA</span>
+                  </CardContent>
+                </Card>
+              </Link>
+<Link href="/service-areas/west-chester-pa">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">West Chester, PA</span>
+                  </CardContent>
+                </Card>
+              </Link>
+<Link href="/service-areas/glen-mills-pa">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Glen Mills, PA</span>
+                  </CardContent>
+                </Card>
+              </Link>
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/service-areas">
+              <Button variant="outline" className="px-6 py-3">View All Service Areas →</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <!-- Our Services in Downingtown -->
+      <section className="py-20 bg-[hsl(0,0%,98%)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Our Pest Control Services in Downingtown
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              From wildlife removal to termite protection, we offer comprehensive pest management tailored to Downingtown properties.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link href="/termites">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Termite Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Inspection &amp; prevention</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/wildlife-control">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,100%,47%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Wildlife Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Raccoon, squirrel &amp; groundhog removal</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bed-bugs">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(207,73%,44%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bed Bug Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Heat &amp; chemical options</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/rodents">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,25%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Rodent Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Mice &amp; rat extermination</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bat-removal">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,80%,50%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bat Removal</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Humane exclusion &amp; guano cleanup</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/request-service">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(0,0%,60%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Schedule Service</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Free inspection · Same-day available</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </section>
+
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <GoogleReviewRequest />

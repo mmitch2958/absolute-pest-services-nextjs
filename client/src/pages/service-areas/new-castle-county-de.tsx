@@ -29,6 +29,8 @@ export default function NewCastleCountyDE() {
     'Ant & Insect Control'
   ];
 
+  const faqs = [{"q":"What pests are most common in New Castle County, Delaware?","a":"New Castle County's mix of rural properties, suburban developments, and the city of Wilmington creates varied pest pressures. Termites, carpenter ants, rodents, and wildlife are the most common issues for homeowners."},{"q":"Do you provide termite protection in New Castle County, DE?","a":"Yes. We are licensed to provide termite treatment and prevention throughout Delaware. Subterranean termites are active in New Castle County, and annual inspections are strongly recommended."},{"q":"How is pest pressure in New Castle County different from Pennsylvania?","a":"New Castle County shares similar pest species with neighboring Chester County, PA, but the higher water table near the Delaware River can create more moisture-related pest issues like centipedes, silverfish, and dampwood termites."},{"q":"Do you offer wildlife removal in New Castle County?","a":"Yes. We handle raccoons, squirrels, groundhogs, skunks, and other wildlife throughout New Castle County, DE, including Wilmington, Newark, Hockessin, and all surrounding areas."}];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-blue-50">
       <Helmet>
@@ -36,6 +38,122 @@ export default function NewCastleCountyDE() {
         <meta name="description" content="New Castle County DE: Expert pest control in Hockessin, Newark, Wilmington, Bear. Licensed, insured, emergency service available." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/new-castle-county-de" />
       </Helmet>
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Absolute Pest Services",
+      "telephone": "484-643-2225",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "21 Sheffield Dr",
+        "addressLocality": "West Grove",
+        "addressRegion": "PA",
+        "postalCode": "19390",
+        "addressCountry": "US"
+      },
+      "url": "https://absolutepestservices.com/service-areas/new-castle-county-de"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What pests are most common in New Castle County, Delaware?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "New Castle County's mix of rural properties, suburban developments, and the city of Wilmington creates varied pest pressures. Termites, carpenter ants, rodents, and wildlife are the most common issues for homeowners."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you provide termite protection in New Castle County, DE?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We are licensed to provide termite treatment and prevention throughout Delaware. Subterranean termites are active in New Castle County, and annual inspections are strongly recommended."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is pest pressure in New Castle County different from Pennsylvania?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "New Castle County shares similar pest species with neighboring Chester County, PA, but the higher water table near the Delaware River can create more moisture-related pest issues like centipedes, silverfish, and dampwood termites."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you offer wildlife removal in New Castle County?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We handle raccoons, squirrels, groundhogs, skunks, and other wildlife throughout New Castle County, DE, including Wilmington, Newark, Hockessin, and all surrounding areas."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Absolute Pest Services",
+      "telephone": "484-643-2225",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "21 Sheffield Dr",
+        "addressLocality": "West Grove",
+        "addressRegion": "PA",
+        "postalCode": "19390",
+        "addressCountry": "US"
+      },
+      "url": "https://absolutepestservices.com/service-areas/new-castle-county-de"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What pests are most common in New Castle County, Delaware?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "New Castle County's mix of rural properties, suburban developments, and the city of Wilmington creates varied pest pressures. Termites, carpenter ants, rodents, and wildlife are the most common issues for homeowners."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you provide termite protection in New Castle County, DE?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We are licensed to provide termite treatment and prevention throughout Delaware. Subterranean termites are active in New Castle County, and annual inspections are strongly recommended."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is pest pressure in New Castle County different from Pennsylvania?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "New Castle County shares similar pest species with neighboring Chester County, PA, but the higher water table near the Delaware River can create more moisture-related pest issues like centipedes, silverfish, and dampwood termites."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you offer wildlife removal in New Castle County?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We handle raccoons, squirrels, groundhogs, skunks, and other wildlife throughout New Castle County, DE, including Wilmington, Newark, Hockessin, and all surrounding areas."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
 
       {/* Header */}
       <Header />
@@ -139,6 +257,163 @@ export default function NewCastleCountyDE() {
           </div>
         </div>
       </section>
+
+      
+      <!-- Nearby Service Areas -->
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Nearby Service Areas — Pest Control Near New Castle County
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              We serve New Castle County and surrounding communities throughout the region.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/service-areas/west-chester-pa">
+              <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium text-gray-900 text-sm">West Chester, PA</span>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/service-areas/kennett-square-pa">
+              <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium text-gray-900 text-sm">Kennett Square, PA</span>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/service-areas/exton-pa">
+              <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium text-gray-900 text-sm">Exton, PA</span>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/service-areas/wilmington-de">
+              <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium text-gray-900 text-sm">Wilmington, DE</span>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/service-areas">
+              <Button variant="outline" className="px-6 py-3">View All Service Areas →</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <!-- Our Services in New Castle County -->
+      <section className="py-20 bg-[hsl(0,0%,98%)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Our Pest Control Services in New Castle County
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              From wildlife removal to termite protection, we offer comprehensive pest management tailored to New Castle County properties.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link href="/termites">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Termite Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Inspection &amp; prevention</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/wildlife-control">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,100%,47%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Wildlife Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Raccoon, squirrel &amp; groundhog removal</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bed-bugs">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(207,73%,44%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bed Bug Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Heat &amp; chemical options</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/rodents">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,25%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Rodent Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Mice &amp; rat extermination</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bat-removal">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,80%,50%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bat Removal</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Humane exclusion &amp; guano cleanup</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/request-service">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(0,0%,60%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Schedule Service</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Free inspection · Same-day available</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </section>
+
 
       {/* Contact Info */}
       <section className="py-16 bg-[hsl(210,13%,28%)]">

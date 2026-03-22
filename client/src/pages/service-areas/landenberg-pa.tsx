@@ -31,7 +31,64 @@ export default function LandenbergPA() {
         <meta property="og:description" content="Landenberg, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225." />
         <meta property="og:url" content="https://absolutepestservices.com/service-areas/landenberg-pa" />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">{JSON.stringify({"@context":"https://schema.org","@type":"LocalBusiness","name":"Absolute Pest Services – Landenberg, PA Pest Control Services","telephone":"484-643-2225","address":{"@type":"PostalAddress","streetAddress":"21 Sheffield Dr","addressLocality":"West Grove","addressRegion":"PA","postalCode":"19390","addressCountry":"US"},"areaServed":"Landenberg, PA","url":"https://absolutepestservices.com/service-areas/landenberg-pa"})}</script>
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Absolute Pest Services",
+      "telephone": "484-643-2225",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "21 Sheffield Dr",
+        "addressLocality": "West Grove",
+        "addressRegion": "PA",
+        "postalCode": "19390",
+        "addressCountry": "US"
+      },
+      "url": "https://absolutepestservices.com/service-areas/landenberg-pa"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why is Landenberg such a hotspot for wildlife calls?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The White Clay Creek Preserve and surrounding conserved lands create a wildlife corridor right through Landenberg neighborhoods. We see elevated raccoon, fox, and groundhog activity."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are termites common near White Clay Creek?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The moist, wooded soils along White Clay Creek are perfect subterranean termite habitat. We recommend annual inspections for all Landenberg homeowners."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you handle bat exclusion in Landenberg?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Bats frequently colonize older homes in rural Chester County. We perform humane, licensed exclusions compliant with PA bat protection laws."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What about deer tick and pest prevention in Landenberg?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We offer perimeter tick control programs that reduce tick populations in your yard \u2014 especially important near the heavily wooded White Clay Creek areas."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
       </Helmet>
 
       <Header />
@@ -131,6 +188,161 @@ export default function LandenbergPA() {
           </div>
         </div>
       </section>
+      <!-- Nearby Service Areas -->
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Nearby Service Areas — Pest Control Near Landenberg
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              We serve Landenberg and surrounding communities throughout the region.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/service-areas/kennett-square-pa">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Kennett Square, PA</span>
+                  </CardContent>
+                </Card>
+              </Link>
+<Link href="/service-areas/hockessin-de">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Hockessin, DE</span>
+                  </CardContent>
+                </Card>
+              </Link>
+<Link href="/service-areas/newark-de">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Newark, DE</span>
+                  </CardContent>
+                </Card>
+              </Link>
+<Link href="/service-areas/avondale-pa">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Avondale, PA</span>
+                  </CardContent>
+                </Card>
+              </Link>
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/service-areas">
+              <Button variant="outline" className="px-6 py-3">View All Service Areas →</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <!-- Our Services in Landenberg -->
+      <section className="py-20 bg-[hsl(0,0%,98%)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Our Pest Control Services in Landenberg
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              From wildlife removal to termite protection, we offer comprehensive pest management tailored to Landenberg properties.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link href="/termites">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Termite Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Inspection &amp; prevention</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/wildlife-control">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,100%,47%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Wildlife Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Raccoon, squirrel &amp; groundhog removal</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bed-bugs">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(207,73%,44%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bed Bug Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Heat &amp; chemical options</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/rodents">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,25%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Rodent Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Mice &amp; rat extermination</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bat-removal">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,80%,50%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bat Removal</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Humane exclusion &amp; guano cleanup</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/request-service">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(0,0%,60%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Schedule Service</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Free inspection · Same-day available</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </section>
+
 
       {/* Contact */}
       <section className="py-16 bg-[hsl(210,13%,28%)]">

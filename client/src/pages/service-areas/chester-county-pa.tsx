@@ -29,6 +29,8 @@ export default function ChesterCountyPA() {
     'Ant & Insect Control'
   ];
 
+  const faqs = [{"q":"What pests are most common in Chester County, PA?","a":"Chester County's mix of farmland, forests, and suburban neighborhoods creates high pest pressure. Carpenter ants, termites, mice, and wildlife like raccoons and groundhogs are the most common issues homeowners face throughout the county."},{"q":"Do you provide termite inspections in Chester County?","a":"Yes. Termite activity is prevalent throughout Chester County due to its moist, clay-heavy soils. We offer free termite inspections for homes in West Grove, Kennett Square, West Chester, Exton, and all other Chester County municipalities."},{"q":"How quickly can you respond to a pest emergency in Chester County?","a":"We offer same-day or next-day service throughout Chester County. Our technicians are based in West Grove, PA, allowing us to reach most county locations within an hour."},{"q":"Are your pest control treatments safe for families and pets in Chester County?","a":"Yes. We use EPA-registered products and follow strict application protocols. We advise on any necessary vacate times, especially for homes with small children or pets."}];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
       <Helmet>
@@ -36,6 +38,122 @@ export default function ChesterCountyPA() {
         <meta name="description" content="Chester County PA: Expert pest control services in West Grove, Kennett Square, Oxford, Avondale. Licensed, insured, emergency service available. 5.0 star rated." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/chester-county-pa" />
       </Helmet>
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Absolute Pest Services",
+      "telephone": "484-643-2225",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "21 Sheffield Dr",
+        "addressLocality": "West Grove",
+        "addressRegion": "PA",
+        "postalCode": "19390",
+        "addressCountry": "US"
+      },
+      "url": "https://absolutepestservices.com/service-areas/chester-county-pa"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What pests are most common in Chester County, PA?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Chester County's mix of farmland, forests, and suburban neighborhoods creates high pest pressure. Carpenter ants, termites, mice, and wildlife like raccoons and groundhogs are the most common issues homeowners face throughout the county."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you provide termite inspections in Chester County?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Termite activity is prevalent throughout Chester County due to its moist, clay-heavy soils. We offer free termite inspections for homes in West Grove, Kennett Square, West Chester, Exton, and all other Chester County municipalities."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How quickly can you respond to a pest emergency in Chester County?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We offer same-day or next-day service throughout Chester County. Our technicians are based in West Grove, PA, allowing us to reach most county locations within an hour."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are your pest control treatments safe for families and pets in Chester County?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We use EPA-registered products and follow strict application protocols. We advise on any necessary vacate times, especially for homes with small children or pets."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Absolute Pest Services",
+      "telephone": "484-643-2225",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "21 Sheffield Dr",
+        "addressLocality": "West Grove",
+        "addressRegion": "PA",
+        "postalCode": "19390",
+        "addressCountry": "US"
+      },
+      "url": "https://absolutepestservices.com/service-areas/chester-county-pa"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What pests are most common in Chester County, PA?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Chester County's mix of farmland, forests, and suburban neighborhoods creates high pest pressure. Carpenter ants, termites, mice, and wildlife like raccoons and groundhogs are the most common issues homeowners face throughout the county."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you provide termite inspections in Chester County?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Termite activity is prevalent throughout Chester County due to its moist, clay-heavy soils. We offer free termite inspections for homes in West Grove, Kennett Square, West Chester, Exton, and all other Chester County municipalities."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How quickly can you respond to a pest emergency in Chester County?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We offer same-day or next-day service throughout Chester County. Our technicians are based in West Grove, PA, allowing us to reach most county locations within an hour."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are your pest control treatments safe for families and pets in Chester County?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We use EPA-registered products and follow strict application protocols. We advise on any necessary vacate times, especially for homes with small children or pets."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
 
       {/* Header */}
       <Header />
@@ -139,6 +257,163 @@ export default function ChesterCountyPA() {
           </div>
         </div>
       </section>
+
+      
+      <!-- Nearby Service Areas -->
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Nearby Service Areas — Pest Control Near Chester County
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              We serve Chester County and surrounding communities throughout the region.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/service-areas/west-chester-pa">
+              <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium text-gray-900 text-sm">West Chester, PA</span>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/service-areas/kennett-square-pa">
+              <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium text-gray-900 text-sm">Kennett Square, PA</span>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/service-areas/exton-pa">
+              <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium text-gray-900 text-sm">Exton, PA</span>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/service-areas/wilmington-de">
+              <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium text-gray-900 text-sm">Wilmington, DE</span>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/service-areas">
+              <Button variant="outline" className="px-6 py-3">View All Service Areas →</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <!-- Our Services in Chester County -->
+      <section className="py-20 bg-[hsl(0,0%,98%)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Our Pest Control Services in Chester County
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              From wildlife removal to termite protection, we offer comprehensive pest management tailored to Chester County properties.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link href="/termites">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Termite Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Inspection &amp; prevention</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/wildlife-control">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,100%,47%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Wildlife Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Raccoon, squirrel &amp; groundhog removal</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bed-bugs">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(207,73%,44%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bed Bug Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Heat &amp; chemical options</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/rodents">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,25%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Rodent Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Mice &amp; rat extermination</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bat-removal">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,80%,50%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bat Removal</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Humane exclusion &amp; guano cleanup</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/request-service">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(0,0%,60%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Schedule Service</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Free inspection · Same-day available</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </section>
+
 
       {/* Contact Info */}
       <section className="py-16 bg-[hsl(210,13%,28%)]">

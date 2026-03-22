@@ -29,6 +29,8 @@ export default function NortheastMaryland() {
     'Ant & Insect Control'
   ];
 
+  const faqs = [{"q":"What pests are most common in Cecil County and Harford County, MD?","a":"Northeast Maryland's rural character, forest cover, and proximity to the Chesapeake Bay create elevated wildlife and insect pressure. Ticks, mosquitoes, carpenter ants, termites, raccoons, and groundhogs are the most common issues."},{"q":"Do you provide termite inspections in Northeast Maryland?","a":"Yes. Subterranean termites are active throughout Cecil County and Harford County. We offer free termite inspections for homes in Elkton, Bel Air, Aberdeen, Havre de Grace, and surrounding areas."},{"q":"What wildlife issues are unique to Northeast Maryland?","a":"Northeast Maryland's forests and farmland attract deer, raccoons, foxes, skunks, and groundhogs. The area near the Chesapeake Bay also sees increased mosquito and fly pressure in summer months."},{"q":"How quickly can you respond to pest emergencies in Northeast Maryland?","a":"We offer same-day service throughout Cecil County and Harford County, MD. Emergency wildlife intrusions and severe infestations are handled promptly."}];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-orange-50">
       <Helmet>
@@ -36,6 +38,122 @@ export default function NortheastMaryland() {
         <meta name="description" content="Northeast MD: Expert pest control in Elkton, North East, Perryville, Rising Sun. Licensed, insured, emergency service available." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/northeast-maryland" />
       </Helmet>
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Absolute Pest Services",
+      "telephone": "484-643-2225",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "21 Sheffield Dr",
+        "addressLocality": "West Grove",
+        "addressRegion": "PA",
+        "postalCode": "19390",
+        "addressCountry": "US"
+      },
+      "url": "https://absolutepestservices.com/service-areas/northeast-maryland"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What pests are most common in Cecil County and Harford County, MD?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Northeast Maryland's rural character, forest cover, and proximity to the Chesapeake Bay create elevated wildlife and insect pressure. Ticks, mosquitoes, carpenter ants, termites, raccoons, and groundhogs are the most common issues."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you provide termite inspections in Northeast Maryland?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Subterranean termites are active throughout Cecil County and Harford County. We offer free termite inspections for homes in Elkton, Bel Air, Aberdeen, Havre de Grace, and surrounding areas."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What wildlife issues are unique to Northeast Maryland?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Northeast Maryland's forests and farmland attract deer, raccoons, foxes, skunks, and groundhogs. The area near the Chesapeake Bay also sees increased mosquito and fly pressure in summer months."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How quickly can you respond to pest emergencies in Northeast Maryland?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We offer same-day service throughout Cecil County and Harford County, MD. Emergency wildlife intrusions and severe infestations are handled promptly."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Absolute Pest Services",
+      "telephone": "484-643-2225",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "21 Sheffield Dr",
+        "addressLocality": "West Grove",
+        "addressRegion": "PA",
+        "postalCode": "19390",
+        "addressCountry": "US"
+      },
+      "url": "https://absolutepestservices.com/service-areas/northeast-maryland"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What pests are most common in Cecil County and Harford County, MD?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Northeast Maryland's rural character, forest cover, and proximity to the Chesapeake Bay create elevated wildlife and insect pressure. Ticks, mosquitoes, carpenter ants, termites, raccoons, and groundhogs are the most common issues."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you provide termite inspections in Northeast Maryland?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Subterranean termites are active throughout Cecil County and Harford County. We offer free termite inspections for homes in Elkton, Bel Air, Aberdeen, Havre de Grace, and surrounding areas."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What wildlife issues are unique to Northeast Maryland?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Northeast Maryland's forests and farmland attract deer, raccoons, foxes, skunks, and groundhogs. The area near the Chesapeake Bay also sees increased mosquito and fly pressure in summer months."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How quickly can you respond to pest emergencies in Northeast Maryland?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We offer same-day service throughout Cecil County and Harford County, MD. Emergency wildlife intrusions and severe infestations are handled promptly."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
 
       {/* Header */}
       <Header />
@@ -139,6 +257,163 @@ export default function NortheastMaryland() {
           </div>
         </div>
       </section>
+
+      
+      <!-- Nearby Service Areas -->
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Nearby Service Areas — Pest Control Near Northeast MD
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              We serve Northeast MD and surrounding communities throughout the region.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/service-areas/west-chester-pa">
+              <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium text-gray-900 text-sm">West Chester, PA</span>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/service-areas/kennett-square-pa">
+              <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium text-gray-900 text-sm">Kennett Square, PA</span>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/service-areas/exton-pa">
+              <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium text-gray-900 text-sm">Exton, PA</span>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/service-areas/wilmington-de">
+              <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-medium text-gray-900 text-sm">Wilmington, DE</span>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/service-areas">
+              <Button variant="outline" className="px-6 py-3">View All Service Areas →</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <!-- Our Services in Northeast MD -->
+      <section className="py-20 bg-[hsl(0,0%,98%)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Our Pest Control Services in Northeast MD
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              From wildlife removal to termite protection, we offer comprehensive pest management tailored to Northeast MD properties.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link href="/termites">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Termite Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Inspection &amp; prevention</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/wildlife-control">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,100%,47%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Wildlife Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Raccoon, squirrel &amp; groundhog removal</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bed-bugs">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(207,73%,44%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bed Bug Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Heat &amp; chemical options</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/rodents">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,25%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Rodent Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Mice &amp; rat extermination</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bat-removal">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,80%,50%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bat Removal</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Humane exclusion &amp; guano cleanup</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/request-service">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(0,0%,60%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Schedule Service</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Free inspection · Same-day available</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </section>
+
 
       {/* Contact Info */}
       <section className="py-16 bg-[hsl(210,13%,28%)]">

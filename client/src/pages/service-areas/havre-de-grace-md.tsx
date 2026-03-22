@@ -28,24 +28,64 @@ export default function HavreDeGraceMD() {
         <title>Havre de Grace MD Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Havre de Grace MD pest control: wildlife removal, termite treatment near the Susquehanna River and Chesapeake Bay. Historic waterfront city pest experts. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/havre-de-grace-md" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "LocalBusiness",
-            "name": "Absolute Pest Services – Havre de Grace, MD Pest Control Services",
-            "telephone": "484-643-2225",
-            "address": {
-              "@type": "PostalAddress",
-              "streetAddress": "21 Sheffield Dr",
-              "addressLocality": "West Grove",
-              "addressRegion": "PA",
-              "postalCode": "19390",
-              "addressCountry": "US"
-            },
-            "areaServed": "Havre de Grace, MD",
-            "url": "https://absolutepestservices.com/service-areas/havre-de-grace-md"
-          })}
-        </script>
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Absolute Pest Services",
+      "telephone": "484-643-2225",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "21 Sheffield Dr",
+        "addressLocality": "West Grove",
+        "addressRegion": "PA",
+        "postalCode": "19390",
+        "addressCountry": "US"
+      },
+      "url": "https://absolutepestservices.com/service-areas/havre-de-grace-md"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Do waterfront properties in Havre de Grace have more pest problems?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The Susquehanna River and Chesapeake Bay waterfront create elevated mosquito, tick, and rodent pressure. We offer seasonal perimeter programs for waterfront homes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are termites common in Havre de Grace's historic homes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutely. Many of Havre de Grace's 19th-century homes have older wood elements that are highly vulnerable to subterranean termites. We inspect and treat to protect historic structures."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can you handle waterfowl or nuisance birds in Havre de Grace?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Geese, cormorants, and other waterfowl can damage waterfront properties. We provide humane deterrent programs."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you serve the Perryville and Port Deposit areas?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We provide pest control throughout Cecil County and northern Harford County, including Perryville and Port Deposit."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
       </Helmet>
       <Header />
 
@@ -178,6 +218,161 @@ export default function HavreDeGraceMD() {
           </div>
         </div>
       </section>
+      <!-- Nearby Service Areas -->
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Nearby Service Areas — Pest Control Near Havre de Grace
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              We serve Havre de Grace and surrounding communities throughout the region.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/service-areas/bel-air-md">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Bel Air, MD</span>
+                  </CardContent>
+                </Card>
+              </Link>
+<Link href="/service-areas/aberdeen-md">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Aberdeen, MD</span>
+                  </CardContent>
+                </Card>
+              </Link>
+<Link href="/service-areas/northeast-maryland">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Northeast MD</span>
+                  </CardContent>
+                </Card>
+              </Link>
+<Link href="/service-areas/newark-de">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Newark, DE</span>
+                  </CardContent>
+                </Card>
+              </Link>
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/service-areas">
+              <Button variant="outline" className="px-6 py-3">View All Service Areas →</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <!-- Our Services in Havre de Grace -->
+      <section className="py-20 bg-[hsl(0,0%,98%)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Our Pest Control Services in Havre de Grace
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              From wildlife removal to termite protection, we offer comprehensive pest management tailored to Havre de Grace properties.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link href="/termites">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Termite Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Inspection &amp; prevention</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/wildlife-control">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,100%,47%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Wildlife Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Raccoon, squirrel &amp; groundhog removal</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bed-bugs">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(207,73%,44%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bed Bug Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Heat &amp; chemical options</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/rodents">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,25%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Rodent Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Mice &amp; rat extermination</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bat-removal">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,80%,50%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bat Removal</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Humane exclusion &amp; guano cleanup</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/request-service">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(0,0%,60%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Schedule Service</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Free inspection · Same-day available</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </section>
+
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <GoogleReviewRequest />

@@ -28,24 +28,64 @@ export default function HockessinDE() {
         <title>Hockessin DE Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Hockessin DE pest control: wildlife removal, termite treatment, and rodent control in heavily wooded Northern Delaware. Serving Kennett Pike corridor. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/hockessin-de" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "LocalBusiness",
-            "name": "Absolute Pest Services – Hockessin, DE Pest Control Services",
-            "telephone": "484-643-2225",
-            "address": {
-              "@type": "PostalAddress",
-              "streetAddress": "21 Sheffield Dr",
-              "addressLocality": "West Grove",
-              "addressRegion": "PA",
-              "postalCode": "19390",
-              "addressCountry": "US"
-            },
-            "areaServed": "Hockessin, DE",
-            "url": "https://absolutepestservices.com/service-areas/hockessin-de"
-          })}
-        </script>
+        <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Absolute Pest Services",
+      "telephone": "484-643-2225",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "21 Sheffield Dr",
+        "addressLocality": "West Grove",
+        "addressRegion": "PA",
+        "postalCode": "19390",
+        "addressCountry": "US"
+      },
+      "url": "https://absolutepestservices.com/service-areas/hockessin-de"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why do wooded Hockessin properties have more wildlife problems?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Hockessin's heavy tree canopy and proximity to Brandywine Creek State Park create a wildlife corridor for raccoons, foxes, groundhogs, and deer. We specialize in exclusion for wooded lots."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are termites a significant risk in Hockessin?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The moist, tree-lined properties in Hockessin create ideal subterranean termite habitat. We recommend annual inspections for all wood-framed homes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you handle bat removal in Hockessin's large homes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutely. Bat colonies frequently colonize the attic spaces of larger homes in Hockessin. We perform licensed, humane exclusion."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can you treat a wildlife problem near the PA border?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. We serve properties on both sides of the Delaware-Pennsylvania border in the Hockessin area."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
       </Helmet>
       <Header />
 
@@ -178,6 +218,161 @@ export default function HockessinDE() {
           </div>
         </div>
       </section>
+      <!-- Nearby Service Areas -->
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Nearby Service Areas — Pest Control Near Hockessin
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              We serve Hockessin and surrounding communities throughout the region.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/service-areas/kennett-square-pa">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Kennett Square, PA</span>
+                  </CardContent>
+                </Card>
+              </Link>
+<Link href="/service-areas/landenberg-pa">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Landenberg, PA</span>
+                  </CardContent>
+                </Card>
+              </Link>
+<Link href="/service-areas/newark-de">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Newark, DE</span>
+                  </CardContent>
+                </Card>
+              </Link>
+<Link href="/service-areas/wilmington-de">
+                <Card className="bg-emerald-50 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-5 flex items-center gap-3">
+                    <div className="w-9 h-9 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900 text-sm">Wilmington, DE</span>
+                  </CardContent>
+                </Card>
+              </Link>
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/service-areas">
+              <Button variant="outline" className="px-6 py-3">View All Service Areas →</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <!-- Our Services in Hockessin -->
+      <section className="py-20 bg-[hsl(0,0%,98%)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Our Pest Control Services in Hockessin
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              From wildlife removal to termite protection, we offer comprehensive pest management tailored to Hockessin properties.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link href="/termites">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Termite Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Inspection &amp; prevention</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/wildlife-control">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,100%,47%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Wildlife Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Raccoon, squirrel &amp; groundhog removal</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bed-bugs">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(207,73%,44%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bed Bug Treatment</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Heat &amp; chemical options</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/rodents">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(132,48%,25%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Rodent Control</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Mice &amp; rat extermination</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/bat-removal">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(36,80%,50%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Bat Removal</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Humane exclusion &amp; guano cleanup</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/request-service">
+              <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[hsl(0,0%,60%)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-900 text-sm">Schedule Service</span>
+                    <p className="text-xs text-gray-500 mt-0.5">Free inspection · Same-day available</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </section>
+
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <GoogleReviewRequest />
