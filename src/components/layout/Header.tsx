@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import MobileMenu from './MobileMenu'
 
 // Server Component — static nav renders on server for SEO + performance
@@ -8,14 +9,15 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 relative">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
-            <div className="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-bold">APS</span>
-            </div>
-            <span className="font-bold text-gray-900 text-lg hidden sm:block">
-              Absolute Pest Services
-            </span>
-            <span className="font-bold text-gray-900 text-sm sm:hidden">APS</span>
+          <Link href="/" className="flex-shrink-0">
+            <Image
+              src="/images/logolong.jpg"
+              alt="Absolute Pest Services"
+              width={200}
+              height={60}
+              className="h-12 w-auto object-contain"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}

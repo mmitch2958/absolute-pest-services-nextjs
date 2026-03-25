@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Shield, Bug, TreePine, Zap, CheckCircle, Phone, Star } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -135,10 +136,15 @@ export default function HomePage() {
       />
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-gray-900 via-green-950 to-gray-900 text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center" />
-        </div>
+      <section className="relative text-white overflow-hidden min-h-[600px]">
+        <Image
+          src="/images/Hero1.jpg"
+          alt="APS technician performing humane wildlife removal"
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/92 via-gray-900/70 to-gray-900/30" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 bg-green-700/30 border border-green-600/30 rounded-full px-4 py-1 text-sm text-green-300 mb-6">

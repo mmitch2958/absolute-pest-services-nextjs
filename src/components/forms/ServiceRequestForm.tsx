@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useRef, useEffect, useCallback } from 'react'
 import { submitServiceRequest, type FormState } from './actions'
 import { Phone } from 'lucide-react'
 
@@ -15,10 +15,61 @@ const services = [
   { value: 'other', label: 'Other / Not Sure' },
 ]
 
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''
+
 const initialState: FormState = null
 
 export default function ServiceRequestForm() {
   const [state, formAction, isPending] = useActionState(submitServiceRequest, initialState)
+  const turnstileRef = useRef<HTMLDivElement>(null)
+  const widgetIdRef = useRef<string | null>(null)
+  const formRef = useRef<HTMLFormElement>(null)
+
+  const resetTurnstile = useCallback(() => {
+    if (widgetIdRef.current !== null && typeof window !== 'undefined' && (window as any).turnstile) {
+      ;(window as any).turnstile.reset(widgetIdRef.current)
+    }
+  }, [])
+
+  useEffect(() => {
+    // Load Turnstile script once
+    if (document.getElementById('cf-turnstile-script')) {
+      renderWidget()
+      return
+    }
+    const script = document.createElement('script')
+    script.id = 'cf-turnstile-script'
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+    script.async = true
+    script.defer = true
+    script.onload = renderWidget
+    document.head.appendChild(script)
+
+    return () => {
+      // cleanup widget on unmount
+      if (widgetIdRef.current !== null && (window as any).turnstile) {
+        ;(window as any).turnstile.remove(widgetIdRef.current)
+        widgetIdRef.current = null
+      }
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function renderWidget() {
+    if (!turnstileRef.current || !(window as any).turnstile) return
+    if (widgetIdRef.current !== null) return // already rendered
+    widgetIdRef.current = (window as any).turnstile.render(turnstileRef.current, {
+      sitekey: SITE_KEY,
+      theme: 'light',
+      size: 'normal',
+    })
+  }
+
+  // Reset Turnstile after a failed submission
+  useEffect(() => {
+    if (state && !state.success) {
+      resetTurnstile()
+    }
+  }, [state, resetTurnstile])
 
   if (state?.success) {
     return (
@@ -42,7 +93,7 @@ export default function ServiceRequestForm() {
   }
 
   return (
-    <form action={formAction} className="space-y-5" noValidate>
+    <form ref={formRef} action={formAction} className="space-y-5" noValidate>
       {state?.error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
           {state.error}
@@ -175,6 +226,14 @@ export default function ServiceRequestForm() {
           className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none resize-none"
           placeholder="Tell us what you're dealing with — where you've seen activity, how long, any details that would help..."
         />
+      </div>
+
+      {/* Cloudflare Turnstile */}
+      <div>
+        <div ref={turnstileRef} />
+        {state?.fieldErrors?.turnstileToken && (
+          <p className="text-red-600 text-xs mt-1">{state.fieldErrors.turnstileToken}</p>
+        )}
       </div>
 
       <button

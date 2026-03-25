@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { CheckCircle, Phone } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -103,6 +104,26 @@ export default function WildlifeControlPage() {
             >
               Request Service Online
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Raccoon Trap Photo */}
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative rounded-2xl overflow-hidden h-72 md:h-96 shadow-lg">
+            <Image
+              src="/images/racoonTrap.jpg"
+              alt="APS technician performing humane raccoon trap removal"
+              fill
+              className="object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-900/70 to-transparent flex items-center">
+              <div className="px-8 text-white max-w-lg">
+                <h2 className="text-2xl md:text-3xl font-bold mb-2">Humane. Effective. Guaranteed.</h2>
+                <p className="text-gray-200 text-sm md:text-base">Our technicians use live traps and exclusion to safely remove wildlife and keep them from returning.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

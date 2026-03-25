@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 // Server Component — fully static, no interactivity needed
 export default function Footer() {
@@ -11,9 +12,13 @@ export default function Footer() {
           {/* Company info */}
           <div className="col-span-1 md:col-span-2 lg:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-bold">APS</span>
-              </div>
+              <Image
+                src="/images/Logosq.jpg"
+                alt="Absolute Pest Services"
+                width={48}
+                height={48}
+                className="w-12 h-12 object-contain rounded"
+              />
               <span className="font-bold text-white text-lg">Absolute Pest Services</span>
             </div>
             <p className="text-sm text-gray-400 mb-4">
