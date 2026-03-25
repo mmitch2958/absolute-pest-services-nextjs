@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# absolutepestservices.com — Next.js 15 SSR Migration
 
-## Getting Started
+This is the Next.js 15 App Router version of absolutepestservices.com.
 
-First, run the development server:
+## Why This Migration?
+
+The old site was a React + Vite SPA. Googlebot received a blank `<div id="root"></div>` with no content — 98 pages were invisible to search engines.
+
+This Next.js version:
+- ✅ Serves full HTML server-side on every request
+- ✅ Unique `<title>` and `<meta description>` per page
+- ✅ `<h1>` tags on all pages (was missing everywhere)
+- ✅ LocalBusiness JSON-LD schema on homepage
+- ✅ FAQ schema on service pages
+- ✅ GA4 (`G-0PXFRNKQW5`) + Google Ads (`AW-1038095551`) on every page
+- ✅ 108 pages — 13 core + 25 service areas + 60 city×service
+- ✅ Sitemap.xml auto-generated
+- ✅ Robots.txt configured
+
+## Deploy to Vercel (5 minutes)
+
+1. Go to [vercel.com/new](https://vercel.com/new)
+2. Import this repo: `mmitch2958/absolute-pest-services-nextjs`
+3. Vercel auto-detects Next.js — click Deploy
+4. Add environment variables:
+   ```
+   NEXT_PUBLIC_GA4_MEASUREMENT_ID = G-0PXFRNKQW5
+   NEXT_PUBLIC_GOOGLE_ADS_ID = AW-1038095551
+   NODE_ENV = production
+   ```
+5. Add custom domain: `absolutepestservices.com`
+
+## Cloudflare DNS Update
+
+After Vercel deploy:
+1. Remove old A record pointing to Replit
+2. Add: `CNAME absolutepestservices.com → cname.vercel-dns.com`
+3. Keep orange cloud (proxy) enabled
+4. SSL/TLS: Full (Strict)
+
+## Local Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev   # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Build
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+npm start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+Copy `.env.example` to `.env.local` and fill in values.
 
-To learn more about Next.js, take a look at the following resources:
+## What's Still Needed
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [ ] Admin dashboard: Import original `AdminMarketing.tsx` from Replit source and add `'use client'` to top
+- [ ] Contact form: Configure email provider in `src/components/forms/actions.ts`
+- [ ] Images: Add real images to `public/images/` — currently using CSS gradients as placeholders
+- [ ] Blog: Connect to CMS if Mike wants a managed blog
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tech Stack
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Framework:** Next.js 15 App Router
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **Icons:** Lucide React
+- **Forms:** Server Actions + Zod validation
+- **Deployment:** Vercel (recommended)
