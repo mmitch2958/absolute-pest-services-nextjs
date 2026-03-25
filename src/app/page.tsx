@@ -135,56 +135,64 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
       />
 
-      {/* Hero Section */}
-      <section className="relative text-white overflow-hidden min-h-[600px]">
-        <Image
-          src="/images/Hero1.jpg"
-          alt="APS technician performing humane wildlife removal"
-          fill
-          className="object-cover object-center"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/92 via-gray-900/70 to-gray-900/30" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-green-700/30 border border-green-600/30 rounded-full px-4 py-1 text-sm text-green-300 mb-6">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              Available 24/7 for Emergencies
-            </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-              Professional Pest Control
-              <span className="text-green-400"> in PA, DE & MD</span>
-            </h1>
-            <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-              Expert wildlife removal, bed bug treatment, termite protection, and comprehensive pest
-              control for homes and businesses throughout southeastern Pennsylvania and Delaware.
-              Licensed, insured, and trusted by thousands of families.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href="tel:484-643-2225"
-                className="inline-flex items-center justify-center gap-3 bg-green-600 hover:bg-green-500 text-white font-bold text-lg px-8 py-4 rounded-xl transition-colors"
-              >
-                <Phone size={22} />
-                Call 484-643-2225
-              </a>
-              <Link
-                href="/request-service"
-                className="inline-flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold text-lg px-8 py-4 rounded-xl transition-colors"
-              >
-                Request Service Online
-              </Link>
-            </div>
-            <div className="mt-8 flex flex-wrap gap-3">
-              {trustSignals.slice(0, 4).map((signal) => (
-                <div
-                  key={signal}
-                  className="flex items-center gap-2 text-sm text-gray-300 bg-white/5 rounded-full px-3 py-1"
+      {/* Hero Section — image displayed at full natural size, text overlaid on left */}
+      <section className="relative text-white overflow-hidden">
+        {/* Full image, no cropping — sits behind the overlay */}
+        <div className="w-full">
+          <Image
+            src="/images/Hero1.jpg"
+            alt="APS technician performing humane wildlife removal"
+            width={1074}
+            height={757}
+            className="w-full h-auto block"
+            priority
+          />
+        </div>
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/92 via-gray-900/75 to-gray-900/20" />
+        {/* Content positioned over image */}
+        <div className="absolute inset-0 flex items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 bg-green-700/30 border border-green-600/30 rounded-full px-4 py-1 text-sm text-green-300 mb-6">
+                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                Available 24/7 for Emergencies
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                Professional Pest Control
+                <span className="text-green-400"> in PA, DE & MD</span>
+              </h1>
+              <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+                Expert wildlife removal, bed bug treatment, termite protection, and comprehensive pest
+                control for homes and businesses throughout southeastern Pennsylvania and Delaware.
+                Licensed, insured, and trusted by thousands of families.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <a
+                  href="tel:484-643-2225"
+                  className="inline-flex items-center justify-center gap-3 bg-green-600 hover:bg-green-500 text-white font-bold text-lg px-8 py-4 rounded-xl transition-colors"
                 >
-                  <CheckCircle size={14} className="text-green-400" />
-                  {signal}
-                </div>
-              ))}
+                  <Phone size={22} />
+                  Call 484-643-2225
+                </a>
+                <Link
+                  href="/request-service"
+                  className="inline-flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold text-lg px-8 py-4 rounded-xl transition-colors"
+                >
+                  Request Service Online
+                </Link>
+              </div>
+              <div className="mt-8 flex flex-wrap gap-3">
+                {trustSignals.slice(0, 4).map((signal) => (
+                  <div
+                    key={signal}
+                    className="flex items-center gap-2 text-sm text-gray-300 bg-white/5 rounded-full px-3 py-1"
+                  >
+                    <CheckCircle size={14} className="text-green-400" />
+                    {signal}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

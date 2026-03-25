@@ -7,15 +7,15 @@ export default function Header() {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 relative">
-          {/* Logo */}
-          <Link href="/" className="flex-shrink-0">
+        <div className="flex items-center justify-between h-20 relative">
+          {/* Logo — fills header height with no padding */}
+          <Link href="/" className="flex-shrink-0 self-stretch flex items-center">
             <Image
               src="/images/logolong.jpg"
               alt="Absolute Pest Services"
-              width={200}
-              height={60}
-              className="h-12 w-auto object-contain"
+              width={300}
+              height={80}
+              className="h-full w-auto object-contain py-1"
               priority
             />
           </Link>
