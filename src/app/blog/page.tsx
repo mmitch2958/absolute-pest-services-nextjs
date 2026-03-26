@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Phone } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -17,6 +18,8 @@ const blogPosts = [
     excerpt: "Pennsylvania has strict regulations on when bat exclusion can be performed. Here's everything you need to know about legal exclusion windows and why they matter.",
     date: '2026-03-01',
     category: 'Wildlife Control',
+    imageUrl: 'https://images.unsplash.com/photo-1585586724079-4dcb146167b7?w=800&q=80',
+    imageAlt: 'Bats flying at dusk near a Pennsylvania home',
   },
   {
     slug: 'termite-swarming-season-chester-county',
@@ -24,6 +27,8 @@ const blogPosts = [
     excerpt: "Spring brings termite swarming season to southeastern PA. Swarmers (winged termites) are the most visible sign of a colony — here's what to do if you see them.",
     date: '2026-02-15',
     category: 'Termites',
+    imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
+    imageAlt: 'Termite swarmers on a wooden surface',
   },
   {
     slug: 'bed-bugs-hotel-prevention',
@@ -31,6 +36,8 @@ const blogPosts = [
     excerpt: 'Bed bugs are expert hitchhikers. Follow these steps every time you travel to avoid bringing an infestation home.',
     date: '2026-02-01',
     category: 'Bed Bugs',
+    imageUrl: 'https://images.unsplash.com/photo-1555421689-d68471e189a2?w=800&q=80',
+    imageAlt: 'Hotel bed showing signs of bed bug infestation',
   },
   {
     slug: 'raccoon-proofing-your-home',
@@ -38,6 +45,8 @@ const blogPosts = [
     excerpt: "Raccoons are active in spring searching for den sites. Here's how to make your attic, chimney, and property less attractive.",
     date: '2026-01-20',
     category: 'Wildlife Control',
+    imageUrl: 'https://images.unsplash.com/photo-1557401620-67270b61ea82?w=800&q=80',
+    imageAlt: 'Raccoon on a residential rooftop at night',
   },
   {
     slug: 'mice-in-winter-chester-county',
@@ -45,6 +54,8 @@ const blogPosts = [
     excerpt: 'As temperatures drop, mice look for warm shelter — and your home looks very inviting. Learn how mice enter and how to keep them out.',
     date: '2025-12-10',
     category: 'Rodents',
+    imageUrl: 'https://images.unsplash.com/photo-1428589667511-22ff5a8dam8e?w=800&q=80',
+    imageAlt: 'Mouse on a kitchen counter near food crumbs',
   },
   {
     slug: 'groundhog-foundation-damage',
@@ -52,6 +63,8 @@ const blogPosts = [
     excerpt: "Groundhogs (woodchucks) are more than a nuisance — their burrows can undermine your home's foundation. Here's when to be concerned and what to do.",
     date: '2025-11-15',
     category: 'Wildlife Control',
+    imageUrl: 'https://images.unsplash.com/photo-1509783236416-c9ad59bae472?w=800&q=80',
+    imageAlt: 'Groundhog in a suburban yard near a foundation',
   },
 ]
 
@@ -100,8 +113,14 @@ export default function BlogPage() {
                 key={post.slug}
                 className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
               >
-                <div className="h-48 bg-gradient-to-br from-green-800 to-gray-700 flex items-center justify-center">
-                  <div className="text-white text-4xl">🦡</div>
+                <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-green-800 to-gray-700">
+                  <Image
+                    src={post.imageUrl}
+                    alt={post.imageAlt}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-2 mb-3">
