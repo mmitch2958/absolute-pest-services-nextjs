@@ -135,25 +135,12 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
       />
 
-      {/* Hero Section — image displayed at full natural size, text overlaid on left */}
-      <section className="relative text-white overflow-hidden">
-        {/* Full image, no cropping — sits behind the overlay */}
-        <div className="w-full">
-          <Image
-            src="/images/Hero1.jpg"
-            alt="APS technician performing humane wildlife removal"
-            width={1074}
-            height={757}
-            className="w-full h-auto block"
-            priority
-          />
-        </div>
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/92 via-gray-900/75 to-gray-900/20" />
-        {/* Content positioned over image */}
-        <div className="absolute inset-0 flex items-center">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div className="max-w-3xl">
+      {/* Hero Section — text on left, constrained image on right */}
+      <section className="relative bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Text content — left side */}
+            <div>
               <div className="inline-flex items-center gap-2 bg-green-700/30 border border-green-600/30 rounded-full px-4 py-1 text-sm text-green-300 mb-6">
                 <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                 Available 24/7 for Emergencies
@@ -192,6 +179,20 @@ export default function HomePage() {
                     {signal}
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Constrained hero image — right side */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative w-full max-w-lg">
+                <Image
+                  src="/images/hero2.png"
+                  alt="APS technician performing humane wildlife removal"
+                  width={600}
+                  height={420}
+                  className="w-full h-auto rounded-2xl shadow-2xl"
+                  priority
+                />
               </div>
             </div>
           </div>
