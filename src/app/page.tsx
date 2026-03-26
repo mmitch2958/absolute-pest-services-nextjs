@@ -186,7 +186,7 @@ export default function HomePage() {
             <div className="flex justify-center lg:justify-end">
               <div className="relative w-full max-w-lg">
                 <Image
-                  src="/images/hero2.png"
+                  src="/images/Hero1.jpg"
                   alt="APS technician performing humane wildlife removal"
                   width={600}
                   height={420}
