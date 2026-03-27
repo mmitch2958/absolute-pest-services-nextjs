@@ -2,6 +2,8 @@
 
 import { z } from 'zod'
 import nodemailer from 'nodemailer'
+import { sql } from '@/lib/db'
+import { insertContactSchema } from '../../../shared/schema'
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -89,14 +91,27 @@ export async function submitServiceRequest(
   }
 
   try {
-    console.log('[Service Request]', JSON.stringify({
-      name: result.data.name,
-      email: result.data.email,
-      phone: result.data.phone,
-      service: result.data.service,
-      zip: result.data.zip,
-      message: result.data.message,
-    }, null, 2))
+    // Parse name into first/last
+    const nameParts = result.data.name.trim().split(/\s+/)
+    const firstName = nameParts[0] ?? ''
+    const lastName = nameParts.slice(1).join(' ') || ''
+
+    // Persist to Neon DB — contact_submissions table
+    const city = result.data.zip // zip is the closest proxy available on this form
+    await sql`
+      INSERT INTO contact_submissions (
+        first_name, last_name, phone, email, city, service_type, message
+      ) VALUES (
+        ${firstName},
+        ${lastName},
+        ${result.data.phone},
+        ${result.data.email},
+        ${city},
+        ${result.data.service},
+        ${result.data.message ?? null}
+      )
+    `
+    console.log('[Service Request] DB insert succeeded.')
 
     // Send email via SMTP
     const smtpHost = process.env.SMTP_HOST
