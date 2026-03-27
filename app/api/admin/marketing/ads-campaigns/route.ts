@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { getSession } from '@/lib/session'
 
 async function requireAdmin() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('admin-token')
-  if (!token?.value) {
+  const session = await getSession()
+  if (!session.adminToken) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   return null

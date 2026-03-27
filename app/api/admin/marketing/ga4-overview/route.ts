@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { getSession } from '@/lib/session'
 
 async function requireAdmin() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('admin-token')
-  if (!token?.value) {
+  const session = await getSession()
+  if (!session.adminToken) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   return null
@@ -16,11 +15,11 @@ export async function GET(request: NextRequest) {
 
   try {
     return NextResponse.json({
-      searchTerms: [],
-      message: 'Connect Google Ads API credentials to populate this data.',
+      overview: null,
+      message: 'Connect GA4 API credentials to populate this data. Property ID: G-0PXFRNKQW5',
     })
   } catch (err) {
-    console.error('[ads-search-terms]', err)
-    return NextResponse.json({ error: 'Failed to load search terms' }, { status: 500 })
+    console.error('[ga4-overview]', err)
+    return NextResponse.json({ error: 'Failed to load GA4 data' }, { status: 500 })
   }
 }
