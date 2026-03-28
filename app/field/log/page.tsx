@@ -307,8 +307,8 @@ export default function FieldLogPage() {
             placeholder="Enter new customer name"
           />
 
-          {/* Property Type — always shown when a customer is entered */}
-          {customerName.trim() && (
+          {/* Property Type — shown whenever a customer is selected or being added */}
+          {(customerName.trim() || customerAddingNew) && (
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-slate-700">
                 Property Type <span className="text-red-500">*</span>
@@ -337,7 +337,7 @@ export default function FieldLogPage() {
           )}
 
           {/* New Customer address — only for brand new customers */}
-          {customerAddingNew && customerName.trim() && (
+          {customerAddingNew && (
             <div className="rounded-xl border-2 border-green-200 bg-green-50 p-4 space-y-2">
               <div className="flex items-center gap-2 mb-1">
                 <div className="h-2 w-2 rounded-full bg-green-500" />
