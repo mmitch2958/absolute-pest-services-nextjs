@@ -21,17 +21,25 @@ export async function GET(request: NextRequest) {
     const limit = 20;
     const offset = (page - 1) * limit;
 
-    let countQuery: any;
-    let dataQuery: any;
+    type CountRow = { total: string }
+    type ClientRow = {
+      id: number; name: string; email: string | null; phone: string | null;
+      address: string | null; contact_person: string | null; property_type: string;
+      client_type: string; status: string; notes: string | null;
+      review_opt_out: boolean; created_at: string; updated_at: string;
+    }
+
+    let countQuery: CountRow[];
+    let dataQuery: ClientRow[];
 
     if (search.trim()) {
       const searchPattern = `%${search.trim()}%`;
-      countQuery = await sql`
+      countQuery = (await sql`
         SELECT COUNT(*) as total FROM clients
         WHERE name ILIKE ${searchPattern}
            OR email ILIKE ${searchPattern}
-      `;
-      dataQuery = await sql`
+      `) as CountRow[];
+      dataQuery = (await sql`
         SELECT id, name, email, phone, address, contact_person, property_type,
                client_type, status, notes, review_opt_out, created_at, updated_at
         FROM clients
@@ -40,17 +48,17 @@ export async function GET(request: NextRequest) {
         ORDER BY created_at DESC
         LIMIT ${limit}
         OFFSET ${offset}
-      `;
+      `) as ClientRow[];
     } else {
-      countQuery = await sql`SELECT COUNT(*) as total FROM clients`;
-      dataQuery = await sql`
+      countQuery = (await sql`SELECT COUNT(*) as total FROM clients`) as CountRow[];
+      dataQuery = (await sql`
         SELECT id, name, email, phone, address, contact_person, property_type,
                client_type, status, notes, review_opt_out, created_at, updated_at
         FROM clients
         ORDER BY created_at DESC
         LIMIT ${limit}
         OFFSET ${offset}
-      `;
+      `) as ClientRow[];
     }
 
     const total = parseInt(countQuery[0]?.total || '0', 10);
