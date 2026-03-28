@@ -45,6 +45,11 @@ const nextConfig: NextConfig = {
         hostname: 'absolutepestservices.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
   },
