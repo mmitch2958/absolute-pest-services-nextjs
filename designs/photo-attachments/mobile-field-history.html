@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=375, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Job History - with Photos</title>
+    <style>
+        :root {
+            --brand-green: #22c55e;
+            --bg-dark: #1a1a2e;
+            --bg-card: #252542;
+            --bg-lighter: #2d2d4f;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            width: 375px;
+            margin: 0 auto;
+            min-height: 100vh;
+            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-card);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .history-list {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .log-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .customer-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .job-details {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .job-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        .photo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--brand-green);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        
+        .photo-badge svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .card-body {
+            padding: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .photos-section {
+            background: var(--bg-lighter);
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .photos-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .thumbnail-wrap {
+            aspect-ratio: 1;
+            background: var(--bg-card);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .thumbnail-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .more-photos-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* Lightbox Overlay */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            /* display: none; */ /* Toggled by JS usually, visible for wireframe */
+        }
+
+        .lightbox-header {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .lightbox-counter {
+            color: white;
+            font-size: 14px;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 8px;
+        }
+
+        .lightbox-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+        }
+
+        .lightbox-img-placeholder {
+            width: 100%;
+            aspect-ratio: 3/4;
+            background: #222;
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+        }
+
+        .lightbox-caption {
+            padding: 24px 16px;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            min-height: 80px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>My History</h1>
+    </div>
+
+    <div class="history-list">
+        <!-- Log Entry 1: With Photos -->
+        <div class="log-card">
+            <div class="card-header">
+                <div>
+                    <div class="customer-name">Smith Residence</div>
+                    <div class="job-details">123 Main St • Kitchen</div>
+                    <div class="photo-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        4 Photos
+                    </div>
+                </div>
+                <div class="job-date">Today<br>10:30 AM</div>
+            </div>
+            <div class="card-body">
+                Performed standard exterior perimeter spray and checked all interior bait stations. Found activity in station 3.
+            </div>
+            <div class="photos-section">
+                <div class="photos-header">
+                    Attached Photos
+                </div>
+                <div class="thumbnail-grid">
+                    <div class="thumbnail-wrap">
+                        <span style="color:#64748b; font-size:10px;">[Station 1]</span>
+                    </div>
+                    <div class="thumbnail-wrap">
+                        <span style="color:#64748b; font-size:10px;">[Station 2]</span>
+                    </div>
+                    <div class="thumbnail-wrap">
+                        <span style="color:#64748b; font-size:10px;">[Activity]</span>
+                        <div class="more-photos-overlay">+2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Entry 2: No Photos -->
+        <div class="log-card">
+            <div class="card-header">
+                <div>
+                    <div class="customer-name">Johnson Corp</div>
+                    <div class="job-details">Warehouse A • Exterior</div>
+                </div>
+                <div class="job-date">Yesterday<br>2:15 PM</div>
+            </div>
+            <div class="card-body">
+                Routine exterior perimeter check. No issues found.
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Overlay (Shown for wireframe purposes) -->
+    <div class="lightbox" style="opacity: 0.95;">
+        <div class="lightbox-header">
+            <div class="lightbox-counter">3 of 4</div>
+            <button class="btn-close">×</button>
+        </div>
+        <div class="lightbox-content">
+            <div class="lightbox-img-placeholder">
+                [Full Size Image: Termite Activity]
+            </div>
+        </div>
+        <div class="lightbox-caption">
+            Active signs of termites found near the foundation of the north wall.
+        </div>
+    </div>
+
+</body>
+</html>

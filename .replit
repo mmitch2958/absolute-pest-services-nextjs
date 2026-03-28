@@ -1,0 +1,52 @@
+modules = ["nodejs-20", "web", "postgresql-16"]
+run = "npm run dev"
+hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["npm", "run", "build"]
+run = ["npm", "run", "start"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash start.sh"
+waitForPort = 5000
+
+[agent]
+integrations = ["javascript_google_analytics:1.0.0", "github:1.0.0"]
+
+[userenv]
+
+[userenv.shared]
+FB_PAGE_ID = "298835070139713"
+FB_PAGE_ACCESS_TOKEN = "EAANJSCq2ju0BREoFNh8QpVk4WxdUF5ZAlFXQQDuURE0rjjlELTrlHZCFbAMFBEmmiTFeNiZB2XWsvuWmdsDU4EFOG4zzQGMoUWTr2Hmen80zho5HNKVjquHOZCZAu8Jnvdg4ntdob27zRwJpaf6xNOtFKtUncjGLmRaY2KdIluVumrCQalnctw7QI4Hy09AZCQmV8Rw79I8BdDloTkQAh4hxPFod05fAO9vB6ZA1F4Nf3udRYT7c9jZCMjqr4gZDZD"
+MATON_API_KEY = "fnVPNNiVTI09Xj4wswkIHoRLr2xNW_pDzaFr1LA4K6eDEgcpL_EKTWx4fzSurIca89tF3WOWPTCCQKV-USBntFxclZ7wfjIHv_Q"
+NEXT_PUBLIC_GA4_MEASUREMENT_ID = "G-0PXFRNKQW5"
+NEXT_PUBLIC_GOOGLE_ADS_ID = "AW-1038095551"
+NEXT_TELEMETRY_DISABLED = "1"

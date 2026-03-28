@@ -1,0 +1,70 @@
+Replit Agent — APS Production Publish (March 19, 2026)
+
+GitHub repo: https://github.com/SteelCity-ai/AbsolutePestServices.com
+
+Branch to pull: feature/city-landing-pages (contains all new work)
+
+Step 1 — Pull latest:
+
+bashCopyCopied!
+git fetch origin
+git checkout feature/city-landing-pages
+git pull origin feature/city-landing-pages
+Step 2 — Install dependencies:
+
+bashCopyCopied!
+npm install
+Step 3 — Environment variables — CHECK these in your Replit secrets/.env:
+
+Variable	Status	Action
+DATABASE_URL	Should already exist	Verify it's set
+SENDGRID_API_KEY	Should already exist	Verify it's set
+CLOUDFLARE_TURNSTILE_SECRET_KEY	Should already exist	Verify it's set
+REPLIT_DOMAINS	Should already exist	Verify it's set
+VITE_GA_MEASUREMENT_ID	Should already exist	Verify it's set
+VITE_TURNSTILE_SITE_KEY	Should already exist	Verify it's set
+OPENAI_API_KEY	NEW	Add this — needed for blog AI generation feature
+For OPENAI_API_KEY: add it to Replit secrets as OPENAI_API_KEY = your OpenAI API key.
+
+Step 4 — Apply database changes:
+
+bashCopyCopied!
+npm run db:push
+Step 5 — Build:
+
+bashCopyCopied!
+npm run build
+Report any errors immediately.
+
+Step 6 — Verify new pages exist:
+After a successful build, confirm these files exist:
+
+CopyCopied!
+src/pages/service-areas/west-chester-pa.tsx
+src/pages/service-areas/exton-pa.tsx
+src/pages/service-areas/malvern-pa.tsx
+src/pages/service-areas/downingtown-pa.tsx
+src/pages/service-areas/norristown-pa.tsx
+src/pages/service-areas/king-of-prussia-pa.tsx
+src/pages/service-areas/collegeville-pa.tsx
+src/pages/service-areas/pottstown-pa.tsx
+src/pages/service-areas/wilmington-de.tsx
+src/pages/service-areas/newark-de.tsx
+src/pages/service-areas/hockessin-de.tsx
+src/pages/service-areas/aberdeen-md.tsx
+src/pages/service-areas/havre-de-grace-md.tsx
+src/pages/service-areas/bel-air-md.tsx
+Step 7 — Spot-check new features:
+
+Visit /service-areas/west-chester-pa in preview — should load a local pest control page
+Visit /blog — should show blog with related posts
+Check sitemap at /sitemap.xml — should have 16+ entries
+Step 8 — Publish:
+If build passes and pages load correctly, publish to production.
+
+Report back with:
+
+Build status (pass/fail, any errors)
+Confirmation that all 14 city pages exist
+Whether OPENAI_API_KEY was added
+Any issues found

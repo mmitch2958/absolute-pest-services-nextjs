@@ -1,0 +1,408 @@
+{
+  "fetched_at": "2026-03-22T00:46:34.570Z",
+  "customer_id": "6800190976",
+  "campaign_id": "all",
+  "term_count": 50,
+  "search_terms": [
+    {
+      "search_term": "absolute pest control",
+      "clicks": 1,
+      "impressions": 2,
+      "cost_micros": 1700000,
+      "spend_usd": 1.7,
+      "conversions": 0
+    },
+    {
+      "search_term": "pest control companies in my area",
+      "clicks": 1,
+      "impressions": 1,
+      "cost_micros": 3120000,
+      "spend_usd": 3.12,
+      "conversions": 0
+    },
+    {
+      "search_term": "presto pest control",
+      "clicks": 1,
+      "impressions": 1,
+      "cost_micros": 4697170,
+      "spend_usd": 4.69717,
+      "conversions": 0
+    },
+    {
+      "search_term": "1 800 terminix phone number",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "24 hour animal removal",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "a cockroach",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "aardvark pest control aston pa",
+      "clicks": 0,
+      "impressions": 2,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "aardvark pest control philadelphia",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "abell pest control",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "absolute exterminating",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "absolute termite and pest control reviews",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "absolute termite control inc",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "accupest",
+      "clicks": 0,
+      "impressions": 2,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "ace exterminating",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "all affordable pest control",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "american pest control",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "ants",
+      "clicks": 0,
+      "impressions": 3,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "aptive",
+      "clicks": 0,
+      "impressions": 2,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "aptive environmental philadelphia",
+      "clicks": 0,
+      "impressions": 2,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "aptive new jersey",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "aptive pest control",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "aptive pest control nj",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "aptive pest control phone number",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "arrest a pest",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "arrest a pest pest control",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "atlantic pest control",
+      "clicks": 0,
+      "impressions": 3,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "bed bug",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "brody brothers",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "brown pest control",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "budget exterminating downingtown pa",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "budget pest control edgewater florida",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "bugman pest control",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "bugs",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "city best pest control philadelphia",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "cockroach cockroach",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "cockroaches",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "cooper pest control",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "countryside pest control",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "countryside pest control broughton",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "countryside pest control denver pa",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "craziest wasp nest removal",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "critter crushers",
+      "clicks": 0,
+      "impressions": 3,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "dead animal removal philadelphia",
+      "clicks": 0,
+      "impressions": 2,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "doctor mouse killer",
+      "clicks": 0,
+      "impressions": 3,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "drain fly",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "ecoshield pest control",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "ehrlich",
+      "clicks": 0,
+      "impressions": 3,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "ehrlich pest",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "ehrlich pest control",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    },
+    {
+      "search_term": "ehrlich pest control baltimore",
+      "clicks": 0,
+      "impressions": 1,
+      "cost_micros": 0,
+      "spend_usd": 0,
+      "conversions": 0
+    }
+  ]
+}

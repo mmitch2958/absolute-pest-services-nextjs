@@ -1,0 +1,34 @@
+pick 6a8c0c0 feat: add admin invoices page and nav link
+squash c7a25b0 integrate: external team commit 6a8c0c0 — admin invoices page
+squash e965341 integrate: external team commit 6a8c0c0 — admin invoices page
+squash 1e814c4 integrate: external team commit 6a8c0c0 — admin invoices page
+pick c477b48 feat: add create invoice page at /admin/invoices/new
+squash 32f56b8 feat: add create invoice page at /admin/invoices/new
+pick 67e3733 feat: service rates, job-to-invoice flow, field invoice creation
+squash c3c92d8 feat: service rates, job-to-invoice flow, field invoice creation
+squash dca55fb feat: service rates, job-to-invoice flow, field invoice creation
+squash 19cae82 feat: service rates, job-to-invoice flow, field invoice creation
+squash 64ec711 feat: service rates, job-to-invoice flow, field invoice creation
+squash 5669027 feat: service rates, job-to-invoice flow, field invoice creation
+squash 794c919 feat: service rates, job-to-invoice flow, field invoice creation
+squash 6f79cdd feat: service rates, job-to-invoice flow, field invoice creation
+squash bfa3798 feat: service rates, job-to-invoice flow, field invoice creation
+pick abfe861 fix: timezone-safe dates, invoice page improvements, admin settings
+squash 2e011e4 fix: timezone-safe dates, invoice page improvements, admin settings
+squash 705da13 fix: timezone-safe dates, invoice page improvements, admin settings
+squash fd7e440 fix: timezone-safe dates, invoice page improvements, admin settings
+squash 0649f5c fix: timezone-safe dates, invoice page improvements, admin settings
+squash 80824cf fix: timezone-safe dates, invoice page improvements, admin settings
+squash cfc117b fix: timezone-safe dates, invoice page improvements, admin settings
+squash ed6e2a9 fix: timezone-safe dates, invoice page improvements, admin settings
+squash fb39e73 fix: timezone-safe dates, invoice page improvements, admin settings
+squash e806c4b fix: timezone-safe dates, invoice page improvements, admin settings
+squash 8ddbf4c fix: timezone-safe dates, invoice page improvements, admin settings
+squash ad0f712 fix: timezone-safe dates, invoice page improvements, admin settings
+pick f75a615 fix: auto-create client record from field job log submissions
+pick ab17fa6 feat: show date & time on job logs (entry timestamps)
+squash 3a99d6c feat: show date & time on job logs (entry timestamps)
+squash 5c46c77 feat: show date & time on job logs (entry timestamps)
+squash c0345fb feat: show date & time on job logs (entry timestamps)
+squash 870c6a9 feat: show date & time on job logs (entry timestamps)
+squash 7bb7496 feat: show date & time on job logs (entry timestamps)

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /field/
+Disallow: /portal/
+Disallow: /api/
+
+Sitemap: https://absolutepestservices.com/sitemap.xml
