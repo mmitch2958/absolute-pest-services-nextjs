@@ -2,13 +2,47 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CheckCircle, Phone } from 'lucide-react'
 
-export const metadata: Metadata = {
-  title: 'Bat Removal Services | Absolute Pest Services',
-  description:
-    'Safe, humane bat removal & exclusion in PA & DE. Licensed for bat work. We follow all PA & DE wildlife regulations. Free inspections. Call 484-643-2225.',
-  alternates: {
-    canonical: 'https://absolutepestservices.com/bat-removal',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Professional Bat Removal & Exclusion Services | Absolute Pest Services PA, DE, MD',
+    description:
+      'Safe, humane bat removal in PA, DE & MD. One-way exclusion devices, guano cleanup & permanent sealing. Licensed bat exclusion specialists. Call 484-643-2225 for inspection.',
+    keywords: [
+      'bat removal',
+      'bat exclusion',
+      'bat control',
+      'humane bat removal',
+      'bat guano cleanup',
+      'bat removal PA',
+      'bat removal Delaware',
+      'bat removal Maryland',
+      'Chester County bat removal',
+      'wildlife control',
+      'pest control',
+    ],
+    alternates: {
+      canonical: 'https://absolutepestservices.com/bat-removal',
+    },
+    openGraph: {
+      title: 'Professional Bat Removal & Exclusion Services | Absolute Pest Services',
+      description:
+        'Safe, humane bat removal in PA, DE & MD. One-way exclusion devices, guano cleanup & permanent sealing. Licensed specialists.',
+      url: 'https://absolutepestservices.com/bat-removal',
+      type: 'website',
+      images: [
+        {
+          url: 'https://absolutepestservices.com/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: 'Absolute Pest Services - Bat Removal',
+        },
+      ],
+    },
+    other: {
+      'geo.region': 'US-PA',
+      'geo.placename': 'Southeastern Pennsylvania',
+    },
+  }
 }
 
 const faqSchema = {
@@ -50,12 +84,65 @@ const faqSchema = {
   ],
 }
 
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: 'Absolute Pest Services',
+  telephone: '+1-484-643-2225',
+  url: 'https://absolutepestservices.com/bat-removal',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: '21 Sheffield Dr',
+    addressLocality: 'West Grove',
+    addressRegion: 'PA',
+    postalCode: '19390',
+    addressCountry: 'US',
+  },
+  areaServed: [
+    { '@type': 'State', name: 'Pennsylvania' },
+    { '@type': 'State', name: 'Delaware' },
+    { '@type': 'State', name: 'Maryland' },
+  ],
+  priceRange: '$$',
+}
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Bat Removal',
+  provider: { '@type': 'LocalBusiness', name: 'Absolute Pest Services' },
+  areaServed: 'Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE',
+  serviceType: 'Pest Control',
+  url: 'https://absolutepestservices.com/bat-removal',
+}
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://absolutepestservices.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Bat Removal', item: 'https://absolutepestservices.com/bat-removal' },
+  ],
+}
+
 export default function BatRemovalPage() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
       <section className="bg-gradient-to-br from-purple-900 to-gray-900 text-white py-16">

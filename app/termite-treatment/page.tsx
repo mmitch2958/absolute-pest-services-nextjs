@@ -2,13 +2,47 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CheckCircle, Phone } from 'lucide-react'
 
-export const metadata: Metadata = {
-  title: 'Termite Treatment | Absolute Pest Services',
-  description:
-    'Expert termite control & prevention in PA & DE. Termidor liquid treatment & bait station systems. Free inspections. Licensed & insured. Call 484-643-2225.',
-  alternates: {
-    canonical: 'https://absolutepestservices.com/termite-treatment',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Termite Inspection & Treatment Services | Absolute Pest Services PA, DE, MD',
+    description:
+      'Licensed termite inspection, treatment & prevention in PA, DE & MD. Termidor liquid barriers, baiting systems & ongoing monitoring. Protect your home from costly termite damage. Call 484-643-2225.',
+    keywords: [
+      'termite treatment',
+      'termite control',
+      'termite inspection',
+      'Termidor treatment',
+      'termite bait stations',
+      'termite prevention',
+      'subterranean termites',
+      'termite damage',
+      'termite extermination',
+      'Chester County termite treatment',
+      'pest control',
+    ],
+    alternates: {
+      canonical: 'https://absolutepestservices.com/termite-treatment',
+    },
+    openGraph: {
+      title: 'Termite Inspection & Treatment Services | Absolute Pest Services',
+      description:
+        'Licensed termite inspection, treatment & prevention in PA, DE & MD. Termidor liquid barriers, baiting systems & ongoing monitoring to protect your home.',
+      url: 'https://absolutepestservices.com/termite-treatment',
+      type: 'website',
+      images: [
+        {
+          url: 'https://absolutepestservices.com/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: 'Absolute Pest Services - Termite Treatment',
+        },
+      ],
+    },
+    other: {
+      'geo.region': 'US-PA',
+      'geo.placename': 'Southeastern Pennsylvania',
+    },
+  }
 }
 
 const faqSchema = {
@@ -50,12 +84,65 @@ const faqSchema = {
   ],
 }
 
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: 'Absolute Pest Services',
+  telephone: '+1-484-643-2225',
+  url: 'https://absolutepestservices.com/termite-treatment',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: '21 Sheffield Dr',
+    addressLocality: 'West Grove',
+    addressRegion: 'PA',
+    postalCode: '19390',
+    addressCountry: 'US',
+  },
+  areaServed: [
+    { '@type': 'State', name: 'Pennsylvania' },
+    { '@type': 'State', name: 'Delaware' },
+    { '@type': 'State', name: 'Maryland' },
+  ],
+  priceRange: '$$',
+}
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Termite Treatment',
+  provider: { '@type': 'LocalBusiness', name: 'Absolute Pest Services' },
+  areaServed: 'Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE',
+  serviceType: 'Pest Control',
+  url: 'https://absolutepestservices.com/termite-treatment',
+}
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://absolutepestservices.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Termite Treatment', item: 'https://absolutepestservices.com/termite-treatment' },
+  ],
+}
+
 export default function TermiteTreatmentPage() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
       <section className="bg-gradient-to-br from-amber-900 to-gray-900 text-white py-16">
@@ -158,6 +245,9 @@ export default function TermiteTreatmentPage() {
                 <Phone size={20} />
                 484-643-2225
               </a>
+              <Link href="/request-service" className="flex items-center gap-2 justify-center text-amber-700 hover:text-amber-800 font-medium text-sm">
+                Or request service online →
+              </Link>
             </div>
           </div>
         </div>

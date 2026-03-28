@@ -2,16 +2,104 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import CostCalculator from '@/components/calculator/CostCalculator'
 
-export const metadata: Metadata = {
-  title: 'Pest Control Cost Calculator | Absolute Pest Services',
-  description:
-    'Estimate your pest control cost. Instant ranges for pest control, bed bug treatment, termite control, bat removal & wildlife removal in PA & DE.',
-  alternates: { canonical: 'https://absolutepestservices.com/cost-calculator' },
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Pest Control Cost Calculator - Free Estimate | Absolute Pest Services',
+    description:
+      'Calculate pest control costs instantly. Get free estimates for termite treatment, bed bug removal, wildlife control, bat removal, and more. Serving PA, DE, and MD.',
+    keywords: [
+      'pest control cost',
+      'pest control estimate',
+      'termite treatment cost',
+      'bed bug treatment cost',
+      'wildlife removal cost',
+      'bat removal cost',
+      'pest control prices',
+      'pest control quote',
+      'pest control calculator',
+    ],
+    alternates: {
+      canonical: 'https://absolutepestservices.com/cost-calculator',
+    },
+    openGraph: {
+      title: 'Pest Control Cost Calculator - Free Estimate | Absolute Pest Services',
+      description:
+        'Calculate pest control costs instantly. Get free estimates for various pest control services.',
+      url: 'https://absolutepestservices.com/cost-calculator',
+      type: 'website',
+      images: [
+        {
+          url: 'https://absolutepestservices.com/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: 'Absolute Pest Services - Cost Calculator',
+        },
+      ],
+    },
+    other: {
+      'geo.region': 'US-PA',
+      'geo.placename': 'Southeastern Pennsylvania',
+    },
+  }
+}
+
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: 'Absolute Pest Services',
+  telephone: '+1-484-643-2225',
+  url: 'https://absolutepestservices.com/cost-calculator',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: '21 Sheffield Dr',
+    addressLocality: 'West Grove',
+    addressRegion: 'PA',
+    postalCode: '19390',
+    addressCountry: 'US',
+  },
+  areaServed: [
+    { '@type': 'State', name: 'Pennsylvania' },
+    { '@type': 'State', name: 'Delaware' },
+    { '@type': 'State', name: 'Maryland' },
+  ],
+  priceRange: '$$',
+}
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Pest Control Cost Calculator',
+  provider: { '@type': 'LocalBusiness', name: 'Absolute Pest Services' },
+  areaServed: 'Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE',
+  serviceType: 'Pest Control',
+  url: 'https://absolutepestservices.com/cost-calculator',
+}
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://absolutepestservices.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Cost Calculator', item: 'https://absolutepestservices.com/cost-calculator' },
+  ],
 }
 
 export default function CostCalculatorPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       <section className="bg-gradient-to-br from-green-900 to-gray-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="text-sm text-green-300 mb-4" aria-label="Breadcrumb">

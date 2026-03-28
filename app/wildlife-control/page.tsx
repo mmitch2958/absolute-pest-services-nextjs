@@ -3,17 +3,49 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { CheckCircle, Phone } from 'lucide-react'
 
-export const metadata: Metadata = {
-  title: 'Wildlife Control Services | Absolute Pest Services',
-  description:
-    'Humane wildlife removal in PA & DE. Expert handling of raccoons, squirrels, opossums, groundhogs, skunks & more. Licensed & insured. Call 484-643-2225.',
-  alternates: {
-    canonical: 'https://absolutepestservices.com/wildlife-control',
-  },
-  openGraph: {
-    url: 'https://absolutepestservices.com/wildlife-control',
-    title: 'Wildlife Control Services | Absolute Pest Services',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Humane Wildlife Control & Removal Services | Absolute Pest Services PA, DE, MD',
+    description:
+      'Professional humane wildlife removal in PA, DE & MD. Non-kill extraction for raccoons, squirrels, opossums, skunks & more. Licensed wildlife control specialists. Call 484-643-2225.',
+    keywords: [
+      'wildlife control',
+      'wildlife removal',
+      'humane wildlife removal',
+      'raccoon removal',
+      'squirrel removal',
+      'opossum removal',
+      'skunk removal',
+      'groundhog removal',
+      'fox removal',
+      'wildlife exclusion',
+      'nuisance wildlife',
+      'Chester County wildlife control',
+      'pest control',
+    ],
+    alternates: {
+      canonical: 'https://absolutepestservices.com/wildlife-control',
+    },
+    openGraph: {
+      title: 'Humane Wildlife Control & Removal Services | Absolute Pest Services',
+      description:
+        'Professional humane wildlife removal in PA, DE & MD. Non-kill extraction for raccoons, squirrels, opossums, skunks & more. Licensed wildlife control specialists.',
+      url: 'https://absolutepestservices.com/wildlife-control',
+      type: 'website',
+      images: [
+        {
+          url: 'https://absolutepestservices.com/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: 'Absolute Pest Services - Wildlife Control',
+        },
+      ],
+    },
+    other: {
+      'geo.region': 'US-PA',
+      'geo.placename': 'Southeastern Pennsylvania',
+    },
+  }
 }
 
 const faqSchema = {
@@ -55,6 +87,47 @@ const faqSchema = {
   ],
 }
 
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: 'Absolute Pest Services',
+  telephone: '+1-484-643-2225',
+  url: 'https://absolutepestservices.com/wildlife-control',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: '21 Sheffield Dr',
+    addressLocality: 'West Grove',
+    addressRegion: 'PA',
+    postalCode: '19390',
+    addressCountry: 'US',
+  },
+  areaServed: [
+    { '@type': 'State', name: 'Pennsylvania' },
+    { '@type': 'State', name: 'Delaware' },
+    { '@type': 'State', name: 'Maryland' },
+  ],
+  priceRange: '$$',
+}
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Wildlife Control',
+  provider: { '@type': 'LocalBusiness', name: 'Absolute Pest Services' },
+  areaServed: 'Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE',
+  serviceType: 'Pest Control',
+  url: 'https://absolutepestservices.com/wildlife-control',
+}
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://absolutepestservices.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Wildlife Control', item: 'https://absolutepestservices.com/wildlife-control' },
+  ],
+}
+
 const wildlifeSpecies = [
   { name: 'Raccoons', desc: 'Attic invasions, chimney dens, garbage raiding. Licensed removal & exclusion.' },
   { name: 'Squirrels', desc: 'Chewing through soffits, nesting in attics. Exclusion and entry point sealing.' },
@@ -72,6 +145,18 @@ export default function WildlifeControlPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
       {/* Hero */}
