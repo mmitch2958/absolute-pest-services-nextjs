@@ -7,7 +7,7 @@ channel = "stable-24_05"
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["bash", "-c", "find node_modules -name '*.node' 2>/dev/null | grep -i swc | while read f; do [ -f \"$f\" ] && mv \"$f\" \"${f}.bak\"; done; npm run build"]
+build = ["bash", "-c", "find node_modules -name '*.node' 2>/dev/null | grep -i swc | while read f; do [ -f \"$f\" ] && mv \"$f\" \"${f}.bak\"; done; npx next build --webpack"]
 run = ["bash", "-c", "find node_modules -name '*.node' 2>/dev/null | grep -i swc | while read f; do [ -f \"$f\" ] && mv \"$f\" \"${f}.bak\"; done; npx next start -p 5000"]
 
 [[ports]]
@@ -50,4 +50,3 @@ MATON_API_KEY = "fnVPNNiVTI09Xj4wswkIHoRLr2xNW_pDzaFr1LA4K6eDEgcpL_EKTWx4fzSurIc
 NEXT_PUBLIC_GA4_MEASUREMENT_ID = "G-0PXFRNKQW5"
 NEXT_PUBLIC_GOOGLE_ADS_ID = "AW-1038095551"
 NEXT_TELEMETRY_DISABLED = "1"
-IS_WEBPACK_TEST = "1"
