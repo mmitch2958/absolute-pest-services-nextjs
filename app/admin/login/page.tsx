@@ -1,156 +1,118 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Bug, AlertCircle, Loader2 } from 'lucide-react'
 
 export default function AdminLoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+    e.preventDefault()
+    setError('')
+    setIsLoading(true)
 
     try {
       const res = await fetch('/api/admin/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-      });
+      })
 
-      const data = await res.json();
+      const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Login failed');
-        setLoading(false);
-        return;
+        setError(data.error || 'Login failed')
+        setIsLoading(false)
+        return
       }
 
-      router.push('/admin/dashboard');
-      router.refresh();
+      router.push('/admin/dashboard')
+      router.refresh()
     } catch {
-      setError('An unexpected error occurred');
-      setLoading(false);
+      setError('An unexpected error occurred')
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        {/* Logo / Brand */}
+    <main className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+
+        {/* Brand header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-white mb-1">
-            Absolute Pest Services
-          </h1>
-          <p className="text-gray-400 text-sm">Admin Portal</p>
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-green-100 rounded-xl mb-4">
+            <Bug className="w-7 h-7 text-green-700" />
+          </div>
+          <h1 className="text-xl font-bold text-slate-900">Absolute Pest Services</h1>
+          <p className="text-sm text-slate-500 mt-1">Admin Portal</p>
         </div>
 
-        {/* Login Card */}
-        <div className="bg-white rounded-2xl p-8 shadow-xl">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
-            Sign In
-          </h2>
+        {/* Error alert */}
+        {error && (
+          <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg mb-6" role="alert">
+            <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+        )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
-                {error}
-              </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Email */}
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
+              Email address
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              autoComplete="email"
+              placeholder="admin@absolutepestservices.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full h-11 px-3 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+            />
+          </div>
+
+          {/* Password */}
+          <div className="mb-6">
+            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full h-11 px-3 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+            />
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-11 flex items-center justify-center gap-2 bg-green-700 hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg shadow-sm shadow-green-900/20 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              'Sign In'
             )}
+          </button>
+        </form>
 
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 text-sm
-                  focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
-                  placeholder-gray-400"
-                placeholder="admin@absolutepestservices.com"
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 text-sm
-                  focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
-                  placeholder-gray-400"
-                placeholder="••••••••"
-              />
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 bg-green-600 hover:bg-green-700 disabled:bg-green-400
-                text-white font-medium rounded-lg transition-colors text-sm
-                flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <svg
-                    className="animate-spin h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    />
-                  </svg>
-                  Signing in...
-                </>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-          </form>
-        </div>
-
-        {/* Footer */}
-        <p className="text-center text-gray-500 text-xs mt-6">
-          &copy; {new Date().getFullYear()} Absolute Pest Services
-        </p>
       </div>
-    </div>
-  );
+    </main>
+  )
 }
