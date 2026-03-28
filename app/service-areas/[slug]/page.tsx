@@ -1,7 +1,5 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 import { Phone, MapPin, Clock, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import {
@@ -226,8 +224,6 @@ export default async function ServiceAreaPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify([localBusinessSchema, faqSchema]) }}
       />
 
-      {/* Header */}
-      <Header />
 
       {/* Hero Section */}
       <section className={`bg-gradient-to-r ${gradient} py-20`}>
@@ -449,7 +445,6 @@ export default async function ServiceAreaPage({ params }: Props) {
         </div>
       </section>
 
-      <Footer />
     </div>
   )
 }

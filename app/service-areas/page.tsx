@@ -1,7 +1,5 @@
 'use client'
 
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 import ServiceRequestForm from '@/components/forms/ServiceRequestForm'
 import { Phone, MapPin, CheckCircle, Clock, Shield, Star, ThumbsUp } from 'lucide-react'
 import Link from 'next/link'
@@ -12,8 +10,6 @@ export default function ServiceAreasPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
-      {/* Header */}
-      <Header />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-[hsl(132,48%,35%)] to-[hsl(132,48%,25%)] py-16">
@@ -279,7 +275,6 @@ export default function ServiceAreasPage() {
         </div>
       </section>
 
-      <Footer />
     </div>
   )
 }

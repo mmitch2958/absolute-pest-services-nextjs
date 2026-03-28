@@ -2,8 +2,6 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Phone, CheckCircle, MapPin, Shield, Clock, Star, ArrowRight } from 'lucide-react'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 import ServiceRequestForm from '@/components/forms/ServiceRequestForm'
 import {
   CITY_SERVICE_CITIES,
