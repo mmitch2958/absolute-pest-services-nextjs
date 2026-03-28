@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   Bug, LayoutDashboard, Users, Wrench, ClipboardCheck,
   Receipt, FileText, Newspaper, Calendar, TrendingUp,
-  LogOut, Menu, X
+  LogOut, Menu, X, ClipboardList
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -15,6 +15,7 @@ const navItems = [
   { label: 'Clients', icon: Users, href: '/admin/clients' },
   { label: 'Service Requests', icon: Wrench, href: '/admin/service-requests' },
   { label: 'Inspections', icon: ClipboardCheck, href: '/admin/inspections' },
+  { label: 'Job Log', icon: ClipboardList, href: '/admin/job-logs' },
   { label: 'Invoices', icon: Receipt, href: '/admin/invoices' },
   { label: 'Contracts', icon: FileText, href: '/admin/contracts' },
   { label: 'Blog', icon: Newspaper, href: '/admin/blog' },
