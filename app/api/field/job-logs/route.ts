@@ -11,13 +11,38 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      customerName, clientId, siteLocation, siteAddress,
+      customerName, siteLocation, siteAddress,
       servicedArea, workPerformed, jobDate, serviceRateId,
-      amount, materials,
+      amount, materials, propertyType, isNewCustomer, newCustomerAddress,
     } = body;
 
     if (!customerName || !siteLocation || !servicedArea || !workPerformed || !jobDate) {
       return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Resolve or auto-create the client
+    let resolvedClientId: number | null = body.clientId ?? null;
+    if (!resolvedClientId && customerName) {
+      const [existing] = await sql`
+        SELECT id FROM clients
+        WHERE LOWER(TRIM(name)) = LOWER(TRIM(${customerName}))
+        LIMIT 1
+      `;
+      if (existing) {
+        resolvedClientId = existing.id;
+      } else {
+        const address = newCustomerAddress || siteAddress || null;
+        try {
+          const [newClient] = await sql`
+            INSERT INTO clients (name, address, property_type, client_type, status, created_at)
+            VALUES (${customerName}, ${address}, ${propertyType || 'residential'}, 'prospect', 'pending', NOW())
+            RETURNING id
+          `;
+          resolvedClientId = newClient.id;
+        } catch (e) {
+          console.error('[field/job-logs] Auto-create client error:', e);
+        }
+      }
     }
 
     const [log] = await sql`
@@ -28,7 +53,7 @@ export async function POST(request: NextRequest) {
       ) VALUES (
         ${session.employeeId},
         ${customerName},
-        ${clientId ?? null},
+        ${resolvedClientId},
         ${siteLocation},
         ${siteAddress ?? null},
         ${servicedArea},
