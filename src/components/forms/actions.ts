@@ -22,7 +22,7 @@ export type FormState = {
 } | null
 
 async function verifyTurnstile(token: string, ip?: string): Promise<boolean> {
-  const secret = process.env.TURNSTILE_SECRET_KEY
+  const secret = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY
   if (!secret) {
     // No secret configured — skip verification in dev
     console.warn('[Turnstile] TURNSTILE_SECRET_KEY not set — skipping verification')
