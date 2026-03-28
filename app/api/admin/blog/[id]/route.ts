@@ -79,7 +79,8 @@ export async function PATCH(
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
     }
 
-    const result = await sql`UPDATE blog_posts SET ${sql(updates)} WHERE id = ${postId} RETURNING *`;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await sql`UPDATE blog_posts SET ${sql(updates as any)} WHERE id = ${postId} RETURNING *`;
     if (!result || result.length === 0) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
