@@ -307,70 +307,54 @@ export default function FieldLogPage() {
             placeholder="Enter new customer name"
           />
 
-          {/* New Customer Details */}
-          {customerAddingNew && customerName.trim() && (
-            <div className="rounded-xl border-2 border-green-200 bg-green-50 p-4 space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
-                <p className="text-sm font-semibold text-green-700">New Customer Details</p>
-                <span className="text-xs text-slate-500 ml-auto">Saved to client list automatically</span>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">
-                  Property Type <span className="text-red-500">*</span>
-                </label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPropertyType('residential')}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl border-2 text-sm font-medium transition-colors ${
-                      propertyType === 'residential' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300'
-                    }`}
-                  >
-                    <Home className="w-4 h-4" /> Residential
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPropertyType('commercial')}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl border-2 text-sm font-medium transition-colors ${
-                      propertyType === 'commercial' ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-600 border-slate-300'
-                    }`}
-                  >
-                    <Building2 className="w-4 h-4" /> Commercial
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">
-                  Customer Address <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={newCustomerAddress}
-                  onChange={e => { setNewCustomerAddress(e.target.value); setSiteAddress(e.target.value); }}
-                  placeholder="Street address, city, state"
-                  className={inputBase}
-                />
-                <p className="text-xs text-slate-400">Stored on their client record and used as site address.</p>
+          {/* Property Type — always shown when a customer is entered */}
+          {customerName.trim() && (
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700">
+                Property Type <span className="text-red-500">*</span>
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPropertyType('residential')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl border-2 text-sm font-medium transition-colors ${
+                    propertyType === 'residential' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300'
+                  }`}
+                >
+                  <Home className="w-4 h-4" /> Residential
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPropertyType('commercial')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl border-2 text-sm font-medium transition-colors ${
+                    propertyType === 'commercial' ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-600 border-slate-300'
+                  }`}
+                >
+                  <Building2 className="w-4 h-4" /> Commercial
+                </button>
               </div>
             </div>
           )}
 
-          {/* Property Type badge for existing customers */}
-          {!customerAddingNew && matchedClient && (
-            <div className="flex items-center gap-2">
-              <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${
-                propertyType === 'commercial'
-                  ? 'bg-orange-50 border-orange-200 text-orange-700'
-                  : 'bg-blue-50 border-blue-200 text-blue-700'
-              }`}>
-                {propertyType === 'commercial'
-                  ? <><Building2 className="w-3 h-3" /> Commercial</>
-                  : <><Home className="w-3 h-3" /> Residential</>}
-              </span>
-              <span className="text-xs text-slate-400">from client record</span>
+          {/* New Customer address — only for brand new customers */}
+          {customerAddingNew && customerName.trim() && (
+            <div className="rounded-xl border-2 border-green-200 bg-green-50 p-4 space-y-2">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="h-2 w-2 rounded-full bg-green-500" />
+                <p className="text-sm font-semibold text-green-700">New Customer</p>
+                <span className="text-xs text-slate-500 ml-auto">Saved to client list automatically</span>
+              </div>
+              <label className="text-sm font-medium text-slate-700">
+                Customer Address <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={newCustomerAddress}
+                onChange={e => { setNewCustomerAddress(e.target.value); setSiteAddress(e.target.value); }}
+                placeholder="Street address, city, state"
+                className={inputBase}
+              />
+              <p className="text-xs text-slate-400">Stored on their client record and used as site address.</p>
             </div>
           )}
 
