@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { ALL_CITIES, CITY_SERVICES, CITY_SERVICE_CITIES } from '@/lib/city-data'
+import { ALL_SERVICE_AREA_SLUGS } from '@/lib/service-areas-data'
 
 const BASE_URL = 'https://absolutepestservices.com'
 
@@ -32,6 +33,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }))
 
+  // Additional service area pages not in ALL_CITIES (county-level + MD cities)
+  const newServiceAreaSlugs = ALL_SERVICE_AREA_SLUGS.filter(
+    (slug) => !ALL_CITIES.some((c) => c.slug === slug)
+  )
+  const newServiceAreaPages = newServiceAreaSlugs.map((slug) => ({
+    url: `${BASE_URL}/service-areas/${slug}`,
+    lastModified: new Date('2026-03-28'),
+    changeFrequency: 'weekly' as const,
+    priority: slug.includes('county') ? 0.85 : 0.75,
+  }))
+
   const cityServicePages = CITY_SERVICES.flatMap((service) =>
     CITY_SERVICE_CITIES.map((city) => ({
       url: `${BASE_URL}/city-services/${service.slug}-${city.cityServiceSlug}`,
@@ -41,5 +53,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }))
   )
 
-  return [...corePages, ...cityPages, ...cityServicePages]
+  // New [service]/[city] URLs (Google Ads landing pages)
+  const cityServiceSplitPages = CITY_SERVICES.flatMap((service) =>
+    CITY_SERVICE_CITIES.map((city) => ({
+      url: `${BASE_URL}/${service.slug}/${city.slug}`,
+      lastModified: new Date('2026-03-28'),
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    }))
+  )
+
+  return [...corePages, ...cityPages, ...newServiceAreaPages, ...cityServicePages, ...cityServiceSplitPages]
 }
