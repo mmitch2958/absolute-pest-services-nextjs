@@ -50,12 +50,75 @@ const faqSchema = {
   ],
 }
 
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  '@id': 'https://absolutepestservices.com/#business',
+  name: 'Absolute Pest Services',
+  telephone: '+1-484-643-2225',
+  email: 'info@absolutepestservices.com',
+  url: 'https://absolutepestservices.com',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: '21 Sheffield Dr',
+    addressLocality: 'West Grove',
+    addressRegion: 'PA',
+    postalCode: '19390',
+    addressCountry: 'US',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 39.8221,
+    longitude: -75.8274,
+  },
+  areaServed: [
+    { '@type': 'State', name: 'Pennsylvania' },
+    { '@type': 'State', name: 'Delaware' },
+    { '@type': 'State', name: 'Maryland' },
+  ],
+  priceRange: '$$',
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '5.0',
+    reviewCount: '247',
+  },
+}
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Bed Bug Treatment',
+  provider: {
+    '@type': 'LocalBusiness',
+    '@id': 'https://absolutepestservices.com/#business',
+    name: 'Absolute Pest Services',
+    telephone: '+1-484-643-2225',
+    url: 'https://absolutepestservices.com',
+  },
+  serviceType: 'Pest Control',
+  description: 'Professional bed bug extermination in PA & DE. Heat treatment and chemical treatment options.',
+  url: 'https://absolutepestservices.com/bed-bug-treatment',
+  areaServed: [
+    { '@type': 'State', name: 'Pennsylvania' },
+    { '@type': 'State', name: 'Delaware' },
+  ],
+  priceRange: '$$',
+}
+
 export default function BedBugTreatmentPage() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
       />
 
       {/* Hero */}

@@ -1,6 +1,30 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Phone } from 'lucide-react'
+import { Phone, CheckCircle } from 'lucide-react'
+import SchemaMarkup from '@/components/analytics/SchemaMarkup'
+
+const faqs = [
+  {
+    q: 'How do I know if I have bed bugs?',
+    a: 'Signs include small rusty-red blood stains on sheets, dark fecal spots on mattress seams, shed skins, a musty odor in severe cases, and of course visible bugs (about the size of an apple seed). Bites alone are not reliable — they can look like mosquito bites. If you travel frequently or recently moved into a new home, get a professional inspection.',
+  },
+  {
+    q: 'Do I need to throw away my mattress if I have bed bugs?',
+    a: 'No. Professional heat or chemical treatment eliminates bed bugs from mattresses and box springs without disposal. Throwing away furniture can actually spread the infestation. We treat and encase mattresses in bed bug-proof covers as part of our protocol.',
+  },
+  {
+    q: 'Heat treatment vs. chemical treatment — which is better?',
+    a: 'Heat treatment is faster (one day) and kills all life stages in a single visit. Chemical treatment costs less but requires 2–3 follow-up visits over 4–6 weeks to break the egg cycle. We recommend heat treatment for severe infestations or when fast results are needed.',
+  },
+  {
+    q: 'How do I prepare for bed bug treatment?',
+    a: 'We provide a detailed preparation checklist after booking. General steps include: wash and bag all bedding and clothing in hot water, declutter floors and under beds, disassemble beds, and vacuum thoroughly. You\'ll need to vacate the property during treatment (typically 4–8 hours for heat, 1–2 hours for chemical).',
+  },
+  {
+    q: 'Can I treat bed bugs myself with over-the-counter products?',
+    a: 'DIY bed bug treatment rarely works and often makes the problem worse by spreading bugs to additional rooms. Over-the-counter sprays do not kill bed bug eggs and can cause bugs to scatter and hide deeper in walls. Professional treatment is the only reliable solution.',
+  },
+]
 
 export const metadata: Metadata = {
   title: 'Bed Bug Control | Absolute Pest Services',
@@ -12,6 +36,15 @@ export const metadata: Metadata = {
 export default function BedBugsPage() {
   return (
     <>
+      <SchemaMarkup
+        serviceName="Bed Bug Treatment"
+        serviceType="Pest Control"
+        description="Professional bed bug elimination in PA & DE. Heat treatment and chemical treatment for homes and businesses."
+        url="https://absolutepestservices.com/bed-bugs"
+        faqs={faqs}
+      />
+
+      {/* Hero */}
       <section className="bg-gradient-to-br from-red-900 to-gray-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="text-sm text-red-300 mb-4" aria-label="Breadcrumb">
@@ -81,6 +114,35 @@ export default function BedBugsPage() {
                 </Link>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16 bg-white border-t border-gray-100">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            Frequently Asked Questions — Bed Bug Treatment
+          </h2>
+          <div className="space-y-4">
+            {faqs.map((faq) => (
+              <details
+                key={faq.q}
+                className="group bg-gray-50 border border-gray-200 rounded-xl overflow-hidden"
+              >
+                <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer list-none font-semibold text-gray-900 text-base hover:bg-gray-100 transition-colors">
+                  <span>{faq.q}</span>
+                  <span className="flex-shrink-0 text-green-700 group-open:rotate-180 transition-transform">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+                      <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                </summary>
+                <div className="px-5 pb-5 text-gray-700 text-sm leading-relaxed border-t border-gray-100 pt-4">
+                  {faq.a}
+                </div>
+              </details>
+            ))}
           </div>
         </div>
       </section>

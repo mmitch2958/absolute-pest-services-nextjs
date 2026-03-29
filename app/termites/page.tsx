@@ -1,6 +1,30 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Phone } from 'lucide-react'
+import { Phone, CheckCircle } from 'lucide-react'
+import SchemaMarkup from '@/components/analytics/SchemaMarkup'
+
+const faqs = [
+  {
+    q: 'How do I know if I have termites?',
+    a: 'Termites are rarely seen — the damage is hidden inside wood. Signs include mud tubes on foundation walls, wood that sounds hollow when tapped, discarded wings near windowsills, and small holes in drywall. If you have any of these signs, schedule a free inspection immediately.',
+  },
+  {
+    q: 'Does homeowners insurance cover termite damage?',
+    a: 'Almost never. Standard homeowners policies exclude termite damage. This is why prevention and early detection through annual inspections are so valuable — the cost of treatment is a fraction of what repairs can cost.',
+  },
+  {
+    q: 'What is Termidor and how does it work?',
+    a: 'Termidor is the gold standard for subterranean termite control. It\'s a non-repellent liquid insecticide that termites cannot detect, so they pass through it unknowingly and carry the active ingredient back to the colony, eventually eliminating the entire population. It has an efficacy rate of 100% when properly applied.',
+  },
+  {
+    q: 'How long does a termite treatment take?',
+    a: 'A typical liquid barrier treatment for a single-family home takes 2–4 hours. The trenching and drilling around the foundation perimeter is completed in one day. The treatment cures within 24–48 hours and provides immediate protection.',
+  },
+  {
+    q: 'Do you offer termite warranty or protection plans?',
+    a: 'Yes. We offer annual termite monitoring plans that include bait station servicing, annual inspections, and re-treatment guarantees if activity recurs. For real estate transactions, we provide Wood Infestation Reports (WDI) and documentation accepted by most lenders.',
+  },
+]
 
 export const metadata: Metadata = {
   title: 'Termite Control | Absolute Pest Services',
@@ -12,6 +36,15 @@ export const metadata: Metadata = {
 export default function TermitesPage() {
   return (
     <>
+      <SchemaMarkup
+        serviceName="Termite Control"
+        serviceType="Pest Control"
+        description="Expert termite inspection, treatment & prevention in PA & DE. Termidor liquid barriers and bait station monitoring."
+        url="https://absolutepestservices.com/termites"
+        faqs={faqs}
+      />
+
+      {/* Hero */}
       <section className="bg-gradient-to-br from-amber-900 to-gray-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="text-sm text-amber-300 mb-4" aria-label="Breadcrumb">
@@ -83,6 +116,35 @@ export default function TermitesPage() {
                 </Link>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16 bg-white border-t border-gray-100">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            Frequently Asked Questions — Termite Control
+          </h2>
+          <div className="space-y-4">
+            {faqs.map((faq) => (
+              <details
+                key={faq.q}
+                className="group bg-gray-50 border border-gray-200 rounded-xl overflow-hidden"
+              >
+                <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer list-none font-semibold text-gray-900 text-base hover:bg-gray-100 transition-colors">
+                  <span>{faq.q}</span>
+                  <span className="flex-shrink-0 text-green-700 group-open:rotate-180 transition-transform">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+                      <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                </summary>
+                <div className="px-5 pb-5 text-gray-700 text-sm leading-relaxed border-t border-gray-100 pt-4">
+                  {faq.a}
+                </div>
+              </details>
+            ))}
           </div>
         </div>
       </section>
