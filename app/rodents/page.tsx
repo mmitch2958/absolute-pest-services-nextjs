@@ -1,6 +1,30 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CheckCircle, Phone } from 'lucide-react'
+import SchemaMarkup from '@/components/analytics/SchemaMarkup'
+
+const faqs = [
+  {
+    q: 'How do I know if I have mice or rats?',
+    a: 'Signs include droppings near food and along walls, gnaw marks on packaging or wiring, scratching sounds in walls at night, nesting materials, and grease marks along baseboards. A mouse can fit through a gap the size of a dime; a rat needs only a quarter-inch gap.',
+  },
+  {
+    q: 'Will one treatment eliminate my rodent problem?',
+    a: 'Rarely. Effective rodent control requires a 3-step process: elimination of the existing population (trapping and baiting), exclusion to seal all entry points, and sanitation to remove food sources. We typically complete this over 2–4 visits and guarantee our exclusion work.',
+  },
+  {
+    q: 'Is rodent bait safe around children and pets?',
+    a: 'We use bait stations that are locked and secured inside tamper-resistant enclosures. These are placed in areas inaccessible to children and pets. We also offer trap-only programs for clients who prefer no rodenticides. We discuss all options and safety measures before treatment.',
+  },
+  {
+    q: 'What is the cost of rodent control?',
+    a: 'A typical rodent control program ranges from $200–$500 for initial treatment and exclusion, depending on the size of the home and the severity of the infestation. We provide a free inspection and written estimate before any work begins.',
+  },
+  {
+    q: 'How do you seal my home against rodents?',
+    a: 'We inspect and seal every potential entry point using a combination of steel wool, caulk, hardware cloth, and expanding foam. We focus on the foundation, gaps around pipes and vents, soffit vents, and any gaps where utility lines enter the building.',
+  },
+]
 
 export const metadata: Metadata = {
   title: 'Rodent Control | Absolute Pest Services',
@@ -12,6 +36,15 @@ export const metadata: Metadata = {
 export default function RodentsPage() {
   return (
     <>
+      <SchemaMarkup
+        serviceName="Rodent Control"
+        serviceType="Pest Control"
+        description="Mice, rats & rodent removal in PA & DE. Fast, effective rodent control and exclusion for homes and businesses."
+        url="https://absolutepestservices.com/rodents"
+        faqs={faqs}
+      />
+
+      {/* Hero */}
       <section className="bg-gradient-to-br from-gray-800 to-gray-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="text-sm text-gray-400 mb-4" aria-label="Breadcrumb">
@@ -95,6 +128,35 @@ export default function RodentsPage() {
                 484-643-2225
               </a>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16 bg-white border-t border-gray-100">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            Frequently Asked Questions — Rodent Control
+          </h2>
+          <div className="space-y-4">
+            {faqs.map((faq) => (
+              <details
+                key={faq.q}
+                className="group bg-gray-50 border border-gray-200 rounded-xl overflow-hidden"
+              >
+                <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer list-none font-semibold text-gray-900 text-base hover:bg-gray-100 transition-colors">
+                  <span>{faq.q}</span>
+                  <span className="flex-shrink-0 text-green-700 group-open:rotate-180 transition-transform">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+                      <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                </summary>
+                <div className="px-5 pb-5 text-gray-700 text-sm leading-relaxed border-t border-gray-100 pt-4">
+                  {faq.a}
+                </div>
+              </details>
+            ))}
           </div>
         </div>
       </section>
