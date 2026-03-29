@@ -257,10 +257,10 @@ export default async function CityServicePage({
                   Request Service Online
                 </Link>
                 <Link
-                  href="/cost-calculator"
+                  href="/blog"
                   className="flex items-center gap-2 justify-center border border-green-300 text-green-700 hover:bg-green-100 font-medium px-4 py-2 rounded-lg w-full text-sm"
                 >
-                  Estimate Your Cost
+                  View Our Blog
                 </Link>
               </div>
 

@@ -26,7 +26,6 @@ import NewCastleCountyDE from "@/pages/service-areas/new-castle-county-de";
 import MontgomeryCountyPA from "@/pages/service-areas/montgomery-county-pa";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
-import CostCalculator from "@/pages/CostCalculator";
 import NotFound from "@/pages/not-found";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminClients } from "@/pages/admin/AdminClients";
@@ -244,7 +243,6 @@ function Router() {
       <Route path="/ant-wasp-control-wilmington-de/" component={AntWaspControlWilmingtonDe} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
-      <Route path="/cost-calculator" component={CostCalculator} />
       
       {/* Pitch Deck */}
       <Route path="/jlpd" component={PitchDeck} />

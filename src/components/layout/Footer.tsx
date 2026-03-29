@@ -94,7 +94,6 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               {[
                 { href: '/request-service', label: 'Request Service' },
-                { href: '/cost-calculator', label: 'Cost Calculator' },
                 { href: '/blog', label: 'Pest Control Blog' },
                 { href: '/service-areas', label: 'All Service Areas' },
               ].map((item) => (

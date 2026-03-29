@@ -68,12 +68,6 @@ export default function Header() {
               Service Areas
             </Link>
             <Link
-              href="/cost-calculator"
-              className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-green-700 rounded-md hover:bg-green-50 transition-colors"
-            >
-              Cost Calculator
-            </Link>
-            <Link
               href="/blog"
               className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-green-700 rounded-md hover:bg-green-50 transition-colors"
             >

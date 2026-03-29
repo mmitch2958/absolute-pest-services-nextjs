@@ -225,8 +225,8 @@ export default function BedBugTreatmentPage() {
                 <Phone size={20} />
                 484-643-2225
               </a>
-              <Link href="/cost-calculator" className="flex justify-center text-gray-600 hover:text-gray-900 text-sm">
-                Estimate your treatment cost →
+              <Link href="/service-areas" className="flex justify-center text-gray-600 hover:text-gray-900 text-sm">
+                View our service areas →
               </Link>
             </div>
           </div>

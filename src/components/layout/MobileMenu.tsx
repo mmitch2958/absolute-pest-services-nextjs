@@ -20,7 +20,6 @@ const navLinks = [
     ],
   },
   { href: '/service-areas', label: 'Service Areas' },
-  { href: '/cost-calculator', label: 'Cost Calculator' },
   { href: '/blog', label: 'Blog' },
   { href: '/request-service', label: 'Request Service' },
 ]

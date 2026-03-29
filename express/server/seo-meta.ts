@@ -105,13 +105,6 @@ const ROUTE_META: Record<string, PageMeta> = {
       "Pest control tips, seasonal alerts, and expert advice from the team at Absolute Pest Services. Serving Chester County, PA and surrounding areas.",
     canonical: BASE_URL + "/blog",
   },
-  "/cost-calculator": {
-    title: "Pest Control Cost Calculator | Absolute Pest Services",
-    description:
-      "Estimate your pest control costs with our calculator. Get a quick quote for services in PA & DE. Call 484-643-2225 to confirm pricing.",
-    canonical: BASE_URL + "/cost-calculator",
-  },
-
   // ── Service area index ────────────────────────────────────────────────────
   "/service-areas": {
     title: "Pest Control Service Areas PA & DE | Absolute Pest Services",
