@@ -71,6 +71,21 @@ export default function ServiceRequestForm() {
     }
   }, [state, resetTurnstile])
 
+  // Fire Google Ads + GA4 conversion on successful form submission
+  useEffect(() => {
+    if (state?.success && typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'conversion', {
+        send_to: 'AW-1038095551',
+        event_category: 'Lead',
+        event_label: 'Service Request Form',
+      })
+      window.gtag('event', 'form_submit', {
+        event_category: 'Lead',
+        event_label: 'Service Request Form',
+      })
+    }
+  }, [state?.success])
+
   if (state?.success) {
     return (
       <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
