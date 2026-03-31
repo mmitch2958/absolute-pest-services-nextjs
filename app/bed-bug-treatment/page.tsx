@@ -74,7 +74,6 @@ const localBusinessSchema = {
   areaServed: [
     { '@type': 'State', name: 'Pennsylvania' },
     { '@type': 'State', name: 'Delaware' },
-    { '@type': 'State', name: 'Maryland' },
   ],
   priceRange: '$$',
   aggregateRating: {

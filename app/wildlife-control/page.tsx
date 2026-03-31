@@ -5,9 +5,9 @@ import { CheckCircle, Phone } from 'lucide-react'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Humane Wildlife Control & Removal Services | Absolute Pest Services PA, DE, MD',
+    title: 'Humane Wildlife Control & Removal Services | Absolute Pest Services PA & DE',
     description:
-      'Professional humane wildlife removal in PA, DE & MD. Non-kill extraction for raccoons, squirrels, opossums, skunks & more. Licensed wildlife control specialists. Call 484-643-2225.',
+      'Professional humane wildlife removal in PA & DE. Non-kill extraction for raccoons, squirrels, opossums, skunks & more. Licensed wildlife control specialists. Call 484-643-2225.',
     keywords: [
       'wildlife control',
       'wildlife removal',
@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: 'Humane Wildlife Control & Removal Services | Absolute Pest Services',
       description:
-        'Professional humane wildlife removal in PA, DE & MD. Non-kill extraction for raccoons, squirrels, opossums, skunks & more. Licensed wildlife control specialists.',
+        'Professional humane wildlife removal in PA & DE. Non-kill extraction for raccoons, squirrels, opossums, skunks & more. Licensed wildlife control specialists.',
       url: 'https://absolutepestservices.com/wildlife-control',
       type: 'website',
       images: [
@@ -104,7 +104,6 @@ const localBusinessSchema = {
   areaServed: [
     { '@type': 'State', name: 'Pennsylvania' },
     { '@type': 'State', name: 'Delaware' },
-    { '@type': 'State', name: 'Maryland' },
   ],
   priceRange: '$$',
 }

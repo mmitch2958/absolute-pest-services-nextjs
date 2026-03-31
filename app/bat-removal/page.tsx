@@ -4,9 +4,9 @@ import { CheckCircle, Phone } from 'lucide-react'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Professional Bat Removal & Exclusion Services | Absolute Pest Services PA, DE, MD',
+    title: 'Professional Bat Removal & Exclusion Services | Absolute Pest Services PA & DE',
     description:
-      'Safe, humane bat removal in PA, DE & MD. One-way exclusion devices, guano cleanup & permanent sealing. Licensed bat exclusion specialists. Call 484-643-2225 for inspection.',
+      'Safe, humane bat removal in PA & DE. One-way exclusion devices, guano cleanup & permanent sealing. Licensed bat exclusion specialists. Call 484-643-2225 for inspection.',
     keywords: [
       'bat removal',
       'bat exclusion',
@@ -15,7 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
       'bat guano cleanup',
       'bat removal PA',
       'bat removal Delaware',
-      'bat removal Maryland',
       'Chester County bat removal',
       'wildlife control',
       'pest control',
@@ -26,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: 'Professional Bat Removal & Exclusion Services | Absolute Pest Services',
       description:
-        'Safe, humane bat removal in PA, DE & MD. One-way exclusion devices, guano cleanup & permanent sealing. Licensed specialists.',
+        'Safe, humane bat removal in PA & DE. One-way exclusion devices, guano cleanup & permanent sealing. Licensed specialists.',
       url: 'https://absolutepestservices.com/bat-removal',
       type: 'website',
       images: [
@@ -101,7 +100,6 @@ const localBusinessSchema = {
   areaServed: [
     { '@type': 'State', name: 'Pennsylvania' },
     { '@type': 'State', name: 'Delaware' },
-    { '@type': 'State', name: 'Maryland' },
   ],
   priceRange: '$$',
 }

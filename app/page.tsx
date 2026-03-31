@@ -4,15 +4,15 @@ import Image from 'next/image'
 import { Shield, Bug, TreePine, Zap, CheckCircle, Phone, Star } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Absolute Pest Services - Professional Pest Control in PA, DE & MD',
+  title: 'Absolute Pest Services - Professional Pest Control in PA & DE',
   description:
-    'Expert pest control in PA, DE & MD. Humane wildlife control, bed bug treatment, termite protection & bat removal. Licensed, insured & available 24/7. Call 484-643-2225.',
+    'Expert pest control in PA & DE. Humane wildlife control, bed bug treatment, termite protection & bat removal. Licensed, insured & available 24/7. Call 484-643-2225.',
   alternates: {
     canonical: 'https://absolutepestservices.com/',
   },
   openGraph: {
     url: 'https://absolutepestservices.com/',
-    title: 'Absolute Pest Services - Professional Pest Control in PA, DE & MD',
+    title: 'Absolute Pest Services - Professional Pest Control in PA & DE',
   },
 }
 
@@ -147,7 +147,7 @@ export default function HomePage() {
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
                 Professional Pest Control
-                <span className="text-green-400"> in PA, DE & MD</span>
+                <span className="text-green-400"> in PA & DE</span>
               </h1>
               <p className="text-xl text-gray-300 mb-8 leading-relaxed">
                 Expert wildlife removal, bed bug treatment, termite protection, and comprehensive pest

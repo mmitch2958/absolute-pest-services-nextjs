@@ -58,7 +58,6 @@ const BUSINESS = {
   areaServed: [
     { '@type': 'State', name: 'Pennsylvania' },
     { '@type': 'State', name: 'Delaware' },
-    { '@type': 'State', name: 'Maryland' },
   ],
   priceRange: '$$',
   openingHoursSpecification: [
@@ -128,7 +127,6 @@ function ServiceSchema({ serviceName, serviceType, description, url }: SchemaMar
     areaServed: [
       { '@type': 'State', name: 'Pennsylvania' },
       { '@type': 'State', name: 'Delaware' },
-      { '@type': 'State', name: 'Maryland' },
     ],
     hasOfferCatalog: {
       '@type': 'OfferCatalog',

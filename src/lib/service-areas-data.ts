@@ -7,8 +7,8 @@ export interface ServiceAreaContent {
   slug: string
   name: string
   county: string
-  state: 'PA' | 'DE' | 'MD'
-  region: 'Chester County PA' | 'Delaware County PA' | 'Montgomery County PA' | 'New Castle County DE' | 'Northeast MD'
+  state: 'PA' | 'DE'
+  region: 'Chester County PA' | 'Delaware County PA' | 'Montgomery County PA' | 'New Castle County DE'
   phoneNumber: string
   phoneDisplay: string
   heroGradient: string      // Tailwind gradient class
@@ -30,7 +30,6 @@ export const PHONE_BY_REGION: Record<string, { phone: string; display: string }>
   'Delaware County PA': { phone: '610-325-4000', display: '610-325-4000' },
   'Montgomery County PA': { phone: '484-643-2225', display: '484-643-2225' },
   'New Castle County DE': { phone: '302-235-1975', display: '302-235-1975' },
-  'Northeast MD': { phone: '610-325-4000', display: '610-325-4000' },
 }
 
 export const REGION_PHONE: Record<string, string> = {
@@ -38,7 +37,6 @@ export const REGION_PHONE: Record<string, string> = {
   'Delaware County PA': '610-325-4000',
   'Montgomery County PA': '484-643-2225',
   'New Castle County DE': '302-235-1975',
-  'Northeast MD': '610-325-4000',
 }
 
 export const REGION_GEO: Record<string, { region: string; placename: string }> = {
@@ -46,7 +44,6 @@ export const REGION_GEO: Record<string, { region: string; placename: string }> =
   'Delaware County PA': { region: 'US-PA', placename: 'Delaware County, PA' },
   'Montgomery County PA': { region: 'US-PA', placename: 'Montgomery County, PA' },
   'New Castle County DE': { region: 'US-DE', placename: 'New Castle County, DE' },
-  'Northeast MD': { region: 'US-MD', placename: 'Northeast, MD' },
 }
 
 export const SERVICE_AREA_DATA: Record<string, ServiceAreaContent> = {
@@ -153,32 +150,6 @@ export const SERVICE_AREA_DATA: Record<string, ServiceAreaContent> = {
     nearbyAreas: ['west-chester-pa', 'kennett-square-pa', 'exton-pa', 'wilmington-de'],
     geoRegion: 'US-PA',
     geoPlacename: 'Montgomery County, PA',
-  },
-  'northeast-maryland': {
-    slug: 'northeast-maryland',
-    name: 'Northeast Maryland',
-    county: 'Cecil & Harford Counties',
-    state: 'MD',
-    region: 'Northeast MD',
-    phoneNumber: '610-325-4000',
-    phoneDisplay: '610-325-4000',
-    heroGradient: 'from-teal-600 to-teal-700',
-    heroAccent: 'text-teal-100',
-    accentColor: 'teal-600',
-    bgCard: 'bg-teal-50',
-    metaDescription: 'Northeast MD: Expert pest control in Elkton, Bel Air, Aberdeen, Havre de Grace. Licensed, insured, emergency service available.',
-    h1: 'Northeast Maryland Pest Control Services',
-    heroSubtext: 'Professional pest control services throughout Cecil County and Harford County, Maryland. Protecting homes from Elkton to Bel Air with safe, effective treatments.',
-    cities: ['Elkton', 'North East', 'Perryville', 'Port Deposit', 'Rising Sun', 'Conowingo', 'Cecilton', 'Charlestown'],
-    faqs: [
-      { q: 'What pests are most common in Cecil County and Harford County, MD?', a: "Northeast Maryland's rural character, forest cover, and proximity to the Chesapeake Bay create elevated wildlife and insect pressure. Ticks, mosquitoes, carpenter ants, termites, raccoons, and groundhogs are the most common issues." },
-      { q: 'Do you provide termite inspections in Northeast Maryland?', a: 'Yes. Subterranean termites are active throughout Cecil County and Harford County. We offer free termite inspections for homes in Elkton, Bel Air, Aberdeen, Havre de Grace, and surrounding areas.' },
-      { q: 'What wildlife issues are unique to Northeast Maryland?', a: "Northeast Maryland's forests and farmland attract deer, raccoons, foxes, skunks, and groundhogs. The area near the Chesapeake Bay also sees increased mosquito and fly pressure in summer months." },
-      { q: 'How quickly can you respond to pest emergencies in Northeast Maryland?', a: 'We offer same-day service throughout Cecil County and Harford County, MD. Emergency wildlife intrusions and severe infestations are handled promptly.' },
-    ],
-    nearbyAreas: ['bel-air-md', 'aberdeen-md', 'havre-de-grace-md'],
-    geoRegion: 'US-MD',
-    geoPlacename: 'Northeast, MD',
   },
   'west-chester-pa': {
     slug: 'west-chester-pa',
@@ -726,84 +697,6 @@ export const SERVICE_AREA_DATA: Record<string, ServiceAreaContent> = {
     geoRegion: 'US-DE',
     geoPlacename: 'Wilmington, DE',
   },
-  'aberdeen-md': {
-    slug: 'aberdeen-md',
-    name: 'Aberdeen',
-    county: 'Harford County',
-    state: 'MD',
-    region: 'Northeast MD',
-    phoneNumber: '610-325-4000',
-    phoneDisplay: '610-325-4000',
-    heroGradient: 'from-teal-600 to-teal-700',
-    heroAccent: 'text-teal-100',
-    accentColor: 'teal-600',
-    bgCard: 'bg-teal-50',
-    metaDescription: 'Aberdeen MD pest control: wildlife removal, termite inspections, waterfront pest control near Chesapeake Bay. Serving Aberdeen and Harford County. Call 610-325-4000.',
-    h1: 'Aberdeen, MD Pest Control Services',
-    heroSubtext: 'Professional pest control services in Aberdeen, Maryland. Protecting Aberdeen, APG area, and Harford County with expert pest and wildlife solutions.',
-    cities: ['Aberdeen City', 'Aberdeen Proving Ground Area', 'Perryman', 'Edgewood', 'Bel Air South', 'Havre de Grace'],
-    faqs: [
-      { q: 'Are there unique pest challenges near Aberdeen Proving Ground?', a: 'Properties adjacent to APG\'s large undeveloped land see significant wildlife activity including deer, groundhogs, and raccoons moving into residential areas. We provide effective exclusion.' },
-      { q: 'Do Chesapeake Bay waterfront properties in Aberdeen need special treatment?', a: 'Yes. Waterfront properties see higher mosquito, tick, and rodent pressure. We offer seasonal mosquito control and perimeter rodent exclusion programs.' },
-      { q: 'Are termites active in Aberdeen MD?', a: 'Yes. Maryland\'s humid climate and Harford County\'s soil conditions support active termite colonies. We offer free inspections and treatment plans.' },
-      { q: 'How do you handle wildlife in Aberdeen neighborhoods?', a: 'We trap and humanely relocate raccoons, groundhogs, foxes, and other wildlife. We also seal entry points to prevent re-entry.' },
-    ],
-    nearbyAreas: ['bel-air-md', 'havre-de-grace-md', 'northeast-maryland'],
-    geoRegion: 'US-MD',
-    geoPlacename: 'Aberdeen, MD',
-  },
-  'bel-air-md': {
-    slug: 'bel-air-md',
-    name: 'Bel Air',
-    county: 'Harford County',
-    state: 'MD',
-    region: 'Northeast MD',
-    phoneNumber: '610-325-4000',
-    phoneDisplay: '610-325-4000',
-    heroGradient: 'from-teal-600 to-teal-700',
-    heroAccent: 'text-teal-100',
-    accentColor: 'teal-600',
-    bgCard: 'bg-teal-50',
-    metaDescription: 'Bel Air MD pest control: new construction pest exclusion, termite inspections, rodent control near I-95. Serving Bel Air and Harford County. Call 610-325-4000.',
-    h1: 'Bel Air, MD Pest Control Services',
-    heroSubtext: 'Professional pest control services in Bel Air, Maryland. Protecting Bel Air Town, Fallston, and Harford County with expert pest and wildlife solutions.',
-    cities: ['Bel Air Town', 'Bel Air North', 'Bel Air South', 'Fallston', 'Forest Hill', 'Abingdon'],
-    faqs: [
-      { q: 'Are pests common in Bel Air\'s growing suburban developments?', a: 'Yes. New construction in Bel Air North and Fallston displaces wildlife and creates new pest pressure as development expands into wooded areas. We offer new-construction pest exclusion.' },
-      { q: 'Do I-95 corridor properties near Bel Air have rodent problems?', a: 'Commercial and residential properties near the I-95 interchange in Abingdon and Bel Air South see elevated rodent activity. We provide targeted baiting and exclusion.' },
-      { q: 'Are termites active in Harford County?', a: 'Yes. Maryland\'s climate supports year-round subterranean termite activity. We recommend annual inspections for all Bel Air-area homeowners.' },
-      { q: 'How quickly can you respond to a wildlife emergency in Bel Air?', a: 'We provide same-day emergency service throughout Bel Air and Harford County.' },
-    ],
-    nearbyAreas: ['aberdeen-md', 'havre-de-grace-md', 'northeast-maryland'],
-    geoRegion: 'US-MD',
-    geoPlacename: 'Bel Air, MD',
-  },
-  'havre-de-grace-md': {
-    slug: 'havre-de-grace-md',
-    name: 'Havre de Grace',
-    county: 'Cecil County',
-    state: 'MD',
-    region: 'Northeast MD',
-    phoneNumber: '610-325-4000',
-    phoneDisplay: '610-325-4000',
-    heroGradient: 'from-teal-600 to-teal-700',
-    heroAccent: 'text-teal-100',
-    accentColor: 'teal-600',
-    bgCard: 'bg-teal-50',
-    metaDescription: 'Havre de Grace MD pest control: waterfront mosquito control, termite inspections, historic home protection near Chesapeake Bay. Serving Havre de Grace and Cecil County. Call 610-325-4000.',
-    h1: 'Havre de Grace, MD Pest Control Services',
-    heroSubtext: 'Professional pest control services in Havre de Grace, Maryland. Protecting historic Havre de Grace and Susquehanna River waterfront properties with expert solutions.',
-    cities: ['Havre de Grace City', 'Perryville', 'Port Deposit', 'Charlestown', 'North East', 'Cecilton'],
-    faqs: [
-      { q: 'Do waterfront properties in Havre de Grace have more pest problems?', a: 'Yes. The Susquehanna River and Chesapeake Bay waterfront create elevated mosquito, tick, and rodent pressure. We offer seasonal perimeter programs for waterfront homes.' },
-      { q: 'Are termites common in Havre de Grace\'s historic homes?', a: 'Absolutely. Many of Havre de Grace\'s 19th-century homes have older wood elements that are highly vulnerable to subterranean termites. We inspect and treat to protect historic structures.' },
-      { q: 'Can you handle waterfowl or nuisance birds in Havre de Grace?', a: 'Yes. Geese, cormorants, and other waterfowl can damage waterfront properties. We provide humane deterrent programs.' },
-      { q: 'Do you serve the Perryville and Port Deposit areas?', a: 'Yes. We provide pest control throughout Cecil County and northern Harford County, including Perryville and Port Deposit.' },
-    ],
-    nearbyAreas: ['aberdeen-md', 'bel-air-md', 'northeast-maryland'],
-    geoRegion: 'US-MD',
-    geoPlacename: 'Havre de Grace, MD',
-  },
 }
 
 // All service area slugs for sitemap
@@ -812,7 +705,6 @@ export const ALL_SERVICE_AREA_SLUGS = [
   'delaware-county-pa',
   'new-castle-county-de',
   'montgomery-county-pa',
-  'northeast-maryland',
   'west-chester-pa',
   'exton-pa',
   'coatesville-pa',
@@ -834,17 +726,14 @@ export const ALL_SERVICE_AREA_SLUGS = [
   'hockessin-de',
   'newark-de',
   'wilmington-de',
-  'aberdeen-md',
-  'bel-air-md',
-  'havre-de-grace-md',
 ]
 
 // Service area landing page content
 export const SERVICE_AREAS_LANDING = {
-  metaTitle: 'Pest Control Service Areas | Absolute Pest Services — PA, DE & MD',
-  metaDescription: 'Absolute Pest Services provides expert pest control and wildlife removal throughout southeastern Pennsylvania, Delaware, and northeast Maryland. Find your city.',
+  metaTitle: 'Pest Control Service Areas | Absolute Pest Services — PA & DE',
+  metaDescription: 'Absolute Pest Services provides expert pest control and wildlife removal throughout southeastern Pennsylvania and Delaware. Find your city.',
   h1: 'Our Service Areas',
-  subheading: 'Professional pest control and wildlife removal serving southeastern Pennsylvania, Delaware, and northeast Maryland. Find your community below.',
+  subheading: 'Professional pest control and wildlife removal serving southeastern Pennsylvania and Delaware. Find your community below.',
   countyGroups: [
     {
       name: 'Chester County, Pennsylvania',
@@ -909,20 +798,6 @@ export const SERVICE_AREAS_LANDING = {
         { slug: 'wilmington-de', name: 'Wilmington' },
         { slug: 'newark-de', name: 'Newark' },
         { slug: 'hockessin-de', name: 'Hockessin' },
-      ],
-    },
-    {
-      name: 'Northeast Maryland',
-      accentColor: 'teal-600',
-      bgCard: 'bg-teal-50',
-      heroGradient: 'from-teal-600 to-teal-700',
-      heroAccent: 'text-teal-100',
-      phoneNumber: '610-325-4000',
-      areas: [
-        { slug: 'northeast-maryland', name: 'Northeast Maryland' },
-        { slug: 'aberdeen-md', name: 'Aberdeen' },
-        { slug: 'bel-air-md', name: 'Bel Air' },
-        { slug: 'havre-de-grace-md', name: 'Havre de Grace' },
       ],
     },
   ],

@@ -4,9 +4,9 @@ import { CheckCircle, Phone } from 'lucide-react'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Termite Inspection & Treatment Services | Absolute Pest Services PA, DE, MD',
+    title: 'Termite Inspection & Treatment Services | Absolute Pest Services PA & DE',
     description:
-      'Licensed termite inspection, treatment & prevention in PA, DE & MD. Termidor liquid barriers, baiting systems & ongoing monitoring. Protect your home from costly termite damage. Call 484-643-2225.',
+      'Licensed termite inspection, treatment & prevention in PA & DE. Termidor liquid barriers, baiting systems & ongoing monitoring. Protect your home from costly termite damage. Call 484-643-2225.',
     keywords: [
       'termite treatment',
       'termite control',
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: 'Termite Inspection & Treatment Services | Absolute Pest Services',
       description:
-        'Licensed termite inspection, treatment & prevention in PA, DE & MD. Termidor liquid barriers, baiting systems & ongoing monitoring to protect your home.',
+        'Licensed termite inspection, treatment & prevention in PA & DE. Termidor liquid barriers, baiting systems & ongoing monitoring to protect your home.',
       url: 'https://absolutepestservices.com/termite-treatment',
       type: 'website',
       images: [
@@ -101,7 +101,6 @@ const localBusinessSchema = {
   areaServed: [
     { '@type': 'State', name: 'Pennsylvania' },
     { '@type': 'State', name: 'Delaware' },
-    { '@type': 'State', name: 'Maryland' },
   ],
   priceRange: '$$',
 }

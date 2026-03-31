@@ -91,9 +91,6 @@ const regionColor = (slug: string): string => {
     return 'hsl(36,100%,47%)'
   }
   if (slug === 'wilmington-de') return 'red-600'
-  if (['northeast-maryland', 'aberdeen-md', 'bel-air-md', 'havre-de-grace-md'].includes(slug)) {
-    return 'teal-600'
-  }
   return 'hsl(132,48%,35%)'
 }
 
@@ -105,9 +102,6 @@ const bgCardColor = (slug: string): string => {
     return 'bg-orange-50'
   }
   if (slug === 'wilmington-de') return 'bg-orange-50'
-  if (['northeast-maryland', 'aberdeen-md', 'bel-air-md', 'havre-de-grace-md'].includes(slug)) {
-    return 'bg-teal-50'
-  }
   return 'bg-emerald-50'
 }
 
@@ -119,9 +113,6 @@ const heroGradient = (slug: string): string => {
     return 'from-[hsl(36,100%,47%)] to-[hsl(36,100%,37%)]'
   }
   if (slug === 'wilmington-de') return 'from-red-600 to-red-700'
-  if (['northeast-maryland', 'aberdeen-md', 'bel-air-md', 'havre-de-grace-md'].includes(slug)) {
-    return 'from-teal-600 to-teal-700'
-  }
   return 'from-[hsl(132,48%,35%)] to-[hsl(132,48%,25%)]'
 }
 
@@ -133,9 +124,6 @@ const heroAccent = (slug: string): string => {
     return 'text-orange-100'
   }
   if (slug === 'wilmington-de') return 'text-red-100'
-  if (['northeast-maryland', 'aberdeen-md', 'bel-air-md', 'havre-de-grace-md'].includes(slug)) {
-    return 'text-teal-100'
-  }
   return 'text-green-100'
 }
 
@@ -147,9 +135,6 @@ const nearbyBgCard = (areaSlug: string): string => {
     return 'bg-orange-50'
   }
   if (areaSlug === 'wilmington-de') return 'bg-orange-50'
-  if (['northeast-maryland', 'aberdeen-md', 'bel-air-md', 'havre-de-grace-md'].includes(areaSlug)) {
-    return 'bg-teal-50'
-  }
   return 'bg-emerald-50'
 }
 
@@ -161,9 +146,6 @@ const nearbyAccentColor = (areaSlug: string): string => {
     return 'bg-[hsl(36,100%,47%)]'
   }
   if (areaSlug === 'wilmington-de') return 'bg-red-600'
-  if (['northeast-maryland', 'aberdeen-md', 'bel-air-md', 'havre-de-grace-md'].includes(areaSlug)) {
-    return 'bg-teal-600'
-  }
   return 'bg-[hsl(132,48%,35%)]'
 }
 
