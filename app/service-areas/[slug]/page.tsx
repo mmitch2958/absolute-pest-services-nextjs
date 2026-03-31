@@ -188,7 +188,7 @@ export default async function ServiceAreaPage({ params }: Props) {
       streetAddress: '21 Sheffield Dr',
       addressLocality: 'West Grove',
       addressRegion: data.state,
-      postalCode: data.state === 'DE' ? '19711' : data.state === 'MD' ? '21001' : '19390',
+      postalCode: data.state === 'DE' ? '19711' : '19390',
       addressCountry: 'US',
     },
     url: `https://absolutepestservices.com/service-areas/${slug}`,
