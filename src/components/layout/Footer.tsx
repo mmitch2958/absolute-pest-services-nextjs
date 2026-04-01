@@ -44,6 +44,7 @@ export default function Footer() {
               {[
                 { href: '/wildlife-control', label: 'Wildlife Control' },
                 { href: '/bat-removal', label: 'Bat Removal' },
+                { href: '/wasp-removal', label: 'Wasp & Hornet Removal' },
                 { href: '/bed-bug-treatment', label: 'Bed Bug Treatment' },
                 { href: '/termite-treatment', label: 'Termite Treatment' },
                 { href: '/rodents', label: 'Rodent Control' },

@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/bed-bug-treatment', priority: 0.9, changeFrequency: 'monthly' as const },
     { path: '/termite-treatment', priority: 0.9, changeFrequency: 'monthly' as const },
     { path: '/bat-removal', priority: 0.9, changeFrequency: 'monthly' as const },
+    { path: '/wasp-removal', priority: 0.9, changeFrequency: 'monthly' as const },
     { path: '/bed-bugs', priority: 0.8, changeFrequency: 'monthly' as const },
     { path: '/termites', priority: 0.8, changeFrequency: 'monthly' as const },
     { path: '/wildlife', priority: 0.8, changeFrequency: 'monthly' as const },
