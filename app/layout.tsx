@@ -10,11 +10,11 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   metadataBase: new URL('https://absolutepestservices.com'),
   title: {
-    default: 'Absolute Pest Services - Professional Pest Control in PA, DE & MD',
+    default: 'Absolute Pest Services - Professional Pest Control in PA & DE',
     template: '%s',
   },
   description:
-    'Expert pest control in PA, DE & MD. Humane wildlife control, bed bug treatment, termite protection & bat removal. Licensed, insured & available 24/7. Call 484-643-2225.',
+    'Expert pest control in PA & DE. Humane wildlife control, bed bug treatment, termite protection & bat removal. Licensed, insured & available 24/7. Call 484-643-2225.',
   openGraph: {
     type: 'website',
     siteName: 'Absolute Pest Services',

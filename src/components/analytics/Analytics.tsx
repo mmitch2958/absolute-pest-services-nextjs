@@ -124,11 +124,11 @@ export default function Analytics() {
       const href = (phoneEl as HTMLAnchorElement).href ?? ''
       const phoneLabel = getPhoneLabel(href)
 
-      // ── Google Ads conversion (AW-1038095551) ─────────────────────────
+      // ── Google Ads conversion (AW-1038095551/6JpzCLqOragbEL-pgO8D) ───
+      // send_to must use the full conversion action label, not just the account ID.
+      // tel: links don't navigate away from the page, so no event_callback needed.
       gaEvent('conversion', {
-        send_to: 'AW-1038095551',
-        event_category: 'Phone Call',
-        event_label: phoneLabel,
+        send_to: 'AW-1038095551/6JpzCLqOragbEL-pgO8D',
         value: 1.0,
         currency: 'USD',
       })
