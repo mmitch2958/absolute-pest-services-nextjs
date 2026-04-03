@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Shield, Bug, TreePine, Zap, CheckCircle, Phone, Star } from 'lucide-react'
+import { Shield, Bug, TreePine, Zap, CheckCircle, Phone } from 'lucide-react'
+import GoogleReviews from '@/components/reviews/GoogleReviews'
 
 export const metadata: Metadata = {
   title: 'Absolute Pest Services - Professional Pest Control in PA & DE',
@@ -42,6 +43,13 @@ const localBusinessSchema = {
     { '@type': 'State', name: 'Delaware' },
   ],
   priceRange: '$$',
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '5',
+    bestRating: '5',
+    worstRating: '1',
+    reviewCount: '47',
+  },
   openingHoursSpecification: [
     {
       '@type': 'OpeningHoursSpecification',
@@ -290,40 +298,42 @@ export default function HomePage() {
               <div className="text-center mb-6">
                 <div className="flex justify-center gap-1 mb-2">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={20} className="text-yellow-400 fill-yellow-400" />
+                    <svg key={i} viewBox="0 0 20 20" className="w-6 h-6 text-yellow-400 fill-yellow-400">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
                   ))}
                 </div>
-                <p className="text-sm text-gray-500">Trusted by thousands of PA & DE families</p>
+                <p className="font-bold text-2xl text-gray-900">5.0 on Google</p>
+                <p className="text-sm text-gray-500 mt-1">Trusted by hundreds of PA &amp; DE families</p>
               </div>
-              <div className="space-y-4 mb-6">
-                <blockquote className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 italic">
-                  &ldquo;Quick response, professional service. They removed a family of raccoons from
-                  our attic and sealed everything up perfectly.&rdquo;
-                  <footer className="mt-2 font-medium text-gray-500 not-italic">
-                    — West Chester, PA homeowner
-                  </footer>
-                </blockquote>
-                <blockquote className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 italic">
-                  &ldquo;Found termites the week before settlement. They came out same day, treated,
-                  and gave us documentation. Saved our home sale.&rdquo;
-                  <footer className="mt-2 font-medium text-gray-500 not-italic">
-                    — Kennett Square, PA homeowner
-                  </footer>
-                </blockquote>
+              <div className="space-y-3 mb-6">
+                {[
+                  'Prompt, same-day response',
+                  'Technicians explain every step',
+                  'Effective on the first visit',
+                  'Fair pricing, no surprises',
+                  'They stand behind their work',
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-3 text-sm text-gray-700">
+                    <CheckCircle size={15} className="text-green-600 flex-shrink-0" />
+                    {item}
+                  </div>
+                ))}
               </div>
-              <div className="text-center">
-                <a
-                  href="tel:484-643-2225"
-                  className="inline-flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white font-bold px-6 py-3 rounded-lg transition-colors w-full justify-center"
-                >
-                  <Phone size={18} />
-                  Call Now: 484-643-2225
-                </a>
-              </div>
+              <a
+                href="tel:484-643-2225"
+                className="inline-flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white font-bold px-6 py-3 rounded-lg transition-colors w-full justify-center"
+              >
+                <Phone size={18} />
+                Call Now: 484-643-2225
+              </a>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Google Reviews */}
+      <GoogleReviews />
 
       {/* Service Areas */}
       <section className="py-16 bg-white">
