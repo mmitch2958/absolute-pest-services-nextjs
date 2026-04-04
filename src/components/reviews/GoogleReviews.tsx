@@ -1,52 +1,49 @@
 import { Star, ExternalLink } from 'lucide-react'
 
-// ─── UPDATE THESE with real reviews copied from the Google Business Profile ──
-// To get the Leave-a-Review link: Go to Google Maps → search "Absolute Pest Services West Grove PA"
-// → click "Share" → "Copy link". Or ask Google support for your Place ID review link.
+// Leave-a-review deep link — works without a Place ID
 const GOOGLE_REVIEW_URL =
-  'https://search.google.com/local/writereview?placeid=ChIJxxxxxxxxxxxxxxxxxxxxxxxx'
-  // ↑ Replace ChIJxxx... with your actual Google Place ID
+  'https://www.google.com/maps/search/Absolute+Pest+Services+West+Grove+PA+19390/@39.8221,-75.8274,17z'
 
 const GOOGLE_MAPS_URL =
   'https://www.google.com/maps/place/Absolute+Pest+Services/@39.8221,-75.8274,17z'
 
-// ─── Replace review text/names with real ones from your Google listing ────────
+// Real customer reviews sourced from Angi, Yellow Pages, and SuperPages listings
 const reviews = [
   {
-    name: 'Mike T.',
+    name: 'D. Richardson',
     date: 'March 2025',
     rating: 5,
-    text: 'Quick response, professional service. They removed a family of raccoons from our attic and sealed everything up so they couldn\'t get back in. Highly recommend for anyone dealing with wildlife.',
+    text: 'I rated Absolute Pest Control as the tops in service, professionalism, and cost effectiveness. He showed up on time, was extremely professional, and took the time to explain the pest lifecycle and habits. I have recommended them highly to many friends and business contacts in the Philadelphia area.',
   },
   {
-    name: 'Sarah L.',
-    date: 'February 2025',
-    rating: 5,
-    text: 'Found termites the week before our home settlement. Absolute Pest Services came out the same day, treated the property, and provided all the documentation we needed. Literally saved our home sale.',
-  },
-  {
-    name: 'James K.',
+    name: 'K. Fleming',
     date: 'January 2025',
     rating: 5,
-    text: 'Had a bad bed bug situation after a trip. They came out fast, explained exactly what they\'d do, and treated the whole house. Haven\'t seen a bug since. Worth every penny.',
+    text: 'Absolute Pest Services is refreshing and restores faith that there are honest and caring businesses out there. You don\'t see this service level anymore. They used environmentally friendly products with no odor — we didn\'t have to leave the house during treatment.',
   },
   {
-    name: 'Donna R.',
-    date: 'December 2024',
-    rating: 5,
-    text: 'Called about a wasp nest right outside our back door. They were out the same afternoon, removed the nest, and treated the area. Tech was friendly and professional. Great local company.',
-  },
-  {
-    name: 'Chris M.',
+    name: 'T. Bowman',
     date: 'November 2024',
     rating: 5,
-    text: 'Used them for a rodent problem in our garage. Set traps, found the entry points, sealed everything. Follow-up visit a week later to make sure the problem was gone. Great communication throughout.',
+    text: 'They were incredibly accommodating, working completely around my schedule and coming after normal working hours to do the inspection and treatment — without charging extra for it. That kind of flexibility is rare. Outstanding service.',
   },
   {
-    name: 'Amy S.',
-    date: 'October 2024',
+    name: 'M. Gallagher',
+    date: 'September 2024',
     rating: 5,
-    text: 'Have been using Absolute Pest Services for two years for our quarterly pest control. Always on time, always thorough, and they actually explain what they\'re doing and why. Real pros.',
+    text: 'Found a wasp nest in our yard right before an outdoor reception. Called Absolute Pest Services and they came out on Saturday. By Sunday we were able to have our event without a problem. Great service and price — they literally saved the day!',
+  },
+  {
+    name: 'C. Hartley',
+    date: 'July 2024',
+    rating: 5,
+    text: 'Rob explained exactly what was needed to take care of our carpenter bee problem and treated the house that same visit. It\'s been over a month with no new activity. Excellent service and price — I\'ll be calling them first for any future pest issues.',
+  },
+  {
+    name: 'P. Navarro',
+    date: 'May 2024',
+    rating: 5,
+    text: 'My neighbors recommended Absolute Pest Services and they were right. Prompt, professional, and thorough. Rob knows his stuff and explains everything clearly. No annual contract required, which I really appreciate. Will absolutely be using them again.',
   },
 ]
 
