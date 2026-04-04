@@ -7,43 +7,31 @@ const GOOGLE_REVIEW_URL =
 const GOOGLE_MAPS_URL =
   'https://www.google.com/maps/place/Absolute+Pest+Services/@39.767703,-75.7347039,9z/data=!4m8!3m7!1s0x89c65390a2f397f1:0x597d349b1db28e37!8m2!3d39.767703!4d-75.734704!9m1!1b1!16s%2Fg%2F1vfzg339'
 
-// Real customer reviews sourced from Angi, Yellow Pages, and SuperPages listings
 const reviews = [
   {
-    name: 'D. Richardson',
-    date: 'March 2025',
+    name: 'Charles Bonadio',
     rating: 5,
-    text: 'I rated Absolute Pest Control as the tops in service, professionalism, and cost effectiveness. He showed up on time, was extremely professional, and took the time to explain the pest lifecycle and habits. I have recommended them highly to many friends and business contacts in the Philadelphia area.',
+    text: 'Rob was awesome! He came out on a Sunday of a holiday weekend and removed the yellow jackets from our wall. He was professional, courteous and the price was very fair. I highly recommend him for pest control.',
   },
   {
-    name: 'K. Fleming',
-    date: 'January 2025',
+    name: 'Kass Walpole',
     rating: 5,
-    text: 'Absolute Pest Services is refreshing and restores faith that there are honest and caring businesses out there. You don\'t see this service level anymore. They used environmentally friendly products with no odor — we didn\'t have to leave the house during treatment.',
+    text: 'I highly recommend Absolute Pest Services. Not only is Rob an expert in his business, he is fair and honest.',
   },
   {
-    name: 'T. Bowman',
-    date: 'November 2024',
+    name: 'Jodi Rowland',
     rating: 5,
-    text: 'They were incredibly accommodating, working completely around my schedule and coming after normal working hours to do the inspection and treatment — without charging extra for it. That kind of flexibility is rare. Outstanding service.',
+    text: 'Rob spoke with me personally, came out quickly and took care of the problem right away. I have been using him ever since. Every summer I seem to have at least one major issue with bees or wasps on my property and each time Rob has taken care of it promptly & effectively. He is trustworthy and dependable — I highly recommend his services.',
   },
   {
-    name: 'M. Gallagher',
-    date: 'September 2024',
+    name: 'Mary Ellen Seifert',
     rating: 5,
-    text: 'Found a wasp nest in our yard right before an outdoor reception. Called Absolute Pest Services and they came out on Saturday. By Sunday we were able to have our event without a problem. Great service and price — they literally saved the day!',
+    text: 'I have had this company for many years and will give them 5 stars. They do a great job. The owner just eliminated a bee nest for me. Other years they took care of an ant problem. Very reasonable in price.',
   },
   {
-    name: 'C. Hartley',
-    date: 'July 2024',
+    name: 'George Janavel',
     rating: 5,
-    text: 'Rob explained exactly what was needed to take care of our carpenter bee problem and treated the house that same visit. It\'s been over a month with no new activity. Excellent service and price — I\'ll be calling them first for any future pest issues.',
-  },
-  {
-    name: 'P. Navarro',
-    date: 'May 2024',
-    rating: 5,
-    text: 'My neighbors recommended Absolute Pest Services and they were right. Prompt, professional, and thorough. Rob knows his stuff and explains everything clearly. No annual contract required, which I really appreciate. Will absolutely be using them again.',
+    text: 'We were hearing noises in our space above the garage. Called Absolute Pest and Rob came over at the end of his work day to set traps. We caught a few of the rascals and fortunately they were only mice. Have had no noises or signs of visitors since. Thanks Rob.',
   },
 ]
 
@@ -126,7 +114,6 @@ export default function GoogleReviews() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900 text-sm">{review.name}</p>
-                    <p className="text-xs text-gray-400">{review.date}</p>
                   </div>
                 </div>
                 {/* Google G mark */}
