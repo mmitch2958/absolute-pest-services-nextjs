@@ -1,11 +1,11 @@
 import { Star, ExternalLink } from 'lucide-react'
 
-// Leave-a-review deep link — works without a Place ID
+// Direct links using the real Google Business CID (from Maps URL)
 const GOOGLE_REVIEW_URL =
-  'https://www.google.com/maps/search/Absolute+Pest+Services+West+Grove+PA+19390/@39.8221,-75.8274,17z'
+  'https://www.google.com/maps?cid=6448368082287234615&action=write-review'
 
 const GOOGLE_MAPS_URL =
-  'https://www.google.com/maps/place/Absolute+Pest+Services/@39.8221,-75.8274,17z'
+  'https://www.google.com/maps/place/Absolute+Pest+Services/@39.767703,-75.7347039,9z/data=!4m8!3m7!1s0x89c65390a2f397f1:0x597d349b1db28e37!8m2!3d39.767703!4d-75.734704!9m1!1b1!16s%2Fg%2F1vfzg339'
 
 // Real customer reviews sourced from Angi, Yellow Pages, and SuperPages listings
 const reviews = [
