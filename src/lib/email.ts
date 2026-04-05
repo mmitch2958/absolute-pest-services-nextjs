@@ -31,6 +31,43 @@ async function sendOne(params: EmailParams): Promise<boolean> {
   }
 }
 
+export async function sendContactFormNotification(data: {
+  name: string;
+  email: string;
+  phone: string;
+  service: string;
+  zip: string;
+  message?: string | null;
+}): Promise<void> {
+  const subject = `New Service Request — ${data.service} (${data.zip})`;
+
+  const html = `
+    <h2 style="color:#1f2937;">New Service Request</h2>
+    <table style="border-collapse:collapse;width:100%;font-family:sans-serif;font-size:14px;">
+      <tr><td style="padding:6px 12px;font-weight:bold;width:120px;">Name</td><td style="padding:6px 12px;">${data.name}</td></tr>
+      <tr style="background:#f9fafb;"><td style="padding:6px 12px;font-weight:bold;">Email</td><td style="padding:6px 12px;"><a href="mailto:${data.email}">${data.email}</a></td></tr>
+      <tr><td style="padding:6px 12px;font-weight:bold;">Phone</td><td style="padding:6px 12px;"><a href="tel:${data.phone}">${data.phone}</a></td></tr>
+      <tr style="background:#f9fafb;"><td style="padding:6px 12px;font-weight:bold;">Service</td><td style="padding:6px 12px;">${data.service}</td></tr>
+      <tr><td style="padding:6px 12px;font-weight:bold;">ZIP</td><td style="padding:6px 12px;">${data.zip}</td></tr>
+      ${data.message ? `<tr style="background:#f9fafb;"><td style="padding:6px 12px;font-weight:bold;">Message</td><td style="padding:6px 12px;">${data.message}</td></tr>` : ''}
+    </table>
+    <hr style="margin-top:24px;border:none;border-top:1px solid #e5e7eb;">
+    <p style="color:#9ca3af;font-size:11px;">Submitted via absolutepestservices.com contact form.</p>
+  `;
+
+  const text = `New Service Request
+Name: ${data.name}
+Email: ${data.email}
+Phone: ${data.phone}
+Service: ${data.service}
+ZIP: ${data.zip}
+${data.message ? `Message: ${data.message}` : ''}`;
+
+  await Promise.all(
+    NOTIFY_EMAILS.map((to) => sendOne({ to, subject, html, text }))
+  );
+}
+
 export async function sendJobLogNotification(data: {
   employeeName: string;
   customerName: string;

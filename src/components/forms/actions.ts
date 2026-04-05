@@ -1,8 +1,8 @@
 'use server'
 
 import { z } from 'zod'
-import nodemailer from 'nodemailer'
 import { sql } from '@/lib/db'
+import { sendContactFormNotification } from '@/lib/email'
 import { insertContactSchema } from '../../../shared/schema'
 
 const formSchema = z.object({
@@ -113,46 +113,15 @@ export async function submitServiceRequest(
     `
     console.log('[Service Request] DB insert succeeded.')
 
-    // Send email via SMTP
-    const smtpHost = process.env.SMTP_HOST
-    const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10)
-    const smtpUser = process.env.SMTP_USER
-    const smtpPass = process.env.SMTP_PASS
-    const contactEmail = process.env.CONTACT_EMAIL || 'info@absolutepestservices.com'
-
-    if (smtpHost && smtpUser && smtpPass) {
-      const transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: smtpPort,
-        secure: smtpPort === 465,
-        auth: {
-          user: smtpUser,
-          pass: smtpPass,
-        },
-      })
-
-      await transporter.sendMail({
-        from: `"APS Website" <${smtpUser}>`,
-        to: contactEmail,
-        replyTo: result.data.email,
-        subject: `New Service Request — ${result.data.service} (${result.data.zip})`,
-        html: `
-          <h2>New Service Request</h2>
-          <p><strong>Name:</strong> ${result.data.name}</p>
-          <p><strong>Email:</strong> ${result.data.email}</p>
-          <p><strong>Phone:</strong> ${result.data.phone}</p>
-          <p><strong>Service:</strong> ${result.data.service}</p>
-          <p><strong>ZIP:</strong> ${result.data.zip}</p>
-          ${result.data.message ? `<p><strong>Message:</strong> ${result.data.message}</p>` : ''}
-          <hr />
-          <p><em>Submitted via absolutepestservices.com contact form</em></p>
-        `,
-      })
-
-      console.log('[Service Request] Email sent successfully')
-    } else {
-      console.warn('[Service Request] SMTP not configured — skipping email')
-    }
+    // Fire-and-forget email via SendGrid
+    sendContactFormNotification({
+      name: result.data.name,
+      email: result.data.email,
+      phone: result.data.phone,
+      service: result.data.service,
+      zip: result.data.zip,
+      message: result.data.message ?? null,
+    }).catch((e) => console.error('[Service Request] Email notification failed:', e))
 
     return { success: true }
   } catch (err) {
