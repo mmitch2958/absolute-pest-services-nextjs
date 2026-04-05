@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFieldSession } from '@/lib/field-session';
 import { sql } from '@/lib/db';
+import { sendJobLogNotification } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,6 +68,18 @@ export async function POST(request: NextRequest) {
       )
       RETURNING *
     `;
+
+    // Fire-and-forget email — don't block the response
+    sendJobLogNotification({
+      employeeName: session.employeeName ?? 'Technician',
+      customerName,
+      siteLocation,
+      siteAddress: siteAddress ?? null,
+      servicedArea,
+      workPerformed,
+      jobDate,
+      amount: amount ?? null,
+    }).catch((e) => console.error('[field/job-logs] Email notification failed:', e));
 
     return NextResponse.json({ success: true, log });
   } catch (err) {
