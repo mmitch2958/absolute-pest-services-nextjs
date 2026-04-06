@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { sql } from '@/lib/db'
 import { sendContactFormNotification } from '@/lib/email'
+import { sendContactFormSMS } from '@/lib/sms'
 import { insertContactSchema } from '../../../shared/schema'
 
 const formSchema = z.object({
@@ -122,6 +123,14 @@ export async function submitServiceRequest(
       zip: result.data.zip,
       message: result.data.message ?? null,
     }).catch((e) => console.error('[Service Request] Email notification failed:', e))
+
+    // Fire-and-forget SMS via Twilio
+    sendContactFormSMS({
+      name: result.data.name,
+      phone: result.data.phone,
+      service: result.data.service,
+      zip: result.data.zip,
+    }).catch((e) => console.error('[Service Request] SMS notification failed:', e))
 
     return { success: true }
   } catch (err) {

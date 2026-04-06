@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getFieldSession } from '@/lib/field-session';
 import { sql } from '@/lib/db';
 import { sendJobLogNotification } from '@/lib/email';
+import { sendJobLogSMS } from '@/lib/sms';
 
 export async function POST(request: NextRequest) {
   try {
@@ -80,6 +81,13 @@ export async function POST(request: NextRequest) {
       jobDate,
       amount: amount ?? null,
     }).catch((e) => console.error('[field/job-logs] Email notification failed:', e));
+
+    sendJobLogSMS({
+      employeeName: session.employeeName ?? 'Technician',
+      customerName,
+      siteLocation,
+      jobDate,
+    }).catch((e) => console.error('[field/job-logs] SMS notification failed:', e));
 
     return NextResponse.json({ success: true, log });
   } catch (err) {
