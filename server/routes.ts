@@ -1416,172 +1416,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // POST /api/admin/blog/generate-image - Generate featured image for article
+  // POST /api/admin/blog/generate-image - Generate featured image for article (Gemini)
   app.post("/api/admin/blog/generate-image", requireAdmin, async (req, res) => {
     try {
       const { title, category } = req.body;
-      
+
       if (!title) {
         return res.status(400).json({ success: false, message: "Title is required" });
       }
 
-      const openaiApiKey = process.env.OPENAI_API_KEY;
-      if (!openaiApiKey) {
-        return res.status(500).json({ success: false, message: "OpenAI API key not configured" });
+      const apiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ success: false, message: "No AI API key configured" });
       }
 
-      // Create a detailed prompt for the image
-      const imagePrompt = `Professional photograph for a pest control blog article about: ${title}. 
-        Realistic style, high quality, showing a clean suburban home exterior or interior with subtle pest control context. 
-        Warm lighting, professional photography style suitable for a business blog. 
-        No text or words in the image. 
+      const imagePrompt = `Professional photograph for a pest control blog article about: ${title}.
+        Realistic style, high quality, showing a clean suburban home exterior or interior with subtle pest control context.
+        Warm lighting, professional photography style suitable for a business blog.
+        No text or words in the image.
         Aspect ratio 16:9 for web use.`;
 
-      const response = await fetch("https://api.openai.com/v1/images/generations", {
+      const GENAI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent";
+      const response = await fetch(`${GENAI_URL}?key=${apiKey}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${openaiApiKey}`
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "dall-e-3",
-          prompt: imagePrompt,
-          n: 1,
-          size: "1792x1024"
+          contents: [{ parts: [{ text: `Generate a high quality image. ${imagePrompt}` }] }],
+          generationConfig: { responseMimeType: "image/png" }
         })
       });
 
-      const data = await response.json();
-      
-      if (data.error) {
-        console.error("OpenAI image generation error:", data.error);
-        return res.status(500).json({ success: false, message: "Image generation failed: " + data.error.message });
+      if (response.ok && response.headers.get("content-type")?.includes("application/json")) {
+        const data = await response.json();
+        if (data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data) {
+          const imageUrl = `data:image/png;base64,${data.candidates[0].content.parts[0].inlineData.data}`;
+          return res.json({ success: true, imageUrl });
+        }
       }
 
-      const imageUrl = data.data?.[0]?.url;
-      
-      if (!imageUrl) {
-        return res.status(500).json({ success: false, message: "No image URL returned" });
+      // Also try raw binary response
+      if (response.ok && response.headers.get("content-type")?.includes("image")) {
+        const arrayBuffer = await response.arrayBuffer();
+        const base64 = Buffer.from(arrayBuffer).toString('base64');
+        const dataUrl = `data:image/png;base64,${base64}`;
+        return res.json({ success: true, imageUrl: dataUrl });
       }
 
-      const imageResponse = await fetch(imageUrl);
-      const arrayBuffer = await imageResponse.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const base64 = buffer.toString('base64');
-      const dataUrl = `data:image/png;base64,${base64}`;
-      
-      res.json({ success: true, imageUrl: dataUrl });
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Gemini image generation error:", errorData);
+      res.status(500).json({ success: false, message: "Image generation failed: " + (errorData.error?.message || 'Unknown error') });
     } catch (error) {
       console.error("Error generating image:", error);
       res.status(500).json({ success: false, message: "Failed to generate image" });
     }
   });
 
-  // POST /api/admin/blog/generate-articles - Generate 6 articles from selected topics
+  // POST /api/admin/blog/generate-articles - Generate articles from selected topics (Gemini)
   app.post("/api/admin/blog/generate-articles", requireAdmin, async (req, res) => {
     try {
       const { topicIds, topics } = req.body;
-      
+
       if (!topics || !Array.isArray(topics) || topics.length === 0) {
         return res.status(400).json({ success: false, message: "Topics array is required" });
       }
 
-      const openaiApiKey = process.env.OPENAI_API_KEY;
-      if (!openaiApiKey) {
-        return res.status(500).json({ success: false, message: "OpenAI API key not configured" });
+      const apiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ success: false, message: "No AI API key configured" });
       }
 
       const generatedArticles = [];
-      const baseUrl = process.env.REPLIT_DOMAINS?.split(',')[0] 
-        ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
-        : 'https://absolutepestservices.com';
+      const GENAI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
       // Generate articles for each topic
       for (let i = 0; i < topics.length && i < 6; i++) {
         const topic = topics[i];
-        
+
         try {
-          // Generate article content using OpenAI
-          const articlePrompt = `Write a 600-800 word blog article for a pest control company serving Chester County, Pennsylvania. 
-          
+          // Generate article content using Gemini
+          const articlePrompt = `You are a professional content writer for a pest control company serving Chester County, Pennsylvania. Write a 600-700 word HTML blog article.
+
 Title: ${topic.title}
 Category: ${topic.category}
-Target Keywords: ${topic.keywords?.join(', ') || topic.title}
+Target audience: Homeowners in Southeastern PA (Philadelphia, Chester County, Delaware County)
 
 Requirements:
-- Write in HTML format with <h2> and <h3> headings
-- Include practical tips homeowners can use
-- Mention Chester County or Southeastern PA naturally
-- Include a call-to-action to contact Absolute Pest Services
-- Use professional but approachable tone
-- Structure: Introduction, 3-4 main points with tips, Conclusion with CTA
+- Write in HTML with <h2> and <h3> subheadings
+- Include practical tips homeowners can use themselves
+- Mention Chester County or Southeastern PA naturally (1-2 times)
+- Include a call-to-action to contact Absolute Pest Services at the end (phone: 484-643-2225)
+- Professional but approachable tone
+- Structure: Introduction (hook), 3-4 main sections with tips, conclusion with CTA
 
-Return the article as JSON with fields:
-- content: the HTML article body
-- excerpt: a 150-200 word summary for meta description
-- suggestedTags: array of 3-5 relevant tags`;
+Return ONLY valid JSON in this exact format (no markdown, no explanation):
+{"content": "<html article here>", "excerpt": "<150 word summary>", "suggestedTags": ["tag1", "tag2", "tag3"]}`;
 
-          const chatResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+          const articleRes = await fetch(`${GENAI_URL}?key=${apiKey}`, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${openaiApiKey}`
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              model: "gpt-4o",
-              messages: [
-                {
-                  role: "system",
-                  content: "You are a professional content writer for a pest control company. You write SEO-optimized blog articles in JSON format."
-                },
-                {
-                  role: "user",
-                  content: articlePrompt
-                }
-              ],
-              response_format: { type: "json_object" },
-              max_tokens: 2000,
-              temperature: 0.7
+              contents: [{ parts: [{ text: articlePrompt }] }],
+              generationConfig: { responseMimeType: "application/json", maxOutputTokens: 2048 }
             })
           });
 
-          const chatData = await chatResponse.json();
-          
-          if (chatData.error) {
-            console.error("OpenAI article generation error:", chatData.error);
-            continue;
+          const articleData = await articleRes.json();
+          let articleContent: { content: string; excerpt: string; suggestedTags: string[] } = {
+            content: "",
+            excerpt: topic.description || "",
+            suggestedTags: topic.keywords || []
+          };
+
+          if (articleData.candidates?.[0]?.content?.parts?.[0]?.text) {
+            try {
+              articleContent = JSON.parse(articleData.candidates[0].content.parts[0].text);
+            } catch {
+              console.error("Failed to parse Gemini article JSON for:", topic.title);
+              articleContent.excerpt = topic.description || "";
+            }
           }
 
-          const articleContent = JSON.parse(chatData.choices[0].message.content);
-          
-          // Generate image for this article
+          // Generate image for this article using Gemini
           let imageUrl = "";
+          const imagePrompt = `Professional photograph for a pest control blog article about: ${topic.title}. Realistic style, high quality, showing relevant pest control context. Warm lighting, professional photography. No text in image.`;
           try {
-            const imageResponse = await fetch("https://api.openai.com/v1/images/generations", {
+            const imgRes = await fetch(`${GENAI_URL}?key=${apiKey}`, {
               method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${openaiApiKey}`
-              },
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                model: "dall-e-3",
-                prompt: `Professional photograph for a pest control blog article about: ${topic.title}. Realistic style, high quality, showing relevant pest control context. Warm lighting, professional photography. No text in image.`,
-                n: 1,
-                size: "1792x1024"
+                contents: [{ parts: [{ text: `Generate a high quality image. ${imagePrompt}` }] }],
+                generationConfig: { responseMimeType: "image/png" }
               })
             });
-
-            const imageData = await imageResponse.json();
-            
-            if (imageData.data?.[0]?.url) {
-              const imgResponse = await fetch(imageData.data[0].url);
-              const arrayBuffer = await imgResponse.arrayBuffer();
-              const buffer = Buffer.from(arrayBuffer);
-              const base64 = buffer.toString('base64');
-              imageUrl = `data:image/png;base64,${base64}`;
+            // If Gemini returns base64 image in inlineData
+            if (imgRes.ok && imgRes.headers.get("content-type")?.includes("application/json")) {
+              const imgData = await imgRes.json();
+              if (imgData.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data) {
+                imageUrl = `data:image/png;base64,${imgData.candidates[0].content.parts[0].inlineData.data}`;
+              }
             }
-          } catch (imgError) {
-            console.error("Image generation failed for article:", topic.title, imgError);
+            // Also try raw binary response
+            if (!imageUrl && imgRes.ok && imgRes.headers.get("content-type")?.includes("image")) {
+              const imgBuffer = await imgRes.arrayBuffer();
+              imageUrl = `data:image/png;base64,${Buffer.from(imgBuffer).toString('base64')}`;
+            }
+          } catch (imgErr) {
+            console.error("Image gen failed for:", topic.title, imgErr);
           }
 
           // Create slug from title
@@ -1593,16 +1573,16 @@ Return the article as JSON with fields:
           // Create the blog post
           const blogPost = await storage.createBlogPost({
             title: topic.title,
-            slug: `${slug}-${Date.now()}`, // Add timestamp to ensure uniqueness
+            slug: `${slug}-${Date.now()}`,
             content: articleContent.content || '',
-            excerpt: articleContent.excerpt || topic.description,
+            excerpt: articleContent.excerpt || topic.description || '',
             author: "AI Generated",
             featuredImage: imageUrl || null,
             category: topic.category,
             tags: articleContent.suggestedTags || topic.keywords || [],
-            isPublished: false, // Draft by default for review
+            isPublished: false,
             metaTitle: topic.title,
-            metaDescription: articleContent.excerpt?.substring(0, 160) || topic.description
+            metaDescription: (articleContent.excerpt || topic.description || '').substring(0, 160)
           });
 
           generatedArticles.push({
@@ -1623,10 +1603,10 @@ Return the article as JSON with fields:
         }
       }
 
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: `Generated ${generatedArticles.filter(a => a.status === 'created').length} articles`,
-        articles: generatedArticles 
+        articles: generatedArticles
       });
     } catch (error) {
       console.error("Error generating articles:", error);
