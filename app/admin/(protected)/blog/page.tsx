@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Plus, X, Loader2, Pencil, Trash2, Eye, Globe, FileText, Sparkles } from 'lucide-react';
+import { Search, Plus, X, Loader2, Pencil, Trash2, Eye, Globe, FileText, Sparkles, ImageIcon } from 'lucide-react';
 
 interface BlogPost {
   id: number;
@@ -46,8 +46,10 @@ function PostModal({ post, onSave, onClose, onDelete }: {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
   const [error, setError] = useState('');
   const [genError, setGenError] = useState('');
+  const [imageGenError, setImageGenError] = useState('');
 
   function handleTitleChange(val: string) {
     setForm(f => ({ ...f, title: val, slug: f.slug || generateSlug(val) }));
@@ -112,6 +114,29 @@ function PostModal({ post, onSave, onClose, onDelete }: {
       setGenError(err.message || 'AI generation failed. Try again.');
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function handleAIGenerateImage() {
+    if (!form.title) {
+      setImageGenError('Enter a title first so AI knows what image to generate.');
+      return;
+    }
+    setImageGenError('');
+    setGeneratingImage(true);
+    try {
+      const res = await fetch('/api/admin/blog/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: form.title, category: form.category || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Image generation failed');
+      setForm(f => ({ ...f, featuredImage: data.imageUrl }));
+    } catch (err: any) {
+      setImageGenError(err.message || 'Image generation failed. Try again.');
+    } finally {
+      setGeneratingImage(false);
     }
   }
 
@@ -195,9 +220,31 @@ function PostModal({ post, onSave, onClose, onDelete }: {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Featured Image URL</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700">Featured Image URL</label>
+              <button
+                type="button"
+                onClick={handleAIGenerateImage}
+                disabled={generatingImage}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 px-3 py-1 rounded-lg disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              >
+                {generatingImage ? (
+                  <><Loader2 className="w-3.5 h-3.5 animate-spin" />Generating…</>
+                ) : (
+                  <><ImageIcon className="w-3.5 h-3.5" />AI Generate Image</>
+                )}
+              </button>
+            </div>
+            {imageGenError && (
+              <div className="bg-amber-50 border border-amber-200 text-amber-700 text-xs rounded-lg px-3 py-2 mb-2">{imageGenError}</div>
+            )}
             <input value={form.featuredImage} onChange={e => setForm(f => ({ ...f, featuredImage: e.target.value }))}
               className={fieldClass} placeholder="https://..." />
+            {form.featuredImage && (
+              <div className="mt-2 rounded-lg overflow-hidden border border-gray-200 h-32 bg-gray-50">
+                <img src={form.featuredImage} alt="Featured image preview" className="w-full h-full object-cover" />
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
