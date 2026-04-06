@@ -18,22 +18,46 @@ function send(ctrl: ReadableStreamDefaultController, data: object) {
   ctrl.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(data)}\n\n`));
 }
 
-async function generateImage(prompt: string, size = 'landscape_16_9'): Promise<string | null> {
-  const key = process.env.INFERENCESH_API_KEY;
-  if (!key) return null;
-  try {
-    const res = await fetch(INFERENCE_API, {
-      method: 'POST',
-      headers: { 'x-api-key': key, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ app: FLUX_APP, input: { prompt, num_images: 1, image_size: size } }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const images = data?.images ?? data?.output?.images ?? data?.data?.images ?? [];
-    return images[0]?.url ?? images[0] ?? null;
-  } catch {
-    return null;
+// Map inference.sh size strings to DALL-E 3 supported sizes
+function dalleSize(size: string): '1024x1024' | '1792x1024' | '1024x1792' {
+  if (size === 'landscape_16_9') return '1792x1024';
+  if (size === 'portrait_9_16') return '1024x1792';
+  return '1024x1024';
+}
+
+async function generateImage(prompt: string, size = 'landscape_16_9'): Promise<{ url: string; source: string } | null> {
+  // 1. Try inference.sh FLUX
+  const inferenceKey = process.env.INFERENCESH_API_KEY;
+  if (inferenceKey) {
+    try {
+      const res = await fetch(INFERENCE_API, {
+        method: 'POST',
+        headers: { 'x-api-key': inferenceKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ app: FLUX_APP, input: { prompt, num_images: 1, image_size: size } }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const images = data?.images ?? data?.output?.images ?? data?.data?.images ?? [];
+        const url = images[0]?.url ?? images[0] ?? null;
+        if (url) return { url, source: 'flux' };
+      }
+    } catch { /* fall through */ }
   }
+
+  // 2. Fallback: DALL-E 3 via OpenAI
+  try {
+    const response = await openai.images.generate({
+      model: 'dall-e-3',
+      prompt: `${prompt}. No text, no watermarks, no logos. Photorealistic style.`,
+      n: 1,
+      size: dalleSize(size),
+      quality: 'standard',
+    });
+    const url = response.data?.[0]?.url ?? null;
+    if (url) return { url, source: 'dalle3' };
+  } catch { /* fall through */ }
+
+  return null;
 }
 
 async function uniqueSlug(base: string): Promise<string> {
@@ -152,24 +176,27 @@ export async function POST(_req: NextRequest) {
             const contentData = JSON.parse(contentRaw);
             if (!contentData.content) throw new Error('No content returned');
 
-            // 2b. generate images
+            // 2b. generate images (FLUX → DALL-E 3 fallback)
             send(ctrl, { type: 'post_images', index: i, imageIndex: 0 });
-            const heroUrl = await generateImage(topic.imagePrompts?.hero ?? `${topic.category} pest control, southeastern Pennsylvania, photorealistic`, 'landscape_16_9');
+            const heroResult = await generateImage(topic.imagePrompts?.hero ?? `${topic.category} pest control, southeastern Pennsylvania, photorealistic`, 'landscape_16_9');
+            if (heroResult) send(ctrl, { type: 'post_image_done', index: i, imageIndex: 0, source: heroResult.source });
 
             send(ctrl, { type: 'post_images', index: i, imageIndex: 1 });
-            const inline1Url = await generateImage(topic.imagePrompts?.inline1 ?? `${topic.title} close-up, photorealistic`, 'square_hd');
+            const inline1Result = await generateImage(topic.imagePrompts?.inline1 ?? `${topic.title} close-up, photorealistic`, 'square_hd');
+            if (inline1Result) send(ctrl, { type: 'post_image_done', index: i, imageIndex: 1, source: inline1Result.source });
 
             send(ctrl, { type: 'post_images', index: i, imageIndex: 2 });
-            const inline2Url = await generateImage(topic.imagePrompts?.inline2 ?? `home pest prevention, southeastern Pennsylvania, photorealistic`, 'landscape_16_9');
+            const inline2Result = await generateImage(topic.imagePrompts?.inline2 ?? `home pest prevention, southeastern Pennsylvania, photorealistic`, 'landscape_16_9');
+            if (inline2Result) send(ctrl, { type: 'post_image_done', index: i, imageIndex: 2, source: inline2Result.source });
 
             // 2c. weave inline images into content
             let finalContent = contentData.content as string;
             let imagesInserted = 0;
             finalContent = finalContent.replace(/<!--\s*IMAGE_PLACEHOLDER\s*-->/g, () => {
               imagesInserted++;
-              const url = imagesInserted === 1 ? inline1Url : inline2Url;
-              if (!url) return '';
-              return `<figure style="margin:2rem 0;"><img src="${url}" alt="${topic.title}" style="width:100%;border-radius:12px;object-fit:cover;" loading="lazy" /></figure>`;
+              const result = imagesInserted === 1 ? inline1Result : inline2Result;
+              if (!result?.url) return '';
+              return `<figure style="margin:2rem 0;"><img src="${result.url}" alt="${topic.title}" style="width:100%;border-radius:12px;object-fit:cover;" loading="lazy" /></figure>`;
             });
 
             // 2d. save to DB
@@ -187,7 +214,7 @@ export async function POST(_req: NextRequest) {
                 ${'Absolute Pest Services'},
                 ${topic.category},
                 ${tags},
-                ${heroUrl ?? null},
+                ${heroResult?.url ?? null},
                 ${contentData.metaTitle ?? topic.title},
                 ${contentData.metaDescription ?? contentData.excerpt ?? ''},
                 ${false},
@@ -206,8 +233,8 @@ export async function POST(_req: NextRequest) {
               id: saved.id,
               title: saved.title,
               slug: saved.slug,
-              hasHeroImage: !!heroUrl,
-              inlineImages: [inline1Url, inline2Url].filter(Boolean).length,
+              hasHeroImage: !!heroResult,
+              inlineImages: [inline1Result, inline2Result].filter(Boolean).length,
             });
           } catch (postErr: any) {
             send(ctrl, { type: 'post_error', index: i, title: topic.title, message: postErr.message ?? 'Unknown error' });
