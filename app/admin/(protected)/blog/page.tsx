@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Plus, X, Loader2, Pencil, Trash2, Eye, Globe, FileText } from 'lucide-react';
+import { Search, Plus, X, Loader2, Pencil, Trash2, Eye, Globe, FileText, Sparkles } from 'lucide-react';
 
 interface BlogPost {
   id: number;
@@ -45,7 +45,9 @@ function PostModal({ post, onSave, onClose, onDelete }: {
   });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
+  const [genError, setGenError] = useState('');
 
   function handleTitleChange(val: string) {
     setForm(f => ({ ...f, title: val, slug: f.slug || generateSlug(val) }));
@@ -76,8 +78,41 @@ function PostModal({ post, onSave, onClose, onDelete }: {
     await onDelete(post.id);
   }
 
-  function handleAIGenerate() {
-    setForm(f => ({ ...f, content: '[AI-generated content placeholder]', excerpt: f.excerpt || 'AI-generated excerpt.' }));
+  async function handleAIGenerate() {
+    if (!form.title) {
+      setGenError('Enter a title first so AI knows what to write about.');
+      return;
+    }
+    setGenError('');
+    setGenerating(true);
+    try {
+      const res = await fetch('/api/admin/blog/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: form.title,
+          category: form.category || undefined,
+          excerpt: form.excerpt || undefined,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'AI generation failed');
+      }
+      const data = await res.json();
+      setForm(f => ({
+        ...f,
+        content: data.content ?? f.content,
+        excerpt: data.excerpt ?? f.excerpt,
+        tags: data.tags ? data.tags.join(', ') : f.tags,
+        metaTitle: data.metaTitle ?? f.metaTitle,
+        metaDescription: data.metaDescription ?? f.metaDescription,
+      }));
+    } catch (err: any) {
+      setGenError(err.message || 'AI generation failed. Try again.');
+    } finally {
+      setGenerating(false);
+    }
   }
 
   const fieldClass = "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500";
@@ -101,11 +136,23 @@ function PostModal({ post, onSave, onClose, onDelete }: {
                 {form.isPublished ? 'Published' : 'Draft'}
               </span>
             </label>
-            <button type="button" onClick={handleAIGenerate}
-              className="ml-auto text-xs text-blue-600 hover:text-blue-800 font-medium">
-              AI Generate Stub
+            <button
+              type="button"
+              onClick={handleAIGenerate}
+              disabled={generating}
+              className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3 py-1.5 rounded-lg disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            >
+              {generating ? (
+                <><Loader2 className="w-3.5 h-3.5 animate-spin" />Generating…</>
+              ) : (
+                <><Sparkles className="w-3.5 h-3.5" />AI Generate</>
+              )}
             </button>
           </div>
+
+          {genError && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-700 text-xs rounded-lg px-3 py-2">{genError}</div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
@@ -126,8 +173,8 @@ function PostModal({ post, onSave, onClose, onDelete }: {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Content *</label>
-            <textarea rows={8} value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-              className={fieldClass + ' resize-none font-mono text-xs'} />
+            <textarea rows={10} value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
+              className={fieldClass + ' resize-y font-mono text-xs'} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
