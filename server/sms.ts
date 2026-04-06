@@ -84,8 +84,8 @@ export function isSMSConfigured(): boolean {
 
 // Recipients for new lead SMS alerts
 const LEAD_SMS_RECIPIENTS = [
-  '+14846432225',  // Office
-  '+14849052263',  // Personal cell
+  '+14846432225',  // Dad
+  '+14849053363',  // Mike personal cell
 ];
 
 export async function sendContactFormSMS(data: {
