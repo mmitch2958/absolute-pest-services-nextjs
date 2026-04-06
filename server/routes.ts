@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import session from "express-session";
 import { sendContactFormEmail, sendInspectionScheduleEmail, sendServiceRequestEmail, sendServiceRequestStatusUpdate, sendNewsletterEmail, sendJobLogNotification, sendInvoiceEmail, sendInvoiceOverdueEmail, sendPaymentConfirmationEmail, sendJobStatusNotification } from "./email";
+import { sendContactFormSMS, sendInspectionRequestSMS } from "./sms";
 import { generateInvoicePdf } from "./invoice-pdf";
 import { sendReviewRequestNow, scheduleReviewRequestForJobLog, scheduleReviewRequestForInvoice, cancelReviewRequestForInvoice } from "./reviews";
 import { assertTransition, isTransitionAllowed } from "./invoiceStateMachine";
@@ -588,6 +589,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!emailSent) {
         console.error("Failed to send contact form email");
       }
+
+      // Send SMS notification (fire-and-forget, never fail the request)
+      sendContactFormSMS({
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        email: validatedData.email,
+        serviceType: validatedData.serviceType,
+        message: validatedData.message
+      }).catch(err => console.error("[SMS] Contact form notification failed:", err));
       
       res.json({ 
         success: true, 
@@ -680,6 +690,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!emailSent) {
         console.error("Failed to send inspection schedule email");
       }
+
+      // Send SMS notification (fire-and-forget, never fail the request)
+      sendInspectionRequestSMS({
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        phone: validatedData.phone,
+        serviceType: validatedData.serviceType,
+        address: validatedData.address
+      }).catch(err => console.error("[SMS] Inspection request notification failed:", err));
       
       res.json({ 
         success: true, 

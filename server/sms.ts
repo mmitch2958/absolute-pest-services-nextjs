@@ -77,3 +77,69 @@ export async function sendAppointmentReminderSMS(data: AppointmentReminderSMSDat
 export function isSMSConfigured(): boolean {
   return !!(TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_FROM_NUMBER);
 }
+
+// ============================================================
+// Business Lead Notifications (Contact Form & Inspection)
+// ============================================================
+
+// Recipients for new lead SMS alerts
+const LEAD_SMS_RECIPIENTS = [
+  '+14846432225',  // Office
+  '+14849052263',  // Personal cell
+];
+
+export async function sendContactFormSMS(data: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  serviceType: string;
+  message: string;
+}): Promise<void> {
+  const client = getTwilioClient();
+  if (!client || !TWILIO_FROM_NUMBER) return;
+
+  const name = `${data.firstName} ${data.lastName}`;
+  // Truncate message to keep SMS concise
+  const msg = data.message.length > 100 ? data.message.slice(0, 100) + '…' : data.message;
+  const body = `New contact form submission from ${name} at ${data.email} - ${msg}`;
+
+  for (const toPhone of LEAD_SMS_RECIPIENTS) {
+    try {
+      await client.messages.create({
+        body,
+        from: TWILIO_FROM_NUMBER,
+        to: toPhone,
+      });
+      console.log(`[SMS] Contact form alert sent to ${toPhone}`);
+    } catch (err: any) {
+      console.error(`[SMS] Failed to send contact form alert to ${toPhone}:`, err?.message || err);
+    }
+  }
+}
+
+export async function sendInspectionRequestSMS(data: {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  serviceType: string;
+  address: string;
+}): Promise<void> {
+  const client = getTwilioClient();
+  if (!client || !TWILIO_FROM_NUMBER) return;
+
+  const name = `${data.firstName} ${data.lastName}`;
+  const body = `New inspection request from ${name} at ${data.phone} for ${data.serviceType} at ${data.address}`;
+
+  for (const toPhone of LEAD_SMS_RECIPIENTS) {
+    try {
+      await client.messages.create({
+        body,
+        from: TWILIO_FROM_NUMBER,
+        to: toPhone,
+      });
+      console.log(`[SMS] Inspection request alert sent to ${toPhone}`);
+    } catch (err: any) {
+      console.error(`[SMS] Failed to send inspection request alert to ${toPhone}:`, err?.message || err);
+    }
+  }
+}
