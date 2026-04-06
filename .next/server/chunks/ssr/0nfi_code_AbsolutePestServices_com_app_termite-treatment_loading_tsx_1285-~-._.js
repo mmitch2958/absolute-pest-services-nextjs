@@ -1,0 +1,3 @@
+module.exports=[84827,a=>{"use strict";var b=a.i(81661);a.s(["default",0,function(){return(0,b.jsx)("div",{className:"min-h-screen bg-gray-50 flex items-center justify-center",children:(0,b.jsxs)("div",{className:"text-center",children:[(0,b.jsx)("div",{className:"inline-block w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mb-4"}),(0,b.jsx)("p",{className:"text-gray-600",children:"Loading termite treatment information..."})]})})}])},17200,a=>{a.n(a.i(84827))}];
+
+//# sourceMappingURL=0nfi_code_AbsolutePestServices_com_app_termite-treatment_loading_tsx_1285-~-._.js.map

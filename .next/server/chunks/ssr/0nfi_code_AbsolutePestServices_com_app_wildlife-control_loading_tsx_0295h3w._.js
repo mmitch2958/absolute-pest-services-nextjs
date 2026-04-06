@@ -1,0 +1,3 @@
+module.exports=[38322,a=>{"use strict";var b=a.i(81661);a.s(["default",0,function(){return(0,b.jsx)("div",{className:"min-h-screen bg-gray-50 flex items-center justify-center",children:(0,b.jsxs)("div",{className:"text-center",children:[(0,b.jsx)("div",{className:"inline-block w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin mb-4"}),(0,b.jsx)("p",{className:"text-gray-600",children:"Loading wildlife control information..."})]})})}])},88111,a=>{a.n(a.i(38322))}];
+
+//# sourceMappingURL=0nfi_code_AbsolutePestServices_com_app_wildlife-control_loading_tsx_0295h3w._.js.map
