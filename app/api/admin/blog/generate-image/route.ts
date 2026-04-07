@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import path from 'path';
-import fs from 'fs';
+import { saveBase64ImageToDisk } from '@/lib/blog-image';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -9,21 +8,6 @@ const INFERENCE_API = 'https://api.inference.sh/apps/run';
 const FLUX_APP = 'falai/flux-dev-lora';
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
 const GEMINI_IMAGE_MODEL = 'google/gemini-2.5-flash-image';
-
-// ─── Save base64 data URL to disk, return relative URL path ──────────────────
-
-function saveBase64ImageToDisk(dataUrl: string, slugHint: string): string {
-  const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);
-  if (!match) throw new Error('Invalid base64 data URL');
-  const mimeToExt: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
-  const ext = mimeToExt[match[1]] ?? 'png';
-  const safeSlug = slugHint.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 40);
-  const filename = `${Date.now()}-${safeSlug}.${ext}`;
-  const dir = path.join(process.cwd(), 'public', 'blog-images');
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, filename), Buffer.from(match[2], 'base64'));
-  return `/blog-images/${filename}`;
-}
 
 // ─── Step 1: craft a focused prompt using GPT ─────────────────────────────────
 

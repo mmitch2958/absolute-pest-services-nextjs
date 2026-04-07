@@ -3,8 +3,7 @@ import { getAdminSession } from '@/lib/admin-session';
 import { sql, db } from '@/lib/db';
 import { blogPosts } from '@/shared/schema';
 import { eq } from 'drizzle-orm';
-import path from 'path';
-import fs from 'fs';
+import { saveBase64ImageToDisk, isBase64DataUrl } from '@/lib/blog-image';
 
 async function requireAdmin() {
   const session = await getAdminSession();
@@ -12,19 +11,6 @@ async function requireAdmin() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   return null;
-}
-
-function saveBase64ImageToDisk(dataUrl: string, slugHint: string): string {
-  const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);
-  if (!match) throw new Error('Invalid base64 data URL');
-  const mimeToExt: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
-  const ext = mimeToExt[match[1]] ?? 'png';
-  const safeSlug = slugHint.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 40);
-  const filename = `${Date.now()}-${safeSlug}.${ext}`;
-  const dir = path.join(process.cwd(), 'public', 'blog-images');
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, filename), Buffer.from(match[2], 'base64'));
-  return `/blog-images/${filename}`;
 }
 
 export async function GET(
@@ -102,7 +88,7 @@ export async function PATCH(
 
     // If featuredImage is a base64 data URL, save to disk to avoid exceeding
     // Neon HTTP driver's per-parameter size limit
-    if (typeof updates.featuredImage === 'string' && updates.featuredImage.startsWith('data:')) {
+    if (typeof updates.featuredImage === 'string' && isBase64DataUrl(updates.featuredImage)) {
       const slugHint = (updates.slug as string | undefined) ?? `post-${postId}`;
       updates.featuredImage = saveBase64ImageToDisk(updates.featuredImage, slugHint);
     }

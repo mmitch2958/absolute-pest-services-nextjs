@@ -1,8 +1,7 @@
 import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 import { sql } from '@/lib/db';
-import path from 'path';
-import fs from 'fs';
+import { saveBase64ImageToDisk } from '@/lib/blog-image';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,19 +19,6 @@ function slugify(title: string): string {
 
 function send(ctrl: ReadableStreamDefaultController, data: object) {
   ctrl.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(data)}\n\n`));
-}
-
-function saveBase64ImageToDisk(dataUrl: string, slugHint: string): string {
-  const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);
-  if (!match) throw new Error('Invalid base64 data URL');
-  const mimeToExt: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
-  const ext = mimeToExt[match[1]] ?? 'png';
-  const safeSlug = slugHint.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 40);
-  const filename = `${Date.now()}-${safeSlug}.${ext}`;
-  const dir = path.join(process.cwd(), 'public', 'blog-images');
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, filename), Buffer.from(match[2], 'base64'));
-  return `/blog-images/${filename}`;
 }
 
 async function generateHeroImage(prompt: string, slugHint: string): Promise<{ url: string; source: string } | null> {
