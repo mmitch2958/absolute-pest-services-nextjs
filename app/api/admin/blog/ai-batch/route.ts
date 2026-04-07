@@ -141,10 +141,30 @@ export async function POST(req: NextRequest) {
           const contentData = JSON.parse(raw);
           if (!contentData.content) throw new Error('No content returned from AI');
 
-          // Step B: generate 1 hero image
+          // Step B: craft a focused image prompt from the actual article content, then generate
           send(ctrl, { type: 'post_image', index: i });
+          let imagePrompt = topic.imagePrompt ?? '';
+          try {
+            const imgPromptCompletion = await openai.chat.completions.create({
+              model: 'gpt-4o-mini',
+              messages: [
+                {
+                  role: 'system',
+                  content: 'You write DALL-E 3 image prompts for pest control blog hero images. Write a single photorealistic, landscape 16:9 prompt depicting the specific subject of the article — the pest, situation, or solution — in a southeastern Pennsylvania residential context. No text, no watermarks, no logos. Return ONLY the prompt.',
+                },
+                {
+                  role: 'user',
+                  content: `Title: ${topic.title}\nCategory: ${topic.category}\nSummary: ${contentData.excerpt ?? topic.angle}`,
+                },
+              ],
+              max_tokens: 180,
+              temperature: 0.7,
+            });
+            imagePrompt = imgPromptCompletion.choices[0]?.message?.content?.trim() ?? imagePrompt;
+          } catch { /* keep existing prompt on failure */ }
+
           const imageResult = await generateHeroImage(
-            topic.imagePrompt ?? `${topic.category} pest control, southeastern Pennsylvania suburban home, professional, photorealistic, no text`
+            imagePrompt || `${topic.category} pest control, southeastern Pennsylvania suburban home, professional, photorealistic, no text`
           );
           if (imageResult) send(ctrl, { type: 'post_image_done', index: i, source: imageResult.source });
 

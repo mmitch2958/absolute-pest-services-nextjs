@@ -6,36 +6,54 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const INFERENCE_API = 'https://api.inference.sh/apps/run';
 const FLUX_APP = 'falai/flux-dev-lora';
 
-function buildImagePrompt(title: string, category: string): string {
-  const categoryPrompts: Record<string, string> = {
-    'Wildlife Control': 'wildlife animal removal, suburban Pennsylvania home exterior, professional wildlife control',
-    'Bed Bugs': 'close-up bed bug inspection, clean white bedding, professional pest inspection',
-    'Termites': 'termite damage on wood, home foundation inspection, Pennsylvania residential',
-    'Rodents': 'mouse or rat in home, residential pest control, suburban Pennsylvania',
-    'Seasonal Tips': 'home exterior pest prevention, Pennsylvania suburban neighborhood, seasonal',
-    'Ants': 'ant infestation close-up, kitchen or home interior, pest control inspection',
-    'Stinging Insects': 'wasp or bee nest on home exterior, professional pest removal',
-    'Mosquitoes': 'mosquito control treatment, suburban backyard Pennsylvania summer',
-  };
-  const hint = categoryPrompts[category] ?? 'pest control professional inspection, suburban Pennsylvania home';
-  return `${hint}, photorealistic, professional editorial photography, bright natural lighting, high detail, 16:9 wide angle, no text, no logos`;
+// Use GPT to craft a precise DALL-E prompt from the article's actual content
+async function buildAIImagePrompt(title: string, category: string, excerpt?: string): Promise<string> {
+  const context = excerpt
+    ? `Title: ${title}\nCategory: ${category}\nSummary: ${excerpt}`
+    : `Title: ${title}\nCategory: ${category}`;
+
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'system',
+        content: `You are an expert at writing DALL-E 3 image generation prompts for pest control blog hero images.
+Given a blog post's title, category, and summary, write a single photorealistic image prompt that:
+- Depicts the specific subject of the article visually (the pest, the situation, the solution)
+- Is set in a southeastern Pennsylvania residential or suburban context where appropriate
+- Is photorealistic, professional editorial photography style
+- Is wide-angle / landscape oriented (16:9)
+- Contains NO text, NO watermarks, NO logos, NO people's faces
+- Is vivid and specific — not generic
+Return ONLY the image prompt text, nothing else.`,
+      },
+      { role: 'user', content: context },
+    ],
+    max_tokens: 200,
+    temperature: 0.7,
+  });
+
+  return completion.choices[0]?.message?.content?.trim() ??
+    `${title}, pest control, southeastern Pennsylvania suburban home, photorealistic, professional editorial photography, no text`;
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { title, category } = await req.json();
+    const { title, category, excerpt } = await req.json();
     if (!title) return NextResponse.json({ error: 'title is required' }, { status: 400 });
 
-    const prompt = buildImagePrompt(title, category ?? '');
+    // Step 1: craft a relevant prompt from the article content
+    const prompt = await buildAIImagePrompt(title, category ?? 'General Pests', excerpt);
+
     let imageUrl: string | null = null;
     let source = '';
 
-    // 1. Try DALL-E 3 first (most reliable)
+    // Step 2: try DALL-E 3 first
     if (process.env.OPENAI_API_KEY) {
       try {
         const response = await openai.images.generate({
           model: 'dall-e-3',
-          prompt: `${prompt}. No watermarks, no text overlays.`,
+          prompt,
           n: 1,
           size: '1792x1024',
           quality: 'standard',
@@ -47,7 +65,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Fallback: inference.sh FLUX
+    // Step 3: fallback to inference.sh FLUX
     if (!imageUrl) {
       const inferenceKey = process.env.INFERENCESH_API_KEY;
       if (inferenceKey) {
@@ -76,7 +94,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Image generation failed — no provider returned an image.' }, { status: 500 });
     }
 
-    return NextResponse.json({ imageUrl, source });
+    return NextResponse.json({ imageUrl, source, prompt });
   } catch (err: any) {
     console.error('[blog/generate-image]', err);
     return NextResponse.json({ error: err.message || 'Image generation failed' }, { status: 500 });
