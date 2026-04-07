@@ -5,93 +5,143 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const INFERENCE_API = 'https://api.inference.sh/apps/run';
 const FLUX_APP = 'falai/flux-dev-lora';
+const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
+const GEMINI_IMAGE_MODEL = 'google/gemini-2.5-flash-image';
 
-// Use GPT to craft a precise DALL-E prompt from the article's actual content
+// ─── Step 1: craft a focused prompt using GPT ─────────────────────────────────
+
 async function buildAIImagePrompt(title: string, category: string, excerpt?: string): Promise<string> {
   const context = excerpt
     ? `Title: ${title}\nCategory: ${category}\nSummary: ${excerpt}`
     : `Title: ${title}\nCategory: ${category}`;
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content: `You are an expert at writing DALL-E 3 image generation prompts for pest control blog hero images.
-Given a blog post's title, category, and summary, write a single photorealistic image prompt that:
-- Depicts the specific subject of the article visually (the pest, the situation, the solution)
-- Is set in a southeastern Pennsylvania residential or suburban context where appropriate
-- Is photorealistic, professional editorial photography style
-- Is wide-angle / landscape oriented (16:9)
-- Contains NO text, NO watermarks, NO logos, NO people's faces
-- Is vivid and specific — not generic
-Return ONLY the image prompt text, nothing else.`,
-      },
-      { role: 'user', content: context },
-    ],
-    max_tokens: 200,
-    temperature: 0.7,
-  });
-
-  return completion.choices[0]?.message?.content?.trim() ??
-    `${title}, pest control, southeastern Pennsylvania suburban home, photorealistic, professional editorial photography, no text`;
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `You write photorealistic image generation prompts for pest control blog hero images.
+Given the blog's title, category, and summary, write a single descriptive prompt that:
+- Depicts the specific pest, situation, or solution described in the article
+- Is set in a southeastern Pennsylvania residential/suburban context
+- Is wide landscape orientation (16:9)
+- Has NO text, NO watermarks, NO logos, NO human faces
+- Is vivid, specific, and photorealistic — not generic
+Return ONLY the prompt, nothing else.`,
+        },
+        { role: 'user', content: context },
+      ],
+      max_tokens: 200,
+      temperature: 0.7,
+    });
+    return completion.choices[0]?.message?.content?.trim() ??
+      `${title}, pest control, southeastern Pennsylvania suburban home, photorealistic, no text`;
+  } catch {
+    return `${category} pest control, southeastern Pennsylvania suburban home, photorealistic editorial photography, no text`;
+  }
 }
+
+// ─── Step 2: generate image — Gemini → DALL-E 3 → FLUX ───────────────────────
+
+async function tryGeminiOpenRouter(prompt: string): Promise<string | null> {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) return null;
+  try {
+    const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://absolutepestservices.com',
+        'X-Title': 'Absolute Pest Services Blog',
+      },
+      body: JSON.stringify({
+        model: GEMINI_IMAGE_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        modalities: ['image'],
+        max_tokens: 4000,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.warn('[generate-image] Gemini failed:', res.status, err?.error?.message);
+      return null;
+    }
+    const data = await res.json();
+    // Gemini returns image in message.images[0].image_url.url as base64 data URL
+    const imageUrl: string | null = data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
+    return imageUrl;
+  } catch (err: any) {
+    console.warn('[generate-image] Gemini error:', err.message);
+    return null;
+  }
+}
+
+async function tryDalle3(prompt: string): Promise<string | null> {
+  if (!process.env.OPENAI_API_KEY) return null;
+  try {
+    const response = await openai.images.generate({
+      model: 'dall-e-3',
+      prompt,
+      n: 1,
+      size: '1792x1024',
+      quality: 'standard',
+    });
+    return response.data?.[0]?.url ?? null;
+  } catch (err: any) {
+    console.warn('[generate-image] DALL-E 3 failed:', err.message);
+    return null;
+  }
+}
+
+async function tryFlux(prompt: string): Promise<string | null> {
+  const key = process.env.INFERENCESH_API_KEY;
+  if (!key) return null;
+  try {
+    const res = await fetch(INFERENCE_API, {
+      method: 'POST',
+      headers: { 'x-api-key': key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ app: FLUX_APP, input: { prompt, num_images: 1, image_size: 'landscape_16_9' } }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const images = data?.images ?? data?.output?.images ?? data?.data?.images ?? [];
+    return images[0]?.url ?? images[0] ?? null;
+  } catch (err: any) {
+    console.warn('[generate-image] FLUX error:', err.message);
+    return null;
+  }
+}
+
+// ─── Route handler ────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   try {
     const { title, category, excerpt } = await req.json();
     if (!title) return NextResponse.json({ error: 'title is required' }, { status: 400 });
 
-    // Step 1: craft a relevant prompt from the article content
     const prompt = await buildAIImagePrompt(title, category ?? 'General Pests', excerpt);
 
+    // Try providers in order: Gemini 2.5 Flash → DALL-E 3 → FLUX
     let imageUrl: string | null = null;
     let source = '';
 
-    // Step 2: try DALL-E 3 first
-    if (process.env.OPENAI_API_KEY) {
-      try {
-        const response = await openai.images.generate({
-          model: 'dall-e-3',
-          prompt,
-          n: 1,
-          size: '1792x1024',
-          quality: 'standard',
-        });
-        imageUrl = response.data?.[0]?.url ?? null;
-        if (imageUrl) source = 'dalle3';
-      } catch (err: any) {
-        console.warn('[generate-image] DALL-E 3 failed:', err.message);
-      }
-    }
+    imageUrl = await tryGeminiOpenRouter(prompt);
+    if (imageUrl) { source = 'gemini-2.5-flash'; }
 
-    // Step 3: fallback to inference.sh FLUX
     if (!imageUrl) {
-      const inferenceKey = process.env.INFERENCESH_API_KEY;
-      if (inferenceKey) {
-        try {
-          const res = await fetch(INFERENCE_API, {
-            method: 'POST',
-            headers: { 'x-api-key': inferenceKey, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ app: FLUX_APP, input: { prompt, num_images: 1, image_size: 'landscape_16_9' } }),
-          });
-          if (res.ok) {
-            const data = await res.json();
-            const images = data?.images ?? data?.output?.images ?? data?.data?.images ?? [];
-            imageUrl = images[0]?.url ?? images[0] ?? null;
-            if (imageUrl) source = 'flux';
-          } else {
-            const errData = await res.json().catch(() => ({}));
-            console.warn('[generate-image] inference.sh failed:', res.status, errData?.error?.message);
-          }
-        } catch (err: any) {
-          console.warn('[generate-image] inference.sh error:', err.message);
-        }
-      }
+      imageUrl = await tryDalle3(prompt);
+      if (imageUrl) source = 'dalle3';
     }
 
     if (!imageUrl) {
-      return NextResponse.json({ error: 'Image generation failed — no provider returned an image.' }, { status: 500 });
+      imageUrl = await tryFlux(prompt);
+      if (imageUrl) source = 'flux';
+    }
+
+    if (!imageUrl) {
+      return NextResponse.json({ error: 'All image providers failed. Check API keys and credits.' }, { status: 500 });
     }
 
     return NextResponse.json({ imageUrl, source, prompt });

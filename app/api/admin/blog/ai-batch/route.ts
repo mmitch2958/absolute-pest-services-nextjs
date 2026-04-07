@@ -18,8 +18,43 @@ function send(ctrl: ReadableStreamDefaultController, data: object) {
   ctrl.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(data)}\n\n`));
 }
 
+const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
+const GEMINI_IMAGE_MODEL = 'google/gemini-2.5-flash-image';
+
 async function generateHeroImage(prompt: string): Promise<{ url: string; source: string } | null> {
-  // 1. Try DALL-E 3 first (reliable, uses existing OpenAI key)
+  // 1. Gemini 2.5 Flash via OpenRouter (returns base64 data URL)
+  const orKey = process.env.OPENROUTER_API_KEY;
+  if (orKey) {
+    try {
+      const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${orKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://absolutepestservices.com',
+          'X-Title': 'Absolute Pest Services Blog',
+        },
+        body: JSON.stringify({
+          model: GEMINI_IMAGE_MODEL,
+          messages: [{ role: 'user', content: prompt }],
+          modalities: ['image'],
+          max_tokens: 4000,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const url: string | null = data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
+        if (url) return { url, source: 'gemini-2.5-flash' };
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        console.warn('[ai-batch] Gemini failed:', res.status, errData?.error?.message);
+      }
+    } catch (err: any) {
+      console.warn('[ai-batch] Gemini error:', err.message);
+    }
+  }
+
+  // 2. Fallback: DALL-E 3
   try {
     const response = await openai.images.generate({
       model: 'dall-e-3',
@@ -34,7 +69,7 @@ async function generateHeroImage(prompt: string): Promise<{ url: string; source:
     console.warn('[ai-batch] DALL-E 3 failed:', err.message);
   }
 
-  // 2. Fallback: inference.sh FLUX
+  // 3. Fallback: inference.sh FLUX
   const inferenceKey = process.env.INFERENCESH_API_KEY;
   if (inferenceKey) {
     try {
@@ -48,12 +83,9 @@ async function generateHeroImage(prompt: string): Promise<{ url: string; source:
         const images = data?.images ?? data?.output?.images ?? data?.data?.images ?? [];
         const url: string | null = images[0]?.url ?? images[0] ?? null;
         if (url) return { url, source: 'flux' };
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        console.warn('[ai-batch] inference.sh failed:', res.status, errData?.error?.message);
       }
     } catch (err: any) {
-      console.warn('[ai-batch] inference.sh error:', err.message);
+      console.warn('[ai-batch] FLUX error:', err.message);
     }
   }
 
