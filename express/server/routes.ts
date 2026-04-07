@@ -2173,6 +2173,8 @@ Return the article as JSON with fields:
               propertyType: req.body.propertyType || "residential",
               clientType: "prospect",
               status: "pending",
+              phone: req.body.phone || null,
+              email: req.body.email || null,
             });
             resolvedClientId = newClient.id;
           } catch (e) {
@@ -2206,6 +2208,28 @@ Return the article as JSON with fields:
         res.status(400).json({ success: false, message: "Invalid job log data", errors: error.errors });
       } else {
         console.error("Error creating job log:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+
+  // POST /api/field/site-locations — field employee creates a new site for a commercial customer
+  app.post("/api/field/site-locations", requireFieldAuth, async (req, res) => {
+    try {
+      const data = insertSiteLocationSchema.parse({
+        name: req.body.name,
+        customerId: req.body.customerId || null,
+        customerName: req.body.customerName,
+        phone: req.body.phone || null,
+        contactEmail: req.body.contactEmail || null,
+      });
+      const site = await storage.createSiteLocation(data);
+      res.json({ success: true, site });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      } else {
+        console.error("Error creating site location:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
       }
     }
@@ -2265,6 +2289,33 @@ Return the article as JSON with fields:
       if (amount !== undefined) updates.amount = String(amount);
       if (materials !== undefined) updates.materials = materials || null;
       const updated = await storage.updateJobLog(id, updates as any);
+
+      // Retroactive contact info editing
+      if (req.body.customerPhone !== undefined || req.body.customerEmail !== undefined) {
+        const log = await storage.getJobLog(id);
+        if (log?.clientId) {
+          const clientUpdates: any = {};
+          if (req.body.customerPhone !== undefined) clientUpdates.phone = req.body.customerPhone || null;
+          if (req.body.customerEmail !== undefined) clientUpdates.email = req.body.customerEmail || null;
+          await storage.updateClient(log.clientId, clientUpdates);
+        }
+      }
+      if (req.body.sitePhone !== undefined || req.body.siteContactEmail !== undefined) {
+        const log = await storage.getJobLog(id);
+        if (log) {
+          const sites = await storage.getSiteLocations();
+          const site = sites.find(s =>
+            s.name === log.siteLocation &&
+            (log.clientId ? s.customerId === log.clientId : s.customerName === log.customerName)
+          );
+          if (site) {
+            const siteUpdates: any = {};
+            if (req.body.sitePhone !== undefined) siteUpdates.phone = req.body.sitePhone || null;
+            if (req.body.siteContactEmail !== undefined) siteUpdates.contactEmail = req.body.siteContactEmail || null;
+            await storage.updateSiteLocation(site.id, siteUpdates);
+          }
+        }
+      }
       res.json({ success: true, jobLog: updated });
     } catch (error) {
       console.error("Error updating field job log:", error);

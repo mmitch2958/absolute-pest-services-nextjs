@@ -362,6 +362,11 @@ function EditModal({ log, serviceRates, onClose, onSaved }: EditModalProps) {
   const [editMaterials, setEditMaterials] = useState<MaterialsData>(
     (log.materials as MaterialsData) ?? null
   );
+  const [showExtraFields, setShowExtraFields] = useState(false);
+  const [editCustomerPhone, setEditCustomerPhone] = useState("");
+  const [editCustomerEmail, setEditCustomerEmail] = useState("");
+  const [editSitePhone, setEditSitePhone] = useState("");
+  const [editSiteContactEmail, setEditSiteContactEmail] = useState("");
   const form = useForm({
     defaultValues: {
       customerName: log.customerName,
@@ -427,7 +432,13 @@ function EditModal({ log, serviceRates, onClose, onSaved }: EditModalProps) {
           </button>
         </div>
 
-        <form onSubmit={form.handleSubmit(v => mutation.mutate(v))} className="p-5 space-y-4">
+        <form onSubmit={form.handleSubmit(v => mutation.mutate({
+          ...v,
+          customerPhone: editCustomerPhone || null,
+          customerEmail: editCustomerEmail || null,
+          sitePhone: editSitePhone || null,
+          siteContactEmail: editSiteContactEmail || null,
+        }))} className="p-5 space-y-4">
           {/* Customer name */}
           <div className="space-y-1.5">
             <Label>Customer Name *</Label>
@@ -477,8 +488,63 @@ function EditModal({ log, serviceRates, onClose, onSaved }: EditModalProps) {
           {/* Site Location */}
           <div className="space-y-1.5">
             <Label>Site Location *</Label>
-            <Input {...form.register("siteLocation", { required: true })} placeholder="e.g. Main building, Warehouse B" />
+            <div className="flex items-center gap-2">
+              <Input {...form.register("siteLocation", { required: true })} placeholder="e.g. Main building, Warehouse B" className="flex-1" />
+              <button
+                type="button"
+                onClick={() => setShowExtraFields(!showExtraFields)}
+                className="text-primary text-sm font-medium px-2 py-1 border rounded hover:bg-primary/5"
+                title="Add contact information"
+              >
+                + Contact Info
+              </button>
+            </div>
           </div>
+
+          {/* Extra contact info fields - collapsible */}
+          {showExtraFields && (
+            <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-dashed">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Contact Information</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Customer Phone</Label>
+                  <Input
+                    type="tel"
+                    value={editCustomerPhone}
+                    onChange={e => setEditCustomerPhone(e.target.value)}
+                    placeholder="(555) 555-5555"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Customer Email</Label>
+                  <Input
+                    type="email"
+                    value={editCustomerEmail}
+                    onChange={e => setEditCustomerEmail(e.target.value)}
+                    placeholder="customer@example.com"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Site Contact Phone</Label>
+                  <Input
+                    type="tel"
+                    value={editSitePhone}
+                    onChange={e => setEditSitePhone(e.target.value)}
+                    placeholder="Site phone"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Site Contact Email</Label>
+                  <Input
+                    type="email"
+                    value={editSiteContactEmail}
+                    onChange={e => setEditSiteContactEmail(e.target.value)}
+                    placeholder="Site contact email"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Site Address */}
           <div className="space-y-1.5">

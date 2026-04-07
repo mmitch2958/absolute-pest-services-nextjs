@@ -346,6 +346,8 @@ export const siteLocations = pgTable("site_locations", {
   name: text("name").notNull(),
   customerId: integer("customer_id").references(() => clients.id),
   customerName: text("customer_name"),
+  phone: text("phone"),
+  contactEmail: text("contact_email"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
