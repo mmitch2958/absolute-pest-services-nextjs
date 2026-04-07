@@ -1,12 +1,16 @@
 import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 import { sql } from '@/lib/db';
+import path from 'path';
+import fs from 'fs';
 
 export const dynamic = 'force-dynamic';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const INFERENCE_API = 'https://api.inference.sh/apps/run';
 const FLUX_APP = 'falai/flux-dev-lora';
+const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
+const GEMINI_IMAGE_MODEL = 'google/gemini-2.5-flash-image';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -18,11 +22,21 @@ function send(ctrl: ReadableStreamDefaultController, data: object) {
   ctrl.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(data)}\n\n`));
 }
 
-const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
-const GEMINI_IMAGE_MODEL = 'google/gemini-2.5-flash-image';
+function saveBase64ImageToDisk(dataUrl: string, slugHint: string): string {
+  const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);
+  if (!match) throw new Error('Invalid base64 data URL');
+  const mimeToExt: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+  const ext = mimeToExt[match[1]] ?? 'png';
+  const safeSlug = slugHint.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 40);
+  const filename = `${Date.now()}-${safeSlug}.${ext}`;
+  const dir = path.join(process.cwd(), 'public', 'blog-images');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, filename), Buffer.from(match[2], 'base64'));
+  return `/blog-images/${filename}`;
+}
 
-async function generateHeroImage(prompt: string): Promise<{ url: string; source: string } | null> {
-  // 1. Gemini 2.5 Flash via OpenRouter (returns base64 data URL)
+async function generateHeroImage(prompt: string, slugHint: string): Promise<{ url: string; source: string } | null> {
+  // 1. Gemini 2.5 Flash via OpenRouter (returns base64 data URL — saved to disk)
   const orKey = process.env.OPENROUTER_API_KEY;
   if (orKey) {
     try {
@@ -43,8 +57,11 @@ async function generateHeroImage(prompt: string): Promise<{ url: string; source:
       });
       if (res.ok) {
         const data = await res.json();
-        const url: string | null = data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
-        if (url) return { url, source: 'gemini-2.5-flash' };
+        const raw: string | null = data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
+        if (raw) {
+          const url = raw.startsWith('data:') ? saveBase64ImageToDisk(raw, slugHint) : raw;
+          return { url, source: 'gemini-2.5-flash' };
+        }
       } else {
         const errData = await res.json().catch(() => ({}));
         console.warn('[ai-batch] Gemini failed:', res.status, errData?.error?.message);
@@ -54,7 +71,7 @@ async function generateHeroImage(prompt: string): Promise<{ url: string; source:
     }
   }
 
-  // 2. Fallback: DALL-E 3
+  // 2. Fallback: DALL-E 3 (returns HTTPS URL directly)
   try {
     const response = await openai.images.generate({
       model: 'dall-e-3',
@@ -69,7 +86,7 @@ async function generateHeroImage(prompt: string): Promise<{ url: string; source:
     console.warn('[ai-batch] DALL-E 3 failed:', err.message);
   }
 
-  // 3. Fallback: inference.sh FLUX
+  // 3. Fallback: inference.sh FLUX (returns HTTPS URL directly)
   const inferenceKey = process.env.INFERENCESH_API_KEY;
   if (inferenceKey) {
     try {
@@ -175,6 +192,7 @@ export async function POST(req: NextRequest) {
 
           // Step B: craft a focused image prompt from the actual article content, then generate
           send(ctrl, { type: 'post_image', index: i });
+          const slugHint = slugify(topic.title);
           let imagePrompt = topic.imagePrompt ?? '';
           try {
             const imgPromptCompletion = await openai.chat.completions.create({
@@ -196,13 +214,14 @@ export async function POST(req: NextRequest) {
           } catch { /* keep existing prompt on failure */ }
 
           const imageResult = await generateHeroImage(
-            imagePrompt || `${topic.category} pest control, southeastern Pennsylvania suburban home, professional, photorealistic, no text`
+            imagePrompt || `${topic.category} pest control, southeastern Pennsylvania suburban home, professional, photorealistic, no text`,
+            slugHint
           );
           if (imageResult) send(ctrl, { type: 'post_image_done', index: i, source: imageResult.source });
 
           // Step C: save to DB as draft
           send(ctrl, { type: 'post_saving', index: i });
-          const slug = await uniqueSlug(slugify(topic.title));
+          const slug = await uniqueSlug(slugHint);
           const tags = Array.isArray(contentData.tags) ? contentData.tags : (topic.seoKeywords ?? []);
 
           const rows = await sql`
@@ -241,6 +260,7 @@ export async function POST(req: NextRequest) {
           });
 
         } catch (err: any) {
+          console.error('[ai-batch] post error:', err);
           send(ctrl, { type: 'post_error', index: i, title: topic.title, message: err.message ?? 'Unknown error' });
         }
       }

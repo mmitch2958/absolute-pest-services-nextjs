@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import path from 'path';
+import fs from 'fs';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -7,6 +9,21 @@ const INFERENCE_API = 'https://api.inference.sh/apps/run';
 const FLUX_APP = 'falai/flux-dev-lora';
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
 const GEMINI_IMAGE_MODEL = 'google/gemini-2.5-flash-image';
+
+// ─── Save base64 data URL to disk, return relative URL path ──────────────────
+
+function saveBase64ImageToDisk(dataUrl: string, slugHint: string): string {
+  const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);
+  if (!match) throw new Error('Invalid base64 data URL');
+  const mimeToExt: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+  const ext = mimeToExt[match[1]] ?? 'png';
+  const safeSlug = slugHint.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 40);
+  const filename = `${Date.now()}-${safeSlug}.${ext}`;
+  const dir = path.join(process.cwd(), 'public', 'blog-images');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, filename), Buffer.from(match[2], 'base64'));
+  return `/blog-images/${filename}`;
+}
 
 // ─── Step 1: craft a focused prompt using GPT ─────────────────────────────────
 
@@ -44,7 +61,7 @@ Return ONLY the prompt, nothing else.`,
 
 // ─── Step 2: generate image — Gemini → DALL-E 3 → FLUX ───────────────────────
 
-async function tryGeminiOpenRouter(prompt: string): Promise<string | null> {
+async function tryGeminiOpenRouter(prompt: string, slugHint: string): Promise<string | null> {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) return null;
   try {
@@ -69,9 +86,12 @@ async function tryGeminiOpenRouter(prompt: string): Promise<string | null> {
       return null;
     }
     const data = await res.json();
-    // Gemini returns image in message.images[0].image_url.url as base64 data URL
-    const imageUrl: string | null = data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
-    return imageUrl;
+    const raw: string | null = data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
+    if (!raw) return null;
+    if (raw.startsWith('data:')) {
+      return saveBase64ImageToDisk(raw, slugHint);
+    }
+    return raw;
   } catch (err: any) {
     console.warn('[generate-image] Gemini error:', err.message);
     return null;
@@ -122,12 +142,12 @@ export async function POST(req: NextRequest) {
     if (!title) return NextResponse.json({ error: 'title is required' }, { status: 400 });
 
     const prompt = await buildAIImagePrompt(title, category ?? 'General Pests', excerpt);
+    const slugHint = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-    // Try providers in order: Gemini 2.5 Flash → DALL-E 3 → FLUX
     let imageUrl: string | null = null;
     let source = '';
 
-    imageUrl = await tryGeminiOpenRouter(prompt);
+    imageUrl = await tryGeminiOpenRouter(prompt, slugHint);
     if (imageUrl) { source = 'gemini-2.5-flash'; }
 
     if (!imageUrl) {

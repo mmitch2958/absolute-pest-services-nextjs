@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/admin-session';
-import { sql } from '@/lib/db';
+import { sql, db } from '@/lib/db';
+import { blogPosts } from '@/shared/schema';
+import { eq } from 'drizzle-orm';
+import path from 'path';
+import fs from 'fs';
 
 async function requireAdmin() {
   const session = await getAdminSession();
@@ -8,6 +12,19 @@ async function requireAdmin() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   return null;
+}
+
+function saveBase64ImageToDisk(dataUrl: string, slugHint: string): string {
+  const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);
+  if (!match) throw new Error('Invalid base64 data URL');
+  const mimeToExt: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+  const ext = mimeToExt[match[1]] ?? 'png';
+  const safeSlug = slugHint.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 40);
+  const filename = `${Date.now()}-${safeSlug}.${ext}`;
+  const dir = path.join(process.cwd(), 'public', 'blog-images');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, filename), Buffer.from(match[2], 'base64'));
+  return `/blog-images/${filename}`;
 }
 
 export async function GET(
@@ -54,33 +71,55 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const allowedKeys = [
-      'title', 'slug', 'excerpt', 'content', 'author', 'category', 'tags',
-      'is_published', 'published_at', 'meta_title', 'meta_description', 'featured_image',
-    ];
-    const camelToSnake: Record<string, string> = {
-      metaTitle: 'meta_title', metaDescription: 'meta_description', featuredImage: 'featured_image',
-      isPublished: 'is_published', publishedAt: 'published_at',
+
+    // Normalise camelCase and snake_case field names to Drizzle schema camelCase
+    const snakeToCamel: Record<string, string> = {
+      featured_image: 'featuredImage',
+      is_published: 'isPublished',
+      published_at: 'publishedAt',
+      meta_title: 'metaTitle',
+      meta_description: 'metaDescription',
     };
 
+    const drizzleAllowed = new Set([
+      'title', 'slug', 'excerpt', 'content', 'author', 'category', 'tags',
+      'featuredImage', 'isPublished', 'publishedAt', 'metaTitle', 'metaDescription',
+    ]);
+
     const updates: Record<string, any> = {};
+
     for (const [key, value] of Object.entries(body)) {
-      const snakeKey = camelToSnake[key] || key;
-      if (allowedKeys.includes(snakeKey)) {
-        updates[snakeKey] = value;
+      const camelKey = snakeToCamel[key] ?? key;
+      if (drizzleAllowed.has(camelKey)) {
+        updates[camelKey] = value;
       }
     }
 
-    if (body.isPublished === true && !updates.published_at) {
-      updates.published_at = new Date();
+    // Auto-set publishedAt when first publishing
+    if (updates.isPublished === true && !updates.publishedAt) {
+      updates.publishedAt = new Date();
     }
 
-    if (Object.keys(updates).length === 0) {
+    // If featuredImage is a base64 data URL, save to disk to avoid exceeding
+    // Neon HTTP driver's per-parameter size limit
+    if (typeof updates.featuredImage === 'string' && updates.featuredImage.startsWith('data:')) {
+      const slugHint = (updates.slug as string | undefined) ?? `post-${postId}`;
+      updates.featuredImage = saveBase64ImageToDisk(updates.featuredImage, slugHint);
+    }
+
+    // Always update updatedAt
+    updates.updatedAt = new Date();
+
+    if (Object.keys(updates).length <= 1) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await sql`UPDATE blog_posts SET ${sql(updates as any)} WHERE id = ${postId} RETURNING *`;
+    const result = await db
+      .update(blogPosts)
+      .set(updates)
+      .where(eq(blogPosts.id, postId))
+      .returning();
+
     if (!result || result.length === 0) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
