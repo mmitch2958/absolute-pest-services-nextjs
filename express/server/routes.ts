@@ -1793,10 +1793,21 @@ Return the article as JSON with fields:
       const allClients = await storage.getClients();
       res.json({
         success: true,
-        clients: allClients.map(c => ({ id: c.id, name: c.name, address: c.address }))
+        clients: allClients.map(c => ({ id: c.id, name: c.name, address: c.address, phone: c.phone ?? null, email: c.email ?? null }))
       });
     } catch (error) {
       console.error("Error fetching clients for field:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/field/site-locations — field employees read site locations with contact info
+  app.get("/api/field/site-locations", requireFieldAuth, async (req, res) => {
+    try {
+      const sites = await storage.getSiteLocations();
+      res.json({ success: true, sites });
+    } catch (error) {
+      console.error("Error fetching site locations for field:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });
@@ -2292,21 +2303,19 @@ Return the article as JSON with fields:
 
       // Retroactive contact info editing
       if (req.body.customerPhone !== undefined || req.body.customerEmail !== undefined) {
-        const log = await storage.getJobLog(id);
-        if (log?.clientId) {
+        if (existing?.clientId) {
           const clientUpdates: any = {};
           if (req.body.customerPhone !== undefined) clientUpdates.phone = req.body.customerPhone || null;
           if (req.body.customerEmail !== undefined) clientUpdates.email = req.body.customerEmail || null;
-          await storage.updateClient(log.clientId, clientUpdates);
+          await storage.updateClient(existing.clientId, clientUpdates);
         }
       }
       if (req.body.sitePhone !== undefined || req.body.siteContactEmail !== undefined) {
-        const log = await storage.getJobLog(id);
-        if (log) {
+        if (existing) {
           const sites = await storage.getSiteLocations();
           const site = sites.find(s =>
-            s.name === log.siteLocation &&
-            (log.clientId ? s.customerId === log.clientId : s.customerName === log.customerName)
+            s.name === existing.siteLocation &&
+            (existing.clientId ? s.customerId === existing.clientId : s.customerName === existing.customerName)
           );
           if (site) {
             const siteUpdates: any = {};

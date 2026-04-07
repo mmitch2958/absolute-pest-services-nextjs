@@ -31,6 +31,7 @@ interface JobLogPhoto {
 interface JobLog {
   id: number;
   customerName: string;
+  clientId?: number | null;
   siteLocation: string;
   siteAddress?: string | null;
   servicedArea: string;
@@ -353,20 +354,28 @@ function PhotoThumbnailRow({ logId, onOpenLightbox }: { logId: number; onOpenLig
 interface EditModalProps {
   log: JobLog;
   serviceRates: ServiceRate[];
+  clients: Array<{ id: number; name: string; address: string | null }>;
+  sites: Array<{ id: number; name: string; customerId: number | null; customerName: string | null; phone: string | null; contactEmail: string | null }>;
   onClose: () => void;
   onSaved: () => void;
 }
 
-function EditModal({ log, serviceRates, onClose, onSaved }: EditModalProps) {
+function EditModal({ log, serviceRates, clients, sites, onClose, onSaved }: EditModalProps) {
   const { toast } = useToast();
   const [editMaterials, setEditMaterials] = useState<MaterialsData>(
     (log.materials as MaterialsData) ?? null
   );
   const [showExtraFields, setShowExtraFields] = useState(false);
-  const [editCustomerPhone, setEditCustomerPhone] = useState("");
-  const [editCustomerEmail, setEditCustomerEmail] = useState("");
-  const [editSitePhone, setEditSitePhone] = useState("");
-  const [editSiteContactEmail, setEditSiteContactEmail] = useState("");
+  // Pre-populate contact fields from existing client/site data
+  const existingClient = clients.find(c => c.id === log.clientId);
+  const existingSite = sites.find(s =>
+    s.name === log.siteLocation &&
+    (log.clientId ? s.customerId === log.clientId : s.customerName === log.customerName)
+  );
+  const [editCustomerPhone, setEditCustomerPhone] = useState(existingClient?.phone || "");
+  const [editCustomerEmail, setEditCustomerEmail] = useState(existingClient?.email || "");
+  const [editSitePhone, setEditSitePhone] = useState(existingSite?.phone || "");
+  const [editSiteContactEmail, setEditSiteContactEmail] = useState(existingSite?.contactEmail || "");
   const form = useForm({
     defaultValues: {
       customerName: log.customerName,
@@ -624,10 +633,22 @@ export default function FieldHistory() {
     enabled: !!employee,
   });
 
+  const { data: clientsData } = useQuery<{ success: boolean; clients: Array<{ id: number; name: string; address: string | null; phone: string | null; email: string | null }> }>({
+    queryKey: ["/api/field/clients"],
+    enabled: !!employee,
+  });
+
+  const { data: sitesData } = useQuery<{ success: boolean; sites: Array<{ id: number; name: string; customerId: number | null; customerName: string | null; phone: string | null; contactEmail: string | null }> }>({
+    queryKey: ["/api/field/site-locations"],
+    enabled: !!employee,
+  });
+
   if (!employee) return null;
 
   const logs = data?.jobLogs || [];
   const serviceRates = ratesData?.rates || [];
+  const clients = clientsData?.clients || [];
+  const sites = sitesData?.sites || [];
 
   const canEdit = (log: JobLog) => log.status !== "invoiced" && log.status !== "paid";
 
@@ -733,6 +754,8 @@ export default function FieldHistory() {
         <EditModal
           log={editingLog}
           serviceRates={serviceRates}
+          clients={clients}
+          sites={sites}
           onClose={() => setEditingLog(null)}
           onSaved={() => setEditingLog(null)}
         />

@@ -1136,10 +1136,10 @@ export default function FieldLog() {
         propertyType: customerPropertyType,
         isNewCustomer: customerAddingNew,
         newCustomerAddress: customerAddingNew ? newCustomerAddress : undefined,
-        phone: customerAddingNew ? newCustomerPhone : undefined,
-        email: customerAddingNew ? newCustomerEmail : undefined,
-        phone: locationAddingNew ? newSitePhone : undefined,
-        contactEmail: locationAddingNew ? newSiteContactEmail : undefined,
+        customerPhone: customerAddingNew ? newCustomerPhone : undefined,
+        customerEmail: customerAddingNew ? newCustomerEmail : undefined,
+        sitePhone: locationAddingNew ? newSitePhone : undefined,
+        siteContactEmail: locationAddingNew ? newSiteContactEmail : undefined,
       };
       let response;
       try {
@@ -1160,6 +1160,18 @@ export default function FieldLog() {
         }
       }
       return response.json();
+    },
+    onMutate: async () => {
+      // BUG-002 fix: When adding a new site location, create the site record first
+      if (locationAddingNew && form.getValues("siteLocation")) {
+        await apiRequest("POST", "/api/field/site-locations", {
+          name: form.getValues("siteLocation"),
+          customerId: form.getValues("clientId") || null,
+          customerName: form.getValues("customerName"),
+          phone: newSitePhone || null,
+          contactEmail: newSiteContactEmail || null,
+        });
+      }
     },
     onSuccess: async (result) => {
       const logId: number = result.jobLog?.id;
