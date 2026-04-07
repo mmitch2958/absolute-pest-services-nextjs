@@ -1171,6 +1171,7 @@ export default function FieldLog() {
           phone: newSitePhone || null,
           contactEmail: newSiteContactEmail || null,
         });
+        queryClient.invalidateQueries({ queryKey: ["/api/field/site-locations"] });
       }
     },
     onSuccess: async (result) => {
