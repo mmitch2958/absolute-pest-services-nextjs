@@ -19,7 +19,22 @@ function send(ctrl: ReadableStreamDefaultController, data: object) {
 }
 
 async function generateHeroImage(prompt: string): Promise<{ url: string; source: string } | null> {
-  // 1. Try inference.sh FLUX
+  // 1. Try DALL-E 3 first (reliable, uses existing OpenAI key)
+  try {
+    const response = await openai.images.generate({
+      model: 'dall-e-3',
+      prompt: `${prompt}. No text, no watermarks, no logos. Photorealistic photography style.`,
+      n: 1,
+      size: '1792x1024',
+      quality: 'standard',
+    });
+    const url = response.data?.[0]?.url ?? null;
+    if (url) return { url, source: 'dalle3' };
+  } catch (err: any) {
+    console.warn('[ai-batch] DALL-E 3 failed:', err.message);
+  }
+
+  // 2. Fallback: inference.sh FLUX
   const inferenceKey = process.env.INFERENCESH_API_KEY;
   if (inferenceKey) {
     try {
@@ -33,22 +48,14 @@ async function generateHeroImage(prompt: string): Promise<{ url: string; source:
         const images = data?.images ?? data?.output?.images ?? data?.data?.images ?? [];
         const url: string | null = images[0]?.url ?? images[0] ?? null;
         if (url) return { url, source: 'flux' };
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        console.warn('[ai-batch] inference.sh failed:', res.status, errData?.error?.message);
       }
-    } catch { /* fall through */ }
+    } catch (err: any) {
+      console.warn('[ai-batch] inference.sh error:', err.message);
+    }
   }
-
-  // 2. Fallback: DALL-E 3
-  try {
-    const response = await openai.images.generate({
-      model: 'dall-e-3',
-      prompt: `${prompt}. No text, no watermarks, no logos. Photorealistic photography style.`,
-      n: 1,
-      size: '1792x1024',
-      quality: 'standard',
-    });
-    const url = response.data?.[0]?.url ?? null;
-    if (url) return { url, source: 'dalle3' };
-  } catch { /* fall through */ }
 
   return null;
 }
