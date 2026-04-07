@@ -881,9 +881,13 @@ export default function FieldLog() {
 
   const [customerAddingNew, setCustomerAddingNew] = useState(false);
   const [locationAddingNew, setLocationAddingNew] = useState(false);
+  const [newSitePhone, setNewSitePhone] = useState("");
+  const [newSiteContactEmail, setNewSiteContactEmail] = useState("");
   const [areaAddingNew, setAreaAddingNew] = useState(false);
   const [customerPropertyType, setCustomerPropertyType] = useState("residential");
   const [newCustomerAddress, setNewCustomerAddress] = useState("");
+  const [newCustomerPhone, setNewCustomerPhone] = useState("");
+  const [newCustomerEmail, setNewCustomerEmail] = useState("");
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, any>>({});
   const [materials, setMaterials] = useState<MaterialsData>(null);
 
@@ -1132,6 +1136,10 @@ export default function FieldLog() {
         propertyType: customerPropertyType,
         isNewCustomer: customerAddingNew,
         newCustomerAddress: customerAddingNew ? newCustomerAddress : undefined,
+        customerPhone: customerAddingNew ? newCustomerPhone : undefined,
+        customerEmail: customerAddingNew ? newCustomerEmail : undefined,
+        sitePhone: locationAddingNew ? newSitePhone : undefined,
+        siteContactEmail: locationAddingNew ? newSiteContactEmail : undefined,
       };
       let response;
       try {
@@ -1152,6 +1160,19 @@ export default function FieldLog() {
         }
       }
       return response.json();
+    },
+    onMutate: async () => {
+      // BUG-002 fix: When adding a new site location, create the site record first
+      if (locationAddingNew && form.getValues("siteLocation")) {
+        await apiRequest("POST", "/api/field/site-locations", {
+          name: form.getValues("siteLocation"),
+          customerId: form.getValues("clientId") || null,
+          customerName: form.getValues("customerName"),
+          phone: newSitePhone || null,
+          contactEmail: newSiteContactEmail || null,
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/field/site-locations"] });
+      }
     },
     onSuccess: async (result) => {
       const logId: number = result.jobLog?.id;
@@ -1187,6 +1208,10 @@ export default function FieldLog() {
         setAreaAddingNew(false);
         setCustomerPropertyType(matchedClient?.propertyType ?? "residential");
         setNewCustomerAddress("");
+        setNewCustomerPhone("");
+        setNewCustomerEmail("");
+        setNewSitePhone("");
+        setNewSiteContactEmail("");
         setCustomFieldValues({});
         setMaterials(null);
         // Clean up blob URLs and reset photos
@@ -1265,6 +1290,10 @@ export default function FieldLog() {
         setLocationAddingNew(false);
         setAreaAddingNew(false);
         setNewCustomerAddress("");
+        setNewCustomerPhone("");
+        setNewCustomerEmail("");
+        setNewSitePhone("");
+        setNewSiteContactEmail("");
         setCustomFieldValues({});
         setMaterials(null);
         photos.forEach(p => URL.revokeObjectURL(p.localUrl));
@@ -1349,6 +1378,10 @@ export default function FieldLog() {
                             setCustomerPropertyType("residential");
                           }
                           setNewCustomerAddress("");
+                          setNewCustomerPhone("");
+                          setNewCustomerEmail("");
+                          setNewSitePhone("");
+                          setNewSiteContactEmail("");
                           form.setValue("siteLocation", "");
                           form.setValue("servicedArea", "");
                           setLocationAddingNew(false);
@@ -1416,6 +1449,34 @@ export default function FieldLog() {
                       />
                       <p className="text-xs text-muted-foreground">This will be stored on their client record and used as the site address.</p>
                     </div>
+
+                    {/* Phone Number */}
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">
+                        Phone Number <span className="text-muted-foreground text-xs">(optional)</span>
+                      </label>
+                      <Input
+                        type="tel"
+                        value={newCustomerPhone}
+                        onChange={e => setNewCustomerPhone(e.target.value)}
+                        placeholder="(555) 555-5555"
+                        className="h-12 text-base"
+                      />
+                    </div>
+
+                    {/* Email Address */}
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">
+                        Email Address <span className="text-muted-foreground text-xs">(optional)</span>
+                      </label>
+                      <Input
+                        type="email"
+                        value={newCustomerEmail}
+                        onChange={e => setNewCustomerEmail(e.target.value)}
+                        placeholder="customer@example.com"
+                        className="h-12 text-base"
+                      />
+                    </div>
                   </div>
                 )}
 
@@ -1460,6 +1521,36 @@ export default function FieldLog() {
                     </FormItem>
                   )}
                 />
+
+                {/* New site contact info - shown when adding a new site */}
+                {locationAddingNew && (
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">
+                        Site Phone <span className="text-muted-foreground text-xs">(optional)</span>
+                      </label>
+                      <Input
+                        type="tel"
+                        value={newSitePhone}
+                        onChange={e => setNewSitePhone(e.target.value)}
+                        placeholder="Site phone"
+                        className="h-12 text-base"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">
+                        Site Contact Email <span className="text-muted-foreground text-xs">(optional)</span>
+                      </label>
+                      <Input
+                        type="email"
+                        value={newSiteContactEmail}
+                        onChange={e => setNewSiteContactEmail(e.target.value)}
+                        placeholder="Site contact email"
+                        className="h-12 text-base"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <FormField
                   control={form.control}
