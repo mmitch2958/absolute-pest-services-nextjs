@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Plus, X, Loader2, Globe, FileText, Sparkles, ImageIcon, Bot, CheckCircle2, AlertCircle, Clock, PenLine, Image, Trash2 } from 'lucide-react';
+import { Search, Plus, X, Loader2, Globe, FileText, Sparkles, ImageIcon, Bot, CheckCircle2, AlertCircle, Clock, PenLine, Image, Trash2, Rss } from 'lucide-react';
 
 interface BlogPost {
   id: number;
@@ -332,6 +332,123 @@ function slotLabel(slot: PostSlot): string {
   return slot.errorMsg ?? 'Error';
 }
 
+// ─── RSS Syndicate Modal ──────────────────────────────────────────────────────
+
+type SyndicateDetail = { title: string; status: 'imported' | 'skipped' | 'error'; reason?: string };
+
+function RssSyndicateModal({ onClose, onComplete }: { onClose: () => void; onComplete: () => void }) {
+  const [feedUrl, setFeedUrl] = useState('https://pestmgt.com/feed/');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{ message: string; details: SyndicateDetail[] } | null>(null);
+  const [error, setError] = useState('');
+
+  async function handleImport() {
+    setLoading(true);
+    setError('');
+    setResult(null);
+    try {
+      const res = await fetch('/api/admin/blog/syndicate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feedUrl }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Import failed');
+      setResult({ message: data.message, details: data.results?.details ?? [] });
+      if ((data.results?.imported ?? 0) > 0) onComplete();
+    } catch (err: any) {
+      setError(err.message || 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <Rss className="w-5 h-5 text-orange-500" />
+            <h2 className="text-lg font-bold text-gray-900">Import RSS Feed</h2>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Feed URL</label>
+            <input
+              type="url"
+              value={feedUrl}
+              onChange={e => setFeedUrl(e.target.value)}
+              placeholder="https://pestmgt.com/feed/"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              disabled={loading}
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Imports all articles from the feed. Existing posts (matched by slug) are skipped.
+              Posts are imported as <strong>published</strong>.
+            </p>
+          </div>
+
+          {error && (
+            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              {error}
+            </div>
+          )}
+
+          {result && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                {result.message}
+              </p>
+              {result.details.length > 0 && (
+                <div className="max-h-52 overflow-y-auto border border-gray-100 rounded-lg divide-y divide-gray-100">
+                  {result.details.map((d, i) => (
+                    <div key={i} className={`flex items-start gap-2 px-3 py-2 text-xs ${
+                      d.status === 'imported' ? 'bg-green-50' :
+                      d.status === 'skipped' ? 'bg-gray-50' : 'bg-red-50'
+                    }`}>
+                      <span className={`mt-0.5 font-bold shrink-0 ${
+                        d.status === 'imported' ? 'text-green-600' :
+                        d.status === 'skipped' ? 'text-gray-400' : 'text-red-600'
+                      }`}>
+                        {d.status === 'imported' ? '✓' : d.status === 'skipped' ? '–' : '✗'}
+                      </span>
+                      <span className="truncate text-gray-700">{d.title}</span>
+                      {d.reason && <span className="text-gray-400 shrink-0">· {d.reason}</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-1">
+            <button
+              onClick={handleImport}
+              disabled={loading || !feedUrl.trim()}
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl text-sm transition-colors"
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rss className="w-4 h-4" />}
+              {loading ? 'Importing…' : 'Import Posts'}
+            </button>
+            <button onClick={onClose} className="px-4 py-2.5 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-sm font-medium transition-colors">
+              {result ? 'Done' : 'Cancel'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Batch AI Create Modal ────────────────────────────────────────────────────
+
 function BatchCreateModal({ onClose, onComplete }: { onClose: () => void; onComplete: () => void }) {
   const [phase, setPhase] = useState<'idle' | 'loading_topics' | 'select' | 'generating' | 'done' | 'fatal'>('idle');
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -644,6 +761,7 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBatchModal, setShowBatchModal] = useState(false);
+  const [showRssModal, setShowRssModal] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -694,7 +812,11 @@ export default function BlogPage() {
           <h1 className="text-2xl font-bold text-gray-900">Blog Posts</h1>
           <p className="text-sm text-gray-500 mt-1">{posts.length} posts</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button onClick={() => setShowRssModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors">
+            <Rss className="w-4 h-4" />Import RSS
+          </button>
           <button onClick={() => setShowBatchModal(true)}
             className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">
             <Bot className="w-4 h-4" />AI Create 6 Posts
@@ -766,6 +888,9 @@ export default function BlogPage() {
       )}
       {editingPost && (
         <PostModal post={editingPost} onSave={(data) => handleSave(data, editingPost.id)} onClose={() => setEditingPost(null)} onDelete={handleDelete} />
+      )}
+      {showRssModal && (
+        <RssSyndicateModal onClose={() => setShowRssModal(false)} onComplete={fetchData} />
       )}
       {showBatchModal && (
         <BatchCreateModal onClose={() => setShowBatchModal(false)} onComplete={fetchData} />
