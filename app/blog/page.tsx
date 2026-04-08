@@ -4,6 +4,8 @@ import Image from 'next/image'
 import { Phone } from 'lucide-react'
 import { sql } from '@/lib/db'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Pest Control Blog | Absolute Pest Services',
   description:

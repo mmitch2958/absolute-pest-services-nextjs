@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation'
 import { Phone } from 'lucide-react'
 import { sql } from '@/lib/db'
 
+export const dynamic = 'force-dynamic'
+
 interface DbPost {
   id: number
   title: string
