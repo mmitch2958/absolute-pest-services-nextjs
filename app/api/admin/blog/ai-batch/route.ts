@@ -21,7 +21,21 @@ function send(ctrl: ReadableStreamDefaultController, data: object) {
   ctrl.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(data)}\n\n`));
 }
 
-async function generateHeroImage(prompt: string, slugHint: string): Promise<{ url: string; source: string } | null> {
+type ImageStyle = 'realistic' | 'cartoon';
+
+function styleModifier(style: ImageStyle): string {
+  return style === 'cartoon'
+    ? 'colorful digital illustration style, cartoon art, friendly and approachable, vibrant colors, clean lines, children-book illustration aesthetic'
+    : 'photorealistic DSLR photography, natural lighting, sharp focus, suburban Pennsylvania residential setting';
+}
+
+async function generateHeroImage(
+  prompt: string,
+  slugHint: string,
+  style: ImageStyle,
+): Promise<{ url: string; source: string } | null> {
+  const styledPrompt = `${prompt}. ${styleModifier(style)}. No text, no watermarks, no logos, wide landscape 16:9 format.`;
+
   // 1. Gemini 2.5 Flash via OpenRouter (returns base64 data URL — saved to disk)
   const orKey = process.env.OPENROUTER_API_KEY;
   if (orKey) {
@@ -36,7 +50,7 @@ async function generateHeroImage(prompt: string, slugHint: string): Promise<{ ur
         },
         body: JSON.stringify({
           model: GEMINI_IMAGE_MODEL,
-          messages: [{ role: 'user', content: prompt }],
+          messages: [{ role: 'user', content: styledPrompt }],
           modalities: ['image'],
           max_tokens: 4000,
         }),
@@ -61,7 +75,7 @@ async function generateHeroImage(prompt: string, slugHint: string): Promise<{ ur
   try {
     const response = await openai.images.generate({
       model: 'dall-e-3',
-      prompt: `${prompt}. No text, no watermarks, no logos. Photorealistic photography style.`,
+      prompt: styledPrompt,
       n: 1,
       size: '1792x1024',
       quality: 'standard',
@@ -79,7 +93,7 @@ async function generateHeroImage(prompt: string, slugHint: string): Promise<{ ur
       const res = await fetch(INFERENCE_API, {
         method: 'POST',
         headers: { 'x-api-key': inferenceKey, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ app: FLUX_APP, input: { prompt, num_images: 1, image_size: 'landscape_16_9' } }),
+        body: JSON.stringify({ app: FLUX_APP, input: { prompt: styledPrompt, num_images: 1, image_size: 'landscape_16_9' } }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -179,14 +193,18 @@ export async function POST(req: NextRequest) {
           // Step B: craft a focused image prompt from the actual article content, then generate
           send(ctrl, { type: 'post_image', index: i });
           const slugHint = slugify(topic.title);
+          const imageStyle: ImageStyle = i % 2 === 0 ? 'realistic' : 'cartoon';
           let imagePrompt = topic.imagePrompt ?? '';
           try {
+            const styleInstruction = imageStyle === 'cartoon'
+              ? 'Write a prompt for a colorful cartoon/illustrated hero image'
+              : 'Write a prompt for a photorealistic DSLR-quality hero image';
             const imgPromptCompletion = await openai.chat.completions.create({
               model: 'gpt-4o-mini',
               messages: [
                 {
                   role: 'system',
-                  content: 'You write DALL-E 3 image prompts for pest control blog hero images. Write a single photorealistic, landscape 16:9 prompt depicting the specific subject of the article — the pest, situation, or solution — in a southeastern Pennsylvania residential context. No text, no watermarks, no logos. Return ONLY the prompt.',
+                  content: `You write image prompts for pest control blog hero images. ${styleInstruction} depicting the specific subject of the article — the pest, situation, or solution — in a southeastern Pennsylvania residential context. No text, no watermarks, no logos. Return ONLY the image subject description (not the style — that is added separately).`,
                 },
                 {
                   role: 'user',
@@ -200,12 +218,13 @@ export async function POST(req: NextRequest) {
           } catch { /* keep existing prompt on failure */ }
 
           const imageResult = await generateHeroImage(
-            imagePrompt || `${topic.category} pest control, southeastern Pennsylvania suburban home, professional, photorealistic, no text`,
-            slugHint
+            imagePrompt || `${topic.category} pest control scene, southeastern Pennsylvania suburban home`,
+            slugHint,
+            imageStyle,
           );
-          if (imageResult) send(ctrl, { type: 'post_image_done', index: i, source: imageResult.source });
+          if (imageResult) send(ctrl, { type: 'post_image_done', index: i, source: imageResult.source, style: imageStyle });
 
-          // Step C: save to DB as draft
+          // Step C: save to DB as published
           send(ctrl, { type: 'post_saving', index: i });
           const slug = await uniqueSlug(slugHint);
           const tags = Array.isArray(contentData.tags) ? contentData.tags : (topic.seoKeywords ?? []);
@@ -214,7 +233,7 @@ export async function POST(req: NextRequest) {
             INSERT INTO blog_posts (
               title, slug, excerpt, content, author, category, tags,
               featured_image, meta_title, meta_description,
-              is_published, created_at, updated_at
+              is_published, published_at, created_at, updated_at
             ) VALUES (
               ${topic.title},
               ${slug},
@@ -226,8 +245,8 @@ export async function POST(req: NextRequest) {
               ${imageResult?.url ?? null},
               ${contentData.metaTitle ?? topic.title},
               ${contentData.metaDescription ?? contentData.excerpt ?? ''},
-              ${false},
-              NOW(), NOW()
+              ${true},
+              NOW(), NOW(), NOW()
             )
             RETURNING id, title, slug
           `;

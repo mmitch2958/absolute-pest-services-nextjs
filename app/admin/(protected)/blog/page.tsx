@@ -303,6 +303,7 @@ interface PostSlot {
   id?: number;
   slug?: string;
   imageSource?: string;
+  imageStyle?: 'realistic' | 'cartoon';
   errorMsg?: string;
 }
 
@@ -328,7 +329,7 @@ function slotLabel(slot: PostSlot): string {
   if (slot.status === 'writing') return 'Writing article…';
   if (slot.status === 'imaging') return 'Generating hero image…';
   if (slot.status === 'saving') return 'Saving to database…';
-  if (slot.status === 'saved') return `Saved as draft ✓${slot.imageSource ? ` · image via ${slot.imageSource === 'dalle3' ? 'DALL-E 3' : 'FLUX'}` : ''}`;
+  if (slot.status === 'saved') return `Published live ✓${slot.imageSource ? ` · ${slot.imageStyle === 'cartoon' ? 'cartoon' : 'photo'} image via ${slot.imageSource === 'dalle3' ? 'DALL-E 3' : slot.imageSource === 'gemini-2.5-flash' ? 'Gemini' : 'FLUX'}` : ' · no image'}`;
   return slot.errorMsg ?? 'Error';
 }
 
@@ -529,13 +530,13 @@ function BatchCreateModal({ onClose, onComplete }: { onClose: () => void; onComp
       case 'post_start': updateSlot(event.index, { status: 'writing', title: event.title, category: event.category }); break;
       case 'post_writing': updateSlot(event.index, { status: 'writing' }); break;
       case 'post_image': updateSlot(event.index, { status: 'imaging' }); break;
-      case 'post_image_done': updateSlot(event.index, { imageSource: event.source }); break;
+      case 'post_image_done': updateSlot(event.index, { imageSource: event.source, imageStyle: event.style }); break;
       case 'post_saving': updateSlot(event.index, { status: 'saving' }); break;
       case 'post_saved': updateSlot(event.index, { status: 'saved', id: event.id, slug: event.slug, imageSource: event.imageSource }); break;
       case 'post_error': updateSlot(event.index, { status: 'error', errorMsg: event.message }); break;
       case 'complete':
         setSavedCount(event.savedCount);
-        setStatusMsg(`Done! ${event.savedCount} post${event.savedCount !== 1 ? 's' : ''} saved as drafts.`);
+        setStatusMsg(`Done! ${event.savedCount} post${event.savedCount !== 1 ? 's' : ''} published live.`);
         setPhase('done');
         break;
     }
@@ -709,8 +710,8 @@ function BatchCreateModal({ onClose, onComplete }: { onClose: () => void; onComp
             <div>
               <div className="text-center mb-6">
                 <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                <p className="font-bold text-gray-900 text-lg">{savedCount} post{savedCount !== 1 ? 's' : ''} saved as drafts</p>
-                <p className="text-gray-500 text-sm mt-1">Review and publish them from the post list.</p>
+                <p className="font-bold text-gray-900 text-lg">{savedCount} post{savedCount !== 1 ? 's' : ''} published live</p>
+                <p className="text-gray-500 text-sm mt-1">They are now visible on the blog. Edit anytime from the post list.</p>
               </div>
               <div className="space-y-2 mb-6">
                 {slots.map(slot => (
