@@ -43,22 +43,13 @@ const nextConfig: NextConfig = {
     return config
   },
 
-  // Image optimization — allow Unsplash and other external images
+  // Image optimization — allow any external https images (blog uses AI-generated images
+  // from various providers: DALL-E, FLUX, Gemini, Cloudinary, Unsplash, etc.)
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'absolutepestservices.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
+        hostname: '**',
         pathname: '/**',
       },
     ],

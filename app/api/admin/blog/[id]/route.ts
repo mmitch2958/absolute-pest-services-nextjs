@@ -28,14 +28,16 @@ export async function GET(
     }
 
     const rows = await sql`
-      SELECT * FROM blog_posts WHERE id = ${postId} LIMIT 1
+      SELECT *, is_published::int as is_published
+      FROM blog_posts WHERE id = ${postId} LIMIT 1
     `;
 
     if (!rows || rows.length === 0) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ post: rows[0] });
+    const post = rows[0];
+    return NextResponse.json({ post: { ...post, is_published: post.is_published === 1 || post.is_published === true } });
   } catch (err) {
     console.error('[admin/blog/[id]] GET error:', err);
     return NextResponse.json({ error: 'Failed to load blog post' }, { status: 500 });

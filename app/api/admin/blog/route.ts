@@ -10,6 +10,13 @@ async function requireAdmin() {
   return null;
 }
 
+// Neon HTTP driver v0.10.x has a bug where PostgreSQL boolean columns are always
+// returned as JavaScript `false` regardless of actual value. Work around by casting
+// is_published to int (0/1) which serialises correctly through the HTTP JSON layer.
+function normalisePosts(rows: any[]) {
+  return rows.map((r) => ({ ...r, is_published: r.is_published === 1 || r.is_published === true }));
+}
+
 export async function GET(request: NextRequest) {
   const authError = await requireAdmin();
   if (authError) return authError;
@@ -21,7 +28,9 @@ export async function GET(request: NextRequest) {
     if (search.trim()) {
       const pattern = `%${search.trim()}%`;
       const rows = await sql`
-        SELECT id, title, slug, excerpt, author, category, tags, is_published, published_at, created_at
+        SELECT id, title, slug, excerpt, author, category, tags,
+               is_published::int as is_published,
+               published_at, created_at
         FROM blog_posts
         WHERE title ILIKE ${pattern}
            OR author ILIKE ${pattern}
@@ -29,16 +38,18 @@ export async function GET(request: NextRequest) {
         ORDER BY created_at DESC
         LIMIT 100
       `;
-      return NextResponse.json({ posts: rows });
+      return NextResponse.json({ posts: normalisePosts(rows) });
     }
 
     const rows = await sql`
-      SELECT id, title, slug, excerpt, author, category, tags, is_published, published_at, created_at
+      SELECT id, title, slug, excerpt, author, category, tags,
+             is_published::int as is_published,
+             published_at, created_at
       FROM blog_posts
       ORDER BY created_at DESC
       LIMIT 100
     `;
-    return NextResponse.json({ posts: rows });
+    return NextResponse.json({ posts: normalisePosts(rows) });
   } catch (err) {
     console.error('[admin/blog] GET error:', err);
     return NextResponse.json({ error: 'Failed to load blog posts' }, { status: 500 });
@@ -72,10 +83,12 @@ export async function POST(request: NextRequest) {
         ${metaDescription?.trim() || null},
         ${featuredImage?.trim() || null}
       )
-      RETURNING id, title, slug, excerpt, content, author, category, tags, is_published, published_at, meta_title, meta_description, featured_image, created_at
+      RETURNING id, title, slug, excerpt, content, author, category, tags,
+                is_published::int as is_published,
+                published_at, meta_title, meta_description, featured_image, created_at
     `;
 
-    return NextResponse.json({ post: result[0] }, { status: 201 });
+    return NextResponse.json({ post: normalisePosts(result)[0] }, { status: 201 });
   } catch (err) {
     console.error('[admin/blog] POST error:', err);
     return NextResponse.json({ error: 'Failed to create blog post' }, { status: 500 });
