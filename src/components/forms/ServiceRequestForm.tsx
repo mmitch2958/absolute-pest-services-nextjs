@@ -74,12 +74,6 @@ export default function ServiceRequestForm() {
   // Fire Google Ads + GA4 conversion on successful form submission
   useEffect(() => {
     if (state?.success && typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'conversion', {
-        // Conversion: close_convert_lead (ID 7332580005), account 6800190976 where PA+DE campaigns run
-        send_to: 'AW-6800190976/7332580005',
-        event_category: 'Lead',
-        event_label: 'Service Request Form',
-      })
       window.gtag('event', 'form_submit', {
         event_category: 'Lead',
         event_label: 'Service Request Form',
