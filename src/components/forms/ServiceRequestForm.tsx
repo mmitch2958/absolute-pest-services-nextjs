@@ -75,12 +75,8 @@ export default function ServiceRequestForm() {
   useEffect(() => {
     if (state?.success && typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'conversion', {
-        // Label derived from conversion action ID 7332580005 (close_convert_lead, REQUEST_QUOTE)
-        // NOTE: Account 1038095551 not accessible via Maton API — label suffix was derived from
-        // conversion action ID. If form conversions don't appear in Google Ads, verify this label
-        // in Google Ads UI (Tools → Conversions) or switch send_to to AW-6800190976/7332580005
-        // if campaigns were migrated to the 6800190976 account.
-        send_to: 'AW-1038095551/7332580005',
+        // Conversion: close_convert_lead (ID 7332580005), account 6800190976 where PA+DE campaigns run
+        send_to: 'AW-6800190976/7332580005',
         event_category: 'Lead',
         event_label: 'Service Request Form',
       })
