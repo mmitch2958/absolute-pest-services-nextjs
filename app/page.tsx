@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Shield, Bug, TreePine, Zap, CheckCircle, Phone } from 'lucide-react'
+import { Shield, Bug, TreePine, Zap, CheckCircle, Phone, AlertTriangle, Calendar } from 'lucide-react'
 import GoogleReviews from '@/components/reviews/GoogleReviews'
 import SpringCarpenterBeeBanner from '@/components/spring-carpenter-bee-banner'
 
@@ -253,6 +253,97 @@ export default function HomePage() {
             >
               Schedule Service Now
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Carpenter Bee Season Section */}
+      <section className="py-16 bg-gradient-to-br from-amber-50 via-white to-green-50 border-y border-amber-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-amber-100 border border-amber-300 text-amber-800 text-sm font-bold px-4 py-2 rounded-full mb-6">
+                <AlertTriangle size={16} />
+                Spring 2026 — Active Now
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                Carpenter Bees Are Drilling Into PA &amp; DE Homes Right Now
+              </h2>
+              <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+                Every spring, carpenter bees return to bore into decks, fascia boards, eaves, and
+                porches across southeastern Pennsylvania and Delaware. One untreated female this spring
+                means 6&ndash;8 new bees this summer &mdash; each boring additional tunnels into your wood.
+              </p>
+              <div className="space-y-3 mb-8">
+                {[
+                  'Perfectly round holes (~1/2 inch) in exterior wood',
+                  'Sawdust piles beneath entry holes',
+                  'Large bees hovering near your deck or eaves',
+                  'Woodpecker damage from birds hunting larvae',
+                ].map((sign) => (
+                  <div key={sign} className="flex items-center gap-3 text-gray-700">
+                    <CheckCircle size={18} className="text-green-600 flex-shrink-0" />
+                    {sign}
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link
+                  href="/carpenter-bee-control"
+                  className="inline-flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-bold px-6 py-3 rounded-xl transition-colors"
+                >
+                  <Bug size={18} />
+                  Learn About Carpenter Bees
+                </Link>
+                <Link
+                  href="/carpenter-bee-treatment"
+                  className="inline-flex items-center justify-center gap-2 bg-green-700 hover:bg-green-800 text-white font-bold px-6 py-3 rounded-xl transition-colors"
+                >
+                  <Calendar size={18} />
+                  Schedule Treatment
+                </Link>
+              </div>
+            </div>
+
+            {/* Discount Banner Card */}
+            <div className="flex flex-col gap-6">
+              <div className="bg-white rounded-2xl shadow-lg border-2 border-amber-400 overflow-hidden">
+                <div className="bg-gradient-to-r from-green-700 to-green-800 px-6 py-4">
+                  <p className="text-green-100 text-sm font-semibold uppercase tracking-wider">Spring Carpenter Bee Special</p>
+                </div>
+                <div className="p-8 text-center">
+                  <p className="text-5xl font-extrabold text-green-700 mb-2">20% OFF</p>
+                  <p className="text-lg text-gray-600 mb-4">Professional Carpenter Bee Treatment</p>
+                  <div className="inline-block bg-gray-100 rounded-lg px-6 py-3 mb-6">
+                    <p className="text-sm text-gray-500 mb-1">Use coupon code</p>
+                    <p className="text-2xl font-mono font-bold text-green-700 tracking-wider">CBT26</p>
+                  </div>
+                  <div className="space-y-3">
+                    <Link
+                      href="/carpenter-bee-treatment"
+                      className="flex items-center justify-center gap-2 w-full bg-amber-500 hover:bg-amber-400 text-white font-bold px-6 py-4 rounded-xl text-lg transition-colors"
+                    >
+                      <Calendar size={20} />
+                      Get Free Estimate
+                    </Link>
+                    <a
+                      href="tel:484-643-2225"
+                      className="flex items-center justify-center gap-2 w-full border-2 border-green-700 text-green-700 hover:bg-green-50 font-bold px-6 py-4 rounded-xl text-lg transition-colors"
+                    >
+                      <Phone size={20} />
+                      Call 484-643-2225
+                    </a>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-4">Valid for new customers in PA &amp; DE during spring 2026.</p>
+                </div>
+              </div>
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+                <p className="text-amber-800 font-medium text-sm">
+                  <strong>Act now:</strong> Every week of delay means more eggs laid in more holes.
+                  Spring is the critical treatment window.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

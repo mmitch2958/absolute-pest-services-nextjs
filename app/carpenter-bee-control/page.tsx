@@ -123,6 +123,42 @@ export default function CarpenterBeeControlPage() {
         </div>
       </section>
 
+      {/* Sub-page Navigation */}
+      <section className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Link
+              href="/carpenter-bees"
+              className="group flex items-start gap-4 p-5 bg-gray-50 hover:bg-green-50 rounded-xl border border-gray-200 hover:border-green-300 transition-all"
+            >
+              <div className="w-12 h-12 bg-gray-900 group-hover:bg-green-700 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors">
+                <AlertTriangle className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 group-hover:text-green-700 transition-colors">Complete Homeowner Guide</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Identification, damage signs, season timeline, and DIY vs. professional comparison.
+                </p>
+              </div>
+            </Link>
+            <Link
+              href="/carpenter-bee-treatment"
+              className="group flex items-start gap-4 p-5 bg-gray-50 hover:bg-green-50 rounded-xl border border-gray-200 hover:border-green-300 transition-all"
+            >
+              <div className="w-12 h-12 bg-amber-500 group-hover:bg-green-700 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors">
+                <Calendar className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 group-hover:text-green-700 transition-colors">Treatment Service &amp; 20% Off</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Our 4-step treatment process, pricing, service areas, and the spring discount (code CBT26).
+                </p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* What Are Carpenter Bees */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
