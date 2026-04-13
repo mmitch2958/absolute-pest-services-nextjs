@@ -42,6 +42,7 @@ export default function Header() {
                   {[
                     { href: '/wildlife-control', label: 'Wildlife Control' },
                     { href: '/bat-removal', label: 'Bat Removal' },
+                    { href: '/carpenter-bee-treatment', label: 'Carpenter Bee Treatment' },
                     { href: '/wasp-removal', label: 'Wasp & Hornet Removal' },
                     { href: '/bed-bug-treatment', label: 'Bed Bug Treatment' },
                     { href: '/termite-treatment', label: 'Termite Treatment' },
