@@ -100,7 +100,7 @@ const steps = [
   {
     step: 2,
     title: 'Treat',
-    desc: 'Using professional-grade products, we treat the exterior of the infected area as well as deep into the galleries, which results in the maximum effectiveness.',
+    desc: 'We use EPA approved products to treat the exterior surfaces and galleries where bees are active. Our treatments have been applied effectively for over 20 years, helping homeowners prevent damage to their homes.',
     warning: 'Important: We do NOT plug the holes immediately. Bees need to pass through the treated entry points to contact and distribute the insecticide through the gallery.',
   },
 ]
