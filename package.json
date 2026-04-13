@@ -15,12 +15,12 @@
     "@swc/helpers": "^0.5.15",
     "@types/bcrypt": "^5.0.2",
     "bcrypt": "^5.1.1",
-    "drizzle-orm": "^0.40.1",
+    "drizzle-orm": "^0.45.2",
     "drizzle-zod": "^0.7.1",
     "framer-motion": "^12.38.0",
     "iron-session": "^8.0.4",
     "lucide-react": "^1.7.0",
-    "next": "^16.2.1",
+    "next": "^16.2.3",
     "nodemailer": "^8.0.4",
     "openai": "^6.33.0",
     "react": "^19.2.4",
@@ -42,7 +42,7 @@
     "@types/ws": "^8.18.1",
     "concurrently": "^9.2.1",
     "eslint": "^9.39.4",
-    "eslint-config-next": "^16.2.1",
+    "eslint-config-next": "^16.2.3",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3"
   }
