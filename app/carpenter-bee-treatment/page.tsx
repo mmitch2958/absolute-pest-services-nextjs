@@ -6,7 +6,7 @@ import { Phone, Calendar, CheckCircle, MapPin } from 'lucide-react'
 export const metadata: Metadata = {
   title: 'Professional Carpenter Bee Treatment Service | Absolute Pest Services',
   description:
-    'Expert carpenter bee treatment for PA & DE homes. Four-step process: inspect, treat, seal, and monitor. Free estimates. Call 484-643-2225. Spring special: 20% off with code CBT26.',
+    'Expert carpenter bee treatment for PA & DE homes. Inspect and treat with EPA approved products. Free estimates. Call 484-643-2225. Spring special: 20% off with code CBT26.',
   alternates: { canonical: 'https://absolutepestservices.com/carpenter-bee-treatment' },
   openGraph: {
     title: 'Professional Carpenter Bee Treatment | Absolute Pest Services',

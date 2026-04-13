@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "BCHZlQBMV2KHJvdfbKmEx"
+uri = "file://STEEL-CITY-AI-DEV-GUIDE.md"
+type = "text"
+title = "Steel City AI Dev Team — Development & Deployment Guide"
