@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Shield, Bug, TreePine, Zap, CheckCircle, Phone } from 'lucide-react'
 import GoogleReviews from '@/components/reviews/GoogleReviews'
+import SpringCarpenterBeeBanner from '@/components/spring-carpenter-bee-banner'
 
 export const metadata: Metadata = {
   title: 'Absolute Pest Services - Professional Pest Control in PA & DE',
@@ -142,6 +143,9 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
       />
+
+      {/* Carpenter Bee Spring Banner — dismissable, shown above the fold */}
+      <SpringCarpenterBeeBanner />
 
       {/* Hero Section — text on left, constrained image on right */}
       <section className="relative bg-gray-900 text-white">
