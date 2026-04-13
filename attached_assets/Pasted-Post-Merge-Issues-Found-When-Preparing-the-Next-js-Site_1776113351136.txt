@@ -1,0 +1,29 @@
+Post-Merge Issues Found When Preparing the Next.js Site for Publishing
+
+1. Security Vulnerabilities Blocking Deployment (Critical)
+
+The legacy express/ directory was left in the repository with its own package.json and package-lock.json. The lockfile had outdated, vulnerable dependency versions pinned — most critically axios@1.13.6 (2 critical CVEs). Replit's deployment security scanner scans the entire workspace, so even though the express app wasn't actively running, its lockfile triggered a deployment block.
+
+Fix: Removed the entire express/ directory. It was a legacy fallback from before the Next.js migration and had no node_modules installed, no references from the Next.js codebase, and no reason to remain in the repo.
+
+Lesson: When migrating to a new framework, fully remove the old codebase from the repository. Don't leave legacy directories with their own package files — scanners will flag their outdated dependencies even if they aren't being used.
+
+2. Carpenter Bee Content Not Wired Into Navigation
+
+Three carpenter bee pages were built (/carpenter-bee-control, /carpenter-bees, /carpenter-bee-treatment) along with a SpringCarpenterBeeBanner component, but none of them were linked from the site navigation. The banner component was imported on the homepage but is dismissable, so returning visitors wouldn't see it. There was no way for users to discover the carpenter bee content through normal browsing.
+
+Fix:
+
+Added "Carpenter Bee Control" to the Services dropdown in both the desktop Header and the mobile MobileMenu, linking to /carpenter-bee-control.
+Added a sub-navigation section on the /carpenter-bee-control page with clear cards linking to the two sub-pages (/carpenter-bees guide and /carpenter-bee-treatment service page).
+Added a large, prominent carpenter bee section on the homepage with damage signs, CTAs, and the 20% off discount banner (code CBT26).
+Lesson: When building new service pages, always update the site navigation (both desktop and mobile) and add visibility from the homepage. Pages that exist but aren't linked are invisible to users and search engines. Treat navigation updates as part of the definition of done for any new page.
+
+3. General Takeaway for Future Development
+
+Before considering a branch ready for merge or publishing:
+
+Run the security scanner and confirm zero critical/high vulnerabilities.
+Verify every new page is reachable from the site navigation.
+Remove any legacy code that's no longer part of the active application.
+Test the deployed preview, not just local dev, to catch cross-origin or module resolution issues.
