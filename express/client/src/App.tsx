@@ -19,6 +19,10 @@ import Termites from "@/pages/termites";
 import BedBugs from "@/pages/bed-bugs";
 import Rodents from "@/pages/rodents";
 import Wildlife from "@/pages/wildlife";
+import CarpenterBeesInfoPage from "@/pages/carpenter-bees";
+import CarpenterBeeControl from "@/pages/carpenter-bee-control";
+import CarpenterBeeTreatment from "@/pages/carpenter-bee-treatment";
+import CarpenterBeeSeasonBlogPost from "@/pages/blog/carpenter-bee-season-pa-de";
 import ServiceAreas from "@/pages/service-areas";
 import ChesterCountyPA from "@/pages/service-areas/chester-county-pa";
 import DelawareCountyPA from "@/pages/service-areas/delaware-county-pa";
@@ -163,6 +167,10 @@ function Router() {
       <Route path="/termites" component={Termites} />
       <Route path="/bed-bugs" component={BedBugs} />
       <Route path="/rodents" component={Rodents} />
+      <Route path="/carpenter-bees" component={CarpenterBeesInfoPage} />
+      <Route path="/carpenter-bee-control" component={CarpenterBeeControl} />
+      <Route path="/carpenter-bee-treatment" component={CarpenterBeeTreatment} />
+      <Route path="/blog/carpenter-bee-season-pa-de" component={CarpenterBeeSeasonBlogPost} />
       <Route path="/wildlife" component={Wildlife} />
       <Route path="/service-areas" component={ServiceAreas} />
       <Route path="/service-areas/chester-county-pa" component={ChesterCountyPA} />

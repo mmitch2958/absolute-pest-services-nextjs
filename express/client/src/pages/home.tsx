@@ -11,6 +11,7 @@ import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import GoogleBusinessIntegration, { GoogleBusinessSchema } from "@/components/google-business-integration";
 import GoogleReviewRequest from "@/components/google-review-request";
 import SeasonalAlerts from "@/components/seasonal-alerts";
+import SpringCarpenterBeeBanner from "@/components/spring-carpenter-bee-banner";
 
 import { trackPhoneClick, trackCtaClick } from "@/lib/analytics";
 
@@ -253,6 +254,7 @@ export default function Home() {
           </div>
         )}
       </header>
+      <SpringCarpenterBeeBanner />
       {/* Hero Section */}
       <section id="home" className="relative h-screen overflow-hidden">
         <HeroSlider />
