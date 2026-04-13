@@ -56,7 +56,7 @@ const faqSchema = {
     {
       '@type': 'Question',
       name: 'What is the four-step carpenter bee treatment process?',
-      acceptedAnswer: { '@type': 'Answer', text: 'APS treats carpenter bees in four steps: (1) Inspect — identify all galleries and assess damage; (2) Treat — apply insecticidal dust into each gallery; (3) Seal — close entry holes 1–2 weeks after treatment; (4) Monitor — follow-up inspections through the season.' },
+      acceptedAnswer: { '@type': 'Answer', text: 'APS treats carpenter bees in four steps: (1) Inspect — identify all galleries and assess damage; (2) Treat — using professional-grade products, we treat the exterior of the infected area as well as deep into the galleries for maximum effectiveness; (3) Seal — close entry holes 1–2 weeks after treatment; (4) Monitor — follow-up inspections through the season.' },
     },
     {
       '@type': 'Question',
@@ -100,7 +100,7 @@ const steps = [
   {
     step: 2,
     title: 'Treat',
-    desc: 'Using professional-grade insecticidal dust applied directly into each gallery opening, we treat the full tunnel system — not just the visible hole. Dust is puffed deep into the galleries where bees contact it as they move in and out. We time our applications for dusk when bees are inside and less active for maximum effectiveness.',
+    desc: 'Using professional-grade products, we treat the exterior of the infected area as well as deep into the galleries, which results in the maximum effectiveness.',
     warning: 'Important: We do NOT plug the holes immediately. Bees need to pass through the treated entry points to contact and distribute the insecticide through the gallery.',
   },
   {
