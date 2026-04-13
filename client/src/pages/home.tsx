@@ -26,7 +26,7 @@ export default function Home() {
       "@type": "WebSite",
       "url": "https://absolutepestservices.com",
       "name": "Absolute Pest Services",
-      "description": "Professional pest control in Chester County, Delaware County & Montgomery County PA, New Castle County DE, and Northeast MD.",
+      "description": "Professional pest control in Chester County, Delaware County & Montgomery County PA, and New Castle County DE.",
       "potentialAction": {
         "@type": "SearchAction",
         "target": {
@@ -55,7 +55,7 @@ export default function Home() {
           "name": "What pest control services do you offer?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "We offer termite treatment, bed bug extermination, rodent control, wildlife removal, bat removal, and general pest control for residential and commercial properties in PA, DE, and MD."
+            "text": "We offer termite treatment, bed bug extermination, rodent control, wildlife removal, bat removal, and general pest control for residential and commercial properties in PA and DE."
           }
         },
         {
@@ -184,17 +184,17 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[hsl(0,0%,98%)]">
       <Helmet>
-        <title>Absolute Pest Services - Professional Pest Control in PA, DE, MD</title>
-        <meta name="description" content="Expert pest control in Chester County, Delaware County &amp; Montgomery County PA, New Castle County DE, and Northeast MD. Wildlife control, bed bug treatment, termite control &amp; bat removal. Licensed, insured, 24/7 emergency service." />
+        <title>Absolute Pest Services - Professional Pest Control in PA &amp; DE</title>
+        <meta name="description" content="Expert pest control in Chester County, Delaware County &amp; Montgomery County PA, and New Castle County DE. Wildlife control, bed bug treatment, termite control &amp; bat removal. Licensed, insured, 24/7 emergency service." />
         <link rel="canonical" href="https://absolutepestservices.com/" />
-        <meta property="og:title" content="Absolute Pest Services - Professional Pest Control in PA, DE, MD" />
-        <meta property="og:description" content="Expert pest control across PA, DE &amp; MD. Humane wildlife control, bed bug treatment, termite protection &amp; bat removal. Licensed, insured &amp; available 24/7." />
+        <meta property="og:title" content="Absolute Pest Services - Professional Pest Control in PA &amp; DE" />
+        <meta property="og:description" content="Expert pest control across PA &amp; DE. Humane wildlife control, bed bug treatment, termite protection &amp; bat removal. Licensed, insured &amp; available 24/7." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://absolutepestservices.com/" />
         <meta property="og:image" content="https://absolutepestservices.com/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Absolute Pest Services - Professional Pest Control in PA, DE, MD" />
-        <meta name="twitter:description" content="Expert pest control in PA, DE &amp; MD. Humane wildlife control, bed bug treatment, termite protection &amp; bat removal." />
+        <meta name="twitter:title" content="Absolute Pest Services - Professional Pest Control in PA &amp; DE" />
+        <meta name="twitter:description" content="Expert pest control in PA &amp; DE. Humane wildlife control, bed bug treatment, termite protection &amp; bat removal." />
         <meta name="twitter:image" content="https://absolutepestservices.com/og-image.png" />
       </Helmet>
       <GoogleBusinessSchema />
@@ -511,7 +511,6 @@ export default function Home() {
                 <li><a href="/service-areas/delaware-county-pa" className="hover:text-white transition-colors">Delaware County, PA</a></li>
                 <li><a href="/service-areas/new-castle-county-de" className="hover:text-white transition-colors">New Castle County, DE</a></li>
                 <li><a href="/service-areas/montgomery-county-pa" className="hover:text-white transition-colors">Montgomery County, PA</a></li>
-                <li><a href="/service-areas/northeast-maryland" className="hover:text-white transition-colors">Northeast Maryland</a></li>
               </ul>
             </div>
           </div>

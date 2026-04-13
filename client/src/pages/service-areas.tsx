@@ -175,18 +175,7 @@ export default function ServiceAreas() {
               </Card>
             </Link>
             
-            <Link href="/service-areas/northeast-maryland">
-              <Card className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-105">
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Northeast Maryland</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Elkton, North East, Perryville, Rising Sun</p>
-                    <p className="text-sm font-medium text-teal-600 mt-1">610-325-4000</p>
-                  </div>
-                  <ArrowRight className="h-6 w-6 text-teal-600" />
-                </CardContent>
-              </Card>
-            </Link>
+
           </div>
         </div>
 

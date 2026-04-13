@@ -119,12 +119,6 @@ const ROUTE_META: Record<string, PageMeta> = {
     description:
       "Montgomery County PA: Expert pest control in Norristown, King of Prussia, Collegeville, Pottstown. Licensed, insured, emergency service available.",
   },
-  "/service-areas/northeast-maryland": {
-    title: "Northeast Maryland Pest Control Services | Absolute Pest Services",
-    description:
-      "Northeast MD: Expert pest control in Elkton, North East, Perryville, Rising Sun. Licensed, insured, emergency service available.",
-  },
-
   // ── City-level service area pages ────────────────────────────────────────
   "/service-areas/avondale-pa": {
     title: "Avondale PA Pest Control Services | Absolute Pest Services",
@@ -231,22 +225,6 @@ const ROUTE_META: Record<string, PageMeta> = {
     description:
       "Wilmington DE pest control: rodent control, wildlife removal, termite treatment near the Brandywine River. Delaware's largest city pest experts. Call 484-643-2225.",
   },
-  "/service-areas/aberdeen-md": {
-    title: "Aberdeen MD Pest Control Services | Absolute Pest Services",
-    description:
-      "Aberdeen MD pest control: wildlife removal, termite treatment, and rodent control near Aberdeen Proving Ground and the Chesapeake Bay. Call 484-643-2225.",
-  },
-  "/service-areas/bel-air-md": {
-    title: "Bel Air MD Pest Control Services | Absolute Pest Services",
-    description:
-      "Bel Air MD pest control: wildlife removal, termite treatment, and rodent control near I-95 in Harford County. Serving Bel Air and surrounding suburbs. Call 484-643-2225.",
-  },
-  "/service-areas/havre-de-grace-md": {
-    title: "Havre de Grace MD Pest Control Services | Absolute Pest Services",
-    description:
-      "Havre de Grace MD pest control: wildlife removal, termite treatment near the Susquehanna River and Chesapeake Bay. Historic waterfront city pest experts. Call 484-643-2225.",
-  },
-
   // ── 60 City × Service programmatic pages ─────────────────────────────────
   // General Pest Control (15 cities)
   "/pest-control-avondale-pa/": {

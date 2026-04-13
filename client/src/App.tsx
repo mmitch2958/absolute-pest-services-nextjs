@@ -26,7 +26,6 @@ import ChesterCountyPA from "@/pages/service-areas/chester-county-pa";
 import DelawareCountyPA from "@/pages/service-areas/delaware-county-pa";
 import NewCastleCountyDE from "@/pages/service-areas/new-castle-county-de";
 import MontgomeryCountyPA from "@/pages/service-areas/montgomery-county-pa";
-import NortheastMaryland from "@/pages/service-areas/northeast-maryland";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
 import CarpenterBeeSeasonBlogPost from "@/pages/blog/carpenter-bee-season-pade";
@@ -172,7 +171,6 @@ function Router() {
       <Route path="/service-areas/delaware-county-pa" component={DelawareCountyPA} />
       <Route path="/service-areas/new-castle-county-de" component={NewCastleCountyDE} />
       <Route path="/service-areas/montgomery-county-pa" component={MontgomeryCountyPA} />
-      <Route path="/service-areas/northeast-maryland" component={NortheastMaryland} />
       {/* Additional city-level service area pages */}
       <Route path="/service-areas/coatesville-pa" component={CoatesvillePA} />
       <Route path="/service-areas/cochranville-pa" component={CochranvillePA} />
