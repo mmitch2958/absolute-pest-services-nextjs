@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,73 @@ export default function GlenMillsPA() {
   ];
 
   const faqs = [{"q":"Does living near Ridley Creek State Park increase pest risk in Glen Mills?","a":"Significantly. Ridley Creek State Park is a major wildlife reservoir. Raccoons, squirrels, deer, foxes, and even black bears have been spotted in Glen Mills neighborhoods adjacent to the park."},{"q":"Are termites a problem in Glen Mills new construction?","a":"Yes. Even newer construction near wooded lots in Thornbury Township and Garnet Valley can have termite pressure from surrounding woodland. Pre-treatment and annual inspections are advised."},{"q":"What should Glen Mills homeowners know about stink bugs?","a":"Glen Mills is firmly in Chester County stink bug territory. Our fall barrier applications prevent thousands of stink bugs from overwintering in your walls and attic."},{"q":"Do you service the Garnet Valley and Chester Heights areas?","a":"Yes. Glen Mills, Garnet Valley, Chester Heights, and Thornbury Township are all within our Chester County service area."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/glen-mills-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Does living near Ridley Creek State Park increase pest risk in Glen Mills?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Significantly. Ridley Creek State Park is a major wildlife reservoir. Raccoons, squirrels, deer, foxes, and even black bears have been spotted in Glen Mills neighborhoods adjacent to the park."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are termites a problem in Glen Mills new construction?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Even newer construction near wooded lots in Thornbury Township and Garnet Valley can have termite pressure from surrounding woodland. Pre-treatment and annual inspections are advised."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What should Glen Mills homeowners know about stink bugs?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Glen Mills is firmly in Chester County stink bug territory. Our fall barrier applications prevent thousands of stink bugs from overwintering in your walls and attic."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you service the Garnet Valley and Chester Heights areas?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Glen Mills, Garnet Valley, Chester Heights, and Thornbury Township are all within our Chester County service area."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -31,64 +99,7 @@ export default function GlenMillsPA() {
         <meta property="og:description" content="Glen Mills, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225." />
         <meta property="og:url" content="https://absolutepestservices.com/service-areas/glen-mills-pa" />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/glen-mills-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Does living near Ridley Creek State Park increase pest risk in Glen Mills?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Significantly. Ridley Creek State Park is a major wildlife reservoir. Raccoons, squirrels, deer, foxes, and even black bears have been spotted in Glen Mills neighborhoods adjacent to the park."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites a problem in Glen Mills new construction?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Even newer construction near wooded lots in Thornbury Township and Garnet Valley can have termite pressure from surrounding woodland. Pre-treatment and annual inspections are advised."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What should Glen Mills homeowners know about stink bugs?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Glen Mills is firmly in Chester County stink bug territory. Our fall barrier applications prevent thousands of stink bugs from overwintering in your walls and attic."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you service the Garnet Valley and Chester Heights areas?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Glen Mills, Garnet Valley, Chester Heights, and Thornbury Township are all within our Chester County service area."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
 
       <Header />
@@ -188,7 +199,7 @@ export default function GlenMillsPA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -249,7 +260,7 @@ export default function GlenMillsPA() {
         </div>
       </section>
 
-      <!-- Our Services in Glen Mills -->
+      {/* Our Services in Glen Mills */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

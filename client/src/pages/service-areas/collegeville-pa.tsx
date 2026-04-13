@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,73 @@ export default function CollegevillePA() {
   ];
 
   const faqs = [{"q": "Do properties near Perkiomen Creek have higher pest pressure?", "a": "Yes. Creek-adjacent properties see higher activity from raccoons, muskrats, and mosquitoes. We offer perimeter treatment and wildlife management for creek-side homes."}, {"q": "Are mice common in Collegeville's older homes?", "a": "Older construction in the borough and Trappe areas has more entry points for mice. We seal gaps and bait strategically to eliminate infestations and prevent re-entry."}, {"q": "Can you handle wildlife near Ursinus College?", "a": "Yes. Campus-adjacent properties see increased raccoon and groundhog activity. We provide humane trapping and relocation throughout the Collegeville area."}, {"q": "What pests are most common in Collegeville in spring?", "a": "Spring brings ants, stink bugs emerging from overwintering, and increased wildlife activity. Call us for a seasonal prevention plan."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/collegeville-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Do properties near Perkiomen Creek have higher pest pressure?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Creek-adjacent properties see higher activity from raccoons, muskrats, and mosquitoes. We offer perimeter treatment and wildlife management for creek-side homes."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are mice common in Collegeville's older homes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Older construction in the borough and Trappe areas has more entry points for mice. We seal gaps and bait strategically to eliminate infestations and prevent re-entry."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can you handle wildlife near Ursinus College?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Campus-adjacent properties see increased raccoon and groundhog activity. We provide humane trapping and relocation throughout the Collegeville area."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What pests are most common in Collegeville in spring?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Spring brings ants, stink bugs emerging from overwintering, and increased wildlife activity. Call us for a seasonal prevention plan."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -28,64 +96,7 @@ export default function CollegevillePA() {
         <title>Collegeville PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Collegeville PA pest control: wildlife removal, termite treatment, and rodent control near Ursinus College and Perkiomen Creek. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/collegeville-pa" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/collegeville-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Do properties near Perkiomen Creek have higher pest pressure?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Creek-adjacent properties see higher activity from raccoons, muskrats, and mosquitoes. We offer perimeter treatment and wildlife management for creek-side homes."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are mice common in Collegeville's older homes?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Older construction in the borough and Trappe areas has more entry points for mice. We seal gaps and bait strategically to eliminate infestations and prevent re-entry."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can you handle wildlife near Ursinus College?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Campus-adjacent properties see increased raccoon and groundhog activity. We provide humane trapping and relocation throughout the Collegeville area."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What pests are most common in Collegeville in spring?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Spring brings ants, stink bugs emerging from overwintering, and increased wildlife activity. Call us for a seasonal prevention plan."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -218,7 +229,7 @@ export default function CollegevillePA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -279,7 +290,7 @@ export default function CollegevillePA() {
         </div>
       </section>
 
-      <!-- Our Services in Collegeville -->
+      {/* Our Services in Collegeville */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

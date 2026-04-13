@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,73 @@ export default function BelAirMD() {
   ];
 
   const faqs = [{"q": "Are pests common in Bel Air's growing suburban developments?", "a": "Yes. New construction in Bel Air North and Fallston displaces wildlife and creates new pest pressure as development expands into wooded areas. We offer new-construction pest exclusion."}, {"q": "Do I-95 corridor properties near Bel Air have rodent problems?", "a": "Commercial and residential properties near the I-95 interchange in Abingdon and Bel Air South see elevated rodent activity. We provide targeted baiting and exclusion."}, {"q": "Are termites active in Harford County?", "a": "Yes. Maryland's climate supports year-round subterranean termite activity. We recommend annual inspections for all Bel Air-area homeowners."}, {"q": "How quickly can you respond to a wildlife emergency in Bel Air?", "a": "We provide same-day emergency service throughout Bel Air and Harford County."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/bel-air-md"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Are pests common in Bel Air's growing suburban developments?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. New construction in Bel Air North and Fallston displaces wildlife and creates new pest pressure as development expands into wooded areas. We offer new-construction pest exclusion."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do I-95 corridor properties near Bel Air have rodent problems?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Commercial and residential properties near the I-95 interchange in Abingdon and Bel Air South see elevated rodent activity. We provide targeted baiting and exclusion."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are termites active in Harford County?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Maryland's climate supports year-round subterranean termite activity. We recommend annual inspections for all Bel Air-area homeowners."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How quickly can you respond to a wildlife emergency in Bel Air?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We provide same-day emergency service throughout Bel Air and Harford County."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -28,64 +96,7 @@ export default function BelAirMD() {
         <title>Bel Air MD Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Bel Air MD pest control: wildlife removal, termite treatment, and rodent control near I-95 in Harford County. Serving Bel Air and surrounding suburbs. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/bel-air-md" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/bel-air-md"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Are pests common in Bel Air's growing suburban developments?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. New construction in Bel Air North and Fallston displaces wildlife and creates new pest pressure as development expands into wooded areas. We offer new-construction pest exclusion."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do I-95 corridor properties near Bel Air have rodent problems?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Commercial and residential properties near the I-95 interchange in Abingdon and Bel Air South see elevated rodent activity. We provide targeted baiting and exclusion."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites active in Harford County?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Maryland's climate supports year-round subterranean termite activity. We recommend annual inspections for all Bel Air-area homeowners."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How quickly can you respond to a wildlife emergency in Bel Air?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We provide same-day emergency service throughout Bel Air and Harford County."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -218,7 +229,7 @@ export default function BelAirMD() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -279,7 +290,7 @@ export default function BelAirMD() {
         </div>
       </section>
 
-      <!-- Our Services in Bel Air -->
+      {/* Our Services in Bel Air */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,73 @@ export default function CoatesvillePA() {
   ];
 
   const faqs = [{"q":"Do older Coatesville homes need termite inspections?","a":"Yes. Many Coatesville properties have older foundations and aged framing highly susceptible to subterranean termites. A free inspection will reveal any current activity."},{"q":"Are rodents a common problem in Coatesville?","a":"Coatesville's mix of older commercial and residential buildings creates numerous entry points for mice and rats. We provide thorough exclusion alongside population control."},{"q":"How quickly can you respond to wildlife calls in Coatesville?","a":"Most wildlife calls in Coatesville receive same-day or next-day service. Emergency situations are handled around the clock."},{"q":"Do you handle stink bug prevention in Coatesville?","a":"Yes. We offer fall exterior barrier treatments that significantly reduce stink bug intrusion across Coatesville homes."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/coatesville-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Do older Coatesville homes need termite inspections?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Many Coatesville properties have older foundations and aged framing highly susceptible to subterranean termites. A free inspection will reveal any current activity."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are rodents a common problem in Coatesville?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Coatesville's mix of older commercial and residential buildings creates numerous entry points for mice and rats. We provide thorough exclusion alongside population control."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How quickly can you respond to wildlife calls in Coatesville?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Most wildlife calls in Coatesville receive same-day or next-day service. Emergency situations are handled around the clock."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you handle stink bug prevention in Coatesville?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We offer fall exterior barrier treatments that significantly reduce stink bug intrusion across Coatesville homes."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -31,64 +99,7 @@ export default function CoatesvillePA() {
         <meta property="og:description" content="Coatesville, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225." />
         <meta property="og:url" content="https://absolutepestservices.com/service-areas/coatesville-pa" />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/coatesville-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Do older Coatesville homes need termite inspections?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Many Coatesville properties have older foundations and aged framing highly susceptible to subterranean termites. A free inspection will reveal any current activity."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are rodents a common problem in Coatesville?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Coatesville's mix of older commercial and residential buildings creates numerous entry points for mice and rats. We provide thorough exclusion alongside population control."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How quickly can you respond to wildlife calls in Coatesville?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Most wildlife calls in Coatesville receive same-day or next-day service. Emergency situations are handled around the clock."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you handle stink bug prevention in Coatesville?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We offer fall exterior barrier treatments that significantly reduce stink bug intrusion across Coatesville homes."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
 
       <Header />
@@ -188,7 +199,7 @@ export default function CoatesvillePA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -249,7 +260,7 @@ export default function CoatesvillePA() {
         </div>
       </section>
 
-      <!-- Our Services in Coatesville -->
+      {/* Our Services in Coatesville */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

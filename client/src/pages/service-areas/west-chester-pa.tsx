@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,6 +30,73 @@ export default function WestChesterPA() {
 
   const faqs = [
     {
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/west-chester-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Do older homes in West Chester Borough need special pest treatment?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. West Chester\\"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are termites common in the West Chester area?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely. Chester County\\"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How quickly can you respond to a wildlife emergency in West Chester?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We provide 24/7 emergency service throughout West Chester and surrounding townships. Most calls receive same-day response."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you handle bat removal in historic West Chester buildings?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Bat colonies are common in older stone and brick buildings in West Chester. Our licensed team performs humane exclusion that complies with Pennsylvania bat protection regulations."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
       q: 'Do older homes in West Chester Borough need special pest treatment?',
       a: 'Yes. West Chester\'s historic 18th-century downtown homes have aged foundations and wall voids that create ideal entry points for rodents, carpenter ants, and termites. We tailor treatment plans to protect older structures while respecting their historic character.',
     },
@@ -52,64 +120,7 @@ export default function WestChesterPA() {
         <title>West Chester PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="West Chester PA pest control: expert wildlife removal, termite treatment, bed bug control, and rodent extermination. Serving West Chester Borough and surrounding townships. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/west-chester-pa" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/west-chester-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Do older homes in West Chester Borough need special pest treatment?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. West Chester\\"
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites common in the West Chester area?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Absolutely. Chester County\\"
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How quickly can you respond to a wildlife emergency in West Chester?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We provide 24/7 emergency service throughout West Chester and surrounding townships. Most calls receive same-day response."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you handle bat removal in historic West Chester buildings?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Bat colonies are common in older stone and brick buildings in West Chester. Our licensed team performs humane exclusion that complies with Pennsylvania bat protection regulations."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
 
       {/* Header */}
@@ -210,7 +221,7 @@ export default function WestChesterPA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -271,7 +282,7 @@ export default function WestChesterPA() {
         </div>
       </section>
 
-      <!-- Our Services in West Chester -->
+      {/* Our Services in West Chester */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

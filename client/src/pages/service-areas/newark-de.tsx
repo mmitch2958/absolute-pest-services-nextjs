@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,73 @@ export default function NewarkDE() {
   ];
 
   const faqs = [{"q": "Are bed bugs common in Newark rental properties near UD?", "a": "Yes. High student turnover in rental housing creates elevated bed bug risk. We offer fast, discreet bed bug treatment for landlords and tenants throughout the Newark area."}, {"q": "Do properties near UD's campus have unique pest challenges?", "a": "College-town environments with high foot traffic, food service, and older housing stock create pest pressure. We provide residential and commercial treatment plans."}, {"q": "Are termites common in Newark's growing suburban areas?", "a": "Yes. New development in Glasgow and Bear disturbs soil and can accelerate subterranean termite activity. We provide pre-construction and post-construction inspections."}, {"q": "How quickly can you respond to an emergency in Newark DE?", "a": "We offer same-day emergency service throughout Newark and New Castle County."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/newark-de"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Are bed bugs common in Newark rental properties near UD?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. High student turnover in rental housing creates elevated bed bug risk. We offer fast, discreet bed bug treatment for landlords and tenants throughout the Newark area."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do properties near UD's campus have unique pest challenges?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "College-town environments with high foot traffic, food service, and older housing stock create pest pressure. We provide residential and commercial treatment plans."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are termites common in Newark's growing suburban areas?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. New development in Glasgow and Bear disturbs soil and can accelerate subterranean termite activity. We provide pre-construction and post-construction inspections."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How quickly can you respond to an emergency in Newark DE?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We offer same-day emergency service throughout Newark and New Castle County."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -28,64 +96,7 @@ export default function NewarkDE() {
         <title>Newark DE Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Newark DE pest control: bed bug treatment, wildlife removal, termite control near the University of Delaware. Serving Newark and growing New Castle County suburbs. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/newark-de" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/newark-de"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Are bed bugs common in Newark rental properties near UD?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. High student turnover in rental housing creates elevated bed bug risk. We offer fast, discreet bed bug treatment for landlords and tenants throughout the Newark area."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do properties near UD's campus have unique pest challenges?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "College-town environments with high foot traffic, food service, and older housing stock create pest pressure. We provide residential and commercial treatment plans."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites common in Newark's growing suburban areas?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. New development in Glasgow and Bear disturbs soil and can accelerate subterranean termite activity. We provide pre-construction and post-construction inspections."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How quickly can you respond to an emergency in Newark DE?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We offer same-day emergency service throughout Newark and New Castle County."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -218,7 +229,7 @@ export default function NewarkDE() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -279,7 +290,7 @@ export default function NewarkDE() {
         </div>
       </section>
 
-      <!-- Our Services in Newark -->
+      {/* Our Services in Newark */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

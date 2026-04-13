@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,73 @@ export default function NorristownPA() {
   ];
 
   const faqs = [{"q": "Are rodents common near the Schuylkill River in Norristown?", "a": "Yes. Waterfront areas attract rats and mice year-round. We use targeted baiting and exclusion programs for properties near the Schuylkill."}, {"q": "Do older Norristown row homes have unique pest challenges?", "a": "Absolutely. Shared walls in row homes mean a problem in one unit can quickly spread. We offer multi-unit treatment plans to address infestations building-wide."}, {"q": "Can you treat commercial properties in downtown Norristown?", "a": "Yes. We provide commercial pest management for restaurants, offices, and retail properties throughout the Norristown business district."}, {"q": "How do you handle bat exclusion in Norristown's older buildings?", "a": "We perform humane bat exclusion following Pennsylvania state regulations. Our team seals entry points after the bats have exited naturally."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/norristown-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Are rodents common near the Schuylkill River in Norristown?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Waterfront areas attract rats and mice year-round. We use targeted baiting and exclusion programs for properties near the Schuylkill."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do older Norristown row homes have unique pest challenges?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely. Shared walls in row homes mean a problem in one unit can quickly spread. We offer multi-unit treatment plans to address infestations building-wide."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can you treat commercial properties in downtown Norristown?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We provide commercial pest management for restaurants, offices, and retail properties throughout the Norristown business district."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do you handle bat exclusion in Norristown's older buildings?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We perform humane bat exclusion following Pennsylvania state regulations. Our team seals entry points after the bats have exited naturally."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -28,64 +96,7 @@ export default function NorristownPA() {
         <title>Norristown PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Norristown PA pest control: rodent control, wildlife removal, termite treatment along the Schuylkill River corridor. Montgomery County's trusted pest experts. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/norristown-pa" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/norristown-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Are rodents common near the Schuylkill River in Norristown?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Waterfront areas attract rats and mice year-round. We use targeted baiting and exclusion programs for properties near the Schuylkill."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do older Norristown row homes have unique pest challenges?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Absolutely. Shared walls in row homes mean a problem in one unit can quickly spread. We offer multi-unit treatment plans to address infestations building-wide."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can you treat commercial properties in downtown Norristown?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We provide commercial pest management for restaurants, offices, and retail properties throughout the Norristown business district."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How do you handle bat exclusion in Norristown's older buildings?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We perform humane bat exclusion following Pennsylvania state regulations. Our team seals entry points after the bats have exited naturally."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -218,7 +229,7 @@ export default function NorristownPA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -279,7 +290,7 @@ export default function NorristownPA() {
         </div>
       </section>
 
-      <!-- Our Services in Norristown -->
+      {/* Our Services in Norristown */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

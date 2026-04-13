@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,73 @@ export default function AvondalePA() {
   ];
 
   const faqs = [{"q":"Why does Avondale see so much wildlife activity?","a":"Avondale borders the Brandywine Creek corridor and extensive agricultural land in New Garden Township, creating ideal wildlife movement routes into neighborhoods."},{"q":"Are bed bugs a problem in Avondale hotels or multi-family units?","a":"Yes. We treat multi-unit residential properties and commercial accounts throughout the Avondale area. Discreet service is available."},{"q":"Do you offer termite protection for new construction in Avondale?","a":"Yes. We provide pre-construction soil treatments and post-construction inspection programs for Avondale's newer developments."},{"q":"Can you help with stinging insects (bees, wasps) in Avondale?","a":"Yes. Yellow jackets, ground bees, and paper wasps are common spring/summer calls throughout Avondale and New Garden Township."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/avondale-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Why does Avondale see so much wildlife activity?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Avondale borders the Brandywine Creek corridor and extensive agricultural land in New Garden Township, creating ideal wildlife movement routes into neighborhoods."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are bed bugs a problem in Avondale hotels or multi-family units?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We treat multi-unit residential properties and commercial accounts throughout the Avondale area. Discreet service is available."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you offer termite protection for new construction in Avondale?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We provide pre-construction soil treatments and post-construction inspection programs for Avondale's newer developments."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can you help with stinging insects (bees, wasps) in Avondale?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Yellow jackets, ground bees, and paper wasps are common spring/summer calls throughout Avondale and New Garden Township."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -31,64 +99,7 @@ export default function AvondalePA() {
         <meta property="og:description" content="Avondale, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225." />
         <meta property="og:url" content="https://absolutepestservices.com/service-areas/avondale-pa" />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/avondale-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Why does Avondale see so much wildlife activity?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Avondale borders the Brandywine Creek corridor and extensive agricultural land in New Garden Township, creating ideal wildlife movement routes into neighborhoods."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are bed bugs a problem in Avondale hotels or multi-family units?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We treat multi-unit residential properties and commercial accounts throughout the Avondale area. Discreet service is available."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you offer termite protection for new construction in Avondale?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We provide pre-construction soil treatments and post-construction inspection programs for Avondale's newer developments."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can you help with stinging insects (bees, wasps) in Avondale?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Yellow jackets, ground bees, and paper wasps are common spring/summer calls throughout Avondale and New Garden Township."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
 
       <Header />
@@ -188,7 +199,7 @@ export default function AvondalePA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -249,7 +260,7 @@ export default function AvondalePA() {
         </div>
       </section>
 
-      <!-- Our Services in Avondale -->
+      {/* Our Services in Avondale */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

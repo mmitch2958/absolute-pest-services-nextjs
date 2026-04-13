@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,73 @@ export default function PottstownPA() {
   ];
 
   const faqs = [{"q": "Do industrial areas in Pottstown attract more rodents?", "a": "Yes. Older industrial properties and warehouses near the Manatawny River provide ideal harboring for rats and mice. We offer commercial rodent control programs with ongoing monitoring."}, {"q": "Are there termite risks in Pottstown's older housing stock?", "a": "Absolutely. Many of Pottstown's homes are 50\u2013100+ years old, making them more vulnerable to subterranean termites. We provide affordable inspections and treatment plans."}, {"q": "How do you handle stink bugs in Pottstown?", "a": "Stink bugs are a major fall nuisance in Montgomery County. We apply exterior barrier treatments in September to prevent mass overwintering invasions."}, {"q": "Do you serve commercial properties in Pottstown?", "a": "Yes. We provide commercial pest management for restaurants, warehouses, and retail throughout the Pottstown area."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/pottstown-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Do industrial areas in Pottstown attract more rodents?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Older industrial properties and warehouses near the Manatawny River provide ideal harboring for rats and mice. We offer commercial rodent control programs with ongoing monitoring."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are there termite risks in Pottstown's older housing stock?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely. Many of Pottstown's homes are 50\u2013100+ years old, making them more vulnerable to subterranean termites. We provide affordable inspections and treatment plans."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do you handle stink bugs in Pottstown?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Stink bugs are a major fall nuisance in Montgomery County. We apply exterior barrier treatments in September to prevent mass overwintering invasions."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you serve commercial properties in Pottstown?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We provide commercial pest management for restaurants, warehouses, and retail throughout the Pottstown area."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -28,64 +96,7 @@ export default function PottstownPA() {
         <title>Pottstown PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Pottstown PA pest control: rodent control, wildlife removal, and termite treatment in Montgomery County's industrial heritage corridor. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/pottstown-pa" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/pottstown-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Do industrial areas in Pottstown attract more rodents?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Older industrial properties and warehouses near the Manatawny River provide ideal harboring for rats and mice. We offer commercial rodent control programs with ongoing monitoring."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are there termite risks in Pottstown's older housing stock?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Absolutely. Many of Pottstown's homes are 50\u2013100+ years old, making them more vulnerable to subterranean termites. We provide affordable inspections and treatment plans."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How do you handle stink bugs in Pottstown?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Stink bugs are a major fall nuisance in Montgomery County. We apply exterior barrier treatments in September to prevent mass overwintering invasions."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you serve commercial properties in Pottstown?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We provide commercial pest management for restaurants, warehouses, and retail throughout the Pottstown area."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -218,7 +229,7 @@ export default function PottstownPA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -279,7 +290,7 @@ export default function PottstownPA() {
         </div>
       </section>
 
-      <!-- Our Services in Pottstown -->
+      {/* Our Services in Pottstown */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

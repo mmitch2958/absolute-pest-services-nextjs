@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,73 @@ export default function ChaddsFordPA() {
   ];
 
   const faqs = [{"q":"Do historic Chadds Ford estates need special pest consideration?","a":"Yes. Older stone and wood-framed Brandywine Valley estates often have complex construction with many potential entry points. We perform thorough inspections tailored to historic properties."},{"q":"Are deer a vector for tick infestations in Chadds Ford?","a":"Yes. Chadds Ford's open countryside and deer population create high tick pressure. Our yard tick control programs help protect families and pets."},{"q":"How common are termites in the Chadds Ford area?","a":"Very common. The mature woodland, moist creek-side soils, and older construction all elevate termite risk. Annual inspections are strongly recommended."},{"q":"Do you handle wildlife control near the Brandywine Battlefield?","a":"Yes. We serve the entire Chadds Ford Township and surrounding Brandywine Valley regardless of proximity to parks or historic sites."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/chadds-ford-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Do historic Chadds Ford estates need special pest consideration?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Older stone and wood-framed Brandywine Valley estates often have complex construction with many potential entry points. We perform thorough inspections tailored to historic properties."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are deer a vector for tick infestations in Chadds Ford?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Chadds Ford's open countryside and deer population create high tick pressure. Our yard tick control programs help protect families and pets."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How common are termites in the Chadds Ford area?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Very common. The mature woodland, moist creek-side soils, and older construction all elevate termite risk. Annual inspections are strongly recommended."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you handle wildlife control near the Brandywine Battlefield?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We serve the entire Chadds Ford Township and surrounding Brandywine Valley regardless of proximity to parks or historic sites."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -31,64 +99,7 @@ export default function ChaddsFordPA() {
         <meta property="og:description" content="Chadds Ford, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225." />
         <meta property="og:url" content="https://absolutepestservices.com/service-areas/chadds-ford-pa" />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/chadds-ford-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Do historic Chadds Ford estates need special pest consideration?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Older stone and wood-framed Brandywine Valley estates often have complex construction with many potential entry points. We perform thorough inspections tailored to historic properties."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are deer a vector for tick infestations in Chadds Ford?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Chadds Ford's open countryside and deer population create high tick pressure. Our yard tick control programs help protect families and pets."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How common are termites in the Chadds Ford area?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Very common. The mature woodland, moist creek-side soils, and older construction all elevate termite risk. Annual inspections are strongly recommended."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you handle wildlife control near the Brandywine Battlefield?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We serve the entire Chadds Ford Township and surrounding Brandywine Valley regardless of proximity to parks or historic sites."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
 
       <Header />
@@ -188,7 +199,7 @@ export default function ChaddsFordPA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -249,7 +260,7 @@ export default function ChaddsFordPA() {
         </div>
       </section>
 
-      <!-- Our Services in Chadds Ford -->
+      {/* Our Services in Chadds Ford */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

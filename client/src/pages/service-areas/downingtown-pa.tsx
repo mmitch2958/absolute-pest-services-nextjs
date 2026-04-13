@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,73 @@ export default function DowningtownPA() {
   ];
 
   const faqs = [{"q": "Does proximity to Marsh Creek State Park increase pest risk?", "a": "Yes. Properties near Marsh Creek see elevated activity from deer, raccoons, groundhogs, and geese. We offer wildlife exclusion and deterrent programs for park-adjacent homes."}, {"q": "Are stink bugs a major problem in Downingtown?", "a": "Stink bugs are very common in Chester County, especially in the fall. We provide exterior barrier treatments that dramatically reduce stink bug intrusion."}, {"q": "Do older Downingtown Borough homes need termite inspections?", "a": "Yes. Many borough homes date to the early 1900s and have wood foundations or aged framing that makes them vulnerable to termite damage. Call us for a free inspection."}, {"q": "How quickly can you respond to a wildlife call in Downingtown?", "a": "We offer same-day response for most wildlife emergencies throughout Downingtown and surrounding townships."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/downingtown-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Does proximity to Marsh Creek State Park increase pest risk?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Properties near Marsh Creek see elevated activity from deer, raccoons, groundhogs, and geese. We offer wildlife exclusion and deterrent programs for park-adjacent homes."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are stink bugs a major problem in Downingtown?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Stink bugs are very common in Chester County, especially in the fall. We provide exterior barrier treatments that dramatically reduce stink bug intrusion."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do older Downingtown Borough homes need termite inspections?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Many borough homes date to the early 1900s and have wood foundations or aged framing that makes them vulnerable to termite damage. Call us for a free inspection."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How quickly can you respond to a wildlife call in Downingtown?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We offer same-day response for most wildlife emergencies throughout Downingtown and surrounding townships."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -28,64 +96,7 @@ export default function DowningtownPA() {
         <title>Downingtown PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Downingtown PA pest control: wildlife removal, termite treatment, bed bug control near Marsh Creek State Park and East Brandywine. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/downingtown-pa" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/downingtown-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Does proximity to Marsh Creek State Park increase pest risk?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Properties near Marsh Creek see elevated activity from deer, raccoons, groundhogs, and geese. We offer wildlife exclusion and deterrent programs for park-adjacent homes."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are stink bugs a major problem in Downingtown?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Stink bugs are very common in Chester County, especially in the fall. We provide exterior barrier treatments that dramatically reduce stink bug intrusion."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do older Downingtown Borough homes need termite inspections?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Many borough homes date to the early 1900s and have wood foundations or aged framing that makes them vulnerable to termite damage. Call us for a free inspection."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How quickly can you respond to a wildlife call in Downingtown?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We offer same-day response for most wildlife emergencies throughout Downingtown and surrounding townships."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -218,7 +229,7 @@ export default function DowningtownPA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -279,7 +290,7 @@ export default function DowningtownPA() {
         </div>
       </section>
 
-      <!-- Our Services in Downingtown -->
+      {/* Our Services in Downingtown */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

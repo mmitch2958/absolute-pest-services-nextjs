@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,73 @@ export default function CochranvillePA() {
   ];
 
   const faqs = [{"q":"What pests are most common on Cochranville farmland properties?","a":"Mice, groundhogs, raccoons, and deer are the top wildlife calls. Agricultural land creates an abundance of harborage and food sources that push pests toward homes."},{"q":"Are termites a risk in rural Cochranville?","a":"Absolutely. Moist agricultural soils are ideal for subterranean termites. Older farm structures and wood debris near homes increase risk."},{"q":"Can you help with groundhog burrows damaging my Cochranville property?","a":"Yes. Groundhog burrows cause serious structural and landscape damage. We provide live trapping and permanent exclusion solutions."},{"q":"Do you service Atglen and Parkesburg near Cochranville?","a":"Yes — Atglen, Parkesburg, and the broader western Chester County area are within our service territory."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/cochranville-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What pests are most common on Cochranville farmland properties?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Mice, groundhogs, raccoons, and deer are the top wildlife calls. Agricultural land creates an abundance of harborage and food sources that push pests toward homes."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are termites a risk in rural Cochranville?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely. Moist agricultural soils are ideal for subterranean termites. Older farm structures and wood debris near homes increase risk."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can you help with groundhog burrows damaging my Cochranville property?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Groundhog burrows cause serious structural and landscape damage. We provide live trapping and permanent exclusion solutions."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you service Atglen and Parkesburg near Cochranville?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes \u2014 Atglen, Parkesburg, and the broader western Chester County area are within our service territory."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -31,64 +99,7 @@ export default function CochranvillePA() {
         <meta property="og:description" content="Cochranville, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225." />
         <meta property="og:url" content="https://absolutepestservices.com/service-areas/cochranville-pa" />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/cochranville-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What pests are most common on Cochranville farmland properties?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Mice, groundhogs, raccoons, and deer are the top wildlife calls. Agricultural land creates an abundance of harborage and food sources that push pests toward homes."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites a risk in rural Cochranville?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Absolutely. Moist agricultural soils are ideal for subterranean termites. Older farm structures and wood debris near homes increase risk."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can you help with groundhog burrows damaging my Cochranville property?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Groundhog burrows cause serious structural and landscape damage. We provide live trapping and permanent exclusion solutions."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you service Atglen and Parkesburg near Cochranville?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes \u2014 Atglen, Parkesburg, and the broader western Chester County area are within our service territory."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
 
       <Header />
@@ -188,7 +199,7 @@ export default function CochranvillePA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -249,7 +260,7 @@ export default function CochranvillePA() {
         </div>
       </section>
 
-      <!-- Our Services in Cochranville -->
+      {/* Our Services in Cochranville */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

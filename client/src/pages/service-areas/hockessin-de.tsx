@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,73 @@ export default function HockessinDE() {
   ];
 
   const faqs = [{"q": "Why do wooded Hockessin properties have more wildlife problems?", "a": "Hockessin's heavy tree canopy and proximity to Brandywine Creek State Park create a wildlife corridor for raccoons, foxes, groundhogs, and deer. We specialize in exclusion for wooded lots."}, {"q": "Are termites a significant risk in Hockessin?", "a": "Yes. The moist, tree-lined properties in Hockessin create ideal subterranean termite habitat. We recommend annual inspections for all wood-framed homes."}, {"q": "Do you handle bat removal in Hockessin's large homes?", "a": "Absolutely. Bat colonies frequently colonize the attic spaces of larger homes in Hockessin. We perform licensed, humane exclusion."}, {"q": "Can you treat a wildlife problem near the PA border?", "a": "Yes. We serve properties on both sides of the Delaware-Pennsylvania border in the Hockessin area."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/hockessin-de"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Why do wooded Hockessin properties have more wildlife problems?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Hockessin's heavy tree canopy and proximity to Brandywine Creek State Park create a wildlife corridor for raccoons, foxes, groundhogs, and deer. We specialize in exclusion for wooded lots."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are termites a significant risk in Hockessin?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The moist, tree-lined properties in Hockessin create ideal subterranean termite habitat. We recommend annual inspections for all wood-framed homes."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you handle bat removal in Hockessin's large homes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely. Bat colonies frequently colonize the attic spaces of larger homes in Hockessin. We perform licensed, humane exclusion."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can you treat a wildlife problem near the PA border?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We serve properties on both sides of the Delaware-Pennsylvania border in the Hockessin area."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -28,64 +96,7 @@ export default function HockessinDE() {
         <title>Hockessin DE Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Hockessin DE pest control: wildlife removal, termite treatment, and rodent control in heavily wooded Northern Delaware. Serving Kennett Pike corridor. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/hockessin-de" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/hockessin-de"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Why do wooded Hockessin properties have more wildlife problems?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Hockessin's heavy tree canopy and proximity to Brandywine Creek State Park create a wildlife corridor for raccoons, foxes, groundhogs, and deer. We specialize in exclusion for wooded lots."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites a significant risk in Hockessin?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. The moist, tree-lined properties in Hockessin create ideal subterranean termite habitat. We recommend annual inspections for all wood-framed homes."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you handle bat removal in Hockessin's large homes?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Absolutely. Bat colonies frequently colonize the attic spaces of larger homes in Hockessin. We perform licensed, humane exclusion."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can you treat a wildlife problem near the PA border?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We serve properties on both sides of the Delaware-Pennsylvania border in the Hockessin area."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -218,7 +229,7 @@ export default function HockessinDE() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -279,7 +290,7 @@ export default function HockessinDE() {
         </div>
       </section>
 
-      <!-- Our Services in Hockessin -->
+      {/* Our Services in Hockessin */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,73 @@ export default function HavreDeGraceMD() {
   ];
 
   const faqs = [{"q": "Do waterfront properties in Havre de Grace have more pest problems?", "a": "Yes. The Susquehanna River and Chesapeake Bay waterfront create elevated mosquito, tick, and rodent pressure. We offer seasonal perimeter programs for waterfront homes."}, {"q": "Are termites common in Havre de Grace's historic homes?", "a": "Absolutely. Many of Havre de Grace's 19th-century homes have older wood elements that are highly vulnerable to subterranean termites. We inspect and treat to protect historic structures."}, {"q": "Can you handle waterfowl or nuisance birds in Havre de Grace?", "a": "Yes. Geese, cormorants, and other waterfowl can damage waterfront properties. We provide humane deterrent programs."}, {"q": "Do you serve the Perryville and Port Deposit areas?", "a": "Yes. We provide pest control throughout Cecil County and northern Harford County, including Perryville and Port Deposit."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/havre-de-grace-md"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Do waterfront properties in Havre de Grace have more pest problems?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The Susquehanna River and Chesapeake Bay waterfront create elevated mosquito, tick, and rodent pressure. We offer seasonal perimeter programs for waterfront homes."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are termites common in Havre de Grace's historic homes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely. Many of Havre de Grace's 19th-century homes have older wood elements that are highly vulnerable to subterranean termites. We inspect and treat to protect historic structures."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can you handle waterfowl or nuisance birds in Havre de Grace?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Geese, cormorants, and other waterfowl can damage waterfront properties. We provide humane deterrent programs."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you serve the Perryville and Port Deposit areas?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We provide pest control throughout Cecil County and northern Harford County, including Perryville and Port Deposit."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -28,64 +96,7 @@ export default function HavreDeGraceMD() {
         <title>Havre de Grace MD Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Havre de Grace MD pest control: wildlife removal, termite treatment near the Susquehanna River and Chesapeake Bay. Historic waterfront city pest experts. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/havre-de-grace-md" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/havre-de-grace-md"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Do waterfront properties in Havre de Grace have more pest problems?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. The Susquehanna River and Chesapeake Bay waterfront create elevated mosquito, tick, and rodent pressure. We offer seasonal perimeter programs for waterfront homes."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites common in Havre de Grace's historic homes?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Absolutely. Many of Havre de Grace's 19th-century homes have older wood elements that are highly vulnerable to subterranean termites. We inspect and treat to protect historic structures."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can you handle waterfowl or nuisance birds in Havre de Grace?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Geese, cormorants, and other waterfowl can damage waterfront properties. We provide humane deterrent programs."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you serve the Perryville and Port Deposit areas?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We provide pest control throughout Cecil County and northern Harford County, including Perryville and Port Deposit."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -218,7 +229,7 @@ export default function HavreDeGraceMD() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -279,7 +290,7 @@ export default function HavreDeGraceMD() {
         </div>
       </section>
 
-      <!-- Our Services in Havre de Grace -->
+      {/* Our Services in Havre de Grace */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

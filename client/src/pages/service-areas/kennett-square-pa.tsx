@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,73 @@ export default function KennettSquarePA() {
   ];
 
   const faqs = [{"q":"Do mushroom farm operations near Kennett Square attract more pests?","a":"Yes. The moisture-rich mushroom farming environment attracts flies, rodents, and soil-dwelling pests. Homes near farming operations often see elevated pressure."},{"q":"Are termites common in Kennett Square?","a":"Yes. The moist, organic-rich soils throughout Kennett Township are ideal for subterranean termite colonies. Annual inspections are strongly recommended."},{"q":"What wildlife issues do Kennett Square homeowners face?","a":"Raccoons, groundhogs, foxes, and deer are common callers. Rural edges of Kennett Township see the most wildlife activity."},{"q":"Do you serve properties near the Delaware border in Kennett Square?","a":"Yes. We serve southern Chester County including properties near the PA-DE border in and around Kennett Square."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/kennett-square-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Do mushroom farm operations near Kennett Square attract more pests?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The moisture-rich mushroom farming environment attracts flies, rodents, and soil-dwelling pests. Homes near farming operations often see elevated pressure."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are termites common in Kennett Square?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The moist, organic-rich soils throughout Kennett Township are ideal for subterranean termite colonies. Annual inspections are strongly recommended."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What wildlife issues do Kennett Square homeowners face?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Raccoons, groundhogs, foxes, and deer are common callers. Rural edges of Kennett Township see the most wildlife activity."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you serve properties near the Delaware border in Kennett Square?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We serve southern Chester County including properties near the PA-DE border in and around Kennett Square."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -31,64 +99,7 @@ export default function KennettSquarePA() {
         <meta property="og:description" content="Kennett Square, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225." />
         <meta property="og:url" content="https://absolutepestservices.com/service-areas/kennett-square-pa" />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/kennett-square-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Do mushroom farm operations near Kennett Square attract more pests?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. The moisture-rich mushroom farming environment attracts flies, rodents, and soil-dwelling pests. Homes near farming operations often see elevated pressure."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites common in Kennett Square?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. The moist, organic-rich soils throughout Kennett Township are ideal for subterranean termite colonies. Annual inspections are strongly recommended."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What wildlife issues do Kennett Square homeowners face?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Raccoons, groundhogs, foxes, and deer are common callers. Rural edges of Kennett Township see the most wildlife activity."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you serve properties near the Delaware border in Kennett Square?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We serve southern Chester County including properties near the PA-DE border in and around Kennett Square."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
 
       <Header />
@@ -188,7 +199,7 @@ export default function KennettSquarePA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -249,7 +260,7 @@ export default function KennettSquarePA() {
         </div>
       </section>
 
-      <!-- Our Services in Kennett Square -->
+      {/* Our Services in Kennett Square */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

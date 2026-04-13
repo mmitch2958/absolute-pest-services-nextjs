@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,6 +30,65 @@ export default function ExtonPA() {
 
   const faqs = [
     {
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/exton-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Do new construction homes near Exton need pest protection?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely. New development in Uwchlan and West Whiteland displaces wildlife like groundhogs, raccoons, and foxes. We handle wildlife exclusion for newly built homes throughout the Exton area."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I know if I have termites in my Exton home?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Look for mud tubes near your foundation, hollow-sounding wood, or discarded wings near windowsills. We offer free termite inspections throughout the Exton area."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can you treat bed bugs in Exton hotels or short-term rentals?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We provide discreet, effective bed bug treatment for commercial and residential properties throughout Exton and Chester County."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
       q: 'Are pests common in Exton\'s corporate parks and office buildings?',
       a: 'Yes. Exton\'s dense concentration of corporate campuses and restaurants near the PA Turnpike interchange creates high pest pressure, particularly for rodents, cockroaches, and ants. We offer commercial pest management tailored to office and retail environments.',
     },
@@ -52,56 +112,7 @@ export default function ExtonPA() {
         <title>Exton PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Exton PA pest control: wildlife removal, termite treatment, bed bug control, and rodent extermination near the PA Turnpike. Serving Exton, Lionville, and Uwchlan. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/exton-pa" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/exton-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Do new construction homes near Exton need pest protection?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Absolutely. New development in Uwchlan and West Whiteland displaces wildlife like groundhogs, raccoons, and foxes. We handle wildlife exclusion for newly built homes throughout the Exton area."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How do I know if I have termites in my Exton home?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Look for mud tubes near your foundation, hollow-sounding wood, or discarded wings near windowsills. We offer free termite inspections throughout the Exton area."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can you treat bed bugs in Exton hotels or short-term rentals?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We provide discreet, effective bed bug treatment for commercial and residential properties throughout Exton and Chester County."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -234,7 +245,7 @@ export default function ExtonPA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -295,7 +306,7 @@ export default function ExtonPA() {
         </div>
       </section>
 
-      <!-- Our Services in Exton -->
+      {/* Our Services in Exton */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

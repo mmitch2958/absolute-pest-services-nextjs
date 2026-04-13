@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,73 @@ export default function OxfordPA() {
   ];
 
   const faqs = [{"q":"What pests are most common in Oxford, PA?","a":"Mice, groundhogs, raccoons, and termites are the top calls in Oxford. The surrounding farmland and woodland push wildlife toward residential areas, especially in fall."},{"q":"Are stink bugs a major problem in Oxford?","a":"Yes. Chester County is stink bug territory — exterior barrier treatments applied in late summer dramatically reduce fall intrusions."},{"q":"Do you serve the rural routes around Oxford Borough?","a":"Yes. We serve Oxford Borough and all surrounding townships including East and West Nottingham, Lower Oxford, and Elk Township."},{"q":"How do I stop mice from entering my Oxford home?","a":"Exclusion is the key. We inspect your home for every gap larger than a dime, seal them with durable materials, and eliminate any existing population before sealing."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/oxford-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What pests are most common in Oxford, PA?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Mice, groundhogs, raccoons, and termites are the top calls in Oxford. The surrounding farmland and woodland push wildlife toward residential areas, especially in fall."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are stink bugs a major problem in Oxford?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Chester County is stink bug territory \u2014 exterior barrier treatments applied in late summer dramatically reduce fall intrusions."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you serve the rural routes around Oxford Borough?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We serve Oxford Borough and all surrounding townships including East and West Nottingham, Lower Oxford, and Elk Township."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I stop mice from entering my Oxford home?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Exclusion is the key. We inspect your home for every gap larger than a dime, seal them with durable materials, and eliminate any existing population before sealing."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -31,64 +99,7 @@ export default function OxfordPA() {
         <meta property="og:description" content="Oxford, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225." />
         <meta property="og:url" content="https://absolutepestservices.com/service-areas/oxford-pa" />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/oxford-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What pests are most common in Oxford, PA?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Mice, groundhogs, raccoons, and termites are the top calls in Oxford. The surrounding farmland and woodland push wildlife toward residential areas, especially in fall."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are stink bugs a major problem in Oxford?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Chester County is stink bug territory \u2014 exterior barrier treatments applied in late summer dramatically reduce fall intrusions."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you serve the rural routes around Oxford Borough?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We serve Oxford Borough and all surrounding townships including East and West Nottingham, Lower Oxford, and Elk Township."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How do I stop mice from entering my Oxford home?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Exclusion is the key. We inspect your home for every gap larger than a dime, seal them with durable materials, and eliminate any existing population before sealing."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
 
       <Header />
@@ -188,7 +199,7 @@ export default function OxfordPA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -249,7 +260,7 @@ export default function OxfordPA() {
         </div>
       </section>
 
-      <!-- Our Services in Oxford -->
+      {/* Our Services in Oxford */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

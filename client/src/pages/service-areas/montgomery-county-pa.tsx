@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +31,73 @@ export default function MontgomeryCountyPA() {
   ];
 
   const faqs = [{"q":"What pests are most common in Montgomery County, PA?","a":"Montgomery County's combination of historic towns, industrial corridors, and suburban developments creates varied pest pressures. Rodents, carpenter ants, cockroaches, stinging insects, and wildlife are the most common issues."},{"q":"Do you offer commercial pest management in Montgomery County?","a":"Yes. We service commercial properties throughout Montgomery County including King of Prussia, Norristown, Collegeville, and Pottstown, handling restaurants, offices, warehouses, and healthcare facilities."},{"q":"Are termites a concern in Montgomery County?","a":"Yes. Termite activity has been documented throughout Montgomery County. Properties with a history of termite activity or near wooded areas should have annual inspections."},{"q":"How quickly can you respond to pest emergencies in Montgomery County?","a":"We provide same-day emergency service throughout Montgomery County. Our technicians are based in West Grove, PA and can reach most Montgomery County locations within 60-90 minutes."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/montgomery-county-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What pests are most common in Montgomery County, PA?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Montgomery County's combination of historic towns, industrial corridors, and suburban developments creates varied pest pressures. Rodents, carpenter ants, cockroaches, stinging insects, and wildlife are the most common issues."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you offer commercial pest management in Montgomery County?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We service commercial properties throughout Montgomery County including King of Prussia, Norristown, Collegeville, and Pottstown, handling restaurants, offices, warehouses, and healthcare facilities."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are termites a concern in Montgomery County?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Termite activity has been documented throughout Montgomery County. Properties with a history of termite activity or near wooded areas should have annual inspections."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How quickly can you respond to pest emergencies in Montgomery County?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We provide same-day emergency service throughout Montgomery County. Our technicians are based in West Grove, PA and can reach most Montgomery County locations within 60-90 minutes."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-emerald-50">
@@ -37,123 +105,8 @@ export default function MontgomeryCountyPA() {
         <title>Montgomery County PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Montgomery County PA: Expert pest control in Norristown, King of Prussia, Collegeville, Pottstown. Licensed, insured, emergency service available." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/montgomery-county-pa" />
+        
       </Helmet>
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/montgomery-county-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What pests are most common in Montgomery County, PA?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Montgomery County's combination of historic towns, industrial corridors, and suburban developments creates varied pest pressures. Rodents, carpenter ants, cockroaches, stinging insects, and wildlife are the most common issues."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you offer commercial pest management in Montgomery County?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We service commercial properties throughout Montgomery County including King of Prussia, Norristown, Collegeville, and Pottstown, handling restaurants, offices, warehouses, and healthcare facilities."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites a concern in Montgomery County?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Termite activity has been documented throughout Montgomery County. Properties with a history of termite activity or near wooded areas should have annual inspections."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How quickly can you respond to pest emergencies in Montgomery County?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We provide same-day emergency service throughout Montgomery County. Our technicians are based in West Grove, PA and can reach most Montgomery County locations within 60-90 minutes."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/montgomery-county-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What pests are most common in Montgomery County, PA?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Montgomery County's combination of historic towns, industrial corridors, and suburban developments creates varied pest pressures. Rodents, carpenter ants, cockroaches, stinging insects, and wildlife are the most common issues."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you offer commercial pest management in Montgomery County?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We service commercial properties throughout Montgomery County including King of Prussia, Norristown, Collegeville, and Pottstown, handling restaurants, offices, warehouses, and healthcare facilities."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites a concern in Montgomery County?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Termite activity has been documented throughout Montgomery County. Properties with a history of termite activity or near wooded areas should have annual inspections."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How quickly can you respond to pest emergencies in Montgomery County?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We provide same-day emergency service throughout Montgomery County. Our technicians are based in West Grove, PA and can reach most Montgomery County locations within 60-90 minutes."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
 
       {/* Header */}
       <Header />
@@ -259,7 +212,7 @@ export default function MontgomeryCountyPA() {
       </section>
 
       
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -320,7 +273,7 @@ export default function MontgomeryCountyPA() {
         </div>
       </section>
 
-      <!-- Our Services in Montgomery County -->
+      {/* Our Services in Montgomery County */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

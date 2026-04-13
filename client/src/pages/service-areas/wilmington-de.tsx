@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,73 @@ export default function WilmingtonDE() {
   ];
 
   const faqs = [{"q": "Are rodents common near Wilmington's Brandywine River?", "a": "Yes. The Brandywine riverfront creates high rodent pressure for nearby homes and businesses. We provide targeted exterior baiting and exclusion programs."}, {"q": "Do older Wilmington neighborhoods need termite protection?", "a": "Many Wilmington neighborhoods have homes built in the early 20th century that are highly susceptible to subterranean termite damage. We recommend annual inspections."}, {"q": "Can you handle wildlife in Wilmington's urban neighborhoods?", "a": "Yes. Raccoons, opossums, and foxes regularly den in Wilmington's urban areas. We provide humane trapping and exclusion."}, {"q": "Do you serve commercial properties in Wilmington's financial district?", "a": "Absolutely. We offer commercial pest management programs for offices, restaurants, and financial institutions throughout downtown Wilmington."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/wilmington-de"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Are rodents common near Wilmington's Brandywine River?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The Brandywine riverfront creates high rodent pressure for nearby homes and businesses. We provide targeted exterior baiting and exclusion programs."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do older Wilmington neighborhoods need termite protection?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Many Wilmington neighborhoods have homes built in the early 20th century that are highly susceptible to subterranean termite damage. We recommend annual inspections."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can you handle wildlife in Wilmington's urban neighborhoods?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Raccoons, opossums, and foxes regularly den in Wilmington's urban areas. We provide humane trapping and exclusion."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you serve commercial properties in Wilmington's financial district?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely. We offer commercial pest management programs for offices, restaurants, and financial institutions throughout downtown Wilmington."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -28,64 +96,7 @@ export default function WilmingtonDE() {
         <title>Wilmington DE Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Wilmington DE pest control: rodent control, wildlife removal, termite treatment near the Brandywine River. Delaware's largest city pest experts. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/wilmington-de" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/wilmington-de"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Are rodents common near Wilmington's Brandywine River?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. The Brandywine riverfront creates high rodent pressure for nearby homes and businesses. We provide targeted exterior baiting and exclusion programs."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do older Wilmington neighborhoods need termite protection?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Many Wilmington neighborhoods have homes built in the early 20th century that are highly susceptible to subterranean termite damage. We recommend annual inspections."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can you handle wildlife in Wilmington's urban neighborhoods?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Raccoons, opossums, and foxes regularly den in Wilmington's urban areas. We provide humane trapping and exclusion."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you serve commercial properties in Wilmington's financial district?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Absolutely. We offer commercial pest management programs for offices, restaurants, and financial institutions throughout downtown Wilmington."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -218,7 +229,7 @@ export default function WilmingtonDE() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -279,7 +290,7 @@ export default function WilmingtonDE() {
         </div>
       </section>
 
-      <!-- Our Services in Wilmington -->
+      {/* Our Services in Wilmington */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

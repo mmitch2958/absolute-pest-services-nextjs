@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,73 @@ export default function AberdeenMD() {
   ];
 
   const faqs = [{"q": "Are there unique pest challenges near Aberdeen Proving Ground?", "a": "Properties adjacent to APG's large undeveloped land see significant wildlife activity including deer, groundhogs, and raccoons moving into residential areas. We provide effective exclusion."}, {"q": "Do Chesapeake Bay waterfront properties in Aberdeen need special treatment?", "a": "Yes. Waterfront properties see higher mosquito, tick, and rodent pressure. We offer seasonal mosquito control and perimeter rodent exclusion programs."}, {"q": "Are termites active in Aberdeen MD?", "a": "Yes. Maryland's humid climate and Harford County's soil conditions support active termite colonies. We offer free inspections and treatment plans."}, {"q": "How do you handle wildlife in Aberdeen neighborhoods?", "a": "We trap and humanely relocate raccoons, groundhogs, foxes, and other wildlife. We also seal entry points to prevent re-entry."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/aberdeen-md"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Are there unique pest challenges near Aberdeen Proving Ground?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Properties adjacent to APG's large undeveloped land see significant wildlife activity including deer, groundhogs, and raccoons moving into residential areas. We provide effective exclusion."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do Chesapeake Bay waterfront properties in Aberdeen need special treatment?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Waterfront properties see higher mosquito, tick, and rodent pressure. We offer seasonal mosquito control and perimeter rodent exclusion programs."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are termites active in Aberdeen MD?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Maryland's humid climate and Harford County's soil conditions support active termite colonies. We offer free inspections and treatment plans."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do you handle wildlife in Aberdeen neighborhoods?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We trap and humanely relocate raccoons, groundhogs, foxes, and other wildlife. We also seal entry points to prevent re-entry."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -28,64 +96,7 @@ export default function AberdeenMD() {
         <title>Aberdeen MD Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Aberdeen MD pest control: wildlife removal, termite treatment, and rodent control near Aberdeen Proving Ground and the Chesapeake Bay. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/aberdeen-md" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/aberdeen-md"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Are there unique pest challenges near Aberdeen Proving Ground?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Properties adjacent to APG's large undeveloped land see significant wildlife activity including deer, groundhogs, and raccoons moving into residential areas. We provide effective exclusion."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do Chesapeake Bay waterfront properties in Aberdeen need special treatment?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Waterfront properties see higher mosquito, tick, and rodent pressure. We offer seasonal mosquito control and perimeter rodent exclusion programs."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites active in Aberdeen MD?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Maryland's humid climate and Harford County's soil conditions support active termite colonies. We offer free inspections and treatment plans."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How do you handle wildlife in Aberdeen neighborhoods?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We trap and humanely relocate raccoons, groundhogs, foxes, and other wildlife. We also seal entry points to prevent re-entry."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -218,7 +229,7 @@ export default function AberdeenMD() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -279,7 +290,7 @@ export default function AberdeenMD() {
         </div>
       </section>
 
-      <!-- Our Services in Aberdeen -->
+      {/* Our Services in Aberdeen */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

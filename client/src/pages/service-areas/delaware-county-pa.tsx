@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +31,73 @@ export default function DelawareCountyPA() {
   ];
 
   const faqs = [{"q":"What pest problems are most common in Delaware County, PA?","a":"Delaware County's dense suburban environment, with older homes, restaurant corridors, and proximity to Philadelphia, creates significant pest pressure. Rodents, cockroaches, ants, and bed bugs are the most common issues."},{"q":"Do you offer commercial pest management in Delaware County?","a":"Yes. We service restaurants, offices, warehouses, and retail spaces throughout Delaware County including Media, Newtown Square, Chester, and surrounding communities."},{"q":"How often should Delaware County homeowners schedule pest control?","a":"Most homes benefit from quarterly exterior barrier treatments. Properties near wooded areas or with a history of infestations may need bi-monthly service."},{"q":"Are your pest control services available in Delaware County on weekends?","a":"We offer Saturday morning appointments for regular service and are available for emergency calls on Sundays throughout Delaware County."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/delaware-county-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What pest problems are most common in Delaware County, PA?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Delaware County's dense suburban environment, with older homes, restaurant corridors, and proximity to Philadelphia, creates significant pest pressure. Rodents, cockroaches, ants, and bed bugs are the most common issues."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you offer commercial pest management in Delaware County?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We service restaurants, offices, warehouses, and retail spaces throughout Delaware County including Media, Newtown Square, Chester, and surrounding communities."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How often should Delaware County homeowners schedule pest control?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Most homes benefit from quarterly exterior barrier treatments. Properties near wooded areas or with a history of infestations may need bi-monthly service."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are your pest control services available in Delaware County on weekends?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We offer Saturday morning appointments for regular service and are available for emergency calls on Sundays throughout Delaware County."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-emerald-50">
@@ -37,123 +105,8 @@ export default function DelawareCountyPA() {
         <title>Delaware County PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Delaware County PA: Expert pest control in Media, Newtown Square, Chester, Aston, Brookhaven. Licensed, insured, emergency service available." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/delaware-county-pa" />
+        
       </Helmet>
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/delaware-county-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What pest problems are most common in Delaware County, PA?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Delaware County's dense suburban environment, with older homes, restaurant corridors, and proximity to Philadelphia, creates significant pest pressure. Rodents, cockroaches, ants, and bed bugs are the most common issues."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you offer commercial pest management in Delaware County?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We service restaurants, offices, warehouses, and retail spaces throughout Delaware County including Media, Newtown Square, Chester, and surrounding communities."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How often should Delaware County homeowners schedule pest control?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Most homes benefit from quarterly exterior barrier treatments. Properties near wooded areas or with a history of infestations may need bi-monthly service."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are your pest control services available in Delaware County on weekends?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We offer Saturday morning appointments for regular service and are available for emergency calls on Sundays throughout Delaware County."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/delaware-county-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What pest problems are most common in Delaware County, PA?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Delaware County's dense suburban environment, with older homes, restaurant corridors, and proximity to Philadelphia, creates significant pest pressure. Rodents, cockroaches, ants, and bed bugs are the most common issues."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you offer commercial pest management in Delaware County?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We service restaurants, offices, warehouses, and retail spaces throughout Delaware County including Media, Newtown Square, Chester, and surrounding communities."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How often should Delaware County homeowners schedule pest control?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Most homes benefit from quarterly exterior barrier treatments. Properties near wooded areas or with a history of infestations may need bi-monthly service."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are your pest control services available in Delaware County on weekends?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We offer Saturday morning appointments for regular service and are available for emergency calls on Sundays throughout Delaware County."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
 
       {/* Header */}
       <Header />
@@ -259,7 +212,7 @@ export default function DelawareCountyPA() {
       </section>
 
       
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -320,7 +273,7 @@ export default function DelawareCountyPA() {
         </div>
       </section>
 
-      <!-- Our Services in Delaware County -->
+      {/* Our Services in Delaware County */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

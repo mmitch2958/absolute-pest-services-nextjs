@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +31,73 @@ export default function NortheastMaryland() {
   ];
 
   const faqs = [{"q":"What pests are most common in Cecil County and Harford County, MD?","a":"Northeast Maryland's rural character, forest cover, and proximity to the Chesapeake Bay create elevated wildlife and insect pressure. Ticks, mosquitoes, carpenter ants, termites, raccoons, and groundhogs are the most common issues."},{"q":"Do you provide termite inspections in Northeast Maryland?","a":"Yes. Subterranean termites are active throughout Cecil County and Harford County. We offer free termite inspections for homes in Elkton, Bel Air, Aberdeen, Havre de Grace, and surrounding areas."},{"q":"What wildlife issues are unique to Northeast Maryland?","a":"Northeast Maryland's forests and farmland attract deer, raccoons, foxes, skunks, and groundhogs. The area near the Chesapeake Bay also sees increased mosquito and fly pressure in summer months."},{"q":"How quickly can you respond to pest emergencies in Northeast Maryland?","a":"We offer same-day service throughout Cecil County and Harford County, MD. Emergency wildlife intrusions and severe infestations are handled promptly."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/northeast-maryland"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What pests are most common in Cecil County and Harford County, MD?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Northeast Maryland's rural character, forest cover, and proximity to the Chesapeake Bay create elevated wildlife and insect pressure. Ticks, mosquitoes, carpenter ants, termites, raccoons, and groundhogs are the most common issues."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you provide termite inspections in Northeast Maryland?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Subterranean termites are active throughout Cecil County and Harford County. We offer free termite inspections for homes in Elkton, Bel Air, Aberdeen, Havre de Grace, and surrounding areas."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What wildlife issues are unique to Northeast Maryland?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Northeast Maryland's forests and farmland attract deer, raccoons, foxes, skunks, and groundhogs. The area near the Chesapeake Bay also sees increased mosquito and fly pressure in summer months."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How quickly can you respond to pest emergencies in Northeast Maryland?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We offer same-day service throughout Cecil County and Harford County, MD. Emergency wildlife intrusions and severe infestations are handled promptly."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-orange-50">
@@ -37,123 +105,8 @@ export default function NortheastMaryland() {
         <title>Northeast Maryland Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Northeast MD: Expert pest control in Elkton, North East, Perryville, Rising Sun. Licensed, insured, emergency service available." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/northeast-maryland" />
+        
       </Helmet>
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/northeast-maryland"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What pests are most common in Cecil County and Harford County, MD?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Northeast Maryland's rural character, forest cover, and proximity to the Chesapeake Bay create elevated wildlife and insect pressure. Ticks, mosquitoes, carpenter ants, termites, raccoons, and groundhogs are the most common issues."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you provide termite inspections in Northeast Maryland?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Subterranean termites are active throughout Cecil County and Harford County. We offer free termite inspections for homes in Elkton, Bel Air, Aberdeen, Havre de Grace, and surrounding areas."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What wildlife issues are unique to Northeast Maryland?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Northeast Maryland's forests and farmland attract deer, raccoons, foxes, skunks, and groundhogs. The area near the Chesapeake Bay also sees increased mosquito and fly pressure in summer months."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How quickly can you respond to pest emergencies in Northeast Maryland?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We offer same-day service throughout Cecil County and Harford County, MD. Emergency wildlife intrusions and severe infestations are handled promptly."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/northeast-maryland"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What pests are most common in Cecil County and Harford County, MD?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Northeast Maryland's rural character, forest cover, and proximity to the Chesapeake Bay create elevated wildlife and insect pressure. Ticks, mosquitoes, carpenter ants, termites, raccoons, and groundhogs are the most common issues."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you provide termite inspections in Northeast Maryland?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Subterranean termites are active throughout Cecil County and Harford County. We offer free termite inspections for homes in Elkton, Bel Air, Aberdeen, Havre de Grace, and surrounding areas."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What wildlife issues are unique to Northeast Maryland?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Northeast Maryland's forests and farmland attract deer, raccoons, foxes, skunks, and groundhogs. The area near the Chesapeake Bay also sees increased mosquito and fly pressure in summer months."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How quickly can you respond to pest emergencies in Northeast Maryland?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We offer same-day service throughout Cecil County and Harford County, MD. Emergency wildlife intrusions and severe infestations are handled promptly."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
 
       {/* Header */}
       <Header />
@@ -259,7 +212,7 @@ export default function NortheastMaryland() {
       </section>
 
       
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -320,7 +273,7 @@ export default function NortheastMaryland() {
         </div>
       </section>
 
-      <!-- Our Services in Northeast MD -->
+      {/* Our Services in Northeast MD */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

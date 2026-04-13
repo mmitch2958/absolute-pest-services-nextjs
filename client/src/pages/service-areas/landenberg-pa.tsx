@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,73 @@ export default function LandenbergPA() {
   ];
 
   const faqs = [{"q":"Why is Landenberg such a hotspot for wildlife calls?","a":"The White Clay Creek Preserve and surrounding conserved lands create a wildlife corridor right through Landenberg neighborhoods. We see elevated raccoon, fox, and groundhog activity."},{"q":"Are termites common near White Clay Creek?","a":"Yes. The moist, wooded soils along White Clay Creek are perfect subterranean termite habitat. We recommend annual inspections for all Landenberg homeowners."},{"q":"Do you handle bat exclusion in Landenberg?","a":"Yes. Bats frequently colonize older homes in rural Chester County. We perform humane, licensed exclusions compliant with PA bat protection laws."},{"q":"What about deer tick and pest prevention in Landenberg?","a":"We offer perimeter tick control programs that reduce tick populations in your yard — especially important near the heavily wooded White Clay Creek areas."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/landenberg-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Why is Landenberg such a hotspot for wildlife calls?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The White Clay Creek Preserve and surrounding conserved lands create a wildlife corridor right through Landenberg neighborhoods. We see elevated raccoon, fox, and groundhog activity."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are termites common near White Clay Creek?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The moist, wooded soils along White Clay Creek are perfect subterranean termite habitat. We recommend annual inspections for all Landenberg homeowners."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you handle bat exclusion in Landenberg?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Bats frequently colonize older homes in rural Chester County. We perform humane, licensed exclusions compliant with PA bat protection laws."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What about deer tick and pest prevention in Landenberg?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We offer perimeter tick control programs that reduce tick populations in your yard \u2014 especially important near the heavily wooded White Clay Creek areas."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -31,64 +99,7 @@ export default function LandenbergPA() {
         <meta property="og:description" content="Landenberg, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225." />
         <meta property="og:url" content="https://absolutepestservices.com/service-areas/landenberg-pa" />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/landenberg-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Why is Landenberg such a hotspot for wildlife calls?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "The White Clay Creek Preserve and surrounding conserved lands create a wildlife corridor right through Landenberg neighborhoods. We see elevated raccoon, fox, and groundhog activity."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites common near White Clay Creek?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. The moist, wooded soils along White Clay Creek are perfect subterranean termite habitat. We recommend annual inspections for all Landenberg homeowners."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you handle bat exclusion in Landenberg?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Bats frequently colonize older homes in rural Chester County. We perform humane, licensed exclusions compliant with PA bat protection laws."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What about deer tick and pest prevention in Landenberg?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We offer perimeter tick control programs that reduce tick populations in your yard \u2014 especially important near the heavily wooded White Clay Creek areas."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
 
       <Header />
@@ -188,7 +199,7 @@ export default function LandenbergPA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -249,7 +260,7 @@ export default function LandenbergPA() {
         </div>
       </section>
 
-      <!-- Our Services in Landenberg -->
+      {/* Our Services in Landenberg */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

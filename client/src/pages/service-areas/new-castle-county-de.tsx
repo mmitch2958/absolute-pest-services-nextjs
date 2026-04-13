@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +31,73 @@ export default function NewCastleCountyDE() {
   ];
 
   const faqs = [{"q":"What pests are most common in New Castle County, Delaware?","a":"New Castle County's mix of rural properties, suburban developments, and the city of Wilmington creates varied pest pressures. Termites, carpenter ants, rodents, and wildlife are the most common issues for homeowners."},{"q":"Do you provide termite protection in New Castle County, DE?","a":"Yes. We are licensed to provide termite treatment and prevention throughout Delaware. Subterranean termites are active in New Castle County, and annual inspections are strongly recommended."},{"q":"How is pest pressure in New Castle County different from Pennsylvania?","a":"New Castle County shares similar pest species with neighboring Chester County, PA, but the higher water table near the Delaware River can create more moisture-related pest issues like centipedes, silverfish, and dampwood termites."},{"q":"Do you offer wildlife removal in New Castle County?","a":"Yes. We handle raccoons, squirrels, groundhogs, skunks, and other wildlife throughout New Castle County, DE, including Wilmington, Newark, Hockessin, and all surrounding areas."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/new-castle-county-de"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What pests are most common in New Castle County, Delaware?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "New Castle County's mix of rural properties, suburban developments, and the city of Wilmington creates varied pest pressures. Termites, carpenter ants, rodents, and wildlife are the most common issues for homeowners."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you provide termite protection in New Castle County, DE?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We are licensed to provide termite treatment and prevention throughout Delaware. Subterranean termites are active in New Castle County, and annual inspections are strongly recommended."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How is pest pressure in New Castle County different from Pennsylvania?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "New Castle County shares similar pest species with neighboring Chester County, PA, but the higher water table near the Delaware River can create more moisture-related pest issues like centipedes, silverfish, and dampwood termites."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you offer wildlife removal in New Castle County?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We handle raccoons, squirrels, groundhogs, skunks, and other wildlife throughout New Castle County, DE, including Wilmington, Newark, Hockessin, and all surrounding areas."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-blue-50">
@@ -37,123 +105,8 @@ export default function NewCastleCountyDE() {
         <title>New Castle County DE Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="New Castle County DE: Expert pest control in Hockessin, Newark, Wilmington, Bear. Licensed, insured, emergency service available." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/new-castle-county-de" />
+        
       </Helmet>
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/new-castle-county-de"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What pests are most common in New Castle County, Delaware?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "New Castle County's mix of rural properties, suburban developments, and the city of Wilmington creates varied pest pressures. Termites, carpenter ants, rodents, and wildlife are the most common issues for homeowners."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you provide termite protection in New Castle County, DE?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We are licensed to provide termite treatment and prevention throughout Delaware. Subterranean termites are active in New Castle County, and annual inspections are strongly recommended."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How is pest pressure in New Castle County different from Pennsylvania?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "New Castle County shares similar pest species with neighboring Chester County, PA, but the higher water table near the Delaware River can create more moisture-related pest issues like centipedes, silverfish, and dampwood termites."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you offer wildlife removal in New Castle County?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We handle raccoons, squirrels, groundhogs, skunks, and other wildlife throughout New Castle County, DE, including Wilmington, Newark, Hockessin, and all surrounding areas."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/new-castle-county-de"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What pests are most common in New Castle County, Delaware?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "New Castle County's mix of rural properties, suburban developments, and the city of Wilmington creates varied pest pressures. Termites, carpenter ants, rodents, and wildlife are the most common issues for homeowners."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you provide termite protection in New Castle County, DE?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We are licensed to provide termite treatment and prevention throughout Delaware. Subterranean termites are active in New Castle County, and annual inspections are strongly recommended."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How is pest pressure in New Castle County different from Pennsylvania?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "New Castle County shares similar pest species with neighboring Chester County, PA, but the higher water table near the Delaware River can create more moisture-related pest issues like centipedes, silverfish, and dampwood termites."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you offer wildlife removal in New Castle County?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We handle raccoons, squirrels, groundhogs, skunks, and other wildlife throughout New Castle County, DE, including Wilmington, Newark, Hockessin, and all surrounding areas."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
 
       {/* Header */}
       <Header />
@@ -259,7 +212,7 @@ export default function NewCastleCountyDE() {
       </section>
 
       
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -320,7 +273,7 @@ export default function NewCastleCountyDE() {
         </div>
       </section>
 
-      <!-- Our Services in New Castle County -->
+      {/* Our Services in New Castle County */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

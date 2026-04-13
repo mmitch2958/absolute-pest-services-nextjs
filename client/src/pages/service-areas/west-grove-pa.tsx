@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,73 @@ export default function WestGrovePA() {
   ];
 
   const faqs = [{"q":"What are the most common pest calls in West Grove?","a":"Mice, stink bugs, carpenter ants, and wildlife (raccoons, groundhogs) are our most frequent calls in West Grove and Penn Township."},{"q":"Do you offer termite inspections in West Grove?","a":"Yes — West Grove is our home base. We can often schedule same-day or next-day termite inspections for local homeowners."},{"q":"Are you familiar with older West Grove Borough homes?","a":"Absolutely. We've serviced West Grove homes of all ages. Older borough properties frequently have gaps that allow pests in — we specialize in finding and sealing them."},{"q":"How quickly can you respond to pest emergencies in West Grove?","a":"As our home community, West Grove gets the fastest response times of anywhere in our service area. Call 484-643-2225 anytime."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/west-grove-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What are the most common pest calls in West Grove?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Mice, stink bugs, carpenter ants, and wildlife (raccoons, groundhogs) are our most frequent calls in West Grove and Penn Township."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you offer termite inspections in West Grove?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes \u2014 West Grove is our home base. We can often schedule same-day or next-day termite inspections for local homeowners."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are you familiar with older West Grove Borough homes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely. We've serviced West Grove homes of all ages. Older borough properties frequently have gaps that allow pests in \u2014 we specialize in finding and sealing them."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How quickly can you respond to pest emergencies in West Grove?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "As our home community, West Grove gets the fastest response times of anywhere in our service area. Call 484-643-2225 anytime."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -31,64 +99,7 @@ export default function WestGrovePA() {
         <meta property="og:description" content="West Grove, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225." />
         <meta property="og:url" content="https://absolutepestservices.com/service-areas/west-grove-pa" />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/west-grove-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What are the most common pest calls in West Grove?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Mice, stink bugs, carpenter ants, and wildlife (raccoons, groundhogs) are our most frequent calls in West Grove and Penn Township."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you offer termite inspections in West Grove?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes \u2014 West Grove is our home base. We can often schedule same-day or next-day termite inspections for local homeowners."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are you familiar with older West Grove Borough homes?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Absolutely. We've serviced West Grove homes of all ages. Older borough properties frequently have gaps that allow pests in \u2014 we specialize in finding and sealing them."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How quickly can you respond to pest emergencies in West Grove?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "As our home community, West Grove gets the fastest response times of anywhere in our service area. Call 484-643-2225 anytime."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
 
       <Header />
@@ -188,7 +199,7 @@ export default function WestGrovePA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -249,7 +260,7 @@ export default function WestGrovePA() {
         </div>
       </section>
 
-      <!-- Our Services in West Grove -->
+      {/* Our Services in West Grove */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

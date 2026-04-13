@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,73 @@ export default function LincolnUniversityPA() {
   ];
 
   const faqs = [{"q":"Does Lincoln University's wooded campus attract more wildlife?","a":"Yes. Wooded campus environments are ideal habitat for raccoons, squirrels, foxes, and groundhogs. Surrounding residential properties often experience spillover."},{"q":"Are termites a risk in Lincoln University area properties?","a":"Yes. The heavy woodland and organic soil conditions in Elk Township and surrounding areas are prime subterranean termite habitat."},{"q":"Do you serve student housing or multi-family properties near Lincoln University?","a":"Yes. We serve multi-unit residential properties and can provide bed bug, rodent, and general pest programs for rental properties near the university."},{"q":"How far south in Chester County do you service?","a":"We serve all of Chester County including the southernmost communities near the Maryland and Delaware borders."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/lincoln-university-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Does Lincoln University's wooded campus attract more wildlife?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Wooded campus environments are ideal habitat for raccoons, squirrels, foxes, and groundhogs. Surrounding residential properties often experience spillover."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are termites a risk in Lincoln University area properties?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. The heavy woodland and organic soil conditions in Elk Township and surrounding areas are prime subterranean termite habitat."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do you serve student housing or multi-family properties near Lincoln University?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We serve multi-unit residential properties and can provide bed bug, rodent, and general pest programs for rental properties near the university."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How far south in Chester County do you service?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We serve all of Chester County including the southernmost communities near the Maryland and Delaware borders."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -31,64 +99,7 @@ export default function LincolnUniversityPA() {
         <meta property="og:description" content="Lincoln University, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225." />
         <meta property="og:url" content="https://absolutepestservices.com/service-areas/lincoln-university-pa" />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/lincoln-university-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Does Lincoln University's wooded campus attract more wildlife?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Wooded campus environments are ideal habitat for raccoons, squirrels, foxes, and groundhogs. Surrounding residential properties often experience spillover."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are termites a risk in Lincoln University area properties?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. The heavy woodland and organic soil conditions in Elk Township and surrounding areas are prime subterranean termite habitat."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you serve student housing or multi-family properties near Lincoln University?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We serve multi-unit residential properties and can provide bed bug, rodent, and general pest programs for rental properties near the university."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How far south in Chester County do you service?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We serve all of Chester County including the southernmost communities near the Maryland and Delaware borders."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
 
       <Header />
@@ -188,7 +199,7 @@ export default function LincolnUniversityPA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -249,7 +260,7 @@ export default function LincolnUniversityPA() {
         </div>
       </section>
 
-      <!-- Our Services in Lincoln University -->
+      {/* Our Services in Lincoln University */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

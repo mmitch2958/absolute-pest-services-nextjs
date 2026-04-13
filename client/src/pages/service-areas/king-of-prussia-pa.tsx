@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,73 @@ export default function KingOfPrussiaPA() {
   ];
 
   const faqs = [{"q": "Do large retail centers in King of Prussia need commercial pest control?", "a": "Yes. High foot traffic, food courts, and loading docks make large retail properties particularly vulnerable to rodents and cockroaches. We offer commercial service plans with guaranteed response times."}, {"q": "Are geese a problem near Valley Forge?", "a": "Geese are common throughout Upper Merion Township and Valley Forge National Park's perimeter. We provide humane goose deterrent programs for commercial and HOA properties."}, {"q": "Can you handle wildlife near the wooded areas around KOP?", "a": "Yes. Raccoons, groundhogs, and foxes regularly move into KOP neighborhoods from Valley Forge. We trap and relocate humanely."}, {"q": "Do new construction homes near KOP need pest-proofing?", "a": "New builds displace wildlife and can have construction gaps that invite pests. We perform post-construction exclusion treatments for new homes throughout Upper Merion Township."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/king-of-prussia-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Do large retail centers in King of Prussia need commercial pest control?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. High foot traffic, food courts, and loading docks make large retail properties particularly vulnerable to rodents and cockroaches. We offer commercial service plans with guaranteed response times."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are geese a problem near Valley Forge?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Geese are common throughout Upper Merion Township and Valley Forge National Park's perimeter. We provide humane goose deterrent programs for commercial and HOA properties."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can you handle wildlife near the wooded areas around KOP?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Raccoons, groundhogs, and foxes regularly move into KOP neighborhoods from Valley Forge. We trap and relocate humanely."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do new construction homes near KOP need pest-proofing?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "New builds displace wildlife and can have construction gaps that invite pests. We perform post-construction exclusion treatments for new homes throughout Upper Merion Township."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -28,64 +96,7 @@ export default function KingOfPrussiaPA() {
         <title>King of Prussia PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="King of Prussia PA pest control: commercial and residential wildlife removal, termite treatment, and rodent control near Valley Forge. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/king-of-prussia-pa" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/king-of-prussia-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Do large retail centers in King of Prussia need commercial pest control?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. High foot traffic, food courts, and loading docks make large retail properties particularly vulnerable to rodents and cockroaches. We offer commercial service plans with guaranteed response times."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Are geese a problem near Valley Forge?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Geese are common throughout Upper Merion Township and Valley Forge National Park's perimeter. We provide humane goose deterrent programs for commercial and HOA properties."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can you handle wildlife near the wooded areas around KOP?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Raccoons, groundhogs, and foxes regularly move into KOP neighborhoods from Valley Forge. We trap and relocate humanely."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do new construction homes near KOP need pest-proofing?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "New builds displace wildlife and can have construction gaps that invite pests. We perform post-construction exclusion treatments for new homes throughout Upper Merion Township."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -218,7 +229,7 @@ export default function KingOfPrussiaPA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -279,7 +290,7 @@ export default function KingOfPrussiaPA() {
         </div>
       </section>
 
-      <!-- Our Services in King of Prussia -->
+      {/* Our Services in King of Prussia */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

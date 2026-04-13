@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,73 @@ export default function MalvernPA() {
   ];
 
   const faqs = [{"q": "Are rodents common in Malvern's upscale neighborhoods?", "a": "Yes. Malvern's mature tree canopy and proximity to wooded buffers along the Paoli Pike corridor create significant rodent pressure, even in high-end neighborhoods. We use integrated rodent management that is safe for children and pets."}, {"q": "Do pharma and corporate campuses in Malvern need commercial pest control?", "a": "Absolutely. We provide commercial pest management programs tailored to the compliance needs of pharma, biotech, and office facilities throughout Great Valley."}, {"q": "How do termites affect Malvern homes?", "a": "Chester County's soil conditions support active Eastern Subterranean Termite populations. We offer thorough inspections and liquid or bait-station treatments to protect your investment."}, {"q": "Can you remove wildlife from wooded Malvern properties?", "a": "Yes. We handle groundhogs, raccoons, foxes, and other wildlife commonly found near Malvern's greenway areas and corporate campus perimeters."}];
+        useEffect(() => {
+            const script = document.createElement("script");
+            script.type = "application/ld+json";
+            script.textContent = `{
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Absolute Pest Services",
+          "telephone": "484-643-2225",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "21 Sheffield Dr",
+            "addressLocality": "West Grove",
+            "addressRegion": "PA",
+            "postalCode": "19390",
+            "addressCountry": "US"
+          },
+          "url": "https://absolutepestservices.com/service-areas/malvern-pa"
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Are rodents common in Malvern's upscale neighborhoods?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Malvern's mature tree canopy and proximity to wooded buffers along the Paoli Pike corridor create significant rodent pressure, even in high-end neighborhoods. We use integrated rodent management that is safe for children and pets."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do pharma and corporate campuses in Malvern need commercial pest control?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely. We provide commercial pest management programs tailored to the compliance needs of pharma, biotech, and office facilities throughout Great Valley."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do termites affect Malvern homes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Chester County's soil conditions support active Eastern Subterranean Termite populations. We offer thorough inspections and liquid or bait-station treatments to protect your investment."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can you remove wildlife from wooded Malvern properties?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. We handle groundhogs, raccoons, foxes, and other wildlife commonly found near Malvern's greenway areas and corporate campus perimeters."
+              }
+            }
+          ]
+        }
+      ]
+    }`;
+            document.head.appendChild(script);
+            return () => {
+                document.head.removeChild(script);
+            };
+        }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
@@ -28,64 +96,7 @@ export default function MalvernPA() {
         <title>Malvern PA Pest Control Services | Absolute Pest Services</title>
         <meta name="description" content="Malvern PA pest control: wildlife removal, termite treatment, bed bug control along the Paoli Pike corridor. Serving Malvern, Frazer, and Great Valley. Call 484-643-2225." />
         <link rel="canonical" href="https://absolutepestservices.com/service-areas/malvern-pa" />
-        <script type="application/ld+json">{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Absolute Pest Services",
-      "telephone": "484-643-2225",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "21 Sheffield Dr",
-        "addressLocality": "West Grove",
-        "addressRegion": "PA",
-        "postalCode": "19390",
-        "addressCountry": "US"
-      },
-      "url": "https://absolutepestservices.com/service-areas/malvern-pa"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Are rodents common in Malvern's upscale neighborhoods?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Malvern's mature tree canopy and proximity to wooded buffers along the Paoli Pike corridor create significant rodent pressure, even in high-end neighborhoods. We use integrated rodent management that is safe for children and pets."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do pharma and corporate campuses in Malvern need commercial pest control?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Absolutely. We provide commercial pest management programs tailored to the compliance needs of pharma, biotech, and office facilities throughout Great Valley."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How do termites affect Malvern homes?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Chester County's soil conditions support active Eastern Subterranean Termite populations. We offer thorough inspections and liquid or bait-station treatments to protect your investment."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can you remove wildlife from wooded Malvern properties?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. We handle groundhogs, raccoons, foxes, and other wildlife commonly found near Malvern's greenway areas and corporate campus perimeters."
-          }
-        }
-      ]
-    }
-  ]
-}</script>
+        
       </Helmet>
       <Header />
 
@@ -218,7 +229,7 @@ export default function MalvernPA() {
           </div>
         </div>
       </section>
-      <!-- Nearby Service Areas -->
+      {/* Nearby Service Areas */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -279,7 +290,7 @@ export default function MalvernPA() {
         </div>
       </section>
 
-      <!-- Our Services in Malvern -->
+      {/* Our Services in Malvern */}
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
