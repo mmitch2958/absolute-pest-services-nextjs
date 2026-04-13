@@ -18,7 +18,6 @@ Full-stack pest control business website for Absolute Pest Services (absolutepes
   src/
     components/          ← React components (forms, UI)
     lib/                 ← db.ts, admin-session.ts, utils
-  express/               ← Original Express app preserved as fallback
   start.sh               ← Startup script (SWC workaround + webpack mode)
 ```
 
