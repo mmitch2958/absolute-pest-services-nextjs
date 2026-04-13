@@ -203,7 +203,7 @@ export default async function ServiceAreaPage({ params }: Props) {
       {/* JSON-LD */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([localBusinessSchema, faqSchema]) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([localBusinessSchema, faqSchema]).replace(/</g, '\\u003c') }}
       />
 
 
