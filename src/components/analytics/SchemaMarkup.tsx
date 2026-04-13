@@ -102,7 +102,7 @@ function LocalBusinessSchema() {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(BUSINESS) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(BUSINESS).replace(/</g, '\\u003c') }}
     />
   )
 }
