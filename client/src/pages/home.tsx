@@ -11,6 +11,7 @@ import { AbsoluteLogoSimple } from "@/components/absolute-logo";
 import GoogleBusinessIntegration, { GoogleBusinessSchema } from "@/components/google-business-integration";
 import GoogleReviewRequest from "@/components/google-review-request";
 import SeasonalAlerts from "@/components/seasonal-alerts";
+import SpringCarpenterBeeBanner from "@/components/spring-carpenter-bee-banner";
 import pestControlTeamImage from "@assets/istockphoto-594474798-612x612_1758123737181.jpg";
 import { trackPhoneClick, trackCtaClick } from "@/lib/analytics";
 
@@ -253,10 +254,13 @@ export default function Home() {
           </div>
         )}
       </header>
+      {/* Spring Carpenter Bee Banner */}
+      <SpringCarpenterBeeBanner />
+
       {/* Hero Section */}
       <section id="home" className="relative h-screen overflow-hidden">
         <HeroSlider />
-        
+
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white max-w-4xl mx-auto px-4">
             <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight text-[#f09000]">

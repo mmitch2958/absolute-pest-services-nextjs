@@ -15,6 +15,8 @@ import WildlifeControl from "@/pages/wildlife-control";
 import BedBugTreatment from "@/pages/bed-bug-treatment";
 import TermiteTreatment from "@/pages/termite-treatment";
 import BatRemoval from "@/pages/bat-removal";
+import CarpenterBeesInfoPage from "@/pages/carpenter-bees";
+import CarpenterBeeTreatmentPage from "@/pages/carpenter-bee-treatment";
 import Termites from "@/pages/termites";
 import BedBugs from "@/pages/bed-bugs";
 import Rodents from "@/pages/rodents";
@@ -27,6 +29,8 @@ import MontgomeryCountyPA from "@/pages/service-areas/montgomery-county-pa";
 import NortheastMaryland from "@/pages/service-areas/northeast-maryland";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
+import CarpenterBeeSeasonBlogPost from "@/pages/blog/carpenter-bee-season-pade";
+import CarpenterBeeControlPage from "@/pages/carpenter-bee-control";
 import CostCalculator from "@/pages/CostCalculator";
 import NotFound from "@/pages/not-found";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -155,6 +159,9 @@ function Router() {
       <Route path="/bed-bug-treatment" component={BedBugTreatment} />
       <Route path="/termite-treatment" component={TermiteTreatment} />
       <Route path="/bat-removal" component={BatRemoval} />
+      <Route path="/carpenter-bees" component={CarpenterBeesInfoPage} />
+      <Route path="/carpenter-bee-control" component={CarpenterBeeControlPage} />
+      <Route path="/carpenter-bee-treatment" component={CarpenterBeeTreatmentPage} />
       {/* New SEO landing pages targeting high-intent keywords */}
       <Route path="/termites" component={Termites} />
       <Route path="/bed-bugs" component={BedBugs} />
@@ -240,6 +247,7 @@ function Router() {
       <Route path="/ant-wasp-control-wilmington-de/" component={AntWaspControlWilmingtonDe} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
+      <Route path="/blog/carpenter-bee-season-pade" component={CarpenterBeeSeasonBlogPost} />
       <Route path="/cost-calculator" component={CostCalculator} />
       
       {/* Pitch Deck */}
