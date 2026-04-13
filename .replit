@@ -7,8 +7,8 @@ channel = "stable-24_05"
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["npm", "run", "build"]
-run = ["npm", "run", "start"]
+build = ["bash", "-c", "npx next build --webpack"]
+run = ["bash", "-c", "npx next start -p 5000"]
 
 [[ports]]
 localPort = 5000
