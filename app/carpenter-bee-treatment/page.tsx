@@ -55,8 +55,8 @@ const faqSchema = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'What is the four-step carpenter bee treatment process?',
-      acceptedAnswer: { '@type': 'Answer', text: 'APS treats carpenter bees in four steps: (1) Inspect — identify all galleries and assess damage; (2) Treat — using professional-grade products, we treat the exterior of the infected area as well as deep into the galleries for maximum effectiveness; (3) Seal — close entry holes 1–2 weeks after treatment; (4) Monitor — follow-up inspections through the season.' },
+      name: 'What is the carpenter bee treatment process?',
+      acceptedAnswer: { '@type': 'Answer', text: 'APS treats carpenter bees in two steps: (1) Inspect — identify all galleries and assess damage; (2) Treat — using professional-grade products, we treat the exterior of the infected area as well as deep into the galleries for maximum effectiveness.' },
     },
     {
       '@type': 'Question',
@@ -102,18 +102,6 @@ const steps = [
     title: 'Treat',
     desc: 'Using professional-grade products, we treat the exterior of the infected area as well as deep into the galleries, which results in the maximum effectiveness.',
     warning: 'Important: We do NOT plug the holes immediately. Bees need to pass through the treated entry points to contact and distribute the insecticide through the gallery.',
-  },
-  {
-    step: 3,
-    title: 'Seal',
-    desc: 'After the treatment has had time to work, we return to seal all entry holes with wood putty or dowels. Once sealed, we recommend painting or varnishing the treated wood surfaces to create a barrier against re-infestation. A proper paint or seal coat is essential.',
-    warning: undefined,
-  },
-  {
-    step: 4,
-    title: 'Monitor',
-    desc: "Carpenter bee treatment isn't a one-and-done service. We schedule follow-up inspections to verify treatment effectiveness, check for new activity, and address any galleries we may have missed.",
-    warning: undefined,
   },
 ]
 
@@ -202,15 +190,14 @@ export default function CarpenterBeeTreatmentPage() {
         </div>
       </section>
 
-      {/* Four-Step Process */}
+      {/* Treatment Process */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">How APS Treats Carpenter Bees</h2>
           <p className="text-lg text-gray-600 text-center max-w-2xl mx-auto mb-12">
-            Our carpenter bee treatment follows a proven four-step process designed to eliminate
-            the current infestation and prevent future damage.
+            Our carpenter bee treatment is designed to eliminate the current infestation and prevent future damage.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {steps.map(({ step, title, desc, warning }) => (
               <div key={step} className="bg-gray-50 rounded-2xl p-6">
                 <div className="w-12 h-12 bg-green-700 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">
@@ -225,6 +212,15 @@ export default function CarpenterBeeTreatmentPage() {
                 )}
               </div>
             ))}
+            <div className="relative rounded-2xl overflow-hidden min-h-64">
+              <Image
+                src="/images/carpenter-bee/carpenter-bee-damage-closeup.jpg"
+                alt="Close-up of carpenter bee damage — round bore holes in exterior wood"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+            </div>
           </div>
         </div>
       </section>
