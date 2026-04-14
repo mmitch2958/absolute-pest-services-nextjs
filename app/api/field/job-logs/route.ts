@@ -104,9 +104,15 @@ export async function GET() {
     }
 
     const logs = await sql`
-      SELECT * FROM job_logs
-      WHERE employee_id = ${session.employeeId}
-      ORDER BY job_date DESC
+      SELECT
+        jl.*,
+        c.phone   AS client_phone,
+        c.email   AS client_email,
+        c.address AS client_address
+      FROM job_logs jl
+      LEFT JOIN clients c ON jl.client_id = c.id
+      WHERE jl.employee_id = ${session.employeeId}
+      ORDER BY jl.job_date DESC
       LIMIT 50
     `;
 

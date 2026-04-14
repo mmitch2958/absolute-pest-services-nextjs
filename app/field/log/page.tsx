@@ -16,6 +16,14 @@ interface SuggestionsData {
   locationAreas: Record<string, string[]>;
   clients: ClientRecord[];
 }
+interface MaterialEntry {
+  id: string;
+  mode: 'none' | 'product' | 'supplies';
+  productName: string;
+  productVolume: string;
+  productUnit: 'oz' | 'gallons';
+  supplyItems: { name: string; quantity: string }[];
+}
 
 const PEST_PRODUCTS = [
   'Termidor SC','Termidor HE','Termidor Foam','Phantom II','Alpine WSG','Alpine Foam',
@@ -42,6 +50,17 @@ const PEST_SUPPLIES = [
 
 const NEW_OPTION = '__NEW__';
 const inputBase = 'w-full h-12 px-3 text-base text-black border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50';
+
+function createBlankEntry(): MaterialEntry {
+  return {
+    id: Math.random().toString(36).slice(2),
+    mode: 'none',
+    productName: '',
+    productVolume: '',
+    productUnit: 'oz',
+    supplyItems: [],
+  };
+}
 
 function FieldNav({ employee, active }: { employee: Employee | null; active: string }) {
   const router = useRouter();
@@ -126,6 +145,230 @@ function SmartField({
   );
 }
 
+function MaterialEntryBlock({
+  entry,
+  index,
+  total,
+  onChange,
+  onRemove,
+}: {
+  entry: MaterialEntry;
+  index: number;
+  total: number;
+  onChange: (updated: MaterialEntry) => void;
+  onRemove: () => void;
+}) {
+  const [productSearch, setProductSearch] = useState(entry.productName);
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+  const [supplySearch, setSupplySearch] = useState('');
+  const [showSupplyDropdown, setShowSupplyDropdown] = useState(false);
+
+  const filteredProducts = PEST_PRODUCTS.filter(p =>
+    p.toLowerCase().includes(productSearch.toLowerCase())
+  );
+  const filteredSupplies = PEST_SUPPLIES.filter(s =>
+    s.toLowerCase().includes(supplySearch.toLowerCase()) &&
+    !entry.supplyItems.find(i => i.name === s)
+  );
+
+  function update(patch: Partial<MaterialEntry>) {
+    onChange({ ...entry, ...patch });
+  }
+
+  return (
+    <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
+      {/* Header row */}
+      <div className="flex items-center justify-between px-3 pt-3 pb-1">
+        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+          {total > 1 ? `Material ${index + 1}` : 'Material'}
+        </span>
+        {total > 1 && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="text-slate-300 hover:text-red-500 transition-colors p-1"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      <div className="px-3 pb-3 space-y-3">
+        {/* Mode selector */}
+        <div className="grid grid-cols-3 gap-2">
+          {(['none', 'product', 'supplies'] as const).map(m => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => update({ mode: m })}
+              className={`py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                entry.mode === m
+                  ? 'bg-green-600 text-white border-green-600'
+                  : 'bg-white text-slate-500 border-slate-300 hover:border-green-400'
+              }`}
+            >
+              {m === 'none' ? 'None' : m === 'product' ? 'Product' : 'Supplies'}
+            </button>
+          ))}
+        </div>
+
+        {/* Product UI */}
+        {entry.mode === 'product' && (
+          <div className="space-y-3 bg-slate-50 rounded-xl p-3 border border-slate-100">
+            <div className="space-y-1.5 relative">
+              <label className="text-sm font-medium text-slate-700">Product / Solution Name</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={productSearch}
+                  onChange={e => {
+                    setProductSearch(e.target.value);
+                    update({ productName: e.target.value });
+                    setShowProductDropdown(true);
+                  }}
+                  onFocus={() => setShowProductDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowProductDropdown(false), 150)}
+                  placeholder="Search or enter product..."
+                  className="w-full h-11 pl-9 pr-3 text-base text-black border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50"
+                />
+              </div>
+              {showProductDropdown && (
+                <div className="absolute z-20 w-full bg-white border border-slate-200 rounded-xl shadow-lg max-h-44 overflow-y-auto">
+                  {filteredProducts.slice(0, 12).map(p => (
+                    <button
+                      key={p}
+                      type="button"
+                      onMouseDown={() => {
+                        setProductSearch(p);
+                        update({ productName: p });
+                        setShowProductDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-sm text-black hover:bg-slate-50"
+                    >{p}</button>
+                  ))}
+                  {productSearch.trim() && !PEST_PRODUCTS.some(p => p.toLowerCase() === productSearch.trim().toLowerCase()) && (
+                    <button
+                      type="button"
+                      onMouseDown={() => {
+                        update({ productName: productSearch.trim() });
+                        setShowProductDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-sm text-green-600 font-medium hover:bg-green-50 flex items-center gap-2 border-t"
+                    >
+                      <Plus className="w-4 h-4" /> Add custom: &ldquo;{productSearch.trim()}&rdquo;
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">Volume</label>
+                <input
+                  type="number" min="0" step="0.1" value={entry.productVolume}
+                  onChange={e => update({ productVolume: e.target.value })}
+                  placeholder="0.0"
+                  className="w-full h-11 px-3 text-base text-black text-right border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">Unit</label>
+                <div className="grid grid-cols-2 gap-1.5 h-11">
+                  {(['oz', 'gallons'] as const).map(u => (
+                    <button
+                      key={u}
+                      type="button"
+                      onClick={() => update({ productUnit: u })}
+                      className={`rounded-xl text-sm font-medium border transition-colors ${
+                        entry.productUnit === u
+                          ? 'bg-green-600 text-white border-green-600'
+                          : 'bg-white text-slate-500 border-slate-300'
+                      }`}
+                    >{u}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Supplies UI */}
+        {entry.mode === 'supplies' && (
+          <div className="space-y-3 bg-slate-50 rounded-xl p-3 border border-slate-100">
+            <div className="space-y-1.5 relative">
+              <label className="text-sm font-medium text-slate-700">Add Supply</label>
+              <div className="relative">
+                <Boxes className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={supplySearch}
+                  onChange={e => { setSupplySearch(e.target.value); setShowSupplyDropdown(true); }}
+                  onFocus={() => setShowSupplyDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowSupplyDropdown(false), 150)}
+                  placeholder="Search or type a supply..."
+                  className="w-full h-11 pl-9 pr-3 text-base text-black border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50"
+                />
+              </div>
+              {showSupplyDropdown && (
+                <div className="absolute z-20 w-full bg-white border border-slate-200 rounded-xl shadow-lg max-h-44 overflow-y-auto">
+                  {filteredSupplies.map(s => (
+                    <button
+                      key={s}
+                      type="button"
+                      onMouseDown={() => {
+                        update({ supplyItems: [...entry.supplyItems, { name: s, quantity: '1' }] });
+                        setSupplySearch('');
+                        setShowSupplyDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-sm text-black hover:bg-slate-50"
+                    >{s}</button>
+                  ))}
+                  {supplySearch.trim() && !PEST_SUPPLIES.some(s => s.toLowerCase() === supplySearch.trim().toLowerCase()) && (
+                    <button
+                      type="button"
+                      onMouseDown={() => {
+                        update({ supplyItems: [...entry.supplyItems, { name: supplySearch.trim(), quantity: '1' }] });
+                        setSupplySearch('');
+                        setShowSupplyDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-sm text-green-600 font-medium hover:bg-green-50 flex items-center gap-2 border-t"
+                    >
+                      <Plus className="w-4 h-4" /> Add &ldquo;{supplySearch.trim()}&rdquo;
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            {entry.supplyItems.map((item, idx) => (
+              <div key={idx} className="flex items-center gap-2 bg-white rounded-xl border border-slate-200 p-2">
+                <span className="flex-1 text-sm font-medium text-black">{item.name}</span>
+                <label className="text-xs text-slate-400">Qty:</label>
+                <input
+                  type="number" min="1" value={item.quantity}
+                  onChange={e => update({
+                    supplyItems: entry.supplyItems.map((it, i) =>
+                      i === idx ? { ...it, quantity: e.target.value } : it
+                    ),
+                  })}
+                  className="w-14 h-8 px-2 text-sm text-right text-black border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/50"
+                />
+                <button
+                  type="button"
+                  onClick={() => update({ supplyItems: entry.supplyItems.filter((_, i) => i !== idx) })}
+                  className="p-1 text-slate-400 hover:text-red-500"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function FieldLogPage() {
   const router = useRouter();
   const [employee, setEmployee] = useState<Employee | null>(null);
@@ -155,15 +398,7 @@ export default function FieldLogPage() {
   const [rateSearch, setRateSearch] = useState('');
   const [showRateDropdown, setShowRateDropdown] = useState(false);
 
-  const [materialsMode, setMaterialsMode] = useState<'none' | 'product' | 'supplies'>('none');
-  const [productName, setProductName] = useState('');
-  const [productSearch, setProductSearch] = useState('');
-  const [showProductDropdown, setShowProductDropdown] = useState(false);
-  const [productVolume, setProductVolume] = useState('');
-  const [productUnit, setProductUnit] = useState<'oz' | 'gallons'>('oz');
-  const [supplyItems, setSupplyItems] = useState<{ name: string; quantity: string }[]>([]);
-  const [supplySearch, setSupplySearch] = useState('');
-  const [showSupplyDropdown, setShowSupplyDropdown] = useState(false);
+  const [materialEntries, setMaterialEntries] = useState<MaterialEntry[]>([createBlankEntry()]);
 
   useEffect(() => {
     const stored = localStorage.getItem('fieldEmployee');
@@ -196,14 +431,30 @@ export default function FieldLogPage() {
     }
   }
 
+  function updateEntry(id: string, updated: MaterialEntry) {
+    setMaterialEntries(prev => prev.map(e => e.id === id ? updated : e));
+  }
+  function removeEntry(id: string) {
+    setMaterialEntries(prev => prev.filter(e => e.id !== id));
+  }
+  function addEntry() {
+    setMaterialEntries(prev => [...prev, createBlankEntry()]);
+  }
+
   function buildMaterials() {
-    if (materialsMode === 'product' && productName) {
-      return { type: 'product', productName, volume: productVolume ? parseFloat(productVolume) : null, unit: productUnit };
-    }
-    if (materialsMode === 'supplies' && supplyItems.length > 0) {
-      return { type: 'supplies', items: supplyItems };
-    }
-    return null;
+    const active = materialEntries
+      .filter(e => {
+        if (e.mode === 'product') return !!e.productName.trim();
+        if (e.mode === 'supplies') return e.supplyItems.length > 0;
+        return false;
+      })
+      .map(e => {
+        if (e.mode === 'product') {
+          return { type: 'product', productName: e.productName, volume: e.productVolume ? parseFloat(e.productVolume) : null, unit: e.productUnit };
+        }
+        return { type: 'supplies', items: e.supplyItems };
+      });
+    return active.length > 0 ? active : null;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -244,8 +495,7 @@ export default function FieldLogPage() {
         setPropertyType('residential'); setSiteLocation(''); setLocationAddingNew(false);
         setSiteAddress(''); setServicedArea(''); setAreaAddingNew(false);
         setWorkPerformed(''); setSelectedRateId(null); setAmount('200.00');
-        setRateSearch(''); setMaterialsMode('none'); setProductName('');
-        setProductSearch(''); setProductVolume(''); setSupplyItems([]);
+        setRateSearch(''); setMaterialEntries([createBlankEntry()]);
         setJobDate(new Date().toISOString().split('T')[0]);
       }, 2500);
     } catch (err: any) {
@@ -270,10 +520,6 @@ export default function FieldLogPage() {
   }
 
   const filteredRates = serviceRates.filter(r => r.name.toLowerCase().includes(rateSearch.toLowerCase()));
-  const filteredProducts = PEST_PRODUCTS.filter(p => p.toLowerCase().includes(productSearch.toLowerCase()));
-  const filteredSupplies = PEST_SUPPLIES.filter(s =>
-    s.toLowerCase().includes(supplySearch.toLowerCase()) && !supplyItems.find(i => i.name === s)
-  );
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col overflow-hidden">
@@ -307,7 +553,7 @@ export default function FieldLogPage() {
             placeholder="Enter new customer name"
           />
 
-          {/* Property Type — shown whenever a customer is selected or being added */}
+          {/* Property Type */}
           {(customerName.trim() || customerAddingNew) && (
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-slate-700">
@@ -336,7 +582,7 @@ export default function FieldLogPage() {
             </div>
           )}
 
-          {/* New Customer address — only for brand new customers */}
+          {/* New Customer address */}
           {customerAddingNew && (
             <div className="rounded-xl border-2 border-green-200 bg-green-50 p-4 space-y-2">
               <div className="flex items-center gap-2 mb-1">
@@ -406,122 +652,30 @@ export default function FieldLogPage() {
             />
           </div>
 
-          {/* Materials */}
+          {/* Materials — multi-entry */}
           <div className="space-y-3">
             <label className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
               <Package className="w-4 h-4 text-slate-400" /> Materials Used
             </label>
-            <div className="grid grid-cols-3 gap-2">
-              {(['none', 'product', 'supplies'] as const).map(m => (
-                <button key={m} type="button" onClick={() => setMaterialsMode(m)}
-                  className={`py-2.5 rounded-xl text-sm font-medium border transition-colors ${
-                    materialsMode === m ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-500 border-slate-300 hover:border-green-400'
-                  }`}>
-                  {m === 'none' ? 'None' : m === 'product' ? 'Product' : 'Supplies'}
-                </button>
-              ))}
-            </div>
 
-            {materialsMode === 'product' && (
-              <div className="space-y-3 bg-slate-50 rounded-xl p-3 border border-slate-200">
-                <div className="space-y-1.5 relative">
-                  <label className="text-sm font-medium text-slate-700">Product / Solution Name</label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={productSearch}
-                      onChange={e => { setProductSearch(e.target.value); setProductName(e.target.value); setShowProductDropdown(true); }}
-                      onFocus={() => setShowProductDropdown(true)}
-                      onBlur={() => setTimeout(() => setShowProductDropdown(false), 150)}
-                      placeholder="Search or enter product..."
-                      className="w-full h-11 pl-9 pr-3 text-base text-black border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50"
-                    />
-                  </div>
-                  {showProductDropdown && (
-                    <div className="absolute z-20 w-full bg-white border border-slate-200 rounded-xl shadow-lg max-h-44 overflow-y-auto">
-                      {filteredProducts.slice(0, 12).map(p => (
-                        <button key={p} type="button"
-                          onMouseDown={() => { setProductName(p); setProductSearch(p); setShowProductDropdown(false); }}
-                          className="w-full text-left px-4 py-3 text-sm text-black hover:bg-slate-50">{p}</button>
-                      ))}
-                      {productSearch.trim() && !PEST_PRODUCTS.some(p => p.toLowerCase() === productSearch.trim().toLowerCase()) && (
-                        <button type="button"
-                          onMouseDown={() => { setProductName(productSearch.trim()); setShowProductDropdown(false); }}
-                          className="w-full text-left px-4 py-3 text-sm text-green-600 font-medium hover:bg-green-50 flex items-center gap-2 border-t">
-                          <Plus className="w-4 h-4" /> Add custom: "{productSearch.trim()}"
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-slate-700">Volume</label>
-                    <input type="number" min="0" step="0.1" value={productVolume}
-                      onChange={e => setProductVolume(e.target.value)} placeholder="0.0"
-                      className="w-full h-11 px-3 text-base text-black text-right border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-slate-700">Unit</label>
-                    <div className="grid grid-cols-2 gap-1.5 h-11">
-                      {(['oz', 'gallons'] as const).map(u => (
-                        <button key={u} type="button" onClick={() => setProductUnit(u)}
-                          className={`rounded-xl text-sm font-medium border transition-colors ${
-                            productUnit === u ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-500 border-slate-300'
-                          }`}>{u}</button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            {materialEntries.map((entry, index) => (
+              <MaterialEntryBlock
+                key={entry.id}
+                entry={entry}
+                index={index}
+                total={materialEntries.length}
+                onChange={updated => updateEntry(entry.id, updated)}
+                onRemove={() => removeEntry(entry.id)}
+              />
+            ))}
 
-            {materialsMode === 'supplies' && (
-              <div className="space-y-3 bg-slate-50 rounded-xl p-3 border border-slate-200">
-                <div className="space-y-1.5 relative">
-                  <label className="text-sm font-medium text-slate-700">Add Supply</label>
-                  <div className="relative">
-                    <Boxes className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    <input type="text" value={supplySearch}
-                      onChange={e => { setSupplySearch(e.target.value); setShowSupplyDropdown(true); }}
-                      onFocus={() => setShowSupplyDropdown(true)}
-                      onBlur={() => setTimeout(() => setShowSupplyDropdown(false), 150)}
-                      placeholder="Search or type a supply..."
-                      className="w-full h-11 pl-9 pr-3 text-base text-black border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50" />
-                  </div>
-                  {showSupplyDropdown && (
-                    <div className="absolute z-20 w-full bg-white border border-slate-200 rounded-xl shadow-lg max-h-44 overflow-y-auto">
-                      {filteredSupplies.map(s => (
-                        <button key={s} type="button"
-                          onMouseDown={() => { setSupplyItems(prev => [...prev, { name: s, quantity: '1' }]); setSupplySearch(''); setShowSupplyDropdown(false); }}
-                          className="w-full text-left px-4 py-3 text-sm text-black hover:bg-slate-50">{s}</button>
-                      ))}
-                      {supplySearch.trim() && !PEST_SUPPLIES.some(s => s.toLowerCase() === supplySearch.trim().toLowerCase()) && (
-                        <button type="button"
-                          onMouseDown={() => { setSupplyItems(prev => [...prev, { name: supplySearch.trim(), quantity: '1' }]); setSupplySearch(''); setShowSupplyDropdown(false); }}
-                          className="w-full text-left px-4 py-3 text-sm text-green-600 font-medium hover:bg-green-50 flex items-center gap-2 border-t">
-                          <Plus className="w-4 h-4" /> Add "{supplySearch.trim()}"
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-                {supplyItems.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2 bg-white rounded-xl border border-slate-200 p-2">
-                    <span className="flex-1 text-sm font-medium text-black">{item.name}</span>
-                    <label className="text-xs text-slate-400">Qty:</label>
-                    <input type="number" min="1" value={item.quantity}
-                      onChange={e => setSupplyItems(prev => prev.map((it, i) => i === idx ? { ...it, quantity: e.target.value } : it))}
-                      className="w-14 h-8 px-2 text-sm text-right text-black border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/50" />
-                    <button type="button" onClick={() => setSupplyItems(prev => prev.filter((_, i) => i !== idx))}
-                      className="p-1 text-slate-400 hover:text-red-500">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={addEntry}
+              className="w-full flex items-center justify-center gap-2 h-10 border-2 border-dashed border-slate-300 rounded-xl text-sm font-medium text-slate-500 hover:border-green-400 hover:text-green-600 transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Add Material
+            </button>
           </div>
 
           {/* Service Type & Amount */}
