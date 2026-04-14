@@ -445,14 +445,22 @@ export default function FieldLogPage() {
     const active = materialEntries
       .filter(e => {
         if (e.mode === 'product') return !!e.productName.trim();
-        if (e.mode === 'supplies') return e.supplyItems.length > 0;
+        if (e.mode === 'supplies') return e.supplyItems.filter(i => i.name.trim()).length > 0;
         return false;
       })
       .map(e => {
         if (e.mode === 'product') {
-          return { type: 'product', productName: e.productName, volume: e.productVolume ? parseFloat(e.productVolume) : null, unit: e.productUnit };
+          return {
+            type: 'product',
+            productName: e.productName.trim(),
+            volume: e.productVolume ? parseFloat(e.productVolume) : null,
+            unit: e.productUnit,
+          };
         }
-        return { type: 'supplies', items: e.supplyItems };
+        return {
+          type: 'supplies',
+          items: e.supplyItems.filter(i => i.name.trim()).map(i => ({ ...i, name: i.name.trim() })),
+        };
       });
     return active.length > 0 ? active : null;
   }
