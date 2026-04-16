@@ -78,6 +78,13 @@ export default function ServiceRequestForm() {
         event_category: 'Lead',
         event_label: 'Service Request Form',
       })
+
+      // Google Ads conversion: "Submit lead form"
+      window.gtag('event', 'conversion', {
+        send_to: 'AW-1038095551/E4u4CK_Xq50cEL-pgO8D',
+        value: 1.0,
+        currency: 'USD',
+      })
     }
   }, [state?.success])
 
