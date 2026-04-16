@@ -137,6 +137,14 @@ export default function Analytics() {
         currency: 'USD',
       })
 
+      // ── Google Ads conversion: "Click to call (3)" ─────────────────────
+      // Second conversion action for the same phone-click interaction.
+      gaEvent('conversion', {
+        send_to: 'AW-1038095551/AmWHCMzEq50cEL-pgO8D',
+        value: 1.0,
+        currency: 'USD',
+      })
+
       // ── GA4 custom event: phone_click ──────────────────────────────────
       // NOTE: For this to appear as a CONVERSION in GA4, Mike must:
       //   1. Go to GA4 Admin → Events → Mark event as conversion
