@@ -67,6 +67,22 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // RFC 8288 Link headers — agent discovery on the homepage and key pages
+        source: '/((?!_next/|api/|admin/|field/).*)',
+        headers: [
+          {
+            key: 'Link',
+            value: [
+              '</.well-known/api-catalog>; rel="api-catalog"; type="application/linkset+json"',
+              '</.well-known/agent-skills/index.json>; rel="https://agentskills.io/rels/index"; type="application/json"',
+              '</openapi.json>; rel="service-desc"; type="application/json"',
+              '</api/health>; rel="status"',
+              '</sitemap.xml>; rel="sitemap"; type="application/xml"',
+            ].join(', '),
+          },
+        ],
+      },
+      {
         source: '/_next/static/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },

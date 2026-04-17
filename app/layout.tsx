@@ -4,6 +4,7 @@ import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import Analytics from '@/components/analytics/Analytics'
+import WebMCPProvider from '@/components/agent/WebMCPProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -64,6 +65,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Footer />
         {/* Client-side analytics: phone click tracking + SPA pageview events */}
         <Analytics />
+        {/* WebMCP — exposes site tools to AI agents (no-op if browser doesn't support it) */}
+        <WebMCPProvider />
       </body>
     </html>
   )
