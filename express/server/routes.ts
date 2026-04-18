@@ -3098,6 +3098,7 @@ Return the article as JSON with fields:
         toDate?: Date;
         page?: number;
         limit?: number;
+        jobLogId?: number;
       } = {};
       if (req.query.clientId) filters.clientId = parseInt(req.query.clientId as string);
       if (req.query.status) filters.status = req.query.status as InvoiceStatus;
@@ -3105,6 +3106,7 @@ Return the article as JSON with fields:
       if (req.query.toDate) filters.toDate = new Date(req.query.toDate as string);
       if (req.query.page) filters.page = parseInt(req.query.page as string);
       if (req.query.limit) filters.limit = parseInt(req.query.limit as string);
+      if (req.query.jobLogId) filters.jobLogId = parseInt(req.query.jobLogId as string);
 
       const invoices = await storage.listInvoices(filters);
       res.json({ success: true, invoices });
@@ -3282,9 +3284,11 @@ Return the article as JSON with fields:
   });
 
   // POST /api/admin/invoices/:id/send — Send invoice to customer (draft → sent)
+  // Supports custom email, subject, message, attachPdf via body
   app.post("/api/admin/invoices/:id/send", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      const { email: customEmail, subject: customSubject, message: customMessage, attachPdf } = req.body || {};
       const invoice = await storage.getInvoice(id);
       if (!invoice) {
         return res.status(404).json({ success: false, message: "Invoice not found" });
@@ -3298,45 +3302,46 @@ Return the article as JSON with fields:
       }
 
       const client = await storage.getClient(invoice.clientId);
-      if (!client || !client.email) {
-        return res.status(400).json({ success: false, message: "Client email not found" });
+      const recipientEmail = customEmail?.trim() || client?.email;
+      if (!recipientEmail) {
+        return res.status(400).json({ success: false, message: "No email address available. Provide an email address or ensure the client has an email on file." });
       }
 
-      // Generate PDF and send email first, then update status
       const adminBaseUrl = await getAppBaseUrl();
       const lineItems = await storage.getLineItemsByInvoice(id);
       let pdfBuffer: Buffer | undefined;
-      try {
-        pdfBuffer = generateInvoicePdf({
-          invoiceNumber: invoice.invoiceNumber,
-          status: 'sent',
-          issueDate: String(invoice.issueDate),
-          dueDate: String(invoice.dueDate),
-          subtotal: String(invoice.subtotal),
-          taxTotal: String(invoice.taxTotal),
-          total: String(invoice.total),
-          notes: invoice.notes,
-          client: { name: client.name, email: client.email, address: client.address, phone: client.phone, propertyType: (client as any).propertyType },
-          lineItems: lineItems.map(li => ({
-            description: li.description,
-            quantity: String(li.quantity),
-            unitRate: String(li.unitRate),
-            taxRate: String(li.taxRate),
-            lineTotal: String(li.lineTotal),
-            lineTax: String(li.lineTax),
-            serviceDate: (li as any).serviceDate,
-            technicianName: (li as any).technicianName,
-            serviceType: (li as any).serviceType,
-            serviceAddress: (li as any).serviceAddress,
-            servicedArea: (li as any).servicedArea,
-            materials: li.materials,
-          })),
-        });
-      } catch (e) { console.error(`[Invoice ${invoice.invoiceNumber}] PDF generation failed:`, e); }
-
+      if (attachPdf !== false) {
+        try {
+          pdfBuffer = generateInvoicePdf({
+            invoiceNumber: invoice.invoiceNumber,
+            status: 'sent',
+            issueDate: String(invoice.issueDate),
+            dueDate: String(invoice.dueDate),
+            subtotal: String(invoice.subtotal),
+            taxTotal: String(invoice.taxTotal),
+            total: String(invoice.total),
+            notes: invoice.notes,
+            client: { name: client?.name || '', email: client?.email, address: client?.address, phone: client?.phone, propertyType: (client as any).propertyType },
+            lineItems: lineItems.map(li => ({
+              description: li.description,
+              quantity: String(li.quantity),
+              unitRate: String(li.unitRate),
+              taxRate: String(li.taxRate),
+              lineTotal: String(li.lineTotal),
+              lineTax: String(li.lineTax),
+              serviceDate: (li as any).serviceDate,
+              technicianName: (li as any).technicianName,
+              serviceType: (li as any).serviceType,
+              serviceAddress: (li as any).serviceAddress,
+              servicedArea: (li as any).servicedArea,
+              materials: li.materials,
+            })),
+          });
+        } catch (e) { console.error(`[Invoice ${invoice.invoiceNumber}] PDF generation failed:`, e); }
+      }
       const emailSent = await sendInvoiceEmail({
-        clientEmail: client.email,
-        clientName: client.name,
+        clientEmail: recipientEmail,
+        clientName: client?.name || 'Valued Customer',
         invoiceNumber: invoice.invoiceNumber,
         invoiceDate: new Date(invoice.issueDate),
         dueDate: new Date(invoice.dueDate),
@@ -3344,13 +3349,16 @@ Return the article as JSON with fields:
         viewToken: invoice.viewToken!,
         baseUrl: adminBaseUrl,
         pdfBuffer,
+        subject: customSubject,
+        message: customMessage,
+        email: customEmail ? recipientEmail : undefined,
       });
 
       if (!emailSent) {
         return res.status(500).json({ success: false, message: "Failed to send invoice email. Invoice status was not changed." });
       }
 
-      await storage.updateInvoiceStatus(id, 'sent', `admin:${req.session.userId}`, 'Invoice sent to customer');
+      await storage.updateInvoiceStatus(id, 'sent', `admin:${req.session.userId}`, `Invoice sent to ${recipientEmail}`);
       const updatedInvoice = await storage.getInvoice(id);
       const statusLogs = await storage.getInvoiceStatusLog(id);
 

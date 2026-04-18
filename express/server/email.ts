@@ -624,11 +624,15 @@ export async function sendInvoiceEmail(data: {
   pdfUrl?: string;
   baseUrl?: string;
   pdfBuffer?: Buffer;
+  subject?: string;    // Custom subject override
+  message?: string;    // Custom personal message appended to email body
+  email?: string;     // Recipient email override (for admin custom send)
 }): Promise<boolean> {
   const resolvedBase = data.baseUrl
     || process.env.APP_BASE_URL
     || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000');
 
+  const recipientEmail = data.email || data.clientEmail;
   const viewUrl = `${resolvedBase}/invoice/${data.viewToken}`;
   const formattedInvoiceDate = data.invoiceDate.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -641,7 +645,7 @@ export async function sendInvoiceEmail(data: {
     day: 'numeric',
   });
 
-  const subject = `Invoice #${data.invoiceNumber} from Absolute Pest Services`;
+  const subject = data.subject || `Invoice #${data.invoiceNumber} from Absolute Pest Services`;
   const html = `
     <!DOCTYPE html>
     <html>
@@ -691,6 +695,13 @@ export async function sendInvoiceEmail(data: {
           <p style="color: #6b7280; margin: 20px 0; font-size: 14px; text-align: center;">
             A PDF copy is also attached to this email.
           </p>
+          ` : ''}
+
+
+          ${data.message ? `
+          <div style="margin-top: 30px; padding: 16px; background-color: #f9fafb; border-left: 4px solid #eab308; border-radius: 4px;">
+            <p style="color: #4b5563; margin: 0; font-size: 14px;"><strong>Personal Note:</strong><br>${data.message}</p>
+          </div>
           ` : ''}
 
           <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
@@ -749,7 +760,7 @@ Absolute Pest Services
 
   // Send to customer
   const customerSent = await sendEmail({
-    to: data.clientEmail,
+    to: recipientEmail,
     from: FROM_EMAIL,
     subject,
     html,
@@ -762,8 +773,8 @@ Absolute Pest Services
     to: TO_EMAIL,
     from: FROM_EMAIL,
     subject: `[INVOICE SENT] ${subject}`,
-    html: `<p>Invoice #${data.invoiceNumber} sent to ${data.clientEmail} (${data.clientName})</p>`,
-    text: `Invoice #${data.invoiceNumber} sent to ${data.clientEmail} (${data.clientName})`,
+    html: `<p>Invoice #${data.invoiceNumber} sent to ${recipientEmail} (${data.clientName})</p>`,
+    text: `Invoice #${data.invoiceNumber} sent to ${recipientEmail} (${data.clientName})`,
   });
 
   return customerSent && businessSent;

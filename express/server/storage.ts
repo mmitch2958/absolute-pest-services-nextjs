@@ -240,7 +240,7 @@ export interface IStorage {
   getInvoice(id: number): Promise<Invoice | undefined>;
   getInvoiceByToken(token: string): Promise<Invoice | undefined>;
   getInvoiceByNumber(invoiceNumber: string): Promise<Invoice | undefined>;
-  listInvoices(filters?: { clientId?: number; status?: InvoiceStatus; fromDate?: Date; toDate?: Date; page?: number; limit?: number }): Promise<InvoiceWithDetails[]>;
+  listInvoices(filters?: { clientId?: number; status?: InvoiceStatus; fromDate?: Date; toDate?: Date; page?: number; limit?: number; jobLogId?: number }): Promise<InvoiceWithDetails[]>;
   updateInvoice(id: number, data: Partial<Invoice>): Promise<Invoice>;
   getInvoiceStats(): Promise<InvoiceStats>;
 
@@ -1183,7 +1183,7 @@ export class DatabaseStorage implements IStorage {
     return invoice || undefined;
   }
 
-  async listInvoices(filters?: { clientId?: number; status?: InvoiceStatus; fromDate?: Date; toDate?: Date; page?: number; limit?: number }): Promise<InvoiceWithDetails[]> {
+  async listInvoices(filters?: { clientId?: number; status?: InvoiceStatus; fromDate?: Date; toDate?: Date; page?: number; limit?: number; jobLogId?: number }): Promise<InvoiceWithDetails[]> {
     const conditions = [];
     
     if (filters?.clientId) {
@@ -1197,6 +1197,9 @@ export class DatabaseStorage implements IStorage {
     }
     if (filters?.toDate) {
       conditions.push(lte(invoices.issueDate, filters.toDate));
+    }
+    if (filters?.jobLogId) {
+      conditions.push(eq(invoices.jobLogId, filters.jobLogId));
     }
 
     const page = filters?.page || 1;
