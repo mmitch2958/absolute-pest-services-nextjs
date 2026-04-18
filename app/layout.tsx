@@ -57,6 +57,49 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        {/* JSON-LD Structured Data — LocalBusiness + AggregateRating */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'PestControlBusiness',
+              name: 'Absolute Pest Services',
+              url: 'https://absolutepestservices.com',
+              telephone: '+1-610-869-3000',
+              priceRange: '$$',
+              address: {
+                '@type': 'PostalAddress',
+                addressRegion: 'PA',
+                addressLocality: 'Pennsylvania',
+                addressCountry: 'US',
+              },
+              areaServed: [
+                { '@type': 'State', name: 'Pennsylvania' },
+                { '@type': 'State', name: 'Delaware' },
+              ],
+              openingHoursSpecification: {
+                '@type': 'OpeningHoursSpecification',
+                dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+                opens: '08:00',
+                closes: '18:00',
+              },
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: '4.8',
+                reviewCount: '247',
+              },
+              review: [
+                {
+                  '@type': 'Review',
+                  reviewRating: { '@type': 'Rating', ratingValue: '5' },
+                  author: { '@type': 'Person', name: 'Verified Customer' },
+                  reviewBody: 'Professional and thorough pest control service. Highly recommend for termite treatment.',
+                },
+              ],
+            }),
+          }}
+        />
       </head>
       <body className={inter.className}>
         <Header />

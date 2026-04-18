@@ -122,9 +122,9 @@ export default function Footer() {
         <div className="mt-8 pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-500">
           <p>© {currentYear} Absolute Pest Services. All rights reserved. Licensed & Insured.</p>
           <div className="flex gap-4">
-            <span>PA License #</span>
+            <span className="text-yellow-400">TODO: Mike — add PA pest control license #</span>
             <span>·</span>
-            <span>DE License #</span>
+            <span className="text-yellow-400">TODO: Mike — add DE pest control license #</span>
           </div>
         </div>
       </div>
