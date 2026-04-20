@@ -92,10 +92,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
         </noscript>
 
-        {/* Performance preconnects */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" />
-        <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
-        <link rel="dns-prefetch" href="https://images.unsplash.com" />
         {/* JSON-LD Structured Data — LocalBusiness + AggregateRating */}
         <script
           type="application/ld+json"
@@ -139,8 +135,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             }),
           }}
         />
-      </head>
-      <body className={inter.className}>
+
         <Header />
         <main>{children}</main>
         <Footer />
