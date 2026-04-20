@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import Analytics from '@/components/analytics/Analytics'
 import WebMCPProvider from '@/components/agent/WebMCPProvider'
+
+const GTM_ID = 'GTM-K3VG6J2W'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -37,23 +40,37 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        {/* Google Tag Manager (GTM-K3VG6J2W) — must load as high in <head> as possible */}
-        <script
+        {/* Performance preconnects */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+      </head>
+      <body className={inter.className}>
+        {/* Google Tag Manager — loads via next/script so the <script> tag
+            is reliably emitted into the rendered HTML. afterInteractive runs
+            it once the page is interactive, with the loader queued in dataLayer
+            from gtm.start so no events are lost. */}
+        <Script
+          id="gtm-init"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-K3VG6J2W');`,
+})(window,document,'script','dataLayer','${GTM_ID}');`,
           }}
         />
-        {/* Google Tag Manager / GA4 + Google Ads — fires on every page */}
-        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-        <script
-          async
+
+        {/* Google Ads + GA4 (gtag) — separate from GTM */}
+        <Script
+          id="gtag-loader"
+          strategy="afterInteractive"
           src="https://www.googletagmanager.com/gtag/js?id=AW-1038095551"
         />
-        <script
+        <Script
+          id="gtag-init"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -64,16 +81,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             `,
           }}
         />
-        {/* Performance preconnects */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" />
-        <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
-        <link rel="dns-prefetch" href="https://images.unsplash.com" />
-      </head>
-      <body className={inter.className}>
-        {/* Google Tag Manager (noscript) — must be immediately after opening <body> */}
+
+        {/* Google Tag Manager (noscript) — fallback for users without JS */}
         <noscript>
           <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-K3VG6J2W"
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
             height="0"
             width="0"
             style={{ display: 'none', visibility: 'hidden' }}
