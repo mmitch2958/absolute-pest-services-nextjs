@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { FileText, ExternalLink, Loader2 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -25,6 +26,16 @@ interface PaginationInfo {
   limit: number;
   total: number;
   totalPages: number;
+}
+
+interface ClientInvoice {
+  id: number;
+  invoiceNumber: string;
+  status: string;
+  issueDate: string;
+  dueDate: string;
+  total: string;
+  notes: string | null;
 }
 
 // ─── Client Form Modal ─────────────────────────────────────────────────────────
@@ -313,6 +324,36 @@ export default function ClientsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [deletingClient, setDeletingClient] = useState<Client | null>(null);
+  const [clientInvoices, setClientInvoices] = useState<Record<number, ClientInvoice[]>>({});
+  const [loadingInvoices, setLoadingInvoices] = useState<Record<number, boolean>>({});
+  const [showInvoicePanel, setShowInvoicePanel] = useState(false);
+  const [selectedClientForInvoices, setSelectedClientForInvoices] = useState<Client | null>(null);
+
+  async function fetchInvoicesForClient(clientId: number) {
+    if (clientInvoices[clientId]) return; // already loaded
+    setLoadingInvoices(prev => ({ ...prev, [clientId]: true }));
+    try {
+      const res = await fetch(`/api/admin/invoices?clientId=${clientId}`);
+      const data = await res.json();
+      setClientInvoices(prev => ({ ...prev, [clientId]: data.invoices || [] }));
+    } catch {} finally {
+      setLoadingInvoices(prev => ({ ...prev, [clientId]: false }));
+    }
+  }
+
+  function openClientInvoices(client: Client) {
+    setSelectedClientForInvoices(client);
+    setShowInvoicePanel(true);
+    fetchInvoicesForClient(client.id);
+  }
+
+  function getClientOutstanding(clientId: number): string {
+    const invs = clientInvoices[clientId] || [];
+    const total = invs
+      .filter(i => ['sent', 'viewed', 'overdue'].includes(i.status))
+      .reduce((s, i) => s + parseFloat(i.total || '0'), 0);
+    return total.toFixed(2);
+  }
 
   // Debounce search
   useEffect(() => {
@@ -479,6 +520,12 @@ export default function ClientsPage() {
                     <td className="px-4 py-3">{statusBadge(client.status)}</td>
                     <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <button
+                        onClick={() => openClientInvoices(client)}
+                        className="text-blue-600 hover:text-blue-800 text-xs font-medium mr-3 inline-flex items-center gap-1"
+                      >
+                        <FileText className="w-3 h-3" />Invoices
+                      </button>
+                      <button
                         onClick={() => setEditingClient(client)}
                         className="text-green-600 hover:text-green-800 text-xs font-medium mr-3"
                       >
@@ -539,6 +586,81 @@ export default function ClientsPage() {
           </div>
         )}
       </div>
+
+      {/* Invoice History Panel */}
+      {showInvoicePanel && selectedClientForInvoices && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl my-8">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Invoices — {selectedClientForInvoices.name}</h2>
+                <p className="text-xs text-gray-500">
+                  Outstanding: ${getClientOutstanding(selectedClientForInvoices.id)}
+                </p>
+              </div>
+              <button
+                onClick={() => { setShowInvoicePanel(false); setSelectedClientForInvoices(null); }}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              {loadingInvoices[selectedClientForInvoices.id] ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                </div>
+              ) : (clientInvoices[selectedClientForInvoices.id] || []).length === 0 ? (
+                <div className="text-center py-8 text-gray-400">
+                  <FileText className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm">No invoices found for this client</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {(clientInvoices[selectedClientForInvoices.id] || []).map((inv: ClientInvoice) => {
+                    const statusColors: Record<string, string> = {
+                      draft: 'bg-gray-100 text-gray-700',
+                      sent: 'bg-blue-100 text-blue-700',
+                      viewed: 'bg-indigo-100 text-indigo-700',
+                      paid: 'bg-green-100 text-green-700',
+                      overdue: 'bg-red-100 text-red-700',
+                      void: 'bg-gray-100 text-gray-400',
+                    };
+                    return (
+                      <a
+                        key={inv.id}
+                        href={`/admin/invoices/${inv.id}/preview`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-4 h-4 text-gray-400 shrink-0" />
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">{inv.invoiceNumber}</p>
+                            <p className="text-xs text-gray-500">
+                              Issued {new Date(inv.issueDate).toLocaleDateString()} · Due {new Date(inv.dueDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${statusColors[inv.status] || 'bg-gray-100 text-gray-700'}`}>
+                            {inv.status}
+                          </span>
+                          <span className="text-sm font-bold text-gray-900">${parseFloat(inv.total || '0').toFixed(2)}</span>
+                          <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
+                        </div>
+                      </a>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       {showAddModal && (

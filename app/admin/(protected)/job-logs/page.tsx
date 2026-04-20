@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Loader2, ClipboardList, ChevronDown, ChevronUp, Trash2, MapPin, User, Calendar, DollarSign, FileText, Package } from 'lucide-react';
+import { Search, Loader2, ClipboardList, ChevronDown, ChevronUp, Trash2, MapPin, User, Calendar, DollarSign, FileText, Package, ExternalLink } from 'lucide-react';
+import InvoicePrompt from '@/components/admin/InvoicePrompt';
+import Link from 'next/link';
 
 interface JobLog {
   id: number;
@@ -25,6 +27,13 @@ interface JobLog {
 
 interface Employee { id: number; name: string; }
 
+interface JobLogInvoice {
+  id: number;
+  invoiceNumber: string;
+  status: string;
+  total: string;
+}
+
 const statusColors: Record<string, string> = {
   scheduled: 'bg-blue-100 text-blue-700 border-blue-200',
   in_progress: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -32,6 +41,15 @@ const statusColors: Record<string, string> = {
   invoiced: 'bg-orange-100 text-orange-700 border-orange-200',
   paid: 'bg-purple-100 text-purple-700 border-purple-200',
   cancelled: 'bg-gray-100 text-gray-500 border-gray-200',
+};
+
+const invoiceStatusColors: Record<string, string> = {
+  draft: 'bg-gray-100 text-gray-700',
+  sent: 'bg-blue-100 text-blue-700',
+  viewed: 'bg-indigo-100 text-indigo-700',
+  paid: 'bg-green-100 text-green-700',
+  overdue: 'bg-red-100 text-red-700',
+  void: 'bg-gray-100 text-gray-400',
 };
 
 const validStatuses = ['scheduled', 'in_progress', 'completed', 'invoiced', 'paid', 'cancelled'];
@@ -57,20 +75,53 @@ function formatMaterials(materials: any): string | null {
   return null;
 }
 
-function RowDetail({ log, employees, onStatusChange, onDelete }: {
+function RowDetail({ log, employees, onStatusChange, onDelete, onInvoiceGenerated }: {
   log: JobLog;
   employees: Employee[];
   onStatusChange: (id: number, status: string) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
+  onInvoiceGenerated: (invoiceId: number) => void;
 }) {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [adminNotes, setAdminNotes] = useState(log.admin_notes || '');
   const [notesSaving, setNotesSaving] = useState(false);
+  const [showInvoicePrompt, setShowInvoicePrompt] = useState(false);
+  const [existingInvoice, setExistingInvoice] = useState<JobLogInvoice | null>(null);
+  const [checkingInvoice, setCheckingInvoice] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState('');
+
+  async function checkExistingInvoice() {
+    setCheckingInvoice(true);
+    try {
+      const res = await fetch(`/api/admin/invoices?jobLogId=${log.id}`);
+      const data = await res.json();
+      const invoices: JobLogInvoice[] = data.invoices || [];
+      if (invoices.length > 0) {
+        setExistingInvoice(invoices[0]);
+      } else {
+        setExistingInvoice(null);
+      }
+    } catch {}
+    finally { setCheckingInvoice(false); }
+  }
+
+  useEffect(() => {
+    if (log.status === 'completed' || log.status === 'invoiced') {
+      checkExistingInvoice();
+    }
+  }, [log.id, log.status]);
 
   async function handleStatus(newStatus: string) {
+    const wasCompleted = log.status === 'completed';
     setSaving(true);
-    try { await onStatusChange(log.id, newStatus); } finally { setSaving(false); }
+    try {
+      await onStatusChange(log.id, newStatus);
+      if (newStatus === 'completed' && wasCompleted === false) {
+        setShowInvoicePrompt(true);
+      }
+    } finally { setSaving(false); }
   }
 
   async function handleDelete() {
@@ -88,6 +139,30 @@ function RowDetail({ log, employees, onStatusChange, onDelete }: {
         body: JSON.stringify({ adminNotes }),
       });
     } finally { setNotesSaving(false); }
+  }
+
+  async function handleGenerateInvoice() {
+    setGenerating(true);
+    setGenerateError('');
+    try {
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 30);
+      const res = await fetch(`/api/admin/invoices/from-job/${log.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dueDate: dueDate.toISOString() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setGenerateError(data.message || 'Failed to generate invoice.');
+        return;
+      }
+      setShowInvoicePrompt(false);
+      setExistingInvoice({ id: data.invoice.id, invoiceNumber: data.invoice.invoiceNumber, status: data.invoice.status, total: data.invoice.total });
+      onInvoiceGenerated(data.invoice.id);
+    } catch {
+      setGenerateError('Failed to generate invoice. Please try again.');
+    } finally { setGenerating(false); }
   }
 
   const materialsStr = formatMaterials(log.materials);
@@ -111,9 +186,80 @@ function RowDetail({ log, employees, onStatusChange, onDelete }: {
             <p className="text-sm text-slate-800">{log.site_address}</p>
           </div>
         )}
+
+        {/* Invoice History Section */}
+        {(log.status === 'completed' || log.status === 'invoiced') && (
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1"><FileText className="w-3 h-3" />Invoice</p>
+            {checkingInvoice ? (
+              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                <Loader2 className="w-3 h-3 animate-spin" />Checking...
+              </div>
+            ) : existingInvoice ? (
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${invoiceStatusColors[existingInvoice.status] || 'bg-gray-100 text-gray-700'}`}>
+                  {existingInvoice.invoiceNumber}
+                </span>
+                <a
+                  href={`/admin/invoices/${existingInvoice.id}/preview`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-green-700 font-medium hover:text-green-900"
+                >
+                  View <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400">No invoice linked</p>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="space-y-3">
+        {/* Invoice Prompt */}
+        {showInvoicePrompt && (
+          <InvoicePrompt
+            jobLogId={log.id}
+            existingInvoiceId={existingInvoice?.id}
+            existingInvoiceNumber={existingInvoice?.invoiceNumber}
+            onGenerated={(invoiceId) => {
+              setShowInvoicePrompt(false);
+              onInvoiceGenerated(invoiceId);
+            }}
+            onDismiss={() => setShowInvoicePrompt(false)}
+          />
+        )}
+
+        {/* Generate Invoice Button */}
+        {(log.status === 'completed' || log.status === 'invoiced') && !showInvoicePrompt && (
+          <div className="flex gap-2">
+            {existingInvoice ? (
+              <a
+                href={`/admin/invoices/${existingInvoice.id}/preview`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <FileText className="w-3 h-3" />
+                View Invoice #{existingInvoice.invoiceNumber}
+              </a>
+            ) : (
+              <button
+                onClick={handleGenerateInvoice}
+                disabled={generating}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+              >
+                {generating ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />}
+                {generating ? 'Creating...' : 'Generate Invoice'}
+              </button>
+            )}
+            {generateError && (
+              <p className="text-xs text-red-600">{generateError}</p>
+            )}
+          </div>
+        )}
+
         <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Update Status</p>
           <div className="flex flex-wrap gap-1.5">
@@ -177,6 +323,7 @@ export default function JobLogsPage() {
   const [dateTo, setDateTo] = useState('');
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [error, setError] = useState('');
+  const [jobInvoiceMap, setJobInvoiceMap] = useState<Record<number, JobLogInvoice>>({});
 
   const fetchLogs = useCallback(async (params?: { search?: string; status?: string; dateFrom?: string; dateTo?: string }) => {
     setLoading(true);
@@ -202,6 +349,27 @@ export default function JobLogsPage() {
 
   useEffect(() => { fetchLogs(); }, []);
 
+  // Fetch invoices for all expanded or invoiced logs to show invoice column
+  useEffect(() => {
+    async function fetchInvoicesForLogs() {
+      const relevantIds = logs.filter(l => l.status === 'invoiced' || l.status === 'completed').map(l => l.id);
+      if (relevantIds.length === 0) return;
+      const newMap: Record<number, JobLogInvoice> = {};
+      for (const id of relevantIds) {
+        try {
+          const res = await fetch(`/api/admin/invoices?jobLogId=${id}`);
+          const data = await res.json();
+          const invs: JobLogInvoice[] = data.invoices || [];
+          if (invs.length > 0) {
+            newMap[id] = invs[0];
+          }
+        } catch {}
+      }
+      setJobInvoiceMap(prev => ({ ...prev, ...newMap }));
+    }
+    fetchInvoicesForLogs();
+  }, [logs]);
+
   async function handleStatusChange(id: number, status: string) {
     const res = await fetch(`/api/admin/job-logs/${id}`, {
       method: 'PATCH',
@@ -222,6 +390,14 @@ export default function JobLogsPage() {
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     fetchLogs({ search, status: statusFilter, dateFrom, dateTo });
+  }
+
+  function handleInvoiceGenerated(invoiceId: number) {
+    // Refresh expanded log
+    if (expandedId) {
+      setExpandedId(null);
+      setTimeout(() => setExpandedId(expandedId), 50);
+    }
   }
 
   const totalAmount = logs.reduce((sum, l) => sum + parseFloat(l.amount || '0'), 0);
@@ -306,20 +482,21 @@ export default function JobLogsPage() {
           </div>
         ) : logs.length === 0 ? (
           <div className="text-center py-20 text-slate-400">
-            <ClipboardList className="w-10 h-10 mx-auto mb-3 opacity-40" />
+            <ClipboardList className="w-10 w-10 mx-auto mb-3 opacity-40" />
             <p className="font-medium">No job logs found</p>
             <p className="text-sm mt-1">Try adjusting your filters</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
             {/* Header */}
-            <div className="hidden md:grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_40px] gap-3 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+            <div className="hidden md:grid grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_80px_40px] gap-3 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Customer</span>
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Location / Area</span>
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</span>
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Employee</span>
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</span>
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Amount</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Invoice</span>
               <span />
             </div>
 
@@ -329,7 +506,7 @@ export default function JobLogsPage() {
                   onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
                   className="w-full text-left hover:bg-slate-50 transition-colors"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_40px] gap-x-3 gap-y-1 px-4 py-3 items-center">
+                  <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1.5fr_1fr_1fr_1fr_1fr_80px_40px] gap-x-3 gap-y-1 px-4 py-3 items-center">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">{log.customer_name}</p>
                       {log.client_name && log.client_name !== log.customer_name && (
@@ -360,6 +537,21 @@ export default function JobLogsPage() {
                       <DollarSign className="w-3 h-3 text-slate-400" />
                       {log.amount ? parseFloat(log.amount).toLocaleString('en-US', { minimumFractionDigits: 2 }) : '—'}
                     </div>
+                    <div>
+                      {jobInvoiceMap[log.id] ? (
+                        <a
+                          href={`/admin/invoices/${jobInvoiceMap[log.id].id}/preview`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-blue-700 font-medium hover:text-blue-900"
+                        >
+                          <FileText className="w-3 h-3" />
+                          {jobInvoiceMap[log.id].invoiceNumber}
+                        </a>
+                      ) : (
+                        <span className="text-xs text-slate-300">—</span>
+                      )}
+                    </div>
                     <div className="flex justify-end">
                       {expandedId === log.id
                         ? <ChevronUp className="w-4 h-4 text-slate-400" />
@@ -375,6 +567,7 @@ export default function JobLogsPage() {
                     employees={employees}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDelete}
+                    onInvoiceGenerated={handleInvoiceGenerated}
                   />
                 )}
               </div>
