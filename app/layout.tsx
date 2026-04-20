@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import Script from 'next/script'
 import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -46,13 +45,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
       </head>
       <body className={inter.className}>
-        {/* Google Tag Manager — loads via next/script so the <script> tag
-            is reliably emitted into the rendered HTML. afterInteractive runs
-            it once the page is interactive, with the loader queued in dataLayer
-            from gtm.start so no events are lost. */}
-        <Script
+        {/* Google Tag Manager — plain <script> tag. Using next/script in Next 16's
+            root layout caused "Element type is invalid" runtime errors because Script
+            was resolving as a Promise. Inline scripts emit reliably this way. */}
+        <script
           id="gtm-init"
-          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -63,14 +60,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         />
 
         {/* Google Ads + GA4 (gtag) — separate from GTM */}
-        <Script
+        <script
           id="gtag-loader"
-          strategy="afterInteractive"
+          async
           src="https://www.googletagmanager.com/gtag/js?id=AW-1038095551"
         />
-        <Script
+        <script
           id="gtag-init"
-          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
