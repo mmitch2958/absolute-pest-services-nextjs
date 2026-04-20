@@ -4,6 +4,12 @@ import type { Configuration } from 'webpack'
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  // Allow the Replit workspace preview iframe to load dev resources (HMR, etc.).
+  // Without this, Next.js 16 blocks /_next/* requests from the *.replit.dev host
+  // and the page fails to fully hydrate inside the canvas iframe — buttons render
+  // but click handlers never attach.
+  allowedDevOrigins: ['*.replit.dev', '*.kirk.replit.dev', '*.repl.co'],
+
   // turbopack: {} is required in Next.js 16 alongside any webpack config; prevents
   // the "webpack config and no turbopack config" build-time error.
   // Actual bundler for this Replit environment is forced to webpack via IS_WEBPACK_TEST
