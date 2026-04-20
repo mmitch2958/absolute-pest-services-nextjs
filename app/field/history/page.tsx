@@ -459,9 +459,12 @@ export default function FieldHistoryPage() {
           ) : (
             logs.map(log => (
               <div key={log.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <button
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
-                  className="w-full text-left p-4"
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedId(expandedId === log.id ? null : log.id); } }}
+                  className="w-full text-left p-4 cursor-pointer select-none"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
@@ -483,7 +486,7 @@ export default function FieldHistoryPage() {
                     <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{formatDate(log.job_date)}</span>
                     {log.amount && <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" />{parseFloat(log.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>}
                   </div>
-                </button>
+                </div>
 
                 {expandedId === log.id && (
                   <div className="border-t border-slate-100 px-4 py-3 bg-slate-50 space-y-3">
