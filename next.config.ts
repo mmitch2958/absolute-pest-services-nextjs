@@ -24,6 +24,24 @@ const nextConfig: NextConfig = {
   // Disable URL processing in css-loader so Tailwind v4 generated url(...) utilities
   // are not treated as module imports by webpack (used in --webpack dev/build mode).
   webpack(config: Configuration) {
+    // Tell webpack's file watcher to ignore directories that Replit's own
+    // infrastructure writes into constantly (agent state DB, log DB, workflow
+    // shell-output files, etc.). Without this, every state write triggers a
+    // fake HMR rebuild, putting dev mode into a 200ms recompile loop.
+    config.watchOptions = {
+      ...(config.watchOptions ?? {}),
+      ignored: [
+        '**/node_modules/**',
+        '**/.next/**',
+        '**/.git/**',
+        '**/.local/**',
+        '**/.cache/**',
+        '**/attached_assets/**',
+        '**/.upm/**',
+        '**/.config/**',
+      ],
+    }
+
     const rules = config.module?.rules ?? []
     for (const rule of rules) {
       if (typeof rule !== 'object' || rule === null || !('oneOf' in rule)) continue
@@ -88,12 +106,19 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        source: '/_next/static/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
-      },
+      // Only apply long-lived caching to /_next/static in production. In dev mode this
+      // breaks Next.js HMR (the immutable header causes the client to cache the HMR
+      // manifest, which puts dev into a rebuild loop — Next itself warns about this).
+      ...(process.env.NODE_ENV === 'production'
+        ? [
+            {
+              source: '/_next/static/:path*',
+              headers: [
+                { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+              ],
+            },
+          ]
+        : []),
       {
         source: '/admin/:path*',
         headers: [
