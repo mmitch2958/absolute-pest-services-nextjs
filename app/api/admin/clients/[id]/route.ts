@@ -81,7 +81,7 @@ export async function PATCH(
     const setClause = cols.map((c, i) => `${c} = $${i + 1}`).join(', ');
     const query = `UPDATE clients SET ${setClause} WHERE id = $${cols.length + 1} RETURNING *`;
 
-    const result = await sql(query, [...vals, clientId]);
+    const result = await sql.query(query, [...vals, clientId]);
 
     if (!result || result.length === 0) {
       return NextResponse.json({ error: 'Client not found' }, { status: 404 });
