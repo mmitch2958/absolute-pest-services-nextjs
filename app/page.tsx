@@ -83,7 +83,7 @@ const services = [
     icon: TreePine,
     title: 'Wildlife Control',
     description:
-      'Humane removal of raccoons, squirrels, opossums, groundhogs & more. We safely relocate wildlife and seal entry points.',
+      'Humane removal of raccoons, squirrels, opossums, groundhogs & more. We humanely remove and seal entry points.',
     href: '/wildlife-control',
     color: 'bg-green-50 text-green-700',
   },
