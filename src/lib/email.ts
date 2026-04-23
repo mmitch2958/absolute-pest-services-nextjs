@@ -68,6 +68,93 @@ ${data.message ? `Message: ${data.message}` : ''}`;
   );
 }
 
+export async function sendInvoiceToCustomer(data: {
+  to: string;
+  ccInternal?: boolean;
+  customerName: string;
+  invoiceNumber: string;
+  total: string;
+  dueDate: string;
+  invoiceUrl: string;
+  personalMessage?: string;
+  paymentMethods?: string[];
+}): Promise<{ success: boolean; error?: string }> {
+  if (!process.env.SENDGRID_API_KEY) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  const formattedDue = new Date(data.dueDate).toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    timeZone: 'America/New_York',
+  });
+  const methods = (data.paymentMethods ?? ['Cash', 'Credit', 'Debit', 'Zelle', 'Cash App', 'PayPal']).join(', ');
+  const subject = `Invoice ${data.invoiceNumber} from Absolute Pest Services — $${parseFloat(data.total).toFixed(2)}`;
+
+  const html = `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#1f2937;">
+      <h2 style="color:#16a34a;margin-bottom:8px;">Thank you, ${data.customerName}!</h2>
+      <p style="font-size:14px;line-height:1.6;">
+        Your invoice from Absolute Pest Services is ready. You can view and print it at the link below.
+      </p>
+      ${data.personalMessage ? `
+        <div style="background:#f9fafb;border-left:3px solid #16a34a;padding:12px 16px;margin:16px 0;font-size:14px;line-height:1.6;white-space:pre-wrap;">
+          ${data.personalMessage}
+        </div>` : ''}
+      <table style="border-collapse:collapse;width:100%;font-size:14px;margin:20px 0;">
+        <tr><td style="padding:8px 0;color:#6b7280;">Invoice #</td><td style="padding:8px 0;font-weight:600;">${data.invoiceNumber}</td></tr>
+        <tr><td style="padding:8px 0;color:#6b7280;">Amount Due</td><td style="padding:8px 0;font-weight:600;">$${parseFloat(data.total).toFixed(2)}</td></tr>
+        <tr><td style="padding:8px 0;color:#6b7280;">Due Date</td><td style="padding:8px 0;">${formattedDue}</td></tr>
+      </table>
+      <div style="text-align:center;margin:28px 0;">
+        <a href="${data.invoiceUrl}"
+           style="display:inline-block;padding:12px 28px;background:#16a34a;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">
+          View Invoice
+        </a>
+      </div>
+      <p style="font-size:13px;color:#6b7280;line-height:1.6;">
+        <strong>Accepted payment methods:</strong> ${methods}
+      </p>
+      <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb;">
+      <p style="font-size:12px;color:#9ca3af;line-height:1.6;">
+        Questions? Reply to this email or call us. Thank you for choosing Absolute Pest Services.<br>
+        <em>absolutepestservices.com</em>
+      </p>
+    </div>
+  `;
+
+  const text = `Thank you, ${data.customerName}!
+
+Your invoice ${data.invoiceNumber} from Absolute Pest Services is ready.
+
+Amount Due: $${parseFloat(data.total).toFixed(2)}
+Due Date: ${formattedDue}
+
+View your invoice: ${data.invoiceUrl}
+
+${data.personalMessage ? `\n${data.personalMessage}\n` : ''}
+Accepted payment methods: ${methods}
+
+Questions? Reply to this email or call us.
+- Absolute Pest Services`;
+
+  try {
+    await sgMail.send({ from: FROM_EMAIL, to: data.to, subject, html, text });
+    if (data.ccInternal) {
+      // Send a copy to office
+      await sgMail.send({
+        from: FROM_EMAIL,
+        to: 'rob@absolutepestservices.com',
+        subject: `[Copy] ${subject}`,
+        html, text,
+      });
+    }
+    return { success: true };
+  } catch (err: any) {
+    console.error('[email] sendInvoiceToCustomer failed:', err?.response?.body ?? err?.message ?? err);
+    return { success: false, error: err?.message || 'Email send failed' };
+  }
+}
+
 export async function sendJobLogNotification(data: {
   employeeName: string;
   customerName: string;

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   ClipboardList, History, LogOut, Loader2, MapPin, Calendar, DollarSign,
   ChevronDown, ChevronUp, Package, Phone, Mail, User, Pencil, Trash2,
-  X, Plus, Save, AlertTriangle,
+  X, Plus, Save, AlertTriangle, Send, CheckCircle, FileText,
 } from 'lucide-react';
 
 interface Employee { id: number; name: string; canManageEmployees: boolean; }
@@ -350,6 +350,151 @@ function EditModal({
   );
 }
 
+function SendInvoiceModal({
+  log, onClose, onSent,
+}: {
+  log: JobLog; onClose: () => void; onSent: (logId: number) => void;
+}) {
+  const [amount, setAmount] = useState(log.amount ?? '0.00');
+  const [note, setNote] = useState('');
+  const [sendEmail, setSendEmail] = useState(!!log.client_email);
+  const [sendSms, setSendSms] = useState(!log.client_email && !!log.client_phone);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(false);
+
+  const hasEmail = !!log.client_email;
+  const hasPhone = !!log.client_phone;
+  const noContact = !hasEmail && !hasPhone;
+
+  async function handleSend() {
+    setError('');
+    if (!sendEmail && !sendSms) {
+      setError('Pick at least one — email or text.');
+      return;
+    }
+    if (parseFloat(amount) <= 0) {
+      setError('Amount must be greater than $0.');
+      return;
+    }
+    setSending(true);
+    try {
+      const channels: string[] = [];
+      if (sendEmail) channels.push('email');
+      if (sendSms) channels.push('sms');
+      const res = await fetch('/api/field/invoices/from-job', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobLogId: log.id, amount, note: note.trim() || undefined, channels }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Send failed');
+      setDone(true);
+      setTimeout(() => onSent(log.id), 1200);
+    } catch (e: any) {
+      setError(e.message || 'Failed to send invoice');
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <FileText className="w-4 h-4 text-green-600" />
+            </div>
+            <h3 className="font-bold text-slate-900">Send Invoice</h3>
+          </div>
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {done ? (
+          <div className="p-8 text-center">
+            <div className="w-14 h-14 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-3">
+              <CheckCircle className="w-7 h-7 text-green-600" />
+            </div>
+            <p className="font-bold text-slate-900">Invoice sent!</p>
+            <p className="text-sm text-slate-500 mt-1">{log.customer_name} will receive it shortly.</p>
+          </div>
+        ) : (
+          <>
+            <div className="p-4 space-y-4 overflow-y-auto">
+              <div className="bg-slate-50 rounded-xl p-3">
+                <p className="text-sm font-semibold text-slate-900">{log.customer_name}</p>
+                <p className="text-xs text-slate-500 truncate">{log.serviced_area} · {log.site_location}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{formatDate(log.job_date)}</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">Amount ($)</label>
+                <input type="number" min="0" step="0.01" value={amount} onChange={e => setAmount(e.target.value)}
+                  className="w-full px-3 py-3 text-lg font-semibold text-right text-black border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50" />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">Note to customer (optional)</label>
+                <textarea value={note} onChange={e => setNote(e.target.value)} rows={2}
+                  placeholder="Thanks for your business..."
+                  className="w-full px-3 py-2 text-base text-black border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50 resize-none" />
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-slate-700">Send via</p>
+                {noContact ? (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+                    No email or phone on file for this customer. Ask admin to add contact info first.
+                  </div>
+                ) : (
+                  <>
+                    <label className={`flex items-center gap-3 p-3 rounded-xl border ${hasEmail ? 'border-slate-300 cursor-pointer' : 'border-slate-200 opacity-50'}`}>
+                      <input type="checkbox" checked={sendEmail} disabled={!hasEmail}
+                        onChange={e => setSendEmail(e.target.checked)}
+                        className="w-4 h-4 text-green-600 rounded" />
+                      <Mail className="w-4 h-4 text-slate-400" />
+                      <span className="text-sm flex-1 truncate">
+                        {log.client_email || <span className="italic text-slate-400">No email on file</span>}
+                      </span>
+                    </label>
+                    <label className={`flex items-center gap-3 p-3 rounded-xl border ${hasPhone ? 'border-slate-300 cursor-pointer' : 'border-slate-200 opacity-50'}`}>
+                      <input type="checkbox" checked={sendSms} disabled={!hasPhone}
+                        onChange={e => setSendSms(e.target.checked)}
+                        className="w-4 h-4 text-green-600 rounded" />
+                      <Phone className="w-4 h-4 text-slate-400" />
+                      <span className="text-sm flex-1 truncate">
+                        {log.client_phone || <span className="italic text-slate-400">No phone on file</span>}
+                      </span>
+                    </label>
+                  </>
+                )}
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-sm text-red-600">{error}</div>
+              )}
+            </div>
+
+            <div className="border-t border-slate-200 p-3 flex gap-2 bg-white">
+              <button onClick={onClose} disabled={sending}
+                className="flex-1 h-12 border border-slate-300 text-slate-700 font-semibold rounded-xl disabled:opacity-60">
+                Cancel
+              </button>
+              <button onClick={handleSend} disabled={sending || noContact}
+                className="flex-1 h-12 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 disabled:opacity-60">
+                {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-4 h-4" /> Send Invoice</>}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function DeleteConfirm({
   log, onClose, onDeleted,
 }: {
@@ -412,6 +557,7 @@ export default function FieldHistoryPage() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [editing, setEditing] = useState<JobLog | null>(null);
   const [deleting, setDeleting] = useState<JobLog | null>(null);
+  const [invoicing, setInvoicing] = useState<JobLog | null>(null);
 
   function loadLogs() {
     setLoading(true);
@@ -540,20 +686,36 @@ export default function FieldHistoryPage() {
                       </div>
                     )}
 
-                    {/* Edit / Delete actions */}
-                    <div className="border-t border-slate-200 pt-3 flex gap-2">
-                      <button
-                        onClick={() => setEditing(log)}
-                        className="flex-1 flex items-center justify-center gap-1.5 h-10 bg-blue-50 text-blue-700 font-medium rounded-xl hover:bg-blue-100 active:opacity-80"
-                      >
-                        <Pencil className="w-4 h-4" /> Edit
-                      </button>
-                      <button
-                        onClick={() => setDeleting(log)}
-                        className="flex-1 flex items-center justify-center gap-1.5 h-10 bg-red-50 text-red-700 font-medium rounded-xl hover:bg-red-100 active:opacity-80"
-                      >
-                        <Trash2 className="w-4 h-4" /> Delete
-                      </button>
+                    {/* Send Invoice / Edit / Delete actions */}
+                    <div className="border-t border-slate-200 pt-3 space-y-2">
+                      {log.status !== 'invoiced' && log.status !== 'paid' && log.status !== 'cancelled' && (
+                        <button
+                          onClick={() => setInvoicing(log)}
+                          className="w-full flex items-center justify-center gap-2 h-11 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl active:opacity-80"
+                        >
+                          <Send className="w-4 h-4" /> Send Invoice
+                        </button>
+                      )}
+                      {(log.status === 'invoiced' || log.status === 'paid') && (
+                        <div className="w-full flex items-center justify-center gap-2 h-10 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-xl">
+                          <CheckCircle className="w-4 h-4" />
+                          {log.status === 'paid' ? 'Paid' : 'Invoice sent'}
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setEditing(log)}
+                          className="flex-1 flex items-center justify-center gap-1.5 h-10 bg-blue-50 text-blue-700 font-medium rounded-xl hover:bg-blue-100 active:opacity-80"
+                        >
+                          <Pencil className="w-4 h-4" /> Edit
+                        </button>
+                        <button
+                          onClick={() => setDeleting(log)}
+                          className="flex-1 flex items-center justify-center gap-1.5 h-10 bg-red-50 text-red-700 font-medium rounded-xl hover:bg-red-100 active:opacity-80"
+                        >
+                          <Trash2 className="w-4 h-4" /> Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -582,6 +744,17 @@ export default function FieldHistoryPage() {
             setLogs(prev => prev.filter(l => l.id !== id));
             setDeleting(null);
             setExpandedId(null);
+          }}
+        />
+      )}
+
+      {invoicing && (
+        <SendInvoiceModal
+          log={invoicing}
+          onClose={() => setInvoicing(null)}
+          onSent={(id) => {
+            setLogs(prev => prev.map(l => l.id === id ? { ...l, status: 'invoiced' } : l));
+            setInvoicing(null);
           }}
         />
       )}

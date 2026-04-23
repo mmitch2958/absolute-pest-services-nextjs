@@ -159,8 +159,13 @@ function DetailModal({ invoice, onClose, onAction, loading }: {
                   <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}
                     className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
                     <option value="">Method</option>
-                    <option value="cash">Cash</option><option value="check">Check</option>
-                    <option value="card">Card</option><option value="stripe">Stripe</option>
+                    <option value="cash">Cash</option>
+                    <option value="credit">Credit</option>
+                    <option value="debit">Debit</option>
+                    <option value="zelle">Zelle</option>
+                    <option value="cashapp">Cash App</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="check">Check</option>
                   </select>
                 </div>
               )}
@@ -254,10 +259,15 @@ export default function InvoicesPage() {
     setActionLoading(true);
     try {
       if (action === 'send') {
-        await fetch(`/api/admin/invoices/${selectedInvoice.id}`, {
-          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'sent', sent_at: new Date().toISOString() }),
+        const res = await fetch(`/api/admin/invoices/${selectedInvoice.id}/send`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}), // use client's email/phone on file
         });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Failed to send invoice');
+          return;
+        }
       } else if (action === 'paid') {
         await fetch(`/api/admin/invoices/${selectedInvoice.id}`, {
           method: 'PATCH', headers: { 'Content-Type': 'application/json' },
@@ -282,6 +292,10 @@ export default function InvoicesPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Invoices</h1>
+        <a href="/admin/invoices/new"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors w-fit">
+          <Plus className="w-4 h-4" /> New Invoice
+        </a>
       </div>
 
       {/* Summary Cards */}

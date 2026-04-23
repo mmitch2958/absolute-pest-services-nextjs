@@ -59,6 +59,35 @@ export async function sendContactFormSMS(data: {
   await sendToAll(body);
 }
 
+/** Send an invoice link to a single customer phone (E.164 normalized internally). */
+export async function sendInvoiceSMSToCustomer(data: {
+  phone: string;
+  customerName: string;
+  invoiceNumber: string;
+  total: string;
+  invoiceUrl: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const client = getClient();
+  if (!client || !fromNumber) {
+    return { success: false, error: 'SMS service not configured' };
+  }
+  const to = toE164(data.phone);
+  if (!to) return { success: false, error: 'Invalid phone number' };
+
+  const body =
+    `Hi ${data.customerName.split(' ')[0]}, your invoice ${data.invoiceNumber} from ` +
+    `Absolute Pest Services is ready: $${parseFloat(data.total).toFixed(2)}\n\n` +
+    `View & pay: ${data.invoiceUrl}`;
+
+  try {
+    await client.messages.create({ from: fromNumber, to, body });
+    return { success: true };
+  } catch (err: any) {
+    console.error('[sms] sendInvoiceSMSToCustomer failed:', err?.message ?? err);
+    return { success: false, error: err?.message || 'SMS send failed' };
+  }
+}
+
 export async function sendJobLogSMS(data: {
   employeeName: string;
   customerName: string;
