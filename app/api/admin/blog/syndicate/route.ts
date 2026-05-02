@@ -62,43 +62,38 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    for (const item of feed.items) {
-      const title = item.title?.trim() || 'Untitled';
-      try {
-        const baseSlug = slugify(title);
+    // Pre-fetch all existing slugs in ONE query
+    const candidates = feed.items.map(it => ({
+      item: it,
+      title: it.title?.trim() || 'Untitled',
+      slug: slugify(it.title?.trim() || 'Untitled'),
+    }));
+    const slugList = candidates.map(c => c.slug);
+    const existingRows = slugList.length
+      ? (await sql`SELECT slug FROM blog_posts WHERE slug = ANY(${slugList})`) as Array<{ slug: string }>
+      : [];
+    const existingSet = new Set(existingRows.map(r => r.slug));
 
-        // Skip if a post with this slug already exists
-        const existing = await sql`SELECT id FROM blog_posts WHERE slug = ${baseSlug} LIMIT 1`;
-        if (existing.length > 0) {
+    // Process all items in parallel (insert is independent per item)
+    await Promise.all(candidates.map(async ({ item, title, slug }) => {
+      try {
+        if (existingSet.has(slug)) {
           results.skipped++;
           results.details.push({ title, status: 'skipped', reason: 'Already exists' });
-          continue;
+          return;
         }
 
-        const slug = baseSlug;
-
-        // Extract first image from content
         const contentHtml = (item as any).contentEncoded || item.content || '';
         const imgMatch = contentHtml.match(/<img[^>]+src="([^">]+)"/);
         const featuredImage: string | null = imgMatch ? imgMatch[1] : null;
 
-        // Build clean excerpt from plain text
-        const plainText = contentHtml
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
+        const plainText = contentHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
         const excerpt = item.contentSnippet?.trim() ||
-          (plainText.length > 300 ? plainText.substring(0, 297) + '…' : plainText) ||
-          '';
+          (plainText.length > 300 ? plainText.substring(0, 297) + '…' : plainText) || '';
 
-        // Category & tags from RSS categories
         const tags: string[] = item.categories ?? [];
         const category = tags[0] ?? 'General';
-
-        // Author
         const author = (item as any).creator || (item as any)['dc:creator'] || 'Absolute Pest Services';
-
-        // Published date from feed
         const publishedAt = item.pubDate ? new Date(item.pubDate) : new Date();
 
         await sql`
@@ -107,20 +102,12 @@ export async function POST(request: NextRequest) {
             featured_image, meta_title, meta_description,
             is_published, published_at, created_at, updated_at
           ) VALUES (
-            ${title},
-            ${slug},
-            ${excerpt},
-            ${contentHtml},
-            ${author},
-            ${category},
-            ${tags},
-            ${featuredImage},
-            ${title},
-            ${excerpt.substring(0, 160)},
-            ${true},
-            ${publishedAt},
-            NOW(), NOW()
+            ${title}, ${slug}, ${excerpt}, ${contentHtml}, ${author},
+            ${category}, ${tags}, ${featuredImage},
+            ${title}, ${excerpt.substring(0, 160)},
+            ${true}, ${publishedAt}, NOW(), NOW()
           )
+          ON CONFLICT (slug) DO NOTHING
         `;
 
         results.imported++;
@@ -130,7 +117,7 @@ export async function POST(request: NextRequest) {
         results.errors++;
         results.details.push({ title, status: 'error', reason: err.message ?? 'Unknown error' });
       }
-    }
+    }));
 
     return NextResponse.json({
       success: true,

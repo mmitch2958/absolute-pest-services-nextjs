@@ -25,91 +25,34 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const clientId = searchParams.get('clientId')
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+    const limit = Math.min(200, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)))
+    const offset = (page - 1) * limit
 
-    let query = sql`
+    // Single query with window-function COUNT + filters
+    const rows = (await sql`
       SELECT
-        i.id,
-        i.invoice_number,
-        i.status,
-        i.issue_date,
-        i.due_date,
-        i.total,
-        i.sent_at,
-        i.viewed_at,
-        i.paid_at,
+        i.id, i.invoice_number, i.status,
+        i.issue_date, i.due_date, i.total,
+        i.sent_at, i.viewed_at, i.paid_at,
         c.id   AS client_id,
-        c.name AS client_name
+        c.name AS client_name,
+        COUNT(*) OVER() AS _total
       FROM invoices i
       JOIN clients c ON c.id = i.client_id
-      WHERE 1=1
-    `
-
-    // Apply filters at the SQL level (neon uses tagged template literals)
-    if (status) {
-      const rows = await sql`
-        SELECT
-          i.id,
-          i.invoice_number,
-          i.status,
-          i.issue_date,
-          i.due_date,
-          i.total,
-          i.sent_at,
-          i.viewed_at,
-          i.paid_at,
-          c.id   AS client_id,
-          c.name AS client_name
-        FROM invoices i
-        JOIN clients c ON c.id = i.client_id
-        WHERE i.status = ${status}
-        ORDER BY i.created_at DESC
-        LIMIT 100
-      `
-      return NextResponse.json({ invoices: rows })
-    }
-
-    if (clientId) {
-      const rows = await sql`
-        SELECT
-          i.id,
-          i.invoice_number,
-          i.status,
-          i.issue_date,
-          i.due_date,
-          i.total,
-          i.sent_at,
-          i.viewed_at,
-          i.paid_at,
-          c.id   AS client_id,
-          c.name AS client_name
-        FROM invoices i
-        JOIN clients c ON c.id = i.client_id
-        WHERE i.client_id = ${Number(clientId)}
-        ORDER BY i.created_at DESC
-        LIMIT 100
-      `
-      return NextResponse.json({ invoices: rows })
-    }
-
-    const rows = await sql`
-      SELECT
-        i.id,
-        i.invoice_number,
-        i.status,
-        i.issue_date,
-        i.due_date,
-        i.total,
-        i.sent_at,
-        i.viewed_at,
-        i.paid_at,
-        c.id   AS client_id,
-        c.name AS client_name
-      FROM invoices i
-      JOIN clients c ON c.id = i.client_id
+      WHERE (${status}::text IS NULL OR i.status = ${status})
+        AND (${clientId ? Number(clientId) : null}::int IS NULL OR i.client_id = ${clientId ? Number(clientId) : null})
       ORDER BY i.created_at DESC
-      LIMIT 100
-    `
-    return NextResponse.json({ invoices: rows })
+      LIMIT ${limit} OFFSET ${offset}
+    `) as any[]
+
+    const total = rows.length > 0 ? parseInt(rows[0]._total, 10) : 0
+    const invoices = rows.map(({ _total, ...r }) => r)
+
+    return NextResponse.json({
+      invoices,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    })
   } catch (err) {
     console.error('[admin/invoices] GET failed:', err)
     return NextResponse.json({ error: 'Failed to load invoices' }, { status: 500 })
@@ -259,25 +202,26 @@ export async function POST(request: NextRequest) {
     `) as any[]
     const invoice = invRows[0]
 
-    // Insert line items
-    for (let i = 0; i < totals.items.length; i++) {
-      const li = totals.items[i]
-      await sql`
-        INSERT INTO invoice_line_items (
-          invoice_id, description, quantity, unit_rate, tax_rate,
-          line_total, line_tax, materials, sort_order,
-          service_date, technician_name, service_type,
-          service_address, serviced_area, job_log_id
-        ) VALUES (
-          ${invoice.id}, ${li.description}, ${String(li.quantity ?? 1)},
-          ${String(li.unitRate)}, ${String(li.taxRate ?? 0)},
-          ${li.lineTotal}, ${li.lineTax},
-          ${li.materials ? JSON.stringify(li.materials) : null}, ${i},
-          ${li.serviceDate || null}, ${li.technicianName || null},
-          ${li.serviceType || null}, ${li.serviceAddress || null},
-          ${li.servicedArea || null}, ${li.jobLogId || null}
-        )
-      `
+    // Bulk insert line items in parallel (single round-trip per item, but no awaits between)
+    if (totals.items.length > 0) {
+      await Promise.all(
+        totals.items.map((li, i) => sql`
+          INSERT INTO invoice_line_items (
+            invoice_id, description, quantity, unit_rate, tax_rate,
+            line_total, line_tax, materials, sort_order,
+            service_date, technician_name, service_type,
+            service_address, serviced_area, job_log_id
+          ) VALUES (
+            ${invoice.id}, ${li.description}, ${String(li.quantity ?? 1)},
+            ${String(li.unitRate)}, ${String(li.taxRate ?? 0)},
+            ${li.lineTotal}, ${li.lineTax},
+            ${li.materials ? JSON.stringify(li.materials) : null}, ${i},
+            ${li.serviceDate || null}, ${li.technicianName || null},
+            ${li.serviceType || null}, ${li.serviceAddress || null},
+            ${li.servicedArea || null}, ${li.jobLogId || null}
+          )
+        `)
+      )
     }
 
     // Status log
