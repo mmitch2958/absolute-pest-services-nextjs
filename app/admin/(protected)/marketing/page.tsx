@@ -156,8 +156,15 @@ function ConnectCTA({ title, body, href, label }: { title: string; body: string;
 }
 
 function OverviewTab({ funnel, seo, days }: { funnel: FunnelStats | null; seo: SeoStats | null; days: number }) {
-  if (!funnel) return null;
+  if (!funnel || typeof funnel.contactSubmissions !== 'number') {
+    return (
+      <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-sm">
+        Marketing data is not available yet. The funnel stats endpoint returned an error — check the server logs.
+      </div>
+    );
+  }
   const conv = funnel.contactSubmissions ? Math.round((funnel.inspectionsScheduled / funnel.contactSubmissions) * 100) : 0;
+  const revenue = typeof funnel.revenue === 'number' ? funnel.revenue : 0;
   return (
     <div>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
@@ -165,7 +172,7 @@ function OverviewTab({ funnel, seo, days }: { funnel: FunnelStats | null; seo: S
         <KPI icon={Phone} label="Inspections" value={funnel.inspectionsScheduled} accent="bg-green-50 text-green-700" />
         <KPI icon={Wrench} label="Jobs" value={funnel.jobsCompleted} accent="bg-purple-50 text-purple-700" />
         <KPI icon={TrendingUp} label="Conversion" value={`${conv}%`} accent="bg-amber-50 text-amber-700" />
-        <KPI icon={TrendingUp} label="Revenue" value={`$${funnel.revenue.toLocaleString('en-US', { maximumFractionDigits: 0 })}`} accent="bg-emerald-50 text-emerald-700" />
+        <KPI icon={TrendingUp} label="Revenue" value={`$${revenue.toLocaleString('en-US', { maximumFractionDigits: 0 })}`} accent="bg-emerald-50 text-emerald-700" />
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
