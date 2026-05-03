@@ -29,6 +29,19 @@ interface SeoStats {
   categories: { label: string; n: number }[];
 }
 
+interface SearchConsoleData {
+  configured: boolean;
+  message?: string;
+  error?: string;
+  hint?: string;
+  windowDays?: number;
+  site?: string;
+  totals?: { clicks: number; impressions: number; ctr: number; position: number };
+  topQueries?: { query: string; clicks: number; impressions: number; ctr: number; position: number }[];
+  topPages?: { page: string; clicks: number; impressions: number; position: number }[];
+  daily?: { date: string; clicks: number; impressions: number }[];
+}
+
 const WINDOWS = [7, 30, 90];
 
 export default function AdminMarketingPage() {
@@ -36,6 +49,7 @@ export default function AdminMarketingPage() {
   const [days, setDays] = useState(30);
   const [funnel, setFunnel] = useState<FunnelStats | null>(null);
   const [seo, setSeo] = useState<SeoStats | null>(null);
+  const [sc, setSc] = useState<SearchConsoleData | null>(null);
   const [adsMsg, setAdsMsg] = useState<string>('');
   const [ga4Msg, setGa4Msg] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -45,11 +59,13 @@ export default function AdminMarketingPage() {
     Promise.all([
       fetch(`/api/admin/dashboard/funnel-stats?days=${days}`).then(r => r.json()),
       fetch('/api/admin/dashboard/seo-stats').then(r => r.json()),
+      fetch(`/api/admin/marketing/search-console?days=${days}`).then(r => r.json()).catch(() => ({ configured: false })),
       fetch('/api/admin/marketing/ads-campaigns').then(r => r.json()).catch(() => ({})),
       fetch('/api/admin/marketing/ga4-overview').then(r => r.json()).catch(() => ({})),
-    ]).then(([f, s, a, g]) => {
+    ]).then(([f, s, scRes, a, g]) => {
       setFunnel(f);
       setSeo(s);
+      setSc(scRes);
       setAdsMsg(a?.message || '');
       setGa4Msg(g?.message || '');
     }).finally(() => setLoading(false));
@@ -89,7 +105,7 @@ export default function AdminMarketingPage() {
               <>
                 {tab === 'overview' && <OverviewTab funnel={funnel} seo={seo} days={days} />}
                 {tab === 'ads' && <AdsTab funnel={funnel} adsMsg={adsMsg} ga4Msg={ga4Msg} days={days} />}
-                {tab === 'seo' && <SeoTab seo={seo} />}
+                {tab === 'seo' && <SeoTab seo={seo} sc={sc} days={days} />}
                 {tab === 'recs' && <RecsTab funnel={funnel} seo={seo} />}
               </>
             )}
@@ -219,16 +235,56 @@ function AdsTab({ funnel, adsMsg, ga4Msg, days }: { funnel: FunnelStats | null; 
   );
 }
 
-function SeoTab({ seo }: { seo: SeoStats | null }) {
+function SeoTab({ seo, sc, days }: { seo: SeoStats | null; sc: SearchConsoleData | null; days: number }) {
   if (!seo) return null;
   const max = seo.categories.reduce((m, c) => Math.max(m, c.n), 0) || 1;
+  const liveSC = sc?.configured && sc.totals;
   return (
     <div className="space-y-5">
-      <ConnectCTA
-        title="Connect Google Search Console for ranking data"
-        body="Top queries, impressions, clicks, and average position will populate once Search Console is connected."
-        href="https://search.google.com/search-console" label="Open Search Console"
-      />
+      {!liveSC && (
+        <ConnectCTA
+          title="Connect Google Search Console for ranking data"
+          body={sc?.error || sc?.message || 'Top queries, impressions, clicks, and average position will populate once Search Console is connected.'}
+          href="https://search.google.com/search-console" label="Open Search Console"
+        />
+      )}
+      {liveSC && sc?.totals && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <KPI icon={Search} label={`Clicks (${days}d)`} value={sc.totals.clicks.toLocaleString()} accent="bg-blue-50 text-blue-700" />
+          <KPI icon={TrendingUp} label="Impressions" value={sc.totals.impressions.toLocaleString()} accent="bg-indigo-50 text-indigo-700" />
+          <KPI icon={TrendingUp} label="Avg CTR" value={`${(sc.totals.ctr * 100).toFixed(1)}%`} accent="bg-amber-50 text-amber-700" />
+          <KPI icon={TrendingUp} label="Avg Position" value={sc.totals.position.toFixed(1)} accent="bg-emerald-50 text-emerald-700" />
+        </div>
+      )}
+      {liveSC && sc?.topQueries && sc.topQueries.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <h3 className="font-semibold text-gray-900 mb-3">Top search queries</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-200">
+                  <th className="py-2 pr-4">Query</th>
+                  <th className="py-2 pr-4 text-right">Clicks</th>
+                  <th className="py-2 pr-4 text-right">Impr.</th>
+                  <th className="py-2 pr-4 text-right">CTR</th>
+                  <th className="py-2 text-right">Position</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {sc.topQueries.slice(0, 15).map(q => (
+                  <tr key={q.query} className="hover:bg-gray-50">
+                    <td className="py-2 pr-4 text-gray-900 font-medium truncate max-w-xs" title={q.query}>{q.query}</td>
+                    <td className="py-2 pr-4 text-right text-gray-700">{q.clicks}</td>
+                    <td className="py-2 pr-4 text-right text-gray-500">{q.impressions.toLocaleString()}</td>
+                    <td className="py-2 pr-4 text-right text-gray-500">{(q.ctr * 100).toFixed(1)}%</td>
+                    <td className="py-2 text-right text-gray-700">{q.position.toFixed(1)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <KPI icon={FileText} label="Published" value={seo.posts.published} accent="bg-emerald-50 text-emerald-700" />
         <KPI icon={FileText} label="Drafts" value={seo.posts.drafts} accent="bg-gray-50 text-gray-700" />
