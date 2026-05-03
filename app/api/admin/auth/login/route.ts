@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
     }
 
     const users = await sql`
-      SELECT id, email, password, first_name, last_name, phone, address, role, is_active
+      SELECT id, email, password, first_name, last_name, phone, address, role,
+             is_active::int AS is_active_int
       FROM users
       WHERE email = ${email}
       LIMIT 1
@@ -33,9 +34,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    const user = users[0] as AdminUser;
+    const user = users[0] as AdminUser & { is_active_int: number };
 
-    if (!user.is_active) {
+    // Cast-to-int avoids Neon HTTP driver boolean quirks ("t"/"f" vs true/false)
+    if (user.is_active_int !== 1) {
       return NextResponse.json({ error: 'Account is inactive' }, { status: 401 });
     }
 
