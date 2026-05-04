@@ -12,26 +12,40 @@ async function requireAdmin() {
   return null;
 }
 
-/**
- * GET /api/admin/marketing/search-console?days=30
- * Pulls top queries, page totals, and trend from Google Search Console.
- *
- * Required secrets:
- *   GOOGLE_SERVICE_ACCOUNT_JSON  – full JSON key for a service account
- *                                  with read access to the SC property
- *   SEARCH_CONSOLE_SITE_URL      – e.g. "sc-domain:absolutepestservices.com"
- *                                  or "https://www.absolutepestservices.com/"
- */
+function getAuth() {
+  const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
+
+  if (clientId && clientSecret && refreshToken) {
+    const oauth2 = new google.auth.OAuth2(clientId, clientSecret);
+    oauth2.setCredentials({ refresh_token: refreshToken });
+    return oauth2;
+  }
+
+  const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (json) {
+    const credentials = JSON.parse(json);
+    return new google.auth.GoogleAuth({
+      credentials,
+      scopes: ['https://www.googleapis.com/auth/webmasters.readonly'],
+    });
+  }
+
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   const err = await requireAdmin();
   if (err) return err;
 
-  const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   const site = process.env.SEARCH_CONSOLE_SITE_URL;
-  if (!json || !site) {
+  const auth = getAuth();
+
+  if (!auth || !site) {
     return NextResponse.json({
       configured: false,
-      message: 'Connect Google Search Console: add GOOGLE_SERVICE_ACCOUNT_JSON and SEARCH_CONSOLE_SITE_URL secrets.',
+      message: 'Connect Google Search Console: add OAuth credentials (GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_REFRESH_TOKEN) and SEARCH_CONSOLE_SITE_URL secrets.',
     });
   }
 
@@ -39,11 +53,6 @@ export async function GET(request: NextRequest) {
   const days = Math.min(90, Math.max(1, parseInt(url.searchParams.get('days') || '30', 10)));
 
   try {
-    const credentials = JSON.parse(json);
-    const auth = new google.auth.GoogleAuth({
-      credentials,
-      scopes: ['https://www.googleapis.com/auth/webmasters.readonly'],
-    });
     const sc = google.searchconsole({ version: 'v1', auth });
 
     const end = new Date();
@@ -105,7 +114,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       configured: false,
       error: e?.message || 'Failed to query Search Console',
-      hint: 'Verify the service account email has been added to Users & Permissions in Search Console for this property, and that SEARCH_CONSOLE_SITE_URL matches the verified property exactly (e.g. "sc-domain:example.com" for domain-verified, or full URL with trailing slash for URL-prefix verified).',
+      hint: 'Verify OAuth credentials are correct, and that SEARCH_CONSOLE_SITE_URL matches the verified property exactly (e.g. "sc-domain:example.com" for domain-verified, or full URL with trailing slash for URL-prefix verified).',
     }, { status: 500 });
   }
 }
