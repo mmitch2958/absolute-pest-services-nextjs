@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
   const days = Math.min(90, Math.max(1, parseInt(url.searchParams.get('days') || '30', 10)));
 
   try {
-    const sc = google.searchconsole({ version: 'v1', auth });
+    const wm = google.webmasters({ version: 'v3', auth });
 
     const end = new Date();
     const start = new Date();
@@ -61,19 +61,19 @@ export async function GET(request: NextRequest) {
     const fmt = (d: Date) => d.toISOString().slice(0, 10);
 
     const [totals, byQuery, byPage, byDay] = await Promise.all([
-      sc.searchanalytics.query({
+      wm.searchanalytics.query({
         siteUrl: site,
         requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: [], rowLimit: 1 },
       }),
-      sc.searchanalytics.query({
+      wm.searchanalytics.query({
         siteUrl: site,
         requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: ['query'], rowLimit: 25 },
       }),
-      sc.searchanalytics.query({
+      wm.searchanalytics.query({
         siteUrl: site,
         requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: ['page'], rowLimit: 15 },
       }),
-      sc.searchanalytics.query({
+      wm.searchanalytics.query({
         siteUrl: site,
         requestBody: { startDate: fmt(start), endDate: fmt(end), dimensions: ['date'], rowLimit: 200 },
       }),
