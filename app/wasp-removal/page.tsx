@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CheckCircle, Phone, AlertTriangle, ShieldCheck, Home, Star } from 'lucide-react'
+import ConversionCard from '@/components/forms/ConversionCard'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -234,12 +235,12 @@ export default function WaspRemovalPage() {
               <Phone size={18} />
               Call 484-643-2225
             </a>
-            <Link
-              href="/request-service"
+            <a
+              href="#contact-form"
               className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg"
             >
-              Request Service Online
-            </Link>
+              Get Free Estimate ↓
+            </a>
           </div>
         </div>
       </section>
@@ -297,37 +298,16 @@ export default function WaspRemovalPage() {
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
-              <h3 className="font-bold text-gray-900 text-xl mb-6">
-                Wasp &amp; Hornet Emergency? Call Now.
-              </h3>
-              <div className="space-y-3 mb-6">
-                {[
-                  'Same-day emergency nest removal',
-                  'Licensed & insured technicians',
-                  'Commercial-grade treatments',
-                  'Preventive treatment available',
-                  'Safe for children & pets when dry',
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-3">
-                    <CheckCircle size={16} className="text-green-600 flex-shrink-0" />
-                    <span className="text-gray-700 text-sm">{item}</span>
-                  </div>
-                ))}
-              </div>
-              <a
-                href="tel:484-643-2225"
-                className="flex items-center gap-3 bg-green-700 hover:bg-green-800 text-white font-bold px-6 py-4 rounded-xl w-full justify-center"
-              >
-                <Phone size={20} />
-                484-643-2225
-              </a>
-              <Link
-                href="/request-service"
-                className="flex items-center gap-2 justify-center mt-3 text-green-700 hover:text-green-800 font-medium"
-              >
-                Or request service online →
-              </Link>
+            <div id="contact-form">
+              <ConversionCard
+                heading="Get Same-Day Wasp Removal"
+                defaultService="ant-wasp"
+                trustItems={[
+                  'Same-day emergency service',
+                  'Licensed & insured in PA & DE',
+                  'No commitment required',
+                ]}
+              />
             </div>
           </div>
         </div>

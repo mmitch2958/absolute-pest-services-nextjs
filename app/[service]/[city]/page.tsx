@@ -481,7 +481,7 @@ export default async function CityServicePage({
                 </a>
                 <p className="text-center text-xs text-gray-500 mb-4">or fill out the form below</p>
 
-                <ServiceRequestForm />
+                <ServiceRequestForm defaultService={serviceSlug} />
               </div>
 
               {/* Other services in this city */}

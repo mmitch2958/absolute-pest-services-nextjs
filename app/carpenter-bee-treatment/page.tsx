@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Phone, Calendar, CheckCircle, MapPin } from 'lucide-react'
+import ConversionCard from '@/components/forms/ConversionCard'
 
 export const metadata: Metadata = {
   title: 'Professional Carpenter Bee Treatment Service | Absolute Pest Services',
@@ -161,13 +162,13 @@ export default function CarpenterBeeTreatmentPage() {
                 <p className="text-sm text-gray-500 mt-1">Valid for new customers booking treatment in PA & DE.</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  href="/request-service"
+                <a
+                  href="#contact-form"
                   className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-white px-8 py-4 text-lg font-semibold rounded-xl"
                 >
                   <Calendar className="h-5 w-5" />
-                  Get Free Estimate
-                </Link>
+                  Get Free Estimate ↓
+                </a>
                 <a
                   href="tel:484-643-2225"
                   className="inline-flex items-center gap-2 border-2 border-white text-white hover:bg-white hover:text-green-900 px-8 py-4 text-lg font-semibold rounded-xl transition-colors"
@@ -177,13 +178,15 @@ export default function CarpenterBeeTreatmentPage() {
                 </a>
               </div>
             </div>
-            <div className="relative h-72 rounded-2xl overflow-hidden">
-              <Image
-                src="/images/carpenter-bee/carpenter-bee-treatment-service.jpg"
-                alt="Professional applying carpenter bee treatment to wood surface"
-                fill
-                className="object-cover"
-                priority
+            <div id="contact-form">
+              <ConversionCard
+                heading="Claim Your 20% Off + Free Estimate"
+                defaultService="ant-wasp"
+                trustItems={[
+                  'Use code CBT26 at checkout',
+                  'Licensed & insured in PA & DE',
+                  'Response within 1–2 hours',
+                ]}
               />
             </div>
           </div>

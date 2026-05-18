@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Shield, Bug, TreePine, Zap, CheckCircle, Phone, AlertTriangle, Calendar } from 'lucide-react'
 import GoogleReviews from '@/components/reviews/GoogleReviews'
 import SpringCarpenterBeeBanner from '@/components/spring-carpenter-bee-banner'
+import ConversionCard from '@/components/forms/ConversionCard'
 
 export const metadata: Metadata = {
   title: 'Absolute Pest Services - Professional Pest Control in PA & DE',
@@ -253,6 +254,62 @@ export default function HomePage() {
             >
               Schedule Service Now
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Lead Capture Section */}
+      <section
+        id="contact-form"
+        className="bg-gray-900 py-16 sm:py-20"
+        aria-labelledby="homepage-form-heading"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+            <div className="lg:pt-4">
+              <div className="inline-flex items-center gap-2 bg-green-700/30 border border-green-600/30 text-green-300 text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full mb-4">
+                🚨 Act Fast — Pests multiply quickly
+              </div>
+              <h2
+                id="homepage-form-heading"
+                className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight"
+              >
+                Get a Free Pest Inspection<br />
+                <span className="text-green-400">Today — No Commitment</span>
+              </h2>
+              <p className="text-gray-300 text-lg mb-6 leading-relaxed">
+                Tell us what you’re dealing with and we’ll send a licensed technician
+                to assess your situation — free, with no pressure.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  'Response within 1–2 business hours',
+                  'Licensed & insured in PA & DE',
+                  'Free estimate, no commitment required',
+                  'Same-day service available',
+                  '5.0 ⭐ rated by 500+ customers',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-gray-300">
+                    <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <p className="text-sm text-gray-400 mb-1">Prefer to call?</p>
+                <a
+                  href="tel:484-643-2225"
+                  className="text-2xl font-bold text-green-400 hover:text-green-300 flex items-center gap-2"
+                >
+                  <Phone size={22} />
+                  484-643-2225
+                </a>
+                <p className="text-xs text-gray-500 mt-1">Mon–Fri 7am–6pm · Sat 8am–4pm · 24/7 emergency</p>
+              </div>
+            </div>
+            <div>
+              <ConversionCard heading="Request a Free Inspection" />
+            </div>
           </div>
         </div>
       </section>

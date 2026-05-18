@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, CheckCircle } from 'lucide-react'
 import SchemaMarkup from '@/components/analytics/SchemaMarkup'
+import ConversionCard from '@/components/forms/ConversionCard'
 
 const faqs = [
   {
@@ -62,9 +63,68 @@ export default function WildlifePage() {
             <a href="tel:484-643-2225" className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold px-6 py-3 rounded-lg">
               <Phone size={18} />Call 484-643-2225
             </a>
-            <Link href="/wildlife-control" className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-3 rounded-lg">
-              Wildlife Control Details
-            </Link>
+            <a href="#contact-form" className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg">
+              Get Free Estimate ↓
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Form Section */}
+      <section
+        id="contact-form"
+        className="bg-green-50 border-b border-green-100 py-12 sm:py-16"
+        aria-labelledby="wildlife-form-heading"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+            <div className="lg:pt-4">
+              <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full mb-4">
+                🚨 Wildlife in your home reproduces fast — act now
+              </div>
+              <h2
+                id="wildlife-form-heading"
+                className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
+              >
+                Get a Free Wildlife Inspection<br />
+                <span className="text-green-700">Today — No Commitment</span>
+              </h2>
+              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+                Tell us what you’re dealing with and we’ll send a licensed technician
+                to assess your situation — free, with no pressure.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  'Response within 1–2 business hours',
+                  'Licensed & insured in PA & DE',
+                  'Free estimate, no commitment required',
+                  'Same-day service available',
+                  '5.0 ⭐ rated by 500+ customers',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-gray-700">
+                    <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="bg-white rounded-xl border border-gray-200 p-4">
+                <p className="text-sm text-gray-500 mb-1">Prefer to call?</p>
+                <a
+                  href="tel:484-643-2225"
+                  className="text-2xl font-bold text-green-700 hover:text-green-800 flex items-center gap-2"
+                >
+                  <Phone size={22} />
+                  484-643-2225
+                </a>
+                <p className="text-xs text-gray-400 mt-1">Mon–Fri 7am–6pm · Sat 8am–4pm · 24/7 emergency</p>
+              </div>
+            </div>
+            <div>
+              <ConversionCard
+                heading="Get a Free Wildlife Inspection"
+                defaultService="wildlife-control"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -130,18 +190,13 @@ export default function WildlifePage() {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-              <h3 className="font-bold text-gray-900 text-xl mb-4">Have Wildlife in Your Home?</h3>
-              <p className="text-gray-600 mb-6 text-sm">
-                Don&apos;t wait — wildlife reproduces quickly. A raccoon litter of 3–5 pups born in
-                your attic becomes a major infestation in weeks. Call now for fast response.
-              </p>
+            <div>
               <a
-                href="tel:484-643-2225"
+                href="#contact-form"
                 className="flex items-center gap-3 bg-green-700 hover:bg-green-800 text-white font-bold px-6 py-4 rounded-xl w-full justify-center mb-4"
               >
                 <Phone size={20} />
-                484-643-2225
+                Get Free Inspection ↓
               </a>
               <p className="text-center text-xs text-gray-500">
                 Free inspection · Same-day available in most areas

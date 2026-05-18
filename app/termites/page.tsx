@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, CheckCircle } from 'lucide-react'
 import SchemaMarkup from '@/components/analytics/SchemaMarkup'
+import ConversionCard from '@/components/forms/ConversionCard'
 
 const faqs = [
   {
@@ -62,9 +63,68 @@ export default function TermitesPage() {
             <a href="tel:484-643-2225" className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-bold px-6 py-3 rounded-lg">
               <Phone size={18} />Call 484-643-2225
             </a>
-            <Link href="/termite-treatment" className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-3 rounded-lg">
-              View Treatment Options
-            </Link>
+            <a href="#contact-form" className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold px-6 py-3 rounded-lg">
+              Free Termite Inspection ↓
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Form Section */}
+      <section
+        id="contact-form"
+        className="bg-green-50 border-b border-green-100 py-12 sm:py-16"
+        aria-labelledby="termites-form-heading"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+            <div className="lg:pt-4">
+              <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full mb-4">
+                🚨 Every day termites stay is more damage
+              </div>
+              <h2
+                id="termites-form-heading"
+                className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
+              >
+                Get a Free Termite Inspection<br />
+                <span className="text-green-700">Today — No Commitment</span>
+              </h2>
+              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+                Termites silently destroy your home from the inside. A free inspection tells you
+                exactly what you’re dealing with — and what it costs to fix it.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  'Response within 1–2 business hours',
+                  'Licensed & insured in PA & DE',
+                  'Free estimate, no commitment required',
+                  'Same-day service available',
+                  '5.0 ⭐ rated by 500+ customers',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-gray-700">
+                    <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="bg-white rounded-xl border border-gray-200 p-4">
+                <p className="text-sm text-gray-500 mb-1">Prefer to call?</p>
+                <a
+                  href="tel:484-643-2225"
+                  className="text-2xl font-bold text-green-700 hover:text-green-800 flex items-center gap-2"
+                >
+                  <Phone size={22} />
+                  484-643-2225
+                </a>
+                <p className="text-xs text-gray-400 mt-1">Mon–Fri 7am–6pm · Sat 8am–4pm · 24/7 emergency</p>
+              </div>
+            </div>
+            <div>
+              <ConversionCard
+                heading="Free Termite Inspection"
+                defaultService="termite-treatment"
+              />
+            </div>
           </div>
         </div>
       </section>
