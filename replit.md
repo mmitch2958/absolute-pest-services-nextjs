@@ -106,7 +106,8 @@ Preferred communication style: Simple, everyday language.
 - Company branding integrated into logo and PDF reports.
 
 ### GitHub Repository & Team Coordination
-- **Repo**: `SteelCity-ai/AbsolutePestServices.com` (main branch)
+- **Repo**: `mmitch2958/absolute-pest-services-nextjs` (main branch)
+- **OLD / Express / DO NOT USE**: `SteelCity-ai/AbsolutePestServices.com` is historical context only
 - **Latest synced SHA**: `d7ee6f8` (March 22, 2026)
 - **Team workflow**: Dev team pushes to GitHub → Replit pulls changes → validates → publishes
 - **Important**: Always pull latest from GitHub before making changes. After local changes, push back to GitHub so all teams stay in sync.
