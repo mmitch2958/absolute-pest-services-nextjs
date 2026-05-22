@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, Mail, MapPin, Clock } from 'lucide-react'
+import ConversionCard from '@/components/forms/ConversionCard'
 
 export const metadata: Metadata = {
   title: 'Contact Us | Absolute Pest Services',
@@ -89,20 +90,11 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="bg-green-50 rounded-2xl p-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Schedule Service Online</h2>
-              <p className="text-gray-600 mb-6">
-                Fill out our quick service request form and we&apos;ll get back to you within the hour during business hours.
-              </p>
-              <Link
-                href="/request-service"
-                className="inline-block w-full text-center bg-green-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-800 transition-colors"
-              >
-                Request Service Online
-              </Link>
-              <p className="text-sm text-gray-500 mt-4 text-center">
-                Or call us directly at <a href="tel:4846432225" className="text-green-700 font-medium">484-643-2225</a> for immediate help.
-              </p>
+            <div id="contact-form">
+              <ConversionCard
+                heading="Request Service Online"
+                subheading="We respond within 1 hour during business hours"
+              />
             </div>
           </div>
         </div>

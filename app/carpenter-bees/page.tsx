@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Phone, CheckCircle, AlertTriangle, Calendar, DollarSign, Shield } from 'lucide-react'
+import ConversionCard from '@/components/forms/ConversionCard'
 
 export const metadata: Metadata = {
   title: 'Carpenter Bees in PA & DE — Complete Homeowner Guide | Absolute Pest Services',
@@ -464,6 +465,58 @@ export default function CarpenterBeesPage() {
         </div>
       </section>
 
+      {/* Form Section */}
+      <section
+        id="contact-form"
+        className="bg-green-50 border-y border-green-100 py-12 sm:py-16"
+        aria-labelledby="cb-form-heading"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+            <div className="lg:pt-4">
+              <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full mb-4">
+                🌸 Spring Treatment Window — Act Now
+              </div>
+              <h2
+                id="cb-form-heading"
+                className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
+              >
+                Claim 20% Off + Free Estimate<br />
+                <span className="text-green-700">Use code CBT26</span>
+              </h2>
+              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+                April and May are the ideal treatment months. Book your free inspection now before
+                carpenter bees start new tunnels this season.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  'Response within 1–2 business hours',
+                  'Licensed & insured in PA & DE',
+                  'Free estimate, no commitment required',
+                  '5.0 ⭐ rated by 500+ customers',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-gray-700">
+                    <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <ConversionCard
+                heading="Claim Your 20% Off + Free Estimate"
+                defaultService="ant-wasp"
+                trustItems={[
+                  'Use code CBT26 at checkout',
+                  'Licensed & insured in PA & DE',
+                  'Response within 1–2 hours',
+                ]}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-16 bg-green-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -477,13 +530,13 @@ export default function CarpenterBeesPage() {
             and every day counts.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/carpenter-bee-treatment"
+            <a
+              href="#contact-form"
               className="inline-flex items-center gap-2 bg-white text-green-700 hover:bg-green-50 font-bold px-8 py-4 rounded-xl text-lg"
             >
               <Calendar size={20} />
-              Get Free Estimate
-            </Link>
+              Get Free Estimate ↓
+            </a>
             <a
               href="tel:484-643-2225"
               className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold px-8 py-4 rounded-xl text-lg"

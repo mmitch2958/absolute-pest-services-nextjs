@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CheckCircle, Phone } from 'lucide-react'
 import SchemaMarkup from '@/components/analytics/SchemaMarkup'
+import ConversionCard from '@/components/forms/ConversionCard'
 
 const faqs = [
   {
@@ -61,9 +62,9 @@ export default function RodentsPage() {
             <a href="tel:484-643-2225" className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-500 text-white font-bold px-6 py-3 rounded-lg">
               <Phone size={18} />Call 484-643-2225
             </a>
-            <Link href="/request-service" className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg">
-              Request Service
-            </Link>
+            <a href="#contact-form" className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg">
+              Request Service ↓
+            </a>
           </div>
         </div>
       </section>
@@ -123,10 +124,54 @@ export default function RodentsPage() {
                   </li>
                 ))}
               </ul>
-              <a href="tel:484-643-2225" className="flex items-center gap-3 bg-gray-800 hover:bg-gray-900 text-white font-bold px-6 py-4 rounded-xl w-full justify-center">
+              <a href="#contact-form" className="flex items-center gap-3 bg-gray-800 hover:bg-gray-900 text-white font-bold px-6 py-4 rounded-xl w-full justify-center">
                 <Phone size={20} />
-                484-643-2225
+                Request Free Inspection ↓
               </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Form Section */}
+      <section
+        id="contact-form"
+        className="bg-green-50 border-b border-green-100 py-12 sm:py-16"
+        aria-labelledby="rodents-form-heading"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+            <div className="lg:pt-4">
+              <h2
+                id="rodents-form-heading"
+                className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
+              >
+                Get a Free Rodent Inspection<br />
+                <span className="text-green-700">Same-Day Service Available</span>
+              </h2>
+              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+                Rodents reproduce fast — one pair can become 1,000+ in a year. Act now before
+                your problem gets worse.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  'Response within 1–2 business hours',
+                  'Licensed & insured in PA & DE',
+                  'Free estimate, no commitment required',
+                  'Same-day service available',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-gray-700">
+                    <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <ConversionCard
+                heading="Get a Free Rodent Inspection"
+                defaultService="rodent-control"
+              />
             </div>
           </div>
         </div>
