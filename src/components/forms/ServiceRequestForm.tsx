@@ -15,7 +15,10 @@ const services = [
   { value: 'other', label: 'Other / Not Sure' },
 ]
 
-const SITE_KEY = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY || ''
+const SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+  process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY ||
+  ''
 
 const initialState: FormState = null
 
@@ -129,6 +132,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
             type="text"
             autoComplete="name"
             required
+            suppressHydrationWarning
             className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${
               state?.fieldErrors?.name ? 'border-red-400' : 'border-gray-300'
             }`}
@@ -150,6 +154,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
             type="tel"
             autoComplete="tel"
             required
+            suppressHydrationWarning
             className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${
               state?.fieldErrors?.phone ? 'border-red-400' : 'border-gray-300'
             }`}
@@ -172,6 +177,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
           type="email"
           autoComplete="email"
           required
+          suppressHydrationWarning
           className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${
             state?.fieldErrors?.email ? 'border-red-400' : 'border-gray-300'
           }`}
@@ -221,6 +227,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
             autoComplete="postal-code"
             required
             maxLength={10}
+            suppressHydrationWarning
             className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${
               state?.fieldErrors?.zip ? 'border-red-400' : 'border-gray-300'
             }`}
@@ -241,6 +248,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
           id="message"
           name="message"
           rows={4}
+          suppressHydrationWarning
           className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none resize-none"
           placeholder="Describe the issue &mdash; where you&apos;ve seen activity, how long, etc."
         />
