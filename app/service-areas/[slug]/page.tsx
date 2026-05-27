@@ -238,6 +238,9 @@ export default async function ServiceAreaPage({ params }: Props) {
             <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4" /> 5.0 Star Rated</span>
             <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4" /> Same-Day Service</span>
           </div>
+          <p className={`mt-4 text-sm ${accent}`}>
+            Reviewed by Absolute Pest Services. Updated May 27, 2026.
+          </p>
         </div>
       </section>
 
