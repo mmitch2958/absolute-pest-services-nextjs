@@ -2,15 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Phone, Calendar, CheckCircle, MapPin } from 'lucide-react'
+import ConversionCard from '@/components/forms/ConversionCard'
 
 export const metadata: Metadata = {
   title: 'Professional Carpenter Bee Treatment Service | Absolute Pest Services',
   description:
-    'Expert carpenter bee treatment for PA & DE homes. Inspect and treat with EPA approved products. Free estimates. Call 484-643-2225. Spring special: 20% off with code CBT26.',
+    'Expert carpenter bee treatment for PA & DE homes. Inspect and treat with EPA approved products. Free estimates. Call 484-643-2225. Spring special: 10% off with code CBT26.',
   alternates: { canonical: 'https://absolutepestservices.com/carpenter-bee-treatment' },
   openGraph: {
     title: 'Professional Carpenter Bee Treatment | Absolute Pest Services',
-    description: 'Expert carpenter bee treatment for PA & DE homes. Spring special: 20% off with code CBT26.',
+    description: 'Expert carpenter bee treatment for PA & DE homes. Spring special: 10% off with code CBT26.',
     url: 'https://absolutepestservices.com/carpenter-bee-treatment',
     type: 'website',
   },
@@ -43,7 +44,7 @@ const serviceSchema = {
   serviceType: 'Carpenter Bee Treatment',
   offers: {
     '@type': 'Offer',
-    description: 'Free carpenter bee inspection. Spring special: 20% off with coupon CBT26.',
+    description: 'Free carpenter bee inspection. Spring special: 10% off with coupon CBT26.',
     price: '0',
     priceCurrency: 'USD',
   },
@@ -153,7 +154,7 @@ export default function CarpenterBeeTreatmentPage() {
               {/* Coupon */}
               <div className="bg-white text-gray-900 rounded-xl p-6 mb-8 border-2 border-amber-400">
                 <p className="text-sm font-semibold text-amber-500 uppercase tracking-wide mb-1">🌸 Spring Special</p>
-                <p className="text-3xl font-bold text-green-700 mb-1">20% OFF Carpenter Bee Treatment</p>
+                <p className="text-3xl font-bold text-green-700 mb-1">10% OFF Carpenter Bee Treatment</p>
                 <p className="text-lg text-gray-600">
                   Use coupon code:{' '}
                   <span className="font-mono font-bold text-green-700 text-xl">CBT26</span>
@@ -161,13 +162,13 @@ export default function CarpenterBeeTreatmentPage() {
                 <p className="text-sm text-gray-500 mt-1">Valid for new customers booking treatment in PA & DE.</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  href="/request-service"
+                <a
+                  href="#contact-form"
                   className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-white px-8 py-4 text-lg font-semibold rounded-xl"
                 >
                   <Calendar className="h-5 w-5" />
-                  Get Free Estimate
-                </Link>
+                  Get Free Estimate ↓
+                </a>
                 <a
                   href="tel:484-643-2225"
                   className="inline-flex items-center gap-2 border-2 border-white text-white hover:bg-white hover:text-green-900 px-8 py-4 text-lg font-semibold rounded-xl transition-colors"
@@ -177,13 +178,15 @@ export default function CarpenterBeeTreatmentPage() {
                 </a>
               </div>
             </div>
-            <div className="relative h-72 rounded-2xl overflow-hidden">
-              <Image
-                src="/images/carpenter-bee/carpenter-bee-treatment-service.jpg"
-                alt="Professional applying carpenter bee treatment to wood surface"
-                fill
-                className="object-cover"
-                priority
+            <div id="contact-form">
+              <ConversionCard
+                heading="Claim Your 10% Off + Free Estimate"
+                defaultService="ant-wasp"
+                trustItems={[
+                  'Use code CBT26 at checkout',
+                  'Licensed & insured in PA & DE',
+                  'Response within 1–2 hours',
+                ]}
               />
             </div>
           </div>
@@ -331,7 +334,7 @@ export default function CarpenterBeeTreatmentPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="bg-white rounded-xl p-6 mb-8 inline-block border-2 border-amber-400">
             <p className="text-sm font-semibold text-amber-500 uppercase tracking-wide mb-1">Spring Special</p>
-            <p className="text-2xl font-bold text-green-700">20% OFF with code CBT26</p>
+            <p className="text-2xl font-bold text-green-700">10% OFF with code CBT26</p>
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">Ready to Get Started?</h2>
           <p className="text-xl text-green-100 mb-8">

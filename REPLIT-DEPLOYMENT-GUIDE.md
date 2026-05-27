@@ -155,7 +155,8 @@ With `trust proxy` set to `1` in production (required because Replit's load bala
 
 ## 9. GitHub Repo Sync Workflow
 
-- **Repo:** `SteelCity-ai/AbsolutePestServices.com` (main branch)
+- **Repo:** `mmitch2958/absolute-pest-services-nextjs` (main branch)
+- **OLD / Express / DO NOT USE:** `SteelCity-ai/AbsolutePestServices.com` is historical context only
 - Dev team pushes to GitHub → Replit pulls changes → validates → publishes
 - After pulling changes, always restart the server to pick up new code
 - After publishing, do a hard refresh to clear service worker cache

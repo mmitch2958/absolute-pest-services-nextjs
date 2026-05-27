@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CheckCircle, Phone } from 'lucide-react'
+import ConversionCard from '@/components/forms/ConversionCard'
 
 export const metadata: Metadata = {
   title: 'Bed Bug Treatment | Absolute Pest Services',
@@ -138,9 +139,73 @@ export default function BedBugTreatmentPage() {
               <Phone size={18} />
               Call 484-643-2225
             </a>
-            <Link href="/request-service" className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg">
-              Request Service Online
-            </Link>
+            <a href="#contact-form" className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg">
+              Get Free Estimate ↓
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Form Section */}
+      <section
+        id="contact-form"
+        className="bg-green-50 border-b border-green-100 py-12 sm:py-16"
+        aria-labelledby="bed-bug-form-heading"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+            <div className="lg:pt-4">
+              <div className="inline-flex items-center gap-2 bg-red-100 text-red-800 text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full mb-4">
+                🚨 Bed bugs spread to every room — don’t wait
+              </div>
+              <h2
+                id="bed-bug-form-heading"
+                className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
+              >
+                Get a Free Bed Bug Inspection<br />
+                <span className="text-green-700">Today — No Commitment</span>
+              </h2>
+              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+                Bed bug populations double every 16 days. The sooner we treat, the easier and more
+                affordable it is. Get a free inspection from our licensed specialists today.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  'Response within 1–2 business hours',
+                  'Licensed & insured in PA & DE',
+                  'Free estimate, no commitment required',
+                  'Same-day service available',
+                  '5.0 ⭐ rated by 500+ customers',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-gray-700">
+                    <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="bg-white rounded-xl border border-gray-200 p-4">
+                <p className="text-sm text-gray-500 mb-1">Prefer to call?</p>
+                <a
+                  href="tel:484-643-2225"
+                  className="text-2xl font-bold text-green-700 hover:text-green-800 flex items-center gap-2"
+                >
+                  <Phone size={22} />
+                  484-643-2225
+                </a>
+                <p className="text-xs text-gray-400 mt-1">Mon–Fri 7am–6pm · Sat 8am–4pm · 24/7 emergency</p>
+              </div>
+            </div>
+            <div>
+              <ConversionCard
+                heading="Get a Free Bed Bug Inspection"
+                defaultService="bed-bug-treatment"
+                trustItems={[
+                  'Response within 1–2 hours',
+                  'Licensed & insured in PA & DE',
+                  'No commitment required',
+                ]}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -213,16 +278,10 @@ export default function BedBugTreatmentPage() {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-              <h3 className="font-bold text-gray-900 text-xl mb-4">Suspect Bed Bugs? Act Fast.</h3>
-              <p className="text-gray-600 mb-6">
-                Bed bug populations double every 16 days. A small problem becomes a severe infestation
-                quickly. Call us for a free inspection — the sooner we treat, the easier and more
-                affordable it is.
-              </p>
-              <a href="tel:484-643-2225" className="flex items-center gap-3 bg-red-700 hover:bg-red-800 text-white font-bold px-6 py-4 rounded-xl w-full justify-center mb-3">
+            <div>
+              <a href="#contact-form" className="flex items-center gap-3 bg-red-700 hover:bg-red-800 text-white font-bold px-6 py-4 rounded-xl w-full justify-center mb-3">
                 <Phone size={20} />
-                484-643-2225
+                Schedule Free Inspection ↓
               </a>
               <Link href="/service-areas" className="flex justify-center text-gray-600 hover:text-gray-900 text-sm">
                 View our service areas →

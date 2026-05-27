@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import NextImage from 'next/image';
 import { Search, Plus, X, Loader2, Globe, FileText, Sparkles, ImageIcon, Bot, CheckCircle2, AlertCircle, Clock, PenLine, Image, Trash2, Rss } from 'lucide-react';
 
 interface BlogPost {
@@ -245,8 +247,8 @@ function PostModal({ post, onSave, onClose, onDelete }: {
             <input value={form.featuredImage} onChange={e => setForm(f => ({ ...f, featuredImage: e.target.value }))}
               className={fieldClass} placeholder="https://..." />
             {form.featuredImage && (
-              <div className="mt-2 rounded-lg overflow-hidden border border-gray-200 h-32 bg-gray-50">
-                <img src={form.featuredImage} alt="Featured image preview" className="w-full h-full object-cover" />
+              <div className="relative mt-2 rounded-lg overflow-hidden border border-gray-200 h-32 bg-gray-50">
+                <NextImage src={form.featuredImage} alt="Featured image preview" fill sizes="(max-width: 768px) 100vw, 600px" className="object-cover" unoptimized />
               </div>
             )}
           </div>
@@ -764,6 +766,30 @@ export default function BlogPage() {
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [showRssModal, setShowRssModal] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Deep-link support: /admin/blog?edit=<id> opens the edit modal for that post
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    if (!editId) return;
+    const id = parseInt(editId, 10);
+    if (!id || isNaN(id)) return;
+    // If already loaded in list, use it; else fetch it.
+    const existing = posts.find(p => p.id === id);
+    if (existing) {
+      setEditingPost(existing);
+    } else {
+      fetch(`/api/admin/blog/${id}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data?.post) setEditingPost(data.post); });
+    }
+  }, [searchParams, posts]);
+
+  // When the edit modal closes, drop the ?edit= param so refresh doesn't reopen it
+  function clearEditParam() {
+    if (searchParams.get('edit')) router.replace('/admin/blog');
+  }
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -787,6 +813,7 @@ export default function BlogPage() {
     if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Save failed'); }
     setShowAddModal(false);
     setEditingPost(null);
+    clearEditParam();
     await fetchData();
   }
 
@@ -794,6 +821,7 @@ export default function BlogPage() {
     const res = await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Delete failed');
     setEditingPost(null);
+    clearEditParam();
     await fetchData();
   }
 
@@ -888,7 +916,7 @@ export default function BlogPage() {
         <PostModal post={null} onSave={(data) => handleSave(data)} onClose={() => setShowAddModal(false)} onDelete={handleDelete} />
       )}
       {editingPost && (
-        <PostModal post={editingPost} onSave={(data) => handleSave(data, editingPost.id)} onClose={() => setEditingPost(null)} onDelete={handleDelete} />
+        <PostModal post={editingPost} onSave={(data) => handleSave(data, editingPost.id)} onClose={() => { setEditingPost(null); clearEditParam(); }} onDelete={handleDelete} />
       )}
       {showRssModal && (
         <RssSyndicateModal onClose={() => setShowRssModal(false)} onComplete={fetchData} />

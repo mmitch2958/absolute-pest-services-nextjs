@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CheckCircle, Phone } from 'lucide-react'
+import ConversionCard from '@/components/forms/ConversionCard'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -161,9 +162,9 @@ export default function BatRemovalPage() {
               <Phone size={18} />
               Call 484-643-2225
             </a>
-            <Link href="/request-service" className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg">
-              Request Service Online
-            </Link>
+            <a href="#contact-form" className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg">
+              Get Free Estimate ↓
+            </a>
           </div>
         </div>
       </section>
@@ -226,16 +227,16 @@ export default function BatRemovalPage() {
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-              <h3 className="font-bold text-gray-900 text-xl mb-4">Free Bat Inspection</h3>
-              <p className="text-gray-600 mb-6">
-                Don&rsquo;t try to handle bats yourself — they can carry rabies, and guano poses
-                health risks. Our licensed technicians handle it safely and legally.
-              </p>
-              <a href="tel:484-643-2225" className="flex items-center gap-3 bg-purple-700 hover:bg-purple-800 text-white font-bold px-6 py-4 rounded-xl w-full justify-center">
-                <Phone size={20} />
-                484-643-2225
-              </a>
+            <div id="contact-form">
+              <ConversionCard
+                heading="Schedule a Free Bat Inspection"
+                defaultService="bat-removal"
+                trustItems={[
+                  'Response within 1–2 hours',
+                  'Licensed & insured in PA & DE',
+                  'Exclusion season scheduling handled',
+                ]}
+              />
             </div>
           </div>
         </div>

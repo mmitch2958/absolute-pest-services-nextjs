@@ -15,11 +15,14 @@ const services = [
   { value: 'other', label: 'Other / Not Sure' },
 ]
 
-const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''
+const SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+  process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY ||
+  ''
 
 const initialState: FormState = null
 
-export default function ServiceRequestForm() {
+export default function ServiceRequestForm({ defaultService }: { defaultService?: string }) {
   const [state, formAction, isPending] = useActionState(submitServiceRequest, initialState)
   const turnstileRef = useRef<HTMLDivElement>(null)
   const widgetIdRef = useRef<string | null>(null)
@@ -96,7 +99,7 @@ export default function ServiceRequestForm() {
           Request Received! We&rsquo;ll Be in Touch Soon.
         </h3>
         <p className="text-gray-600 mb-6">
-          Our team will contact you within 1–2 business hours. For faster service, call us directly.
+          Our team will contact you within 1-2 business hours. For faster service, call us directly.
         </p>
         <a
           href="tel:484-643-2225"
@@ -129,10 +132,11 @@ export default function ServiceRequestForm() {
             type="text"
             autoComplete="name"
             required
+            suppressHydrationWarning
             className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${
               state?.fieldErrors?.name ? 'border-red-400' : 'border-gray-300'
             }`}
-            placeholder="John Smith"
+            placeholder="Your Name"
           />
           {state?.fieldErrors?.name && (
             <p className="text-red-600 text-xs mt-1">{state.fieldErrors.name}</p>
@@ -150,10 +154,11 @@ export default function ServiceRequestForm() {
             type="tel"
             autoComplete="tel"
             required
+            suppressHydrationWarning
             className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${
               state?.fieldErrors?.phone ? 'border-red-400' : 'border-gray-300'
             }`}
-            placeholder="(484) 555-1234"
+            placeholder="(555) 123-4567"
           />
           {state?.fieldErrors?.phone && (
             <p className="text-red-600 text-xs mt-1">{state.fieldErrors.phone}</p>
@@ -172,6 +177,7 @@ export default function ServiceRequestForm() {
           type="email"
           autoComplete="email"
           required
+          suppressHydrationWarning
           className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${
             state?.fieldErrors?.email ? 'border-red-400' : 'border-gray-300'
           }`}
@@ -192,6 +198,7 @@ export default function ServiceRequestForm() {
             id="service"
             name="service"
             required
+            defaultValue={defaultService || ''}
             className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white ${
               state?.fieldErrors?.service ? 'border-red-400' : 'border-gray-300'
             }`}
@@ -220,6 +227,7 @@ export default function ServiceRequestForm() {
             autoComplete="postal-code"
             required
             maxLength={10}
+            suppressHydrationWarning
             className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${
               state?.fieldErrors?.zip ? 'border-red-400' : 'border-gray-300'
             }`}
@@ -240,8 +248,9 @@ export default function ServiceRequestForm() {
           id="message"
           name="message"
           rows={4}
+          suppressHydrationWarning
           className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none resize-none"
-          placeholder="Tell us what you're dealing with — where you've seen activity, how long, any details that would help..."
+          placeholder="Describe the issue &mdash; where you&apos;ve seen activity, how long, etc."
         />
       </div>
 
@@ -272,7 +281,7 @@ export default function ServiceRequestForm() {
       </button>
 
       <p className="text-xs text-gray-500 text-center">
-        We&rsquo;ll contact you within 1–2 business hours. For immediate service, call{' '}
+        We&rsquo;ll contact you within 1-2 business hours. For immediate service, call{' '}
         <a href="tel:484-643-2225" className="text-green-700 font-medium">
           484-643-2225
         </a>

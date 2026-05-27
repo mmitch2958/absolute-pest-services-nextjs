@@ -29,48 +29,26 @@ export async function GET(request: NextRequest) {
       review_opt_out: boolean; created_at: string; updated_at: string;
     }
 
-    let countQuery: CountRow[];
-    let dataQuery: ClientRow[];
+    // Single query: filter + count via window function (one round-trip instead of two)
+    const searchPattern = search.trim() ? `%${search.trim()}%` : null;
+    const rows = (await sql`
+      SELECT id, name, email, phone, address, contact_person, property_type,
+             client_type, status, notes, review_opt_out, created_at, updated_at,
+             COUNT(*) OVER() AS _total
+      FROM clients
+      WHERE (${searchPattern}::text IS NULL
+             OR name ILIKE ${searchPattern}
+             OR email ILIKE ${searchPattern})
+      ORDER BY created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `) as Array<ClientRow & { _total: string }>;
 
-    if (search.trim()) {
-      const searchPattern = `%${search.trim()}%`;
-      countQuery = (await sql`
-        SELECT COUNT(*) as total FROM clients
-        WHERE name ILIKE ${searchPattern}
-           OR email ILIKE ${searchPattern}
-      `) as CountRow[];
-      dataQuery = (await sql`
-        SELECT id, name, email, phone, address, contact_person, property_type,
-               client_type, status, notes, review_opt_out, created_at, updated_at
-        FROM clients
-        WHERE name ILIKE ${searchPattern}
-           OR email ILIKE ${searchPattern}
-        ORDER BY created_at DESC
-        LIMIT ${limit}
-        OFFSET ${offset}
-      `) as ClientRow[];
-    } else {
-      countQuery = (await sql`SELECT COUNT(*) as total FROM clients`) as CountRow[];
-      dataQuery = (await sql`
-        SELECT id, name, email, phone, address, contact_person, property_type,
-               client_type, status, notes, review_opt_out, created_at, updated_at
-        FROM clients
-        ORDER BY created_at DESC
-        LIMIT ${limit}
-        OFFSET ${offset}
-      `) as ClientRow[];
-    }
-
-    const total = parseInt(countQuery[0]?.total || '0', 10);
+    const total = rows.length > 0 ? parseInt(rows[0]._total, 10) : 0;
+    const clients = rows.map(({ _total, ...c }) => c);
 
     return NextResponse.json({
-      clients: dataQuery,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      clients,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
   } catch (err) {
     console.error('[admin/clients] GET error:', err);

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { CheckCircle, Phone } from 'lucide-react'
+import ConversionCard from '@/components/forms/ConversionCard'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -182,12 +183,12 @@ export default function WildlifeControlPage() {
               <Phone size={18} />
               Call 484-643-2225
             </a>
-            <Link
-              href="/request-service"
+            <a
+              href="#contact-form"
               className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg"
             >
-              Request Service Online
-            </Link>
+              Get Free Estimate ↓
+            </a>
           </div>
         </div>
       </section>
@@ -284,27 +285,16 @@ export default function WildlifeControlPage() {
                 ))}
               </div>
             </div>
-            <div className="bg-green-50 rounded-2xl p-8 border border-green-100">
-              <h3 className="font-bold text-gray-900 text-xl mb-4">
-                Wildlife Emergency? Call Now.
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Wildlife intrusions can cause significant damage quickly. Don&rsquo;t wait —
-                call us for a free inspection and same-day service when available.
-              </p>
-              <a
-                href="tel:484-643-2225"
-                className="flex items-center gap-3 bg-green-700 hover:bg-green-800 text-white font-bold px-6 py-4 rounded-xl w-full justify-center"
-              >
-                <Phone size={20} />
-                484-643-2225 (24/7)
-              </a>
-              <Link
-                href="/request-service"
-                className="flex items-center gap-2 justify-center mt-3 text-green-700 hover:text-green-800 font-medium"
-              >
-                Or request service online →
-              </Link>
+            <div id="contact-form">
+              <ConversionCard
+                heading="Get a Free Wildlife Inspection"
+                defaultService="wildlife-control"
+                trustItems={[
+                  '24/7 emergency response',
+                  'Licensed & insured in PA & DE',
+                  'Humane removal methods',
+                ]}
+              />
             </div>
           </div>
         </div>
