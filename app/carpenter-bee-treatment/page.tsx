@@ -7,11 +7,11 @@ import ConversionCard from '@/components/forms/ConversionCard'
 export const metadata: Metadata = {
   title: 'Professional Carpenter Bee Treatment Service | Absolute Pest Services',
   description:
-    'Expert carpenter bee treatment for PA & DE homes. Inspect and treat with EPA approved products. Free estimates. Call 484-643-2225. Spring special: 20% off with code CBT26.',
+    'Expert carpenter bee treatment for PA & DE homes. Inspect and treat with EPA approved products. Free estimates. Call 484-643-2225. Spring special: 10% off with code CBT26.',
   alternates: { canonical: 'https://absolutepestservices.com/carpenter-bee-treatment' },
   openGraph: {
     title: 'Professional Carpenter Bee Treatment | Absolute Pest Services',
-    description: 'Expert carpenter bee treatment for PA & DE homes. Spring special: 20% off with code CBT26.',
+    description: 'Expert carpenter bee treatment for PA & DE homes. Spring special: 10% off with code CBT26.',
     url: 'https://absolutepestservices.com/carpenter-bee-treatment',
     type: 'website',
   },
@@ -44,7 +44,7 @@ const serviceSchema = {
   serviceType: 'Carpenter Bee Treatment',
   offers: {
     '@type': 'Offer',
-    description: 'Free carpenter bee inspection. Spring special: 20% off with coupon CBT26.',
+    description: 'Free carpenter bee inspection. Spring special: 10% off with coupon CBT26.',
     price: '0',
     priceCurrency: 'USD',
   },
@@ -154,7 +154,7 @@ export default function CarpenterBeeTreatmentPage() {
               {/* Coupon */}
               <div className="bg-white text-gray-900 rounded-xl p-6 mb-8 border-2 border-amber-400">
                 <p className="text-sm font-semibold text-amber-500 uppercase tracking-wide mb-1">🌸 Spring Special</p>
-                <p className="text-3xl font-bold text-green-700 mb-1">20% OFF Carpenter Bee Treatment</p>
+                <p className="text-3xl font-bold text-green-700 mb-1">10% OFF Carpenter Bee Treatment</p>
                 <p className="text-lg text-gray-600">
                   Use coupon code:{' '}
                   <span className="font-mono font-bold text-green-700 text-xl">CBT26</span>
@@ -180,7 +180,7 @@ export default function CarpenterBeeTreatmentPage() {
             </div>
             <div id="contact-form">
               <ConversionCard
-                heading="Claim Your 20% Off + Free Estimate"
+                heading="Claim Your 10% Off + Free Estimate"
                 defaultService="ant-wasp"
                 trustItems={[
                   'Use code CBT26 at checkout',
@@ -334,7 +334,7 @@ export default function CarpenterBeeTreatmentPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="bg-white rounded-xl p-6 mb-8 inline-block border-2 border-amber-400">
             <p className="text-sm font-semibold text-amber-500 uppercase tracking-wide mb-1">Spring Special</p>
-            <p className="text-2xl font-bold text-green-700">20% OFF with code CBT26</p>
+            <p className="text-2xl font-bold text-green-700">10% OFF with code CBT26</p>
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">Ready to Get Started?</h2>
           <p className="text-xl text-green-100 mb-8">

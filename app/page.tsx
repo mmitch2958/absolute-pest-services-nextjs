@@ -369,7 +369,7 @@ export default function HomePage() {
                   <p className="text-green-100 text-sm font-semibold uppercase tracking-wider">Spring Carpenter Bee Special</p>
                 </div>
                 <div className="p-8 text-center">
-                  <p className="text-5xl font-extrabold text-green-700 mb-2">20% OFF</p>
+                  <p className="text-5xl font-extrabold text-green-700 mb-2">10% OFF</p>
                   <p className="text-lg text-gray-600 mb-4">Professional Carpenter Bee Treatment</p>
                   <div className="inline-block bg-gray-100 rounded-lg px-6 py-3 mb-6">
                     <p className="text-sm text-gray-500 mb-1">Use coupon code</p>

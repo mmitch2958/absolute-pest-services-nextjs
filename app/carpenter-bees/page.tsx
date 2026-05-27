@@ -481,7 +481,7 @@ export default function CarpenterBeesPage() {
                 id="cb-form-heading"
                 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
               >
-                Claim 20% Off + Free Estimate<br />
+                Claim 10% Off + Free Estimate<br />
                 <span className="text-green-700">Use code CBT26</span>
               </h2>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
@@ -504,7 +504,7 @@ export default function CarpenterBeesPage() {
             </div>
             <div>
               <ConversionCard
-                heading="Claim Your 20% Off + Free Estimate"
+                heading="Claim Your 10% Off + Free Estimate"
                 defaultService="ant-wasp"
                 trustItems={[
                   'Use code CBT26 at checkout',
@@ -522,7 +522,7 @@ export default function CarpenterBeesPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="bg-white rounded-xl p-4 mb-6 inline-block border-2 border-amber-400">
             <p className="text-sm font-bold text-amber-500 uppercase tracking-wide mb-0.5">Spring Special</p>
-            <p className="text-2xl font-bold text-green-700">20% OFF with code CBT26</p>
+            <p className="text-2xl font-bold text-green-700">10% OFF with code CBT26</p>
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">Protect Your Home This Spring</h2>
           <p className="text-xl text-green-100 mb-8">

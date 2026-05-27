@@ -150,7 +150,7 @@ export default function CarpenterBeeControlPage() {
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900 group-hover:text-green-700 transition-colors">Treatment Service &amp; 20% Off</h3>
+                <h3 className="font-bold text-gray-900 group-hover:text-green-700 transition-colors">Treatment Service &amp; 10% Off</h3>
                 <p className="text-sm text-gray-600 mt-1">
                   Our 4-step treatment process, pricing, service areas, and the spring discount (code CBT26).
                 </p>
@@ -451,7 +451,7 @@ export default function CarpenterBeeControlPage() {
                 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
               >
                 Get a Free Carpenter Bee Estimate<br />
-                <span className="text-green-700">Spring Special — 20% Off with CBT26</span>
+                <span className="text-green-700">Spring Special — 10% Off with CBT26</span>
               </h2>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
                 Spring is the critical treatment window. Book your free inspection before carpenter
@@ -472,7 +472,7 @@ export default function CarpenterBeeControlPage() {
             </div>
             <div>
               <ConversionCard
-                heading="Claim Your 20% Off + Free Estimate"
+                heading="Claim Your 10% Off + Free Estimate"
                 defaultService="ant-wasp"
                 trustItems={[
                   'Use code CBT26 at checkout',
@@ -490,7 +490,7 @@ export default function CarpenterBeeControlPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="bg-white rounded-xl p-4 mb-6 inline-block border-2 border-amber-400">
             <p className="text-sm font-bold text-amber-500 uppercase tracking-wide mb-0.5">Spring Special</p>
-            <p className="text-2xl font-bold text-green-700">20% OFF with code CBT26</p>
+            <p className="text-2xl font-bold text-green-700">10% OFF with code CBT26</p>
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">Ready to Protect Your Home?</h2>
           <p className="text-xl text-green-100 mb-8">

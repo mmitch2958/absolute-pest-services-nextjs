@@ -38,7 +38,7 @@ export default function SpringCarpenterBeeBanner() {
               Carpenter Bee Season Is Here
             </h2>
             <span className="bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-              20% OFF — Code CBT26
+              10% OFF — Code CBT26
             </span>
           </div>
           <p className="text-sm text-gray-600">
@@ -51,7 +51,7 @@ export default function SpringCarpenterBeeBanner() {
             href="/carpenter-bee-treatment"
             className="bg-green-700 hover:bg-green-800 text-white font-bold px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm whitespace-nowrap"
           >
-            Get 20% Off
+            Get 10% Off
           </Link>
           <a
             href="tel:484-643-2225"
