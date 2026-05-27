@@ -79,6 +79,25 @@ const localBusinessSchema = {
   },
 }
 
+const homePageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': 'https://absolutepestservices.com/#homepage',
+  url: 'https://absolutepestservices.com/',
+  name: 'Absolute Pest Services - Professional Pest Control in PA & DE',
+  isPartOf: {
+    '@id': 'https://absolutepestservices.com/#website',
+  },
+  about: {
+    '@id': 'https://absolutepestservices.com/#business',
+  },
+  primaryImageOfPage: {
+    '@type': 'ImageObject',
+    url: 'https://absolutepestservices.com/images/Hero1.jpg',
+  },
+  dateModified: '2026-05-27',
+}
+
 const services = [
   {
     icon: TreePine,
@@ -142,7 +161,7 @@ export default function HomePage() {
       {/* LocalBusiness JSON-LD Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([localBusinessSchema, homePageSchema]) }}
       />
 
       {/* Carpenter Bee Spring Banner — dismissable, shown above the fold */}
@@ -193,6 +212,9 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
+              <p className="mt-5 text-sm text-gray-400">
+                Reviewed by Absolute Pest Services. Updated May 27, 2026.
+              </p>
             </div>
 
             {/* Constrained hero image — right side */}
@@ -209,6 +231,25 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="py-10 bg-white border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Who should call Absolute Pest Services?
+          </h2>
+          <p className="text-lg text-gray-700 leading-relaxed">
+            Absolute Pest Services helps homeowners and businesses in southeastern Pennsylvania
+            and Delaware with wildlife removal, termite treatment, bed bug treatment, bat
+            exclusion, wasp removal, rodent control, and general pest problems. Customers usually
+            call when they hear animals in the attic, see termite swarmers, find wasp nests near
+            doors, notice mice activity, or need fast help with an active infestation. We inspect
+            the problem, explain what is happening, recommend a treatment plan, and help prevent
+            the issue from coming back. If you need a licensed local pest control company serving
+            Chester County, surrounding PA communities, or northern Delaware, call 484-643-2225
+            or request service online to check same-day or next-day availability.
+          </p>
         </div>
       </section>
 

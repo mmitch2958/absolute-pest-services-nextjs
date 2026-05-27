@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/layout/Header'
@@ -9,6 +9,11 @@ import WebMCPProvider from '@/components/agent/WebMCPProvider'
 const GTM_ID = 'GTM-K3VG6J2W'
 
 const inter = Inter({ subsets: ['latin'] })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://absolutepestservices.com'),
@@ -36,6 +41,33 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': 'https://absolutepestservices.com/#organization',
+    name: 'Absolute Pest Services',
+    url: 'https://absolutepestservices.com',
+    logo: 'https://absolutepestservices.com/images/logolong.jpg',
+    telephone: '+1-484-643-2225',
+    email: 'info@absolutepestservices.com',
+    sameAs: [
+      'https://www.facebook.com/absolutepestservices',
+      'https://www.google.com/maps/place/Absolute+Pest+Services',
+    ],
+  }
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': 'https://absolutepestservices.com/#website',
+    url: 'https://absolutepestservices.com',
+    name: 'Absolute Pest Services',
+    publisher: {
+      '@id': 'https://absolutepestservices.com/#organization',
+    },
+    inLanguage: 'en-US',
+  }
+
   return (
     <html lang="en">
       <head>
@@ -129,6 +161,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 },
               ],
             }),
+          }}
+        />
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([organizationSchema, websiteSchema]),
           }}
         />
 
