@@ -473,7 +473,7 @@ export default function CarpenterBeeControlPage() {
             <div>
               <ConversionCard
                 heading="Claim Your 10% Off + Free Estimate"
-                defaultService="ant-wasp"
+                defaultService="carpenter-bee-treatment"
                 trustItems={[
                   'Use code CBT26 at checkout',
                   'Licensed & insured in PA & DE',

@@ -7,6 +7,8 @@ import { Phone } from 'lucide-react'
 const services = [
   { value: 'pest-control', label: 'General Pest Control' },
   { value: 'wildlife-control', label: 'Wildlife Control' },
+  { value: 'carpenter-bee-treatment', label: 'Carpenter Bee Treatment' },
+  { value: 'wasp-hornet-removal', label: 'Wasp & Hornet Removal' },
   { value: 'bed-bug-treatment', label: 'Bed Bug Treatment' },
   { value: 'termite-treatment', label: 'Termite Treatment' },
   { value: 'bat-removal', label: 'Bat Removal' },

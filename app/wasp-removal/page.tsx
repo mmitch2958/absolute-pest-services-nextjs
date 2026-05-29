@@ -301,7 +301,7 @@ export default function WaspRemovalPage() {
             <div id="contact-form">
               <ConversionCard
                 heading="Get Same-Day Wasp Removal"
-                defaultService="ant-wasp"
+                defaultService="wasp-hornet-removal"
                 trustItems={[
                   'Same-day emergency service',
                   'Licensed & insured in PA & DE',
