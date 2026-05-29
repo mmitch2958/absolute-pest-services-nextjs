@@ -2,7 +2,7 @@
 
 import { useActionState, useRef, useEffect, useCallback } from 'react'
 import { submitServiceRequest, type FormState } from './actions'
-import { Phone } from 'lucide-react'
+import { ArrowRight, Phone } from 'lucide-react'
 
 const services = [
   { value: 'pest-control', label: 'General Pest Control' },
@@ -115,14 +115,14 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
   }
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-5" noValidate>
+    <form ref={formRef} action={formAction} className="space-y-4" noValidate>
       {state?.error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
           {state.error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Name */}
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -135,7 +135,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
             autoComplete="name"
             required
             suppressHydrationWarning
-            className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${
+            className={`h-12 w-full rounded-lg border bg-white px-4 text-base text-gray-900 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-100 ${
               state?.fieldErrors?.name ? 'border-red-400' : 'border-gray-300'
             }`}
             placeholder="Your Name"
@@ -157,7 +157,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
             autoComplete="tel"
             required
             suppressHydrationWarning
-            className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${
+            className={`h-12 w-full rounded-lg border bg-white px-4 text-base text-gray-900 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-100 ${
               state?.fieldErrors?.phone ? 'border-red-400' : 'border-gray-300'
             }`}
             placeholder="(555) 123-4567"
@@ -180,7 +180,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
           autoComplete="email"
           required
           suppressHydrationWarning
-          className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${
+            className={`h-12 w-full rounded-lg border bg-white px-4 text-base text-gray-900 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-100 ${
             state?.fieldErrors?.email ? 'border-red-400' : 'border-gray-300'
           }`}
           placeholder="john@example.com"
@@ -190,7 +190,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Service */}
         <div>
           <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-1">
@@ -201,7 +201,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
             name="service"
             required
             defaultValue={defaultService || ''}
-            className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white ${
+            className={`h-12 w-full rounded-lg border bg-white px-4 text-base text-gray-900 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-100 ${
               state?.fieldErrors?.service ? 'border-red-400' : 'border-gray-300'
             }`}
           >
@@ -230,7 +230,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
             required
             maxLength={10}
             suppressHydrationWarning
-            className={`w-full border rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${
+            className={`h-12 w-full rounded-lg border bg-white px-4 text-base text-gray-900 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-100 ${
               state?.fieldErrors?.zip ? 'border-red-400' : 'border-gray-300'
             }`}
             placeholder="19380"
@@ -251,7 +251,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
           name="message"
           rows={4}
           suppressHydrationWarning
-          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none resize-none"
+          className="w-full resize-none rounded-lg border border-gray-300 bg-white px-4 py-3 text-base text-gray-900 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-100"
           placeholder="Describe the issue &mdash; where you&apos;ve seen activity, how long, etc."
         />
       </div>
@@ -267,7 +267,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
       <button
         type="submit"
         disabled={isPending}
-        className="w-full bg-green-700 hover:bg-green-800 disabled:bg-green-400 text-white font-bold py-4 px-6 rounded-xl text-lg transition-colors flex items-center justify-center gap-2"
+        className="flex h-14 w-full items-center justify-center gap-2 rounded-lg bg-green-800 px-6 text-lg font-bold text-white shadow-lg shadow-green-900/20 transition hover:bg-green-700 disabled:bg-green-400"
       >
         {isPending ? (
           <>
@@ -278,12 +278,15 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
             Submitting...
           </>
         ) : (
-          'Request Service'
+          <>
+            Request Service
+            <ArrowRight className="h-5 w-5" />
+          </>
         )}
       </button>
 
-      <p className="text-xs text-gray-500 text-center">
-        We&rsquo;ll contact you within 1-2 business hours. For immediate service, call{' '}
+      <p className="text-center text-xs leading-relaxed text-gray-500">
+        We&rsquo;ll contact you within 1-2 business hours. For urgent help, call{' '}
         <a href="tel:484-643-2225" className="text-green-700 font-medium">
           484-643-2225
         </a>

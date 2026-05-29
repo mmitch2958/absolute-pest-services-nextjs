@@ -5,6 +5,7 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import Analytics from '@/components/analytics/Analytics'
 import WebMCPProvider from '@/components/agent/WebMCPProvider'
+import StickyServiceCTA from '@/components/layout/StickyServiceCTA'
 
 const GTM_ID = 'GTM-K3VG6J2W'
 
@@ -174,6 +175,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <Header />
         <main>{children}</main>
         <Footer />
+        <StickyServiceCTA />
         {/* Client-side analytics: phone click tracking + SPA pageview events */}
         <Analytics />
         {/* WebMCP — exposes site tools to AI agents (no-op if browser doesn't support it) */}

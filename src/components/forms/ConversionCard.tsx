@@ -1,4 +1,5 @@
 import ServiceRequestForm from './ServiceRequestForm'
+import { CheckCircle2, Clock, ShieldCheck } from 'lucide-react'
 
 interface ConversionCardProps {
   heading?: string
@@ -20,32 +21,34 @@ export default function ConversionCard({
   trustItems = defaultTrustItems,
 }: ConversionCardProps) {
   return (
-    <div className="bg-white rounded-2xl border-2 border-green-700 shadow-xl overflow-hidden">
-      {/* Header bar */}
-      <div className="bg-green-700 px-6 py-4">
-        <p className="text-green-200 text-xs font-bold uppercase tracking-widest mb-1">
+    <div className="overflow-hidden rounded-xl border border-green-900/10 bg-white shadow-2xl shadow-green-950/10">
+      <div className="bg-gradient-to-br from-green-900 via-green-800 to-slate-900 px-5 py-5 text-white sm:px-6">
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-green-100">
+          <Clock className="h-3.5 w-3.5" />
           {subheading}
+        </div>
+        <h2 className="text-2xl font-bold leading-tight">{heading}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-green-50/90">
+          Tell us what is happening and where. APS will follow up quickly with the next best step.
         </p>
-        <h2 className="text-white font-bold text-xl leading-tight">{heading}</h2>
       </div>
 
-      {/* Trust strip */}
-      <div className="bg-green-50 border-b border-green-100 px-6 py-2 flex flex-wrap gap-x-4 gap-y-1">
+      <div className="grid grid-cols-1 gap-2 border-b border-green-100 bg-green-50 px-5 py-3 text-xs font-semibold text-green-900 sm:grid-cols-3 sm:px-6">
         {trustItems.map((item) => (
-          <span key={item} className="text-xs text-green-800 font-medium flex items-center gap-1">
-            ✓ {item}
+          <span key={item} className="flex items-center gap-1.5">
+            <CheckCircle2 className="h-3.5 w-3.5 text-green-700" />
+            {item}
           </span>
         ))}
       </div>
 
-      {/* Form body */}
-      <div className="px-6 py-6">
+      <div className="px-5 py-5 sm:px-6">
         <ServiceRequestForm defaultService={defaultService} />
       </div>
 
-      {/* Social proof footer */}
-      <div className="bg-gray-50 border-t border-gray-100 px-6 py-3 text-center">
-        <p className="text-xs text-gray-500">⭐⭐⭐⭐⭐ Trusted by 500+ PA &amp; DE homeowners</p>
+      <div className="flex items-center justify-center gap-2 border-t border-gray-100 bg-gray-50 px-5 py-3 text-center text-xs font-medium text-gray-600">
+        <ShieldCheck className="h-4 w-4 text-green-700" />
+        Licensed, insured, and trusted by PA &amp; DE homeowners
       </div>
     </div>
   )
