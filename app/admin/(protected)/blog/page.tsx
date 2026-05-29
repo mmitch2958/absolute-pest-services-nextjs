@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import NextImage from 'next/image';
-import { Search, Plus, X, Loader2, Globe, FileText, Sparkles, ImageIcon, Bot, CheckCircle2, AlertCircle, Clock, PenLine, Image, Trash2, Rss } from 'lucide-react';
+import { Search, Plus, X, Loader2, Globe, FileText, Sparkles, ImageIcon, Bot, CheckCircle2, AlertCircle, Clock, PenLine, Trash2, Rss } from 'lucide-react';
 
 interface BlogPost {
   id: number;
@@ -37,8 +37,8 @@ function PostModal({ post, onSave, onClose, onDelete }: {
     slug: post?.slug || '',
     excerpt: post?.excerpt || '',
     content: post?.content || '',
-    author: post?.author || '',
-    category: post?.category || '',
+    author: post?.author || 'Absolute Pest Services',
+    category: post?.category || 'General Pests',
     tags: post?.tags?.join(', ') || '',
     isPublished: post?.is_published || false,
     metaTitle: post?.meta_title || '',
@@ -184,6 +184,9 @@ function PostModal({ post, onSave, onClose, onDelete }: {
           {genError && (
             <div className="bg-amber-50 border border-amber-200 text-amber-700 text-xs rounded-lg px-3 py-2">{genError}</div>
           )}
+          <p className="text-xs text-gray-400">
+            Article generation uses GPT-4o mini and returns editable HTML, excerpt, tags, and SEO fields.
+          </p>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
@@ -244,6 +247,9 @@ function PostModal({ post, onSave, onClose, onDelete }: {
             {imageGenError && (
               <div className="bg-amber-50 border border-amber-200 text-amber-700 text-xs rounded-lg px-3 py-2 mb-2">{imageGenError}</div>
             )}
+            <p className="text-xs text-gray-400 mb-2">
+              Images are timeout-bound and optional, so a slow provider will not block post editing.
+            </p>
             <input value={form.featuredImage} onChange={e => setForm(f => ({ ...f, featuredImage: e.target.value }))}
               className={fieldClass} placeholder="https://..." />
             {form.featuredImage && (
@@ -460,6 +466,7 @@ function BatchCreateModal({ onClose, onComplete }: { onClose: () => void; onComp
   const [savedCount, setSavedCount] = useState(0);
   const [statusMsg, setStatusMsg] = useState('');
   const [fatalMsg, setFatalMsg] = useState('');
+  const [includeImages, setIncludeImages] = useState(true);
 
   function updateSlot(index: number, patch: Partial<PostSlot>) {
     setSlots(prev => prev.map(s => s.index === index ? { ...s, ...patch } : s));
@@ -501,7 +508,7 @@ function BatchCreateModal({ onClose, onComplete }: { onClose: () => void; onComp
       const res = await fetch('/api/admin/blog/ai-batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topics: chosen }),
+        body: JSON.stringify({ topics: chosen, includeImages }),
       });
       if (!res.body) throw new Error('No response body');
 
@@ -571,7 +578,7 @@ function BatchCreateModal({ onClose, onComplete }: { onClose: () => void; onComp
               <h3 className="font-bold text-gray-900 text-xl mb-2">AI Blog Post Creator</h3>
               <p className="text-gray-500 text-sm mb-6 max-w-md mx-auto">
                 First, AI generates <strong>6 topic ideas</strong> tailored for SE PA pest control.
-                You pick the ones you want, then it writes the full articles with hero images.
+                You pick the ones you want, then it writes cleaner local articles. Hero images are optional.
               </p>
               <div className="grid grid-cols-3 gap-3 mb-6 text-xs text-gray-600">
                 <div className="bg-purple-50 rounded-xl p-3 border border-purple-100">
@@ -587,9 +594,12 @@ function BatchCreateModal({ onClose, onComplete }: { onClose: () => void; onComp
                 <div className="bg-green-50 rounded-xl p-3 border border-green-100">
                   <CheckCircle2 className="w-5 h-5 text-green-500 mx-auto mb-1" />
                   <div className="font-semibold">Step 3</div>
-                  <div className="text-gray-500">Articles + images generated</div>
+                  <div className="text-gray-500">Publish with optional images</div>
                 </div>
               </div>
+              <p className="text-xs text-gray-400 mb-6">
+                Uses GPT-4o mini for topics and writing. Images use Gemini via OpenRouter first, then DALL-E 3 or FLUX if available.
+              </p>
               <button onClick={loadTopics}
                 className="inline-flex items-center gap-2 px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-colors text-sm">
                 <Sparkles className="w-4 h-4" />
@@ -660,11 +670,22 @@ function BatchCreateModal({ onClose, onComplete }: { onClose: () => void; onComp
                 <button onClick={loadTopics} className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
                   ↺ Regenerate topics
                 </button>
-                <button onClick={createSelected} disabled={selected.size === 0}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors text-sm">
-                  <PenLine className="w-4 h-4" />
-                  Create {selected.size} Post{selected.size !== 1 ? 's' : ''}
-                </button>
+                <div className="flex items-center gap-3">
+                  <label className="inline-flex items-center gap-2 text-xs font-medium text-gray-600">
+                    <input
+                      type="checkbox"
+                      checked={includeImages}
+                      onChange={e => setIncludeImages(e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                    />
+                    Create hero images
+                  </label>
+                  <button onClick={createSelected} disabled={selected.size === 0}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors text-sm">
+                    <PenLine className="w-4 h-4" />
+                    Create {selected.size} Post{selected.size !== 1 ? 's' : ''}
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -702,7 +723,7 @@ function BatchCreateModal({ onClose, onComplete }: { onClose: () => void; onComp
                 ))}
               </div>
               <p className="text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mt-4">
-                Keep this window open — closing it will not stop posts already saved.
+                Image generation is timeout-bound. If an image provider is slow, the post still publishes without a hero image.
               </p>
             </div>
           )}

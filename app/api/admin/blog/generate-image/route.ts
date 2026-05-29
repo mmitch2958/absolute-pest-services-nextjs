@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { saveBase64ImageToDisk } from '@/lib/blog-image';
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+import {
+  BLOG_DALLE_MODEL,
+  BLOG_IMAGE_PROMPT_MODEL,
+  BLOG_OPENROUTER_IMAGE_MODEL,
+  fetchJsonWithTimeout,
+  getOpenAIClient,
+  requireAdminJson,
+  withTimeout,
+} from '@/lib/admin-ai';
 
 const INFERENCE_API = 'https://api.inference.sh/apps/run';
 const FLUX_APP = 'falai/flux-dev-lora';
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
-const GEMINI_IMAGE_MODEL = 'google/gemini-2.5-flash-image';
+const IMAGE_TIMEOUT_MS = 25000;
 
 // ─── Step 1: craft a focused prompt using GPT ─────────────────────────────────
 
@@ -17,12 +23,14 @@ async function buildAIImagePrompt(title: string, category: string, excerpt?: str
     : `Title: ${title}\nCategory: ${category}`;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: `You write photorealistic image generation prompts for pest control blog hero images.
+    const openai = getOpenAIClient();
+    const completion = await withTimeout(
+      openai.chat.completions.create({
+        model: BLOG_IMAGE_PROMPT_MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: `You write photorealistic image generation prompts for pest control blog hero images.
 Given the blog's title, category, and summary, write a single descriptive prompt that:
 - Depicts the specific pest, situation, or solution described in the article
 - Is set in a southeastern Pennsylvania residential/suburban context
@@ -30,12 +38,15 @@ Given the blog's title, category, and summary, write a single descriptive prompt
 - Has NO text, NO watermarks, NO logos, NO human faces
 - Is vivid, specific, and photorealistic — not generic
 Return ONLY the prompt, nothing else.`,
-        },
-        { role: 'user', content: context },
-      ],
-      max_tokens: 200,
-      temperature: 0.7,
-    });
+          },
+          { role: 'user', content: context },
+        ],
+        max_tokens: 200,
+        temperature: 0.65,
+      }),
+      15000,
+      'Image prompt generation',
+    );
     return completion.choices[0]?.message?.content?.trim() ??
       `${title}, pest control, southeastern Pennsylvania suburban home, photorealistic, no text`;
   } catch {
@@ -49,7 +60,7 @@ async function tryGeminiOpenRouter(prompt: string, slugHint: string): Promise<st
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) return null;
   try {
-    const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+    const res = await fetchJsonWithTimeout(`${OPENROUTER_BASE}/chat/completions`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${key}`,
@@ -58,12 +69,12 @@ async function tryGeminiOpenRouter(prompt: string, slugHint: string): Promise<st
         'X-Title': 'Absolute Pest Services Blog',
       },
       body: JSON.stringify({
-        model: GEMINI_IMAGE_MODEL,
+        model: BLOG_OPENROUTER_IMAGE_MODEL,
         messages: [{ role: 'user', content: prompt }],
         modalities: ['image'],
         max_tokens: 4000,
       }),
-    });
+    }, IMAGE_TIMEOUT_MS);
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       console.warn('[generate-image] Gemini failed:', res.status, err?.error?.message);
@@ -85,13 +96,18 @@ async function tryGeminiOpenRouter(prompt: string, slugHint: string): Promise<st
 async function tryDalle3(prompt: string): Promise<string | null> {
   if (!process.env.OPENAI_API_KEY) return null;
   try {
-    const response = await openai.images.generate({
-      model: 'dall-e-3',
-      prompt,
-      n: 1,
-      size: '1792x1024',
-      quality: 'standard',
-    });
+    const openai = getOpenAIClient();
+    const response = await withTimeout(
+      openai.images.generate({
+        model: BLOG_DALLE_MODEL,
+        prompt,
+        n: 1,
+        size: '1792x1024',
+        quality: 'standard',
+      }),
+      IMAGE_TIMEOUT_MS,
+      'DALL-E image generation',
+    );
     return response.data?.[0]?.url ?? null;
   } catch (err: any) {
     console.warn('[generate-image] DALL-E 3 failed:', err.message);
@@ -103,11 +119,11 @@ async function tryFlux(prompt: string): Promise<string | null> {
   const key = process.env.INFERENCESH_API_KEY;
   if (!key) return null;
   try {
-    const res = await fetch(INFERENCE_API, {
+    const res = await fetchJsonWithTimeout(INFERENCE_API, {
       method: 'POST',
       headers: { 'x-api-key': key, 'Content-Type': 'application/json' },
       body: JSON.stringify({ app: FLUX_APP, input: { prompt, num_images: 1, image_size: 'landscape_16_9' } }),
-    });
+    }, IMAGE_TIMEOUT_MS);
     if (!res.ok) return null;
     const data = await res.json();
     const images = data?.images ?? data?.output?.images ?? data?.data?.images ?? [];
@@ -121,6 +137,9 @@ async function tryFlux(prompt: string): Promise<string | null> {
 // ─── Route handler ────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAdminJson();
+  if (authError) return authError;
+
   try {
     const { title, category, excerpt } = await req.json();
     if (!title) return NextResponse.json({ error: 'title is required' }, { status: 400 });

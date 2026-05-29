@@ -1,15 +1,23 @@
 import { NextRequest } from 'next/server';
-import OpenAI from 'openai';
 import { sql } from '@/lib/db';
 import { saveBase64ImageToDisk } from '@/lib/blog-image';
+import {
+  BLOG_DALLE_MODEL,
+  BLOG_IMAGE_PROMPT_MODEL,
+  BLOG_OPENROUTER_IMAGE_MODEL,
+  BLOG_TEXT_MODEL,
+  fetchJsonWithTimeout,
+  getOpenAIClient,
+  requireAdminJson,
+  withTimeout,
+} from '@/lib/admin-ai';
 
 export const dynamic = 'force-dynamic';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const INFERENCE_API = 'https://api.inference.sh/apps/run';
 const FLUX_APP = 'falai/flux-dev-lora';
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
-const GEMINI_IMAGE_MODEL = 'google/gemini-2.5-flash-image';
+const IMAGE_TIMEOUT_MS = 22000;
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -40,7 +48,7 @@ async function generateHeroImage(
   const orKey = process.env.OPENROUTER_API_KEY;
   if (orKey) {
     try {
-      const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+      const res = await fetchJsonWithTimeout(`${OPENROUTER_BASE}/chat/completions`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${orKey}`,
@@ -49,12 +57,12 @@ async function generateHeroImage(
           'X-Title': 'Absolute Pest Services Blog',
         },
         body: JSON.stringify({
-          model: GEMINI_IMAGE_MODEL,
+          model: BLOG_OPENROUTER_IMAGE_MODEL,
           messages: [{ role: 'user', content: styledPrompt }],
           modalities: ['image'],
           max_tokens: 4000,
         }),
-      });
+      }, IMAGE_TIMEOUT_MS);
       if (res.ok) {
         const data = await res.json();
         const raw: string | null = data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
@@ -73,13 +81,18 @@ async function generateHeroImage(
 
   // 2. Fallback: DALL-E 3 (returns HTTPS URL directly)
   try {
-    const response = await openai.images.generate({
-      model: 'dall-e-3',
-      prompt: styledPrompt,
-      n: 1,
-      size: '1792x1024',
-      quality: 'standard',
-    });
+    const openai = getOpenAIClient();
+    const response = await withTimeout(
+      openai.images.generate({
+        model: BLOG_DALLE_MODEL,
+        prompt: styledPrompt,
+        n: 1,
+        size: '1792x1024',
+        quality: 'standard',
+      }),
+      IMAGE_TIMEOUT_MS,
+      'DALL-E image generation',
+    );
     const url = response.data?.[0]?.url ?? null;
     if (url) return { url, source: 'dalle3' };
   } catch (err: any) {
@@ -90,11 +103,11 @@ async function generateHeroImage(
   const inferenceKey = process.env.INFERENCESH_API_KEY;
   if (inferenceKey) {
     try {
-      const res = await fetch(INFERENCE_API, {
+      const res = await fetchJsonWithTimeout(INFERENCE_API, {
         method: 'POST',
         headers: { 'x-api-key': inferenceKey, 'Content-Type': 'application/json' },
         body: JSON.stringify({ app: FLUX_APP, input: { prompt: styledPrompt, num_images: 1, image_size: 'landscape_16_9' } }),
-      });
+      }, IMAGE_TIMEOUT_MS);
       if (res.ok) {
         const data = await res.json();
         const images = data?.images ?? data?.output?.images ?? data?.data?.images ?? [];
@@ -134,6 +147,8 @@ Requirements:
 - 700–950 words of high-quality HTML content
 - Use <h2>, <h3>, <p>, <ul>, <li>, <strong> tags appropriately
 - Reference southeastern PA context (Chester County, Delaware County, seasonal timing, PA/DE specific where relevant)
+- Open with the direct answer or practical takeaway in the first paragraph
+- Include one checklist, warning-sign list, or "what to do next" section
 - End with a call to action mentioning Absolute Pest Services and phone 484-643-2225
 - Authoritative, warm, helpful tone — not alarmist or overly salesy
 - NO image placeholders or image tags — hero image is handled separately
@@ -151,11 +166,16 @@ Return ONLY valid JSON with this exact structure:
 // ─── main handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAdminJson();
+  if (authError) return authError;
+
   let selectedTopics: any[] = [];
+  let includeImages = true;
 
   try {
     const body = await req.json();
     selectedTopics = Array.isArray(body.topics) ? body.topics : [];
+    includeImages = body.includeImages !== false;
   } catch {
     return new Response('Bad request', { status: 400 });
   }
@@ -167,7 +187,7 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream({
     async start(ctrl) {
       const total = selectedTopics.length;
-      send(ctrl, { type: 'start', total, message: `Creating ${total} blog post${total !== 1 ? 's' : ''}…` });
+      send(ctrl, { type: 'start', total, message: `Creating ${total} blog post${total !== 1 ? 's' : ''}${includeImages ? ' with hero images' : ''}…` });
 
       const savedPosts: { id: number; title: string; slug: string }[] = [];
 
@@ -178,53 +198,72 @@ export async function POST(req: NextRequest) {
         try {
           // Step A: write content
           send(ctrl, { type: 'post_writing', index: i });
-          const completion = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: [{ role: 'user', content: contentPrompt(topic) }],
-            response_format: { type: 'json_object' },
-            temperature: 0.7,
-            max_tokens: 2500,
-          });
+          const openai = getOpenAIClient();
+          const completion = await withTimeout(
+            openai.chat.completions.create({
+              model: BLOG_TEXT_MODEL,
+              messages: [{ role: 'user', content: contentPrompt(topic) }],
+              response_format: { type: 'json_object' },
+              temperature: 0.65,
+              max_tokens: 2800,
+            }),
+            40000,
+            'Blog post generation',
+          );
 
           const raw = completion.choices[0]?.message?.content ?? '{}';
           const contentData = JSON.parse(raw);
           if (!contentData.content) throw new Error('No content returned from AI');
 
-          // Step B: craft a focused image prompt from the actual article content, then generate
-          send(ctrl, { type: 'post_image', index: i });
           const slugHint = slugify(topic.title);
-          const imageStyle: ImageStyle = i % 2 === 0 ? 'realistic' : 'cartoon';
+          let imageResult: { url: string; source: string } | null = null;
+          let imageStyle: ImageStyle = 'realistic';
           let imagePrompt = topic.imagePrompt ?? '';
-          try {
-            const styleInstruction = imageStyle === 'cartoon'
-              ? 'Write a prompt for a colorful cartoon/illustrated hero image'
-              : 'Write a prompt for a photorealistic DSLR-quality hero image';
-            const imgPromptCompletion = await openai.chat.completions.create({
-              model: 'gpt-4o-mini',
-              messages: [
-                {
-                  role: 'system',
-                  content: `You write image prompts for pest control blog hero images. ${styleInstruction} depicting the specific subject of the article — the pest, situation, or solution — in a southeastern Pennsylvania residential context. No text, no watermarks, no logos. Return ONLY the image subject description (not the style — that is added separately).`,
-                },
-                {
-                  role: 'user',
-                  content: `Title: ${topic.title}\nCategory: ${topic.category}\nSummary: ${contentData.excerpt ?? topic.angle}`,
-                },
-              ],
-              max_tokens: 180,
-              temperature: 0.7,
+
+          if (includeImages) {
+            // Step B: craft a focused image prompt from the actual article content, then generate.
+            // Image generation is optional and timeout-bound so a slow provider cannot block publishing.
+            send(ctrl, { type: 'post_image', index: i });
+            imageStyle = 'realistic';
+            try {
+              const imgPromptCompletion = await withTimeout(
+                openai.chat.completions.create({
+                  model: BLOG_IMAGE_PROMPT_MODEL,
+                  messages: [
+                    {
+                      role: 'system',
+                      content: 'Write one photorealistic pest control blog hero image prompt showing the specific pest, home setting, or solution in southeastern Pennsylvania. No text, no watermarks, no logos. Return only the image subject description.',
+                    },
+                    {
+                      role: 'user',
+                      content: `Title: ${topic.title}\nCategory: ${topic.category}\nSummary: ${contentData.excerpt ?? topic.angle}`,
+                    },
+                  ],
+                  max_tokens: 180,
+                  temperature: 0.65,
+                }),
+                12000,
+                'Image prompt generation',
+              );
+              imagePrompt = imgPromptCompletion.choices[0]?.message?.content?.trim() ?? imagePrompt;
+            } catch { /* keep existing prompt on failure */ }
+
+            imageResult = await withTimeout(
+              generateHeroImage(
+                imagePrompt || `${topic.category} pest control scene, southeastern Pennsylvania suburban home`,
+                slugHint,
+                imageStyle,
+              ),
+              50000,
+              'Hero image generation',
+            ).catch((err) => {
+              console.warn('[ai-batch] image skipped:', err.message);
+              return null;
             });
-            imagePrompt = imgPromptCompletion.choices[0]?.message?.content?.trim() ?? imagePrompt;
-          } catch { /* keep existing prompt on failure */ }
+            if (imageResult) send(ctrl, { type: 'post_image_done', index: i, source: imageResult.source, style: imageStyle });
+          }
 
-          const imageResult = await generateHeroImage(
-            imagePrompt || `${topic.category} pest control scene, southeastern Pennsylvania suburban home`,
-            slugHint,
-            imageStyle,
-          );
-          if (imageResult) send(ctrl, { type: 'post_image_done', index: i, source: imageResult.source, style: imageStyle });
-
-          // Step C: save to DB as published
+          // Step C: save to DB as published, even if image generation was skipped or failed.
           send(ctrl, { type: 'post_saving', index: i });
           const slug = await uniqueSlug(slugHint);
           const tags = Array.isArray(contentData.tags) ? contentData.tags : (topic.seoKeywords ?? []);
