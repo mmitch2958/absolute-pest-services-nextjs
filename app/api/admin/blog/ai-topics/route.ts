@@ -1,13 +1,11 @@
 import { NextRequest } from 'next/server';
-import OpenAI from 'openai';
+import { BLOG_TEXT_MODEL, getOpenAIClient, requireAdminJson, withTimeout } from '@/lib/admin-ai';
 
 export const dynamic = 'force-dynamic';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 const TOPIC_SYSTEM = `You are a pest control content strategist for Absolute Pest Services, a professional pest and wildlife control company serving southeastern Pennsylvania (Chester County, Delaware County, Montgomery County, Philadelphia suburbs) and Delaware.
 
-Generate 6 blog post topic ideas that provide real value to SE PA homeowners. Today is early spring — mix timely seasonal topics with evergreen guides. Vary the pest types and article styles.
+Generate 6 blog post topic ideas that provide real value to SE PA homeowners. Prioritize seasonal, local-service topics that can support pest control leads without sounding like ads. Vary the pest types and article styles.
 
 Return ONLY a JSON object with key "topics" containing an array of exactly 6 objects:
 {
@@ -27,17 +25,25 @@ Required mix:
 - At least 1 termites or bed bugs`;
 
 export async function POST(_req: NextRequest) {
+  const authError = await requireAdminJson();
+  if (authError) return authError;
+
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: TOPIC_SYSTEM },
-        { role: 'user', content: 'Generate the 6 blog post topic ideas now.' },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.85,
-      max_tokens: 1800,
-    });
+    const openai = getOpenAIClient();
+    const completion = await withTimeout(
+      openai.chat.completions.create({
+        model: BLOG_TEXT_MODEL,
+        messages: [
+          { role: 'system', content: TOPIC_SYSTEM },
+          { role: 'user', content: 'Generate the 6 blog post topic ideas now.' },
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.75,
+        max_tokens: 1800,
+      }),
+      25000,
+      'Topic generation',
+    );
 
     const raw = completion.choices[0]?.message?.content ?? '{}';
     const parsed = JSON.parse(raw);
