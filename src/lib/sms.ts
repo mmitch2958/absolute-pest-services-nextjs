@@ -48,14 +48,14 @@ export async function sendContactFormSMS(data: {
   name: string;
   phone: string;
   service: string;
-  zip: string;
+  address: string;
 }): Promise<void> {
   const body =
     `🐛 New APS Lead\n` +
     `Name: ${data.name}\n` +
     `Phone: ${data.phone}\n` +
     `Service: ${data.service}\n` +
-    `ZIP: ${data.zip}`;
+    `Address: ${data.address}`;
   await sendToAll(body);
 }
 

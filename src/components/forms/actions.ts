@@ -11,6 +11,9 @@ const formSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   phone: z.string().min(10, 'Please enter a valid phone number').max(20),
   service: z.string().min(1, 'Please select a service'),
+  address: z.string().min(1, 'Street address is required').max(200),
+  city: z.string().min(1, 'City is required').max(100),
+  state: z.string().min(2, 'State is required').max(2),
   zip: z.string().min(5, 'Please enter your ZIP code').max(10),
   message: z.string().max(1000).optional(),
   turnstileToken: z.string().min(1, 'Please complete the human verification'),
@@ -65,6 +68,9 @@ export async function submitServiceRequest(
     email: formData.get('email'),
     phone: formData.get('phone'),
     service: formData.get('service'),
+    address: formData.get('address'),
+    city: formData.get('city'),
+    state: formData.get('state'),
     zip: formData.get('zip'),
     message: formData.get('message'),
     // Turnstile widget posts as 'cf-turnstile-response'
@@ -98,7 +104,7 @@ export async function submitServiceRequest(
     const lastName = nameParts.slice(1).join(' ') || ''
 
     // Persist to Neon DB — contact_submissions table
-    const city = result.data.zip // zip is the closest proxy available on this form
+    const fullAddress = `${result.data.address}, ${result.data.city}, ${result.data.state} ${result.data.zip}`
     await sql`
       INSERT INTO contact_submissions (
         first_name, last_name, phone, email, city, service_type, message
@@ -107,7 +113,7 @@ export async function submitServiceRequest(
         ${lastName},
         ${result.data.phone},
         ${result.data.email},
-        ${city},
+        ${fullAddress},
         ${result.data.service},
         ${result.data.message ?? null}
       )
@@ -120,7 +126,7 @@ export async function submitServiceRequest(
       email: result.data.email,
       phone: result.data.phone,
       service: result.data.service,
-      zip: result.data.zip,
+      address: fullAddress,
       message: result.data.message ?? null,
     }).catch((e) => console.error('[Service Request] Email notification failed:', e))
 
@@ -129,7 +135,7 @@ export async function submitServiceRequest(
       name: result.data.name,
       phone: result.data.phone,
       service: result.data.service,
-      zip: result.data.zip,
+      address: fullAddress,
     }).catch((e) => console.error('[Service Request] SMS notification failed:', e))
 
     return { success: true }
