@@ -190,34 +190,100 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {/* Service */}
-        <div>
-          <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-1">
-            Service Needed <span className="text-red-500">*</span>
+      {/* Service */}
+      <div>
+        <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-1">
+          Service Needed <span className="text-red-500">*</span>
+        </label>
+        <select
+          id="service"
+          name="service"
+          required
+          defaultValue={defaultService || ''}
+          className={`h-12 w-full rounded-lg border bg-white px-4 text-base text-gray-900 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-100 ${
+            state?.fieldErrors?.service ? 'border-red-400' : 'border-gray-300'
+          }`}
+        >
+          <option value="">Select a service</option>
+          {services.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+        {state?.fieldErrors?.service && (
+          <p className="text-red-600 text-xs mt-1">{state.fieldErrors.service}</p>
+        )}
+      </div>
+
+      {/* Street Address */}
+      <div>
+        <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+          Street Address <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="address"
+          name="address"
+          type="text"
+          autoComplete="street-address"
+          required
+          suppressHydrationWarning
+          className={`h-12 w-full rounded-lg border bg-white px-4 text-base text-gray-900 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-100 ${
+            state?.fieldErrors?.address ? 'border-red-400' : 'border-gray-300'
+          }`}
+          placeholder="123 Main St"
+        />
+        {state?.fieldErrors?.address && (
+          <p className="text-red-600 text-xs mt-1">{state.fieldErrors.address}</p>
+        )}
+      </div>
+
+      {/* City / State / ZIP */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <div className="col-span-2 sm:col-span-1">
+          <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+            City <span className="text-red-500">*</span>
           </label>
-          <select
-            id="service"
-            name="service"
+          <input
+            id="city"
+            name="city"
+            type="text"
+            autoComplete="address-level2"
             required
-            defaultValue={defaultService || ''}
+            suppressHydrationWarning
             className={`h-12 w-full rounded-lg border bg-white px-4 text-base text-gray-900 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-100 ${
-              state?.fieldErrors?.service ? 'border-red-400' : 'border-gray-300'
+              state?.fieldErrors?.city ? 'border-red-400' : 'border-gray-300'
             }`}
-          >
-            <option value="">Select a service</option>
-            {services.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-          {state?.fieldErrors?.service && (
-            <p className="text-red-600 text-xs mt-1">{state.fieldErrors.service}</p>
+            placeholder="West Chester"
+          />
+          {state?.fieldErrors?.city && (
+            <p className="text-red-600 text-xs mt-1">{state.fieldErrors.city}</p>
           )}
         </div>
 
-        {/* ZIP */}
+        <div>
+          <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
+            State <span className="text-red-500">*</span>
+          </label>
+          <select
+            id="state"
+            name="state"
+            required
+            defaultValue="PA"
+            className={`h-12 w-full rounded-lg border bg-white px-4 text-base text-gray-900 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-100 ${
+              state?.fieldErrors?.state ? 'border-red-400' : 'border-gray-300'
+            }`}
+          >
+            <option value="PA">PA</option>
+            <option value="DE">DE</option>
+            <option value="NJ">NJ</option>
+            <option value="MD">MD</option>
+          </select>
+          {state?.fieldErrors?.state && (
+            <p className="text-red-600 text-xs mt-1">{state.fieldErrors.state}</p>
+          )}
+        </div>
+
         <div>
           <label htmlFor="zip" className="block text-sm font-medium text-gray-700 mb-1">
             ZIP Code <span className="text-red-500">*</span>

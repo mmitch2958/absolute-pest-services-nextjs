@@ -36,10 +36,10 @@ export async function sendContactFormNotification(data: {
   email: string;
   phone: string;
   service: string;
-  zip: string;
+  address: string;
   message?: string | null;
 }): Promise<void> {
-  const subject = `New Service Request — ${data.service} (${data.zip})`;
+  const subject = `New Service Request — ${data.service} (${data.address})`;
 
   const html = `
     <h2 style="color:#1f2937;">New Service Request</h2>
@@ -48,7 +48,7 @@ export async function sendContactFormNotification(data: {
       <tr style="background:#f9fafb;"><td style="padding:6px 12px;font-weight:bold;">Email</td><td style="padding:6px 12px;"><a href="mailto:${data.email}">${data.email}</a></td></tr>
       <tr><td style="padding:6px 12px;font-weight:bold;">Phone</td><td style="padding:6px 12px;"><a href="tel:${data.phone}">${data.phone}</a></td></tr>
       <tr style="background:#f9fafb;"><td style="padding:6px 12px;font-weight:bold;">Service</td><td style="padding:6px 12px;">${data.service}</td></tr>
-      <tr><td style="padding:6px 12px;font-weight:bold;">ZIP</td><td style="padding:6px 12px;">${data.zip}</td></tr>
+      <tr><td style="padding:6px 12px;font-weight:bold;">Address</td><td style="padding:6px 12px;">${data.address}</td></tr>
       ${data.message ? `<tr style="background:#f9fafb;"><td style="padding:6px 12px;font-weight:bold;">Message</td><td style="padding:6px 12px;">${data.message}</td></tr>` : ''}
     </table>
     <hr style="margin-top:24px;border:none;border-top:1px solid #e5e7eb;">
