@@ -493,7 +493,7 @@ export default function CarpenterBeesPage() {
                   'Response within 1–2 business hours',
                   'Licensed & insured in PA & DE',
                   'Free estimate, no commitment required',
-                  '5.0 ⭐ rated by 500+ customers',
+                  '5.0 ⭐ rated by 40+ customers',
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-gray-700">
                     <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
