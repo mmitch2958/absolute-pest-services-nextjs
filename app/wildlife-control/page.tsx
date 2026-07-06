@@ -244,7 +244,7 @@ export default function WildlifeControlPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[
-              { step: '1', title: 'Free Inspection', desc: 'We inspect your property to identify the species, entry points, and extent of the problem.' },
+              { step: '1', title: 'Free Quote', desc: 'We inspect your property to identify the species, entry points, and extent of the problem.' },
               { step: '2', title: 'Custom Plan', desc: 'We develop a removal plan that\'s humane, effective, and compliant with PA/DE wildlife regulations.' },
               { step: '3', title: 'Removal', desc: 'We use live trapping, exclusion devices, and other methods to safely remove the wildlife.' },
               { step: '4', title: 'Exclusion & Repair', desc: 'We seal all entry points and remove nesting materials to prevent future intrusions.' },

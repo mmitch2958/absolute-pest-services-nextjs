@@ -55,7 +55,7 @@ const faqSchema = {
       name: 'How do I know if I have termites?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Signs include mud tubes on foundation walls, hollow-sounding wood, discarded wings near windows and doors, and visible damage to wood structures. Schedule a free inspection if you suspect termites — early detection saves thousands in repairs.',
+        text: 'Signs include mud tubes on foundation walls, hollow-sounding wood, discarded wings near windows and doors, and visible damage to wood structures. Schedule a free quote if you suspect termites — early detection saves thousands in repairs.',
       },
     },
     {
@@ -190,7 +190,7 @@ export default function TermiteTreatmentPage() {
                 <span className="text-green-700">Today — No Commitment</span>
               </h2>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                Termites silently destroy your home from the inside. A free inspection by our
+                Termites silently destroy your home from the inside. A free quote by our
                 licensed specialists will tell you exactly what you’re dealing with — and what
                 it costs to fix it.
               </p>
@@ -303,7 +303,7 @@ export default function TermiteTreatmentPage() {
             <div>
               <a href="#contact-form" className="flex items-center gap-3 bg-amber-700 hover:bg-amber-800 text-white font-bold px-6 py-4 rounded-xl w-full justify-center mb-3">
                 <Phone size={20} />
-                Schedule Free Inspection ↓
+                Schedule Free Quote ↓
               </a>
               <a href="tel:484-643-2225" className="flex items-center gap-2 justify-center text-amber-700 hover:text-amber-800 font-medium text-sm">
                 Or call 484-643-2225

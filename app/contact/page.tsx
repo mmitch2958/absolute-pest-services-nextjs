@@ -27,7 +27,7 @@ export default function ContactPage() {
           </nav>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Absolute Pest Services</h1>
           <p className="text-xl text-green-100 max-w-3xl">
-            Get in touch for same-day pest control, free inspections, and emergency wildlife removal across PA &amp; DE.
+            Get in touch for same-day pest control, free quotes, and emergency wildlife removal across PA &amp; DE.
           </p>
         </div>
       </section>

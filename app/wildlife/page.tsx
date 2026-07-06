@@ -196,10 +196,10 @@ export default function WildlifePage() {
                 className="flex items-center gap-3 bg-green-700 hover:bg-green-800 text-white font-bold px-6 py-4 rounded-xl w-full justify-center mb-4"
               >
                 <Phone size={20} />
-                Get Free Inspection ↓
+                Get Free Quote ↓
               </a>
               <p className="text-center text-xs text-gray-500">
-                Free inspection · Same-day available in most areas
+                Free quote · Same-day available in most areas
               </p>
             </div>
           </div>
