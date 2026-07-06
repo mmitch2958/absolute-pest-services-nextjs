@@ -86,7 +86,7 @@ export default function WildlifePage() {
                 id="wildlife-form-heading"
                 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
               >
-                Get a Free Wildlife Inspection<br />
+                Get a Free Wildlife Quote<br />
                 <span className="text-green-700">Today — No Commitment</span>
               </h2>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
@@ -121,7 +121,7 @@ export default function WildlifePage() {
             </div>
             <div>
               <ConversionCard
-                heading="Get a Free Wildlife Inspection"
+                heading="Get a Free Wildlife Quote"
                 defaultService="wildlife-control"
               />
             </div>

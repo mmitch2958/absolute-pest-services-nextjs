@@ -146,7 +146,7 @@ export default function RodentsPage() {
                 id="rodents-form-heading"
                 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
               >
-                Get a Free Rodent Inspection<br />
+                Get a Free Rodent Quote<br />
                 <span className="text-green-700">Same-Day Service Available</span>
               </h2>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
@@ -169,7 +169,7 @@ export default function RodentsPage() {
             </div>
             <div>
               <ConversionCard
-                heading="Get a Free Rodent Inspection"
+                heading="Get a Free Rodent Quote"
                 defaultService="rodent-control"
               />
             </div>

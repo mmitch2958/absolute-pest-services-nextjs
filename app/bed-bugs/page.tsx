@@ -85,7 +85,7 @@ export default function BedBugsPage() {
                 id="bed-bugs-form-heading"
                 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
               >
-                Get a Free Bed Bug Inspection<br />
+                Get a Free Bed Bug Quote<br />
                 <span className="text-green-700">Today — No Commitment</span>
               </h2>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
@@ -120,7 +120,7 @@ export default function BedBugsPage() {
             </div>
             <div>
               <ConversionCard
-                heading="Free Bed Bug Inspection"
+                heading="Free Bed Bug Quote"
                 defaultService="bed-bug-treatment"
               />
             </div>

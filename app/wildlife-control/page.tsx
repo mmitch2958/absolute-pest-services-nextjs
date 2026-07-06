@@ -287,7 +287,7 @@ export default function WildlifeControlPage() {
             </div>
             <div id="contact-form">
               <ConversionCard
-                heading="Get a Free Wildlife Inspection"
+                heading="Get a Free Wildlife Quote"
                 defaultService="wildlife-control"
                 trustItems={[
                   '24/7 emergency response',
