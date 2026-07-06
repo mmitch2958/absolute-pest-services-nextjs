@@ -142,7 +142,7 @@ export default function CarpenterBeeTreatmentPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="inline-flex items-center gap-2 bg-green-700 text-white text-sm font-semibold px-4 py-2 rounded-full mb-4">
-                🌸 Spring 2026 Service
+                ☀️ Summer 2026 Service
               </div>
               <h1 className="text-4xl sm:text-5xl font-bold mb-4">
                 Professional Carpenter Bee Treatment for PA &amp; DE Homes

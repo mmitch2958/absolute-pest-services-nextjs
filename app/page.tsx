@@ -362,7 +362,7 @@ export default function HomePage() {
             <div>
               <div className="inline-flex items-center gap-2 bg-amber-100 border border-amber-300 text-amber-800 text-sm font-bold px-4 py-2 rounded-full mb-6">
                 <AlertTriangle size={16} />
-                Spring 2026 — Active Now
+                Summer 2026 — Active Now
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
                 Carpenter Bees Are Drilling Into PA &amp; DE Homes Right Now
@@ -432,7 +432,7 @@ export default function HomePage() {
                       Call 484-643-2225
                     </a>
                   </div>
-                  <p className="text-xs text-gray-400 mt-4">Valid for new customers in PA &amp; DE during spring 2026.</p>
+                  <p className="text-xs text-gray-400 mt-4">Valid for new customers in PA &amp; DE during summer 2026.</p>
                 </div>
               </div>
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">

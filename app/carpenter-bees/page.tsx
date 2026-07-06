@@ -138,7 +138,7 @@ export default function CarpenterBeesPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <span className="inline-block bg-green-700 text-white text-xs font-bold px-3 py-1 rounded-full mb-6">
-              Spring 2026 — Active Now
+              Summer 2026 — Active Now
             </span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
               Carpenter Bees Are Drilling Into PA &amp; DE Homes{' '}

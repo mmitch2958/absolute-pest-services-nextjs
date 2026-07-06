@@ -69,7 +69,7 @@ export default function SpringCarpenterBeeBanner() {
         <X className="w-4 h-4" />
       </button>
       <span className="absolute top-2 right-12 bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded-full hidden sm:inline">
-        Spring 2026
+        Summer 2026
       </span>
     </div>
   )
