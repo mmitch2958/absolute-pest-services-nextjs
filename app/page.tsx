@@ -328,7 +328,7 @@ export default function HomePage() {
                   'Licensed & insured in PA & DE',
                   'Free estimate, no commitment required',
                   'Same-day service available',
-                  '5.0 ⭐ rated by 500+ customers',
+                  '5.0 ⭐ rated by 40+ customers',
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-gray-300">
                     <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
@@ -497,7 +497,6 @@ export default function HomePage() {
                   ))}
                 </div>
                 <p className="font-bold text-2xl text-gray-900">5.0 on Google</p>
-                <p className="text-sm text-gray-500 mt-1">Trusted by hundreds of PA &amp; DE families</p>
               </div>
               <div className="space-y-3 mb-6">
                 {[
