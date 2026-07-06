@@ -167,7 +167,7 @@ export default function BedBugTreatmentPage() {
               </h2>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
                 Bed bug populations double every 16 days. The sooner we treat, the easier and more
-                affordable it is. Get a free inspection from our licensed specialists today.
+                affordable it is. Get a free quote from our licensed specialists today.
               </p>
               <ul className="space-y-3 mb-8">
                 {[
@@ -281,7 +281,7 @@ export default function BedBugTreatmentPage() {
             <div>
               <a href="#contact-form" className="flex items-center gap-3 bg-red-700 hover:bg-red-800 text-white font-bold px-6 py-4 rounded-xl w-full justify-center mb-3">
                 <Phone size={20} />
-                Schedule Free Inspection ↓
+                Schedule Free Quote ↓
               </a>
               <Link href="/service-areas" className="flex justify-center text-gray-600 hover:text-gray-900 text-sm">
                 View our service areas →

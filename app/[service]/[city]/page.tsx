@@ -258,7 +258,7 @@ export default async function CityServicePage({
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-green-200 mb-7" aria-label="Trust signals">
             <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-300" />Licensed &amp; Insured</span>
             <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-300" />PA &amp; DE Certified</span>
-            <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-300" />Free Inspection</span>
+            <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-300" />Free Quote</span>
             <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />5.0★ Rated</span>
             <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-300" />24/7 Emergency</span>
           </div>
@@ -470,7 +470,7 @@ export default async function CityServicePage({
                 <h3 className="font-bold text-gray-900 text-lg mb-1">
                   Get {service.name} in {city.name}
                 </h3>
-                <p className="text-gray-600 text-sm mb-4">Free inspection · Same-day available</p>
+                <p className="text-gray-600 text-sm mb-4">Free quote · Same-day available</p>
 
                 <a
                   href={`tel:+1${telLink}`}
@@ -575,7 +575,7 @@ export default async function CityServicePage({
               href="#contact-form"
               className="flex items-center justify-center gap-2 bg-amber-500 text-gray-900 font-bold px-8 py-4 rounded-lg hover:bg-amber-400 transition-colors text-lg shadow"
             >
-              Get Free Inspection
+              Get Free Quote
             </Link>
           </div>
         </div>

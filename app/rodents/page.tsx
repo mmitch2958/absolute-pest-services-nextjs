@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     q: 'What is the cost of rodent control?',
-    a: 'A typical rodent control program ranges from $200–$500 for initial treatment and exclusion, depending on the size of the home and the severity of the infestation. We provide a free inspection and written estimate before any work begins.',
+    a: 'A typical rodent control program ranges from $200–$500 for initial treatment and exclusion, depending on the size of the home and the severity of the infestation. We provide a free quote and written estimate before any work begins.',
   },
   {
     q: 'How do you seal my home against rodents?',
@@ -126,7 +126,7 @@ export default function RodentsPage() {
               </ul>
               <a href="#contact-form" className="flex items-center gap-3 bg-gray-800 hover:bg-gray-900 text-white font-bold px-6 py-4 rounded-xl w-full justify-center">
                 <Phone size={20} />
-                Request Free Inspection ↓
+                Request Free Quote ↓
               </a>
             </div>
           </div>

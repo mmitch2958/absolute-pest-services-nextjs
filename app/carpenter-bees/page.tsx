@@ -485,7 +485,7 @@ export default function CarpenterBeesPage() {
                 <span className="text-green-700">Use code CBT26</span>
               </h2>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                April and May are the ideal treatment months. Book your free inspection now before
+                April and May are the ideal treatment months. Book your free quote now before
                 carpenter bees start new tunnels this season.
               </p>
               <ul className="space-y-3 mb-8">

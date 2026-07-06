@@ -7,7 +7,7 @@ import ConversionCard from '@/components/forms/ConversionCard'
 const faqs = [
   {
     q: 'How do I know if I have termites?',
-    a: 'Termites are rarely seen — the damage is hidden inside wood. Signs include mud tubes on foundation walls, wood that sounds hollow when tapped, discarded wings near windowsills, and small holes in drywall. If you have any of these signs, schedule a free inspection immediately.',
+    a: 'Termites are rarely seen — the damage is hidden inside wood. Signs include mud tubes on foundation walls, wood that sounds hollow when tapped, discarded wings near windowsills, and small holes in drywall. If you have any of these signs, schedule a free quote immediately.',
   },
   {
     q: 'Does homeowners insurance cover termite damage?',
@@ -90,7 +90,7 @@ export default function TermitesPage() {
                 <span className="text-green-700">Today — No Commitment</span>
               </h2>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                Termites silently destroy your home from the inside. A free inspection tells you
+                Termites silently destroy your home from the inside. A free quote tells you
                 exactly what you’re dealing with — and what it costs to fix it.
               </p>
               <ul className="space-y-3 mb-8">

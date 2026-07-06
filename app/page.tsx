@@ -349,7 +349,7 @@ export default function HomePage() {
               </div>
             </div>
             <div>
-              <ConversionCard heading="Request a Free Inspection" />
+              <ConversionCard heading="Request a Free Quote" />
             </div>
           </div>
         </div>

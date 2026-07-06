@@ -229,7 +229,7 @@ export default async function ServiceAreaPage({ params }: Props) {
               href="#request-service"
               className="inline-flex items-center bg-[hsl(36,100%,47%)] text-white px-8 py-4 text-lg font-semibold hover:bg-[hsl(36,100%,37%)] rounded-md transition-colors"
             >
-              Schedule Free Inspection
+              Schedule Free Quote
             </Link>
           </div>
           <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm text-white">
@@ -383,7 +383,7 @@ export default async function ServiceAreaPage({ params }: Props) {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-4">
-              Schedule Your Free Inspection in {data.name}
+              Schedule Your Free Quote in {data.name}
             </h2>
             <p className="text-green-100">
               Fill out the form below and we&apos;ll be in touch within 24 hours.

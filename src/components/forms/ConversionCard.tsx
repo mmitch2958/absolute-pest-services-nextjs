@@ -16,7 +16,7 @@ const defaultTrustItems = [
 
 export default function ConversionCard({
   heading = 'Get a Free Estimate Today',
-  subheading = 'Free Inspection · No Obligation',
+  subheading = 'Free Quote · No Obligation',
   defaultService,
   trustItems = defaultTrustItems,
 }: ConversionCardProps) {

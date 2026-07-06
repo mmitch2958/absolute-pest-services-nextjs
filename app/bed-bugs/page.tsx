@@ -30,7 +30,7 @@ const faqs = [
 export const metadata: Metadata = {
   title: 'Bed Bug Control | Absolute Pest Services',
   description:
-    'Identify & eliminate bed bugs in PA & DE. Expert heat and chemical treatment. Free inspections. Licensed & insured. Call 484-643-2225.',
+    'Identify & eliminate bed bugs in PA & DE. Expert heat and chemical treatment. Free quotes. Licensed & insured. Call 484-643-2225.',
   alternates: { canonical: 'https://absolutepestservices.com/bed-bugs' },
 }
 
@@ -63,7 +63,7 @@ export default function BedBugsPage() {
               <Phone size={18} />Call 484-643-2225
             </a>
             <a href="#contact-form" className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg">
-              Get Free Inspection ↓
+              Get Free Quote ↓
             </a>
           </div>
         </div>
@@ -154,7 +154,7 @@ export default function BedBugsPage() {
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Bed Bug Services</h2>
               <div className="space-y-4">
                 {[
-                  { title: 'Free Inspection', desc: 'We thoroughly inspect mattresses, furniture, walls, and all harboring areas.' },
+                  { title: 'Free Quote', desc: 'We thoroughly inspect mattresses, furniture, walls, and all harboring areas.' },
                   { title: 'Heat Treatment', desc: 'Most effective option. Kills all life stages in a single treatment. No chemical residue.' },
                   { title: 'Chemical Treatment', desc: '2-3 visit program using EPA-registered insecticides with residual protection.' },
                   { title: 'Follow-Up Monitoring', desc: 'We schedule follow-up visits to ensure complete elimination.' },

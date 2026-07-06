@@ -111,7 +111,7 @@ export default function CarpenterBeeControlPage() {
               className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-white px-8 py-4 text-lg font-semibold rounded-xl"
             >
               <Calendar className="h-5 w-5" />
-              Schedule Free Inspection
+              Schedule Free Quote
             </Link>
             <a
               href="tel:484-643-2225"
@@ -454,7 +454,7 @@ export default function CarpenterBeeControlPage() {
                 <span className="text-green-700">Spring Special — 10% Off with CBT26</span>
               </h2>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                Spring is the critical treatment window. Book your free inspection before carpenter
+                Spring is the critical treatment window. Book your free quote before carpenter
                 bees start new tunnels this season.
               </p>
               <ul className="space-y-3 mb-8">

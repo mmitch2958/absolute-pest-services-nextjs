@@ -220,7 +220,7 @@ export const SERVICE_AREA_DATA: Record<string, ServiceAreaContent> = {
     heroSubtext: 'Professional pest control services in Coatesville, Pennsylvania. Protecting homes and businesses throughout Coatesville and surrounding Chester County communities.',
     cities: ['Coatesville City', 'South Coatesville Borough', 'Valley Township', 'West Marlborough Township', 'Caln Township', 'East Fallowfield Township'],
     faqs: [
-      { q: 'Do older Coatesville homes need termite inspections?', a: 'Yes. Many Coatesville properties have older foundations and aged framing highly susceptible to subterranean termites. A free inspection will reveal any current activity.' },
+      { q: 'Do older Coatesville homes need termite inspections?', a: 'Yes. Many Coatesville properties have older foundations and aged framing highly susceptible to subterranean termites. A free quote will reveal any current activity.' },
       { q: 'Are rodents a common problem in Coatesville?', a: "Coatesville's mix of older commercial and residential buildings creates numerous entry points for mice and rats. We provide thorough exclusion alongside population control." },
       { q: 'How quickly can you respond to wildlife calls in Coatesville?', a: 'Most wildlife calls in Coatesville receive same-day or next-day service. Emergency situations are handled around the clock.' },
       { q: 'Do you handle stink bug prevention in Coatesville?', a: 'Yes. We offer fall exterior barrier treatments that significantly reduce stink bug intrusion across Coatesville homes.' },
@@ -482,7 +482,7 @@ export const SERVICE_AREA_DATA: Record<string, ServiceAreaContent> = {
     faqs: [
       { q: 'Does proximity to Marsh Creek State Park increase pest risk?', a: 'Yes. Properties near Marsh Creek see elevated activity from deer, raccoons, groundhogs, and geese. We offer wildlife exclusion and deterrent programs for park-adjacent homes.' },
       { q: 'Are stink bugs a major problem in Downingtown?', a: 'Stink bugs are very common in Chester County, especially in the fall. We provide exterior barrier treatments that dramatically reduce stink bug intrusion.' },
-      { q: 'Do older Downingtown Borough homes need termite inspections?', a: 'Yes. Many borough homes date to the early 1900s and have wood foundations or aged framing that makes them vulnerable to termite damage. Call us for a free inspection.' },
+      { q: 'Do older Downingtown Borough homes need termite inspections?', a: 'Yes. Many borough homes date to the early 1900s and have wood foundations or aged framing that makes them vulnerable to termite damage. Call us for a free quote.' },
       { q: 'How quickly can you respond to a wildlife call in Downingtown?', a: 'We offer same-day response for most wildlife emergencies throughout Downingtown and surrounding townships.' },
     ],
     nearbyAreas: ['exton-pa', 'west-chester-pa', 'coatesville-pa', 'chester-county-pa'],

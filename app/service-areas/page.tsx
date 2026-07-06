@@ -203,9 +203,9 @@ export default function ServiceAreasPage() {
               { href: '/wildlife-control', label: 'Wildlife Control & Removal', desc: 'Raccoon, groundhog, fox, squirrel removal' },
               { href: '/bat-removal', label: 'Bat Removal & Exclusion', desc: 'Licensed, humane bat exclusion' },
               { href: '/bed-bug-treatment', label: 'Bed Bug Treatment', desc: 'Heat & chemical treatment options' },
-              { href: '/termite-treatment', label: 'Termite Inspection & Treatment', desc: 'Free inspections, guaranteed protection' },
+              { href: '/termite-treatment', label: 'Termite Inspection & Treatment', desc: 'Free quotes, guaranteed protection' },
               { href: '/rodents', label: 'Rodent Control', desc: 'Mice & rat extermination & exclusion' },
-              { href: '/request-service', label: 'Schedule Free Inspection', desc: 'Same-day appointments available' },
+              { href: '/request-service', label: 'Schedule Free Quote', desc: 'Same-day appointments available' },
             ].map((service) => (
               <div key={service.href} className="bg-white rounded-lg border border-gray-100 hover:shadow-lg transition-shadow p-5 flex items-center gap-3">
                 <div className="w-10 h-10 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center flex-shrink-0 text-white">
@@ -228,10 +228,10 @@ export default function ServiceAreasPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-4">
-              Schedule Your Free Inspection
+              Schedule Your Free Quote
             </h2>
             <p className="text-green-100">
-              Fill out the form below and we&apos;ll be in touch within 24 hours to schedule your free inspection.
+              Fill out the form below and we&apos;ll be in touch within 24 hours to schedule your free quote.
             </p>
           </div>
           <div className="bg-white rounded-xl shadow-xl p-6">

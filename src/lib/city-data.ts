@@ -129,7 +129,7 @@ export const CITY_SERVICES: ServiceData[] = [
     faqs: [
       {
         q: 'How do I know if I have termites?',
-        a: 'Signs include mud tubes on foundation walls, hollow-sounding wood, discarded wings, and visible damage to wood structures. Schedule a free inspection if you suspect termites.',
+        a: 'Signs include mud tubes on foundation walls, hollow-sounding wood, discarded wings, and visible damage to wood structures. Schedule a free quote if you suspect termites.',
       },
       {
         q: 'What termite treatment methods do you use?',
