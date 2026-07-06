@@ -164,7 +164,7 @@ export default function TermiteTreatmentPage() {
               Call 484-643-2225
             </a>
             <a href="#contact-form" className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold px-6 py-3 rounded-lg">
-              Free Termite Inspection ↓
+              Free Termite Quote ↓
             </a>
           </div>
         </div>
@@ -186,7 +186,7 @@ export default function TermiteTreatmentPage() {
                 id="termite-form-heading"
                 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
               >
-                Get a Free Termite Inspection<br />
+                Get a Free Termite Quote<br />
                 <span className="text-green-700">Today — No Commitment</span>
               </h2>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
@@ -222,7 +222,7 @@ export default function TermiteTreatmentPage() {
             </div>
             <div>
               <ConversionCard
-                heading="Get a Free Termite Inspection"
+                heading="Get a Free Termite Quote"
                 defaultService="termite-treatment"
                 trustItems={[
                   'Response within 1–2 hours',

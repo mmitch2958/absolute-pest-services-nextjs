@@ -315,7 +315,7 @@ export default function HomePage() {
                 id="homepage-form-heading"
                 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight"
               >
-                Get a Free Pest Inspection<br />
+                Get a Free Pest Quote<br />
                 <span className="text-green-400">Today — No Commitment</span>
               </h2>
               <p className="text-gray-300 text-lg mb-6 leading-relaxed">

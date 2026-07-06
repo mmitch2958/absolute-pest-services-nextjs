@@ -229,7 +229,7 @@ export default function BatRemovalPage() {
             </div>
             <div id="contact-form">
               <ConversionCard
-                heading="Schedule a Free Bat Inspection"
+                heading="Schedule a Free Bat Quote"
                 defaultService="bat-removal"
                 trustItems={[
                   'Response within 1–2 hours',
