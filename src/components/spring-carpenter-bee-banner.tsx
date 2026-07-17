@@ -52,12 +52,6 @@ export default function SpringCarpenterBeeBanner() {
           >
             Get a Free Quote
           </Link>
-          <a
-            href="tel:484-643-2225"
-            className="hidden sm:inline-flex border border-yellow-500 text-yellow-700 hover:bg-yellow-50 font-bold px-4 py-2 rounded-lg text-sm whitespace-nowrap"
-          >
-            484-643-2225
-          </a>
         </div>
       </div>
       <button
