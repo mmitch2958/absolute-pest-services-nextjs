@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ClipboardList, History, LogOut, Loader2, CheckCircle2,
+  ClipboardList, History, LogOut, Loader2, CheckCircle2, Calendar,
   Search, Plus, Package, Boxes, Trash2, Home, Building2,
 } from 'lucide-react';
 
@@ -74,6 +74,7 @@ function FieldNav({ employee, active }: { employee: Employee | null; active: str
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-4">
         {([
           { href: '/field/log', label: 'Log Job', icon: ClipboardList },
+          { href: '/field/schedule', label: 'Schedule', icon: Calendar },
           { href: '/field/history', label: 'History', icon: History },
         ] as const).map(({ href, label, icon: Icon }) => (
           <button key={href} onClick={() => router.push(href)}

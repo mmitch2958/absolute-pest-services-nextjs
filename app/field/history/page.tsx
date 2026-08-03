@@ -112,6 +112,10 @@ function FieldNav({ active }: { active: string }) {
           className={`flex flex-col items-center gap-0.5 px-5 py-1 rounded-xl ${active === '/field/log' ? 'text-green-600' : 'text-slate-400'}`}>
           <ClipboardList className="w-5 h-5" /><span className="text-xs font-medium">Log Job</span>
         </button>
+        <button onClick={() => router.push('/field/schedule')}
+          className={`flex flex-col items-center gap-0.5 px-5 py-1 rounded-xl ${active === '/field/schedule' ? 'text-green-600' : 'text-slate-400'}`}>
+          <Calendar className="w-5 h-5" /><span className="text-xs font-medium">Schedule</span>
+        </button>
         <button onClick={() => router.push('/field/history')}
           className={`flex flex-col items-center gap-0.5 px-5 py-1 rounded-xl ${active === '/field/history' ? 'text-green-600' : 'text-slate-400'}`}>
           <History className="w-5 h-5" /><span className="text-xs font-medium">History</span>
