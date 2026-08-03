@@ -55,14 +55,6 @@ const statusBarColor: Record<string, string> = {
 };
 const statusBarColorFallback = 'bg-gray-400';
 
-const statusBarColor: Record<string, string> = {
-  pending: 'bg-amber-500',
-  assigned: 'bg-blue-500',
-  in_progress: 'bg-indigo-500',
-  completed: 'bg-green-500',
-  cancelled: 'bg-gray-400',
-};
-
 function AssignModal({ job, employees, onSave, onClose }: {
   job: Job;
   employees: Employee[];
