@@ -79,7 +79,12 @@ export async function PATCH(
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
     }
 
-    const result = await sql`UPDATE invoices SET ${sql(updates as any)} WHERE id = ${invoiceId} RETURNING *`;
+    const cols = Object.keys(updates);
+    const vals = Object.values(updates);
+    const setClause = cols.map((c, i) => `${c} = $${i + 1}`).join(', ');
+    const query = `UPDATE invoices SET ${setClause} WHERE id = $${cols.length + 1} RETURNING *`;
+
+    const result = await sql.query(query, [...vals, invoiceId]);
     if (!result || result.length === 0) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }

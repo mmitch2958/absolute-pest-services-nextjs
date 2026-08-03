@@ -67,7 +67,9 @@ export async function PATCH(
       const vals = Object.values(updates);
       const setClause = cols.map((c, i) => `${c} = $${i + 1}`).join(', ');
 
-      const result = await sql`UPDATE contact_submissions SET ${sql(updates as any)} WHERE id = ${submissionId} RETURNING *`;
+      const query = `UPDATE contact_submissions SET ${setClause} WHERE id = $${cols.length + 1} RETURNING *`;
+
+      const result = await sql.query(query, [...vals, submissionId]);
       if (!result || result.length === 0) {
         return NextResponse.json({ error: 'Not found' }, { status: 404 });
       }

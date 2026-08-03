@@ -72,7 +72,12 @@ export async function PATCH(
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
     }
 
-    const result = await sql`UPDATE inspection_schedules SET ${sql(updates as any)} WHERE id = ${inspectionId} RETURNING *`;
+    const cols = Object.keys(updates);
+    const vals = Object.values(updates);
+    const setClause = cols.map((c, i) => `${c} = $${i + 1}`).join(', ');
+    const query = `UPDATE inspection_schedules SET ${setClause} WHERE id = $${cols.length + 1} RETURNING *`;
+
+    const result = await sql.query(query, [...vals, inspectionId]);
     if (!result || result.length === 0) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
