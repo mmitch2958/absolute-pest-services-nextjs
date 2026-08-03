@@ -32,12 +32,28 @@ const priorityColors: Record<string, string> = {
 };
 
 const statusColors: Record<string, string> = {
+  scheduled: 'bg-blue-100 text-blue-700',
   pending: 'bg-amber-100 text-amber-700',
-  assigned: 'bg-blue-100 text-blue-700',
+  assigned: 'bg-cyan-100 text-cyan-700',
   in_progress: 'bg-indigo-100 text-indigo-700',
   completed: 'bg-green-100 text-green-700',
+  invoiced: 'bg-orange-100 text-orange-700',
+  paid: 'bg-purple-100 text-purple-700',
   cancelled: 'bg-gray-100 text-gray-500',
 };
+const statusColorFallback = 'bg-gray-100 text-gray-500';
+
+const statusBarColor: Record<string, string> = {
+  scheduled: 'bg-blue-500',
+  pending: 'bg-amber-500',
+  assigned: 'bg-cyan-500',
+  in_progress: 'bg-indigo-500',
+  completed: 'bg-green-500',
+  invoiced: 'bg-orange-500',
+  paid: 'bg-purple-500',
+  cancelled: 'bg-gray-400',
+};
+const statusBarColorFallback = 'bg-gray-400';
 
 const statusBarColor: Record<string, string> = {
   pending: 'bg-amber-500',
@@ -194,7 +210,7 @@ function CalendarView({ jobs, monthAnchor, onPrev, onNext, onToday, onJobClick }
               <div className="flex flex-col gap-1 overflow-hidden">
                 {dayJobs.slice(0, 3).map(j => (
                   <button key={j.id} onClick={() => onJobClick(j)}
-                    className={`text-left text-[11px] leading-tight px-1.5 py-1 rounded text-white truncate hover:opacity-90 ${statusBarColor[j.status] || 'bg-gray-400'}`}
+                    className={`text-left text-[11px] leading-tight px-1.5 py-1 rounded text-white truncate hover:opacity-90 ${statusBarColor[j.status] || statusBarColorFallback}`}
                     title={`${j.customer_name} — ${j.serviced_area} (${j.status})${j.employee_name ? ' · ' + j.employee_name : ''}`}>
                     <span className="font-medium">{j.customer_name}</span>
                     {j.employee_name && <span className="opacity-80"> · {j.employee_name}</span>}
@@ -376,7 +392,7 @@ export default function SchedulingPage() {
                           : <span className="text-gray-400 text-xs">Unassigned</span>}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${statusColors[job.status]}`}>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${statusColors[job.status] || statusColorFallback}`}>
                           {job.status.replace('_', ' ')}
                         </span>
                       </td>

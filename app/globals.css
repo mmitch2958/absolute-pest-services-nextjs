@@ -35,3 +35,22 @@ body {
   .invoice-preview-wrapper { padding: 0 !important; }
   @page { margin: 15mm; size: A4; }
 }
+
+/* ── Admin Portal: force black typed text in inputs/search/forms ──────────
+   Admin pages use light backgrounds regardless of OS color scheme, but
+   form controls inherited body `color: var(--foreground)`, which turns
+   light under `prefers-color-scheme: dark` — making typed text look grey
+   and hard to read. Scope admin form controls to explicit black text. */
+.admin-portal {
+  color-scheme: light;
+}
+.admin-portal input,
+.admin-portal select,
+.admin-portal textarea {
+  color: #111827 !important;
+  caret-color: #111827;
+}
+.admin-portal input::placeholder,
+.admin-portal textarea::placeholder {
+  color: #9ca3af;
+}
