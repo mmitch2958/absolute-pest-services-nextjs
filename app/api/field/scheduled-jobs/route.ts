@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminSession } from '@/lib/admin-session';
+import { getFieldSession } from '@/lib/field-session';
 import { sql } from '@/lib/db';
 
-async function requireAdmin() {
-  const session = await getAdminSession();
-  if (!session.userId || session.role !== 'admin') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  return null;
-}
-
+// Tech-facing scheduling view. Mirrors the admin scheduled-jobs list but
+// authenticated with the field session. Shows ALL job statuses (scheduled,
+// pending, assigned, in_progress, completed, invoiced, paid, cancelled) so a
+// tech can see every job that may be scheduled, not just future/pending ones.
 export async function GET(request: NextRequest) {
-  const authError = await requireAdmin();
-  if (authError) return authError;
+  const session = await getFieldSession();
+  if (!session.employeeId) {
+    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     const { searchParams } = new URL(request.url);
@@ -65,9 +63,9 @@ export async function GET(request: NextRequest) {
 
     const employees = await sql`SELECT id, name FROM field_employees WHERE is_active = true ORDER BY name`;
 
-    return NextResponse.json({ jobs: rows, employees });
+    return NextResponse.json({ success: true, jobs: rows, employees });
   } catch (err) {
-    console.error('[admin/scheduled-jobs] GET error:', err);
-    return NextResponse.json({ error: 'Failed to load scheduled jobs' }, { status: 500 });
+    console.error('[field/scheduled-jobs] GET error:', err);
+    return NextResponse.json({ success: false, message: 'Failed to load scheduled jobs' }, { status: 500 });
   }
 }
