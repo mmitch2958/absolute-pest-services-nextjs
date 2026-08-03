@@ -1,0 +1,1 @@
+- [Neon sql() function-call form](neon-sql-function-call.md) — dynamic UPDATE SET clauses must use sql.query(), not sql(obj)
