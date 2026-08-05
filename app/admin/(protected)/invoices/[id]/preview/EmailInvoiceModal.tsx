@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Loader2, Mail, Paperclip, Send } from 'lucide-react';
+import { X, Loader2, Mail, Paperclip, Send, Plus } from 'lucide-react';
 
 interface EmailInvoiceModalProps {
   invoiceId: number;
@@ -27,11 +27,21 @@ export default function EmailInvoiceModal({
     defaultSubject || `Invoice #${invoiceNumber} from Absolute Pest Services`
   );
   const [message, setMessage] = useState('');
-  const [cc, setCc] = useState('');
+  const [extraEmails, setExtraEmails] = useState<string[]>([]);
   const [attachPdf, setAttachPdf] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+
+  function addExtraEmail() {
+    setExtraEmails(prev => [...prev, '']);
+  }
+  function updateExtraEmail(i: number, v: string) {
+    setExtraEmails(prev => prev.map((a, idx) => idx === i ? v : a));
+  }
+  function removeExtraEmail(i: number) {
+    setExtraEmails(prev => prev.filter((_, idx) => idx !== i));
+  }
 
   async function handleSend() {
     if (!to.trim()) {
@@ -42,6 +52,13 @@ export default function EmailInvoiceModal({
     if (!emailRegex.test(to.trim())) {
       setError('Please enter a valid email address.');
       return;
+    }
+    const extras = extraEmails.map(a => a.trim()).filter(Boolean);
+    for (const addr of extras) {
+      if (!emailRegex.test(addr)) {
+        setError(`${addr} is not a valid email address.`);
+        return;
+      }
     }
 
     setLoading(true);
@@ -55,6 +72,7 @@ export default function EmailInvoiceModal({
           subject: subject.trim(),
           message: message.trim(),
           attachPdf,
+          additionalEmails: extras.length > 0 ? extras : undefined,
         }),
       });
       const data = await res.json();
@@ -111,7 +129,7 @@ export default function EmailInvoiceModal({
               </div>
               <p className="text-lg font-semibold text-gray-900">Invoice sent!</p>
               <p className="text-sm text-gray-500 mt-1">
-                Sent to {to}
+                Sent to {to}{extraEmails.filter(a => a.trim()).length > 0 ? ` and ${extraEmails.filter(a => a.trim()).join(', ')}` : ''}
               </p>
             </div>
           ) : (
@@ -130,18 +148,37 @@ export default function EmailInvoiceModal({
                 />
               </div>
 
-              {/* CC */}
+              {/* Additional emails */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                  CC <span className="font-normal text-gray-400">(optional)</span>
+                  Additional emails <span className="font-normal text-gray-400">(optional)</span>
                 </label>
-                <input
-                  type="email"
-                  value={cc}
-                  onChange={e => setCc(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
-                  placeholder="cc@example.com"
-                />
+                <div className="space-y-2">
+                  {extraEmails.map((addr, i) => (
+                    <div key={i} className="flex gap-2">
+                      <input
+                        type="email"
+                        value={addr}
+                        onChange={e => updateExtraEmail(i, e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+                        placeholder="other@example.com"
+                      />
+                      <button
+                        onClick={() => removeExtraEmail(i)}
+                        className="shrink-0 px-3 text-gray-400 hover:text-red-500 border border-gray-300 rounded-lg transition-colors"
+                        aria-label="Remove additional email"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={addExtraEmail}
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add another email
+                  </button>
+                </div>
               </div>
 
               {/* Subject */}

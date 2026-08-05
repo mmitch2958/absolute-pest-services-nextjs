@@ -39,6 +39,10 @@ export async function POST(
     const channels: string[] = Array.isArray(body.channels) ? body.channels : [];
     const personalMessage: string | undefined = body.message?.trim() || undefined;
     const ccInternal: boolean = !!body.ccInternal;
+    const additionalEmails: string[] = Array.isArray(body.additionalEmails)
+      ? body.additionalEmails.map((e: any) => String(e).trim()).filter(Boolean)
+      : [];
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // Load invoice + client
     const rows = (await sql`
@@ -82,12 +86,18 @@ export async function POST(
     if (!sendEmail && !sendSms) {
       return NextResponse.json({ error: 'No email or phone available to send to' }, { status: 400 });
     }
+    for (const addr of additionalEmails) {
+      if (!EMAIL_RE.test(addr)) {
+        return NextResponse.json({ error: `That additional email doesn't look valid: ${addr}` }, { status: 400 });
+      }
+    }
 
     const results: Record<string, any> = {};
 
     if (sendEmail) {
       results.email = await sendInvoiceToCustomer({
         to: targetEmail,
+        cc: additionalEmails.length > 0 ? additionalEmails : undefined,
         ccInternal,
         customerName: inv.client_name,
         invoiceNumber: inv.invoice_number,
