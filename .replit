@@ -7,7 +7,7 @@ channel = "stable-24_05"
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["bash", "-c", "npx next build --webpack"]
+build = ["bash", "-c", "npm install --no-save @next/swc-linux-x64-gnu@16.2.12 && npx next build --webpack"]
 run = ["bash", "-c", "npx next start -p 5000"]
 
 [[ports]]
@@ -49,7 +49,7 @@ integrations = ["javascript_google_analytics:1.0.0", "github:1.0.0"]
 
 [userenv.shared]
 FB_PAGE_ID = "298835070139713"
-FB_PAGE_ACCESS_TOKEN = "EAANJSCq2ju0BREoFNh8QpVk4WxdUF5ZAlFXQQDuURE0rjjlELTrlHZCFbAMFBEmmiTFeNiZB2XWsvuWmdsDU4EFOG4zzQGMoUWTr2Hmen80zho5HNKVjquHOZCZAu8Jnvdg4ntdob27zRwJpaf6xNOtFKtUncjGLmRaY2KdIluVumrCQalnctw7QI4Hy09AZCQmV8Rw79I8BdDloTkQAh4hxPFod05fAO9vB6ZA1F4Nf3udRYT7c9jZCMjqr4gZDZD"
+FB_PAGE_ACCESS_TOKEN = "EAANJSCq2ju0BREoFNh8QpVk4WxdUF5ZAlFXQQDuURE0rjjlELTrlHZCFbAMFBEmmiTFeNiZB2XWsvuWmdsDU4EFOG4zzQGMoUWTr2Hmen80zho5HNKVjquHOZCZAu8Jnvdg4ntdob27zRwJpaf6xNOtFKtUncjGLmRaY2KdIluVumrCQalnctw7QI4Hy09AZCQmV8Rw79I8BdDloTkQAh4hxPFod05fAO9vB6ZA1F4fN3udRYT7c9jZCMjqr4gZDZD"
 MATON_API_KEY = "fnVPNNiVTI09Xj4wswkIHoRLr2xNW_pDzaFr1LA4K6eDEgcpL_EKTWx4fzSurIca89tF3WOWPTCCQKV-USBntFxclZ7wfjIHv_Q"
 NEXT_PUBLIC_GA4_MEASUREMENT_ID = "G-0PXFRNKQW5"
 NEXT_PUBLIC_GOOGLE_ADS_ID = "AW-1038095551"
