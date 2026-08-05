@@ -363,13 +363,26 @@ function SendInvoiceModal({
   const [note, setNote] = useState('');
   const [sendEmail, setSendEmail] = useState(!!log.client_email);
   const [sendSms, setSendSms] = useState(!log.client_email && !!log.client_phone);
+  const [email, setEmail] = useState(log.client_email ?? '');
+  const [extraEmails, setExtraEmails] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
   const hasEmail = !!log.client_email;
   const hasPhone = !!log.client_phone;
-  const noContact = !hasEmail && !hasPhone;
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function addExtraEmail() {
+    setExtraEmails(prev => [...prev, '']);
+  }
+  function updateExtraEmail(i: number, v: string) {
+    setExtraEmails(prev => prev.map((a, idx) => idx === i ? v : a));
+  }
+  function removeExtraEmail(i: number) {
+    setExtraEmails(prev => prev.filter((_, idx) => idx !== i));
+  }
 
   async function handleSend() {
     setError('');
@@ -381,6 +394,22 @@ function SendInvoiceModal({
       setError('Amount must be greater than $0.');
       return;
     }
+    const primary = email.trim();
+    const extras = extraEmails.map(a => a.trim()).filter(Boolean);
+    if (sendEmail && !primary) {
+      setError('Enter the customer\'s email to send the invoice to.');
+      return;
+    }
+    if (sendEmail && !EMAIL_RE.test(primary)) {
+      setError('Enter a valid email address.');
+      return;
+    }
+    for (const addr of extras) {
+      if (!EMAIL_RE.test(addr)) {
+        setError(`${addr} is not a valid email address.`);
+        return;
+      }
+    }
     setSending(true);
     try {
       const channels: string[] = [];
@@ -389,7 +418,11 @@ function SendInvoiceModal({
       const res = await fetch('/api/field/invoices/from-job', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jobLogId: log.id, amount, note: note.trim() || undefined, channels }),
+        body: JSON.stringify({
+          jobLogId: log.id, amount, note: note.trim() || undefined, channels,
+          email: sendEmail ? primary : undefined,
+          additionalEmails: sendEmail && extras.length > 0 ? extras : undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Send failed');
@@ -424,6 +457,7 @@ function SendInvoiceModal({
             </div>
             <p className="font-bold text-slate-900">Invoice sent!</p>
             <p className="text-sm text-slate-500 mt-1">{log.customer_name} will receive it shortly.</p>
+            {email.trim() && <p className="text-xs text-slate-400 mt-1">Sent to {email.trim()}{extraEmails.filter(a => a.trim()).length > 0 ? ` and ${extraEmails.filter(a => a.trim()).length} more` : ''}</p>}
           </div>
         ) : (
           <>
@@ -449,32 +483,63 @@ function SendInvoiceModal({
 
               <div className="space-y-2">
                 <p className="text-sm font-medium text-slate-700">Send via</p>
-                {noContact ? (
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
-                    No email or phone on file for this customer. Ask admin to add contact info first.
+                <label className={`flex items-center gap-3 p-3 rounded-xl border ${sendEmail ? 'border-green-300 bg-green-50/50' : 'border-slate-300 cursor-pointer'}`}>
+                  <input type="checkbox" checked={sendEmail}
+                    onChange={e => setSendEmail(e.target.checked)}
+                    className="w-4 h-4 text-green-600 rounded" />
+                  <Mail className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm flex-1 truncate">Email invoice</span>
+                </label>
+
+                {sendEmail && (
+                  <div className="space-y-2.5 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <div>
+                      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 block">
+                        {hasEmail ? 'Email address' : 'Customer\'s email'}
+                      </label>
+                      <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                        placeholder="customer@example.com"
+                        className="w-full px-3 py-2.5 text-base text-black border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50" />
+                      {!hasEmail && (
+                        <p className="text-xs text-slate-400 mt-1">
+                          Entered email will be saved to this customer for future invoices.
+                        </p>
+                      )}
+                    </div>
+
+                    {extraEmails.map((addr, i) => (
+                      <div key={i}>
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 block">
+                          Additional email {i + 1}
+                        </label>
+                        <div className="flex gap-2">
+                          <input type="email" value={addr} onChange={e => updateExtraEmail(i, e.target.value)}
+                            placeholder="other@example.com"
+                            className="w-full px-3 py-2.5 text-base text-black border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50" />
+                          <button onClick={() => removeExtraEmail(i)} type="button"
+                            className="shrink-0 px-3 text-slate-400 hover:text-red-500 border border-slate-300 rounded-xl"
+                            aria-label="Remove additional email">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    <button onClick={addExtraEmail} type="button"
+                      className="flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800">
+                      <Plus className="w-4 h-4" /> Add another email
+                    </button>
                   </div>
-                ) : (
-                  <>
-                    <label className={`flex items-center gap-3 p-3 rounded-xl border ${hasEmail ? 'border-slate-300 cursor-pointer' : 'border-slate-200 opacity-50'}`}>
-                      <input type="checkbox" checked={sendEmail} disabled={!hasEmail}
-                        onChange={e => setSendEmail(e.target.checked)}
-                        className="w-4 h-4 text-green-600 rounded" />
-                      <Mail className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm flex-1 truncate">
-                        {log.client_email || <span className="italic text-slate-400">No email on file</span>}
-                      </span>
-                    </label>
-                    <label className={`flex items-center gap-3 p-3 rounded-xl border ${hasPhone ? 'border-slate-300 cursor-pointer' : 'border-slate-200 opacity-50'}`}>
-                      <input type="checkbox" checked={sendSms} disabled={!hasPhone}
-                        onChange={e => setSendSms(e.target.checked)}
-                        className="w-4 h-4 text-green-600 rounded" />
-                      <Phone className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm flex-1 truncate">
-                        {log.client_phone || <span className="italic text-slate-400">No phone on file</span>}
-                      </span>
-                    </label>
-                  </>
                 )}
+
+                <label className={`flex items-center gap-3 p-3 rounded-xl border ${hasPhone ? 'border-slate-300 cursor-pointer' : 'border-slate-200 opacity-50'}`}>
+                  <input type="checkbox" checked={sendSms} disabled={!hasPhone}
+                    onChange={e => setSendSms(e.target.checked)}
+                    className="w-4 h-4 text-green-600 rounded" />
+                  <Phone className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm flex-1 truncate">
+                    {log.client_phone || <span className="italic text-slate-400">No phone on file</span>}
+                  </span>
+                </label>
               </div>
 
               {error && (
@@ -487,7 +552,7 @@ function SendInvoiceModal({
                 className="flex-1 h-12 border border-slate-300 text-slate-700 font-semibold rounded-xl disabled:opacity-60">
                 Cancel
               </button>
-              <button onClick={handleSend} disabled={sending || noContact}
+              <button onClick={handleSend} disabled={sending}
                 className="flex-1 h-12 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 disabled:opacity-60">
                 {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-4 h-4" /> Send Invoice</>}
               </button>

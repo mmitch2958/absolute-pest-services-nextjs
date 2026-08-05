@@ -70,6 +70,7 @@ ${data.message ? `Message: ${data.message}` : ''}`;
 
 export async function sendInvoiceToCustomer(data: {
   to: string;
+  cc?: string[];
   ccInternal?: boolean;
   customerName: string;
   invoiceNumber: string;
@@ -138,7 +139,11 @@ Questions? Reply to this email or call us.
 - Absolute Pest Services`;
 
   try {
-    await sgMail.send({ from: FROM_EMAIL, to: data.to, subject, html, text });
+    const mail: any = { from: FROM_EMAIL, to: data.to, subject, html, text };
+    if (data.cc && data.cc.length > 0) {
+      mail.cc = data.cc;
+    }
+    await sgMail.send(mail);
     if (data.ccInternal) {
       // Send a copy to office
       await sgMail.send({

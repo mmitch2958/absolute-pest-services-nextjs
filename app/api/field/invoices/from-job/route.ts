@@ -29,6 +29,12 @@ export async function POST(request: NextRequest) {
     const amountOverride = body?.amount;
     const note: string | undefined = body?.note?.trim() || undefined;
     const channels: string[] = Array.isArray(body?.channels) ? body.channels : [];
+    const emailOverride: string | undefined = typeof body?.email === 'string' ? body.email.trim() || undefined : undefined;
+    const additionalEmails: string[] = Array.isArray(body?.additionalEmails)
+      ? body.additionalEmails.map((e: any) => String(e).trim()).filter(Boolean)
+      : [];
+
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!jobLogId || isNaN(jobLogId)) {
       return NextResponse.json({ error: 'jobLogId required' }, { status: 400 });
@@ -63,8 +69,20 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    if (wantEmail && !job.c_email) {
-      return NextResponse.json({ error: 'Customer has no email on file' }, { status: 400 });
+    // Email target: explicit entry from the tech wins, otherwise the on-file email.
+    const targetEmail = emailOverride || job.c_email;
+    if (wantEmail) {
+      if (!targetEmail) {
+        return NextResponse.json({ error: 'Enter the customer\'s email to send the invoice.' }, { status: 400 });
+      }
+      if (!EMAIL_RE.test(targetEmail)) {
+        return NextResponse.json({ error: 'That email address doesn\'t look valid.' }, { status: 400 });
+      }
+    }
+    for (const addr of additionalEmails) {
+      if (!EMAIL_RE.test(addr)) {
+        return NextResponse.json({ error: `That additional email doesn't look valid: ${addr}` }, { status: 400 });
+      }
     }
     if (wantSms && !job.c_phone) {
       return NextResponse.json({ error: 'Customer has no phone on file' }, { status: 400 });
@@ -79,6 +97,15 @@ export async function POST(request: NextRequest) {
         error: 'An invoice already exists for this job. Open it in Admin to resend.',
         existingInvoiceId: existing[0].id,
       }, { status: 409 });
+    }
+
+    // Persist a newly-entered address so it's on file for future invoices
+    // (only when the tech supplies one for a customer with no email on record).
+    if (wantEmail && emailOverride && !job.c_email) {
+      await sql`
+        UPDATE clients SET email = ${emailOverride}
+        WHERE id = ${job.client_id}
+      `;
     }
 
     const amount = amountOverride !== undefined ? amountOverride : (job.amount ?? '0');
@@ -168,7 +195,8 @@ export async function POST(request: NextRequest) {
     const results: Record<string, any> = {};
     if (wantEmail) {
       results.email = await sendInvoiceToCustomer({
-        to: job.c_email,
+        to: targetEmail as string,
+        cc: additionalEmails.length > 0 ? additionalEmails : undefined,
         ccInternal: false,
         customerName: job.c_name,
         invoiceNumber,
