@@ -1,0 +1,191 @@
+
+2026-08-07 17:20:14.43
+07038d90
+User
+at async s (.next/server/app/page.js:2:4238)
+
+2026-08-07 17:20:14.43
+07038d90
+User
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+
+2026-08-07 17:20:14.43
+07038d90
+User
+⨯ Error: Failed to find Server Action. This request might be from an older or newer deployment.
+
+2026-08-07 17:20:14.43
+07038d90
+User
+at async q (.next/server/app/page.js:1:49829)
+
+2026-08-07 23:46:00.00
+07038d90
+User
+⚠ Missing `origin` header from a forwarded Server Actions request.
+
+2026-08-08 00:49:20.60
+07038d90
+User
+at async s (.next/server/app/page.js:2:4238)
+
+2026-08-08 00:49:20.60
+07038d90
+User
+⨯ Error: Failed to find Server Action. This request might be from an older or newer deployment.
+
+2026-08-08 00:49:20.60
+07038d90
+User
+at async q (.next/server/app/page.js:1:49829)
+
+2026-08-08 00:49:20.60
+07038d90
+User
+at async Module.Q (.next/server/app/page.js:2:9929)
+
+2026-08-08 00:49:20.60
+07038d90
+User
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+
+2026-08-08 00:49:20.61
+07038d90
+User
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+
+2026-08-08 00:49:20.61
+07038d90
+User
+at async q (.next/server/app/page.js:1:49829)
+
+2026-08-08 00:49:20.61
+07038d90
+User
+at async Module.Q (.next/server/app/page.js:2:9929)
+
+2026-08-08 00:49:20.61
+07038d90
+User
+at async s (.next/server/app/page.js:2:4238)
+
+2026-08-08 00:49:20.61
+07038d90
+User
+⨯ Error: Failed to find Server Action. This request might be from an older or newer deployment.
+
+2026-08-08 01:09:54.12
+07038d90
+User
+at async s (.next/server/app/page.js:2:4238)
+
+2026-08-08 01:09:54.12
+07038d90
+User
+at async Module.Q (.next/server/app/page.js:2:9929)
+
+2026-08-08 01:09:54.12
+07038d90
+User
+⨯ Error: Failed to find Server Action. This request might be from an older or newer deployment.
+
+2026-08-08 01:09:54.12
+07038d90
+User
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+
+2026-08-08 01:09:54.12
+07038d90
+User
+at async q (.next/server/app/page.js:1:49829)
+
+2026-08-08 01:09:54.13
+07038d90
+User
+at async q (.next/server/app/page.js:1:49829)
+
+2026-08-08 01:09:54.13
+07038d90
+User
+⨯ Error: Failed to find Server Action. This request might be from an older or newer deployment.
+
+2026-08-08 01:09:54.13
+07038d90
+User
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+
+2026-08-08 01:09:54.13
+07038d90
+User
+at async s (.next/server/app/page.js:2:4238)
+
+2026-08-08 01:09:54.13
+07038d90
+User
+at async Module.Q (.next/server/app/page.js:2:9929)
+
+2026-08-08 01:58:30.79
+07038d90
+User
+⚠ Missing `origin` header from a forwarded Server Actions request.
+
+2026-08-08 06:24:56.20
+07038d90
+User
+at async s (.next/server/app/contact/page.js:2:4238)
+
+2026-08-08 06:24:56.20
+07038d90
+User
+⨯ Error: Failed to find Server Action. This request might be from an older or newer deployment.
+
+
+2026-08-08 06:24:56.20
+07038d90
+User
+at async q (.next/server/app/contact/page.js:1:22168)
+
+2026-08-08 06:24:56.20
+07038d90
+User
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+
+2026-08-08 06:24:56.20
+07038d90
+User
+at async Module.Q (.next/server/app/contact/page.js:2:9929)
+
+2026-08-08 06:24:56.20
+07038d90
+User
+at async Module.Q (.next/server/app/contact/page.js:2:9929)
+
+2026-08-08 06:24:56.20
+07038d90
+User
+Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+
+2026-08-08 06:24:56.20
+07038d90
+User
+⨯ Error: Failed to find Server Action. This request might be from an older or newer deployment.
+
+2026-08-08 06:24:56.20
+07038d90
+User
+at async q (.next/server/app/contact/page.js:1:22168)
+
+2026-08-08 06:24:56.20
+07038d90
+User
+at async s (.next/server/app/contact/page.js:2:4238)
+
+2026-08-08 06:38:38.27
+07038d90
+User
+⚠ Missing `origin` header from a forwarded Server Actions request.
+
+2026-08-08 07:03:20.61
+07038d90
+User
+⚠ Missing `origin` header from a forwarded Server Actions request.

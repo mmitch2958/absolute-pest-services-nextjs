@@ -35,7 +35,18 @@ const nextConfig: NextConfig = {
 
   // Disable URL processing in css-loader so Tailwind v4 generated url(...) utilities
   // are not treated as module imports by webpack (used in --webpack dev/build mode).
-  webpack(config: Configuration) {
+  webpack(config: Configuration, { dev }: { dev: boolean }) {
+    // Persistent filesystem caching buys nothing on the publish builder (every
+    // publish build starts from a clean container, so there's no prior cache to
+    // reuse) but its in-memory pack-serialization step adds a large extra memory
+    // spike right during "Creating an optimized production build", which is
+    // exactly where this large multi-route app has been OOM-crashing in the
+    // 4GB/2vCPU publish container. Disable it for production builds only; keep
+    // it on in dev where it speeds up local iteration.
+    if (!dev) {
+      config.cache = false
+    }
+
     // Tell webpack's file watcher to ignore directories that Replit's own
     // infrastructure writes into constantly (agent state DB, log DB, workflow
     // shell-output files, etc.). Without this, every state write triggers a
