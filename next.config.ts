@@ -16,6 +16,18 @@ const nextConfig: NextConfig = {
   // env var (set in Replit shared secrets) because native SWC binaries are unavailable.
   turbopack: {},
 
+  // The publish builder is a 4GB/2vCPU container. A custom webpack hook disables
+  // Next's build worker by default, which makes compilation and static generation
+  // share one memory-heavy process. Keep them isolated and limit static generation
+  // concurrency to one worker for reliable production builds.
+  experimental: {
+    webpackBuildWorker: true,
+    webpackMemoryOptimizations: true,
+    cpus: 1,
+    memoryBasedWorkersCount: false,
+    workerThreads: false,
+  },
+
   // The Next.js 16 WASM-based TypeScript checker worker crashes on Replit's NixOS
   // environment (Rust deserialization error: "unit value, expected usize").
   // TypeScript validation is done separately via `npx tsc --noEmit` in CI.
