@@ -7,7 +7,7 @@ channel = "stable-24_05"
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["bash", "-c", "npm install --no-save @next/swc-linux-x64-gnu@16.2.12 && npx next build --webpack"]
+build = ["bash", "-c", "rm -rf node_modules/@next/swc-linux-x64-gnu && npm install --no-save @next/swc-linux-x64-gnu@16.2.12 && npx next build --webpack"]
 run = ["bash", "-c", "npx next start -p 5000"]
 
 [[ports]]
