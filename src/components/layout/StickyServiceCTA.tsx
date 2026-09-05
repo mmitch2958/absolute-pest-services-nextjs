@@ -17,14 +17,14 @@ export default function StickyServiceCTA() {
       <div className="mx-auto grid max-w-lg grid-cols-2 gap-2">
         <a
           href="tel:484-643-2225"
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-green-800 px-3 text-sm font-bold text-white shadow-sm"
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-[#173f35] bg-white px-3 text-sm font-bold text-[#173f35] shadow-sm"
         >
           <Phone className="h-4 w-4" />
           Call Now
         </a>
         <Link
           href="/request-service"
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-yellow-400 px-3 text-sm font-bold text-gray-950 shadow-sm"
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#173f35] px-3 text-sm font-bold text-white shadow-sm"
         >
           <CalendarCheck className="h-4 w-4" />
           Request Service

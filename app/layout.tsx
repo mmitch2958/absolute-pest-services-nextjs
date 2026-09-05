@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     '@id': 'https://absolutepestservices.com/#organization',
     name: 'Absolute Pest Services',
     url: 'https://absolutepestservices.com',
-    logo: 'https://absolutepestservices.com/images/logolong.jpg',
+    logo: 'https://absolutepestservices.com/images/absolute-wordmark.svg',
     telephone: '+1-484-643-2225',
     email: 'info@absolutepestservices.com',
     sameAs: [

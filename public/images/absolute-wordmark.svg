@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="264" height="64" viewBox="0 0 264 64" role="img" aria-label="Absolute Pest Services">
+  <path d="M30 2 55 11v18c0 16-11 26-25 33C16 55 5 45 5 29V11Z" fill="#173f35"/>
+  <path d="m17 40 13-23 13 23M23 31h14" fill="none" stroke="#f7f6f0" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M26 47h8" stroke="#c6ab68" stroke-width="3"/>
+  <text x="72" y="33" fill="#173f35" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="32" letter-spacing="-.8">Absolute</text>
+  <text x="74" y="51" fill="#58665e" font-family="Arial, Helvetica, sans-serif" font-weight="600" font-size="10" letter-spacing="3.2">PEST SERVICES</text>
+</svg>

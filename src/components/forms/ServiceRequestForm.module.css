@@ -1,0 +1,85 @@
+.hero {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  color: #203d34;
+}
+.hero > * {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.hero > .half {
+  grid-column: auto;
+}
+.hero [data-group='contact'] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.hero [data-group='location'] {
+  grid-template-columns: 1.25fr 0.7fr 0.85fr;
+  gap: 12px;
+}
+.hero [data-group='location'] > div {
+  grid-column: auto;
+  min-width: 0;
+}
+.hero label {
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 5px;
+}
+.hero input,
+.hero select {
+  height: 42px;
+  padding: 0 11px;
+  border-radius: 5px;
+  border-color: #d7ded3;
+  font-size: 16px;
+}
+.hero textarea {
+  height: 64px;
+  padding: 10px 11px;
+  border-radius: 5px;
+  border-color: #d7ded3;
+  font-size: 16px;
+}
+.hero button[type='submit'] {
+  height: 46px;
+  padding: 0 16px;
+  border-radius: 5px;
+  background: #173f35;
+  font-size: 14px;
+  box-shadow: none;
+}
+.hero button[type='submit']:hover {
+  background: #285748;
+}
+.hero button[type='submit']:disabled {
+  background: #648073;
+}
+.hero > p {
+  font-size: 11px;
+  line-height: 1.6;
+}
+.hero [data-verification] {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.hero [data-verification] > p {
+  width: 100%;
+}
+@media (max-width: 360px) {
+  .hero {
+    gap: 10px;
+  }
+  .hero [data-group='contact'],
+  .hero [data-group='location'] {
+    gap: 8px;
+  }
+  .hero input,
+  .hero select {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}

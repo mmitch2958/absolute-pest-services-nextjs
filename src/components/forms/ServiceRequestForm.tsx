@@ -3,6 +3,7 @@
 import { useActionState, useRef, useEffect, useCallback } from 'react'
 import { submitServiceRequest, type FormState } from './actions'
 import { ArrowRight, Phone } from 'lucide-react'
+import styles from './ServiceRequestForm.module.css'
 
 const services = [
   { value: 'pest-control', label: 'General Pest Control' },
@@ -24,7 +25,8 @@ const SITE_KEY =
 
 const initialState: FormState = null
 
-export default function ServiceRequestForm({ defaultService }: { defaultService?: string }) {
+export default function ServiceRequestForm({ defaultService, variant = 'default' }: { defaultService?: string; variant?: 'default' | 'hero' }) {
+  const isHero = variant === 'hero'
   const [state, formAction, isPending] = useActionState(submitServiceRequest, initialState)
   const turnstileRef = useRef<HTMLDivElement>(null)
   const widgetIdRef = useRef<string | null>(null)
@@ -65,7 +67,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
     widgetIdRef.current = (window as any).turnstile.render(turnstileRef.current, {
       sitekey: SITE_KEY,
       theme: 'light',
-      size: 'normal',
+      size: isHero ? 'compact' : 'normal',
     })
   }
 
@@ -115,14 +117,14 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
   }
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-4" noValidate>
+    <form ref={formRef} action={formAction} className={isHero ? styles.hero : 'space-y-4'} noValidate>
       {state?.error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
           {state.error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div data-group="contact" className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Name */}
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -169,7 +171,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
       </div>
 
       {/* Email */}
-      <div>
+      <div className={isHero ? styles.half : undefined}>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
           Email Address <span className="text-red-500">*</span>
         </label>
@@ -191,7 +193,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
       </div>
 
       {/* Service */}
-      <div>
+      <div className={isHero ? styles.half : undefined}>
         <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-1">
           Service Needed <span className="text-red-500">*</span>
         </label>
@@ -239,7 +241,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
       </div>
 
       {/* City / State / ZIP */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div data-group="location" className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         <div className="col-span-2 sm:col-span-1">
           <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
             City <span className="text-red-500">*</span>
@@ -323,7 +325,7 @@ export default function ServiceRequestForm({ defaultService }: { defaultService?
       </div>
 
       {/* Cloudflare Turnstile */}
-      <div>
+      <div data-verification>
         <div ref={turnstileRef} />
         {state?.fieldErrors?.turnstileToken && (
           <p className="text-red-600 text-xs mt-1">{state.fieldErrors.turnstileToken}</p>

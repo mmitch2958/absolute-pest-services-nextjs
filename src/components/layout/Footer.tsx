@@ -13,13 +13,12 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-2 lg:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
               <Image
-                src="/images/Logosq.jpg"
+                src="/images/absolute-wordmark-light.svg"
                 alt="Absolute Pest Services"
-                width={48}
-                height={48}
-                className="w-12 h-12 object-contain rounded"
+                width={264}
+                height={64}
+                className="h-14 w-[231px] object-contain"
               />
-              <span className="font-bold text-white text-lg">Absolute Pest Services</span>
             </div>
             <p className="text-sm text-gray-400 mb-4">
               Licensed, insured pest control serving southeastern Pennsylvania and Delaware.

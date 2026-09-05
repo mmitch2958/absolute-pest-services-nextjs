@@ -34,7 +34,7 @@ export default function MobileMenu() {
     <>
       {/* Mobile hamburger button */}
       <button
-        className="md:hidden p-2 text-gray-700 hover:text-green-700"
+        className="lg:hidden p-2 text-gray-700 hover:text-green-700"
         onClick={() => setOpen(!open)}
         aria-label={open ? 'Close menu' : 'Open menu'}
         aria-expanded={open}
@@ -44,7 +44,7 @@ export default function MobileMenu() {
 
       {/* Mobile menu overlay */}
       {open && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg border-t border-gray-100 z-50">
+        <div className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-lg border-t border-gray-100 z-50">
           <nav className="flex flex-col p-4">
             {navLinks.map((link) =>
               link.children ? (
