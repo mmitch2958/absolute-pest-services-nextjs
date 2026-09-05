@@ -124,7 +124,7 @@ const heroAccent = (slug: string): string => {
     return 'text-orange-100'
   }
   if (slug === 'wilmington-de') return 'text-red-100'
-  return 'text-green-100'
+  return 'text-[#e9eddf]'
 }
 
 const nearbyBgCard = (areaSlug: string): string => {
@@ -219,7 +219,7 @@ export default async function ServiceAreaPage({ params }: Props) {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href={`tel:+1${data.phoneNumber.replace(/-/g, '')}`}
-              className="inline-flex items-center bg-white px-8 py-4 text-lg font-semibold hover:bg-gray-100 rounded-md transition-colors"
+              className="inline-flex items-center bg-white px-8 py-4 text-lg font-semibold hover:bg-[#e9eddf] rounded-md transition-colors"
               style={{ color }}
             >
               <Phone className="mr-2 h-5 w-5" />
@@ -248,10 +248,10 @@ export default async function ServiceAreaPage({ params }: Props) {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-[#203d34] mb-4">
               Cities We Serve in {data.name}
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-[#58665e] max-w-3xl mx-auto">
               Fast, reliable pest control services for homeowners and businesses{' '}
               across {data.name} and surrounding communities.
             </p>
@@ -259,15 +259,15 @@ export default async function ServiceAreaPage({ params }: Props) {
 
           <div className="grid md:grid-cols-4 gap-6 mb-12">
             {data.cities.map((city, index) => (
-              <div key={index} className={`${bgCard} rounded-lg border border-gray-100 hover:shadow-lg transition-shadow p-6 text-center`}>
+              <div key={index} className={`${bgCard} rounded-lg border border-[#e9eddf] hover:shadow-lg transition-shadow p-6 text-center`}>
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-white"
                   style={{ backgroundColor: color }}
                 >
                   <MapPin className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">{city}</h3>
-                <p className="text-sm text-gray-600 mt-1">{data.state}</p>
+                <h3 className="text-lg font-semibold text-[#203d34]">{city}</h3>
+                <p className="text-sm text-[#58665e] mt-1">{data.state}</p>
               </div>
             ))}
           </div>
@@ -278,24 +278,24 @@ export default async function ServiceAreaPage({ params }: Props) {
       <section className="py-20 bg-[hsl(0,0%,98%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-[#203d34] mb-4">
               Pest Control Services in {data.name}
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-[#58665e] max-w-3xl mx-auto">
               Complete pest management solutions for your {data.name} property.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {SERVICES.map((service, index) => (
-              <div key={index} className="bg-white rounded-lg border border-gray-100 hover:shadow-lg transition-shadow p-6 flex items-center gap-4">
+              <div key={index} className="bg-white rounded-lg border border-[#e9eddf] hover:shadow-lg transition-shadow p-6 flex items-center gap-4">
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 text-white"
                   style={{ backgroundColor: color }}
                 >
                   <CheckCircle className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">{service}</h3>
+                <h3 className="text-lg font-semibold text-[#203d34]">{service}</h3>
               </div>
             ))}
           </div>
@@ -306,7 +306,7 @@ export default async function ServiceAreaPage({ params }: Props) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors font-medium"
+                  className="px-6 py-3 border border-[#c7d0cb] rounded-md text-[#3f5049] hover:bg-[#f7f6f0] hover:border-[#8b978f] transition-colors font-medium"
                 >
                   {link.label}
                 </Link>
@@ -320,18 +320,18 @@ export default async function ServiceAreaPage({ params }: Props) {
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold text-[#203d34] mb-4">
               Frequently Asked Questions About Pest Control in {data.name}
             </h2>
           </div>
 
           <div className="space-y-4">
             {data.faqs.map((faq, index) => (
-              <div key={index} className="bg-[hsl(0,0%,98%)] rounded-lg border border-gray-100 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              <div key={index} className="bg-[hsl(0,0%,98%)] rounded-lg border border-[#e9eddf] p-6">
+                <h3 className="text-lg font-semibold text-[#203d34] mb-3">
                   {faq.q}
                 </h3>
-                <p className="text-gray-700 leading-relaxed">{faq.a}</p>
+                <p className="text-[#3f5049] leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>
@@ -343,10 +343,10 @@ export default async function ServiceAreaPage({ params }: Props) {
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold text-[#203d34] mb-4">
                 Nearby Service Areas — Pest Control Near {data.name}
               </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              <p className="text-lg text-[#58665e] max-w-2xl mx-auto">
                 We serve {data.name} and surrounding communities throughout the region.
               </p>
             </div>
@@ -356,11 +356,11 @@ export default async function ServiceAreaPage({ params }: Props) {
                 if (!areaData) return null
                 return (
                   <Link key={areaSlug} href={`/service-areas/${areaSlug}`}>
-                    <div className={`${nearbyBgCard(areaSlug)} rounded-lg border border-gray-100 hover:shadow-lg transition-shadow cursor-pointer p-5 flex items-center gap-3`}>
+                    <div className={`${nearbyBgCard(areaSlug)} rounded-lg border border-[#e9eddf] hover:shadow-lg transition-shadow cursor-pointer p-5 flex items-center gap-3`}>
                       <div className={`w-9 h-9 ${nearbyAccentColor(areaSlug)} rounded-full flex items-center justify-center flex-shrink-0 text-white`}>
                         <MapPin className="w-4 h-4" />
                       </div>
-                      <span className="font-medium text-gray-900 text-sm">{areaData.name}</span>
+                      <span className="font-medium text-[#203d34] text-sm">{areaData.name}</span>
                     </div>
                   </Link>
                 )
@@ -369,7 +369,7 @@ export default async function ServiceAreaPage({ params }: Props) {
             <div className="text-center mt-8">
               <Link
                 href="/service-areas"
-                className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors font-medium"
+                className="px-6 py-3 border border-[#c7d0cb] rounded-md text-[#3f5049] hover:bg-[#f7f6f0] transition-colors font-medium"
               >
                 View All Service Areas →
               </Link>
@@ -385,7 +385,7 @@ export default async function ServiceAreaPage({ params }: Props) {
             <h2 className="text-3xl font-bold text-white mb-4">
               Schedule Your Free Quote in {data.name}
             </h2>
-            <p className="text-green-100">
+            <p className="text-[#e9eddf]">
               Fill out the form below and we&apos;ll be in touch within 24 hours.
             </p>
           </div>
@@ -401,30 +401,30 @@ export default async function ServiceAreaPage({ params }: Props) {
               <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-white" style={{ backgroundColor: color }}>
                 <Phone className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Call Us</h3>
+              <h3 className="text-xl font-semibold text-[#203d34] mb-2">Call Us</h3>
               <p className="text-2xl font-bold" style={colorStyle}>
                 <a href={`tel:+1${data.phoneNumber.replace(/-/g, '')}`}>{data.phoneDisplay}</a>
               </p>
-              <p className="text-gray-600 mt-2">24/7 Emergency Service</p>
+              <p className="text-[#58665e] mt-2">24/7 Emergency Service</p>
             </div>
 
             <div className="bg-white rounded-lg p-6 text-center">
               <div className="w-12 h-12 bg-[hsl(36,100%,47%)] rounded-full flex items-center justify-center mx-auto mb-4 text-white">
                 <Clock className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Hours</h3>
-              <p className="text-gray-600">Mon-Fri: 8:00 AM - 5:00 PM</p>
-              <p className="text-gray-600">Sat: 8:00 AM - 12:00 PM</p>
-              <p className="text-gray-600">Sun: Emergency Only</p>
+              <h3 className="text-xl font-semibold text-[#203d34] mb-2">Hours</h3>
+              <p className="text-[#58665e]">Mon-Fri: 8:00 AM - 5:00 PM</p>
+              <p className="text-[#58665e]">Sat: 8:00 AM - 12:00 PM</p>
+              <p className="text-[#58665e]">Sun: Emergency Only</p>
             </div>
 
             <div className="bg-white rounded-lg p-6 text-center">
               <div className="w-12 h-12 bg-[hsl(132,48%,35%)] rounded-full flex items-center justify-center mx-auto mb-4 text-white">
                 <MapPin className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Main Office</h3>
-              <p className="text-gray-600">21 Sheffield Dr</p>
-              <p className="text-gray-600">West Grove, PA 19390</p>
+              <h3 className="text-xl font-semibold text-[#203d34] mb-2">Main Office</h3>
+              <p className="text-[#58665e]">21 Sheffield Dr</p>
+              <p className="text-[#58665e]">West Grove, PA 19390</p>
             </div>
           </div>
         </div>

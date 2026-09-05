@@ -160,9 +160,9 @@ export default function WildlifeControlPage() {
       />
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-green-900 to-gray-900 text-white py-16">
+      <section className="bg-gradient-to-br from-[#0a221c] to-[#203d34] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-green-300 mb-4" aria-label="Breadcrumb">
+          <nav className="text-sm text-[#c3d6bd] mb-4" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
             <span className="mx-2">/</span>
             <span>Wildlife Control</span>
@@ -170,7 +170,7 @@ export default function WildlifeControlPage() {
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">
             Wildlife Control Services
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mb-8">
+          <p className="text-xl text-[#c7d0cb] max-w-2xl mb-8">
             Humane, effective wildlife removal and exclusion for homes and businesses in
             southeastern Pennsylvania and Delaware. We safely remove wildlife and seal entry points
             to keep them out for good.
@@ -178,14 +178,14 @@ export default function WildlifeControlPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <a
               href="tel:484-643-2225"
-              className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold px-6 py-3 rounded-lg"
+              className="inline-flex items-center gap-2 bg-[#66845d] hover:bg-[#7fa073] text-white font-bold px-6 py-3 rounded-lg"
             >
               <Phone size={18} />
               Call 484-643-2225
             </a>
             <a
               href="#contact-form"
-              className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg"
+              className="inline-flex items-center gap-2 bg-white hover:bg-[#f7f6f0] text-[#173f35] border-2 border-[#173f35] font-bold px-6 py-3 rounded-lg"
             >
               Get Free Estimate ↓
             </a>
@@ -203,10 +203,10 @@ export default function WildlifeControlPage() {
               fill
               className="object-cover object-center"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-900/70 to-transparent flex items-center">
+            <div className="absolute inset-0 bg-gradient-to-r from-[#203d34]/70 to-transparent flex items-center">
               <div className="px-8 text-white max-w-lg">
                 <h2 className="text-2xl md:text-3xl font-bold mb-2">Humane. Effective. Guaranteed.</h2>
-                <p className="text-gray-200 text-sm md:text-base">Our technicians use live traps and exclusion to safely remove wildlife and keep them from returning.</p>
+                <p className="text-[#e1e5dc] text-sm md:text-base">Our technicians use live traps and exclusion to safely remove wildlife and keep them from returning.</p>
               </div>
             </div>
           </div>
@@ -216,8 +216,8 @@ export default function WildlifeControlPage() {
       {/* Wildlife Species Grid */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Wildlife We Remove</h2>
-          <p className="text-lg text-gray-600 mb-10">
+          <h2 className="text-3xl font-bold text-[#203d34] mb-4">Wildlife We Remove</h2>
+          <p className="text-lg text-[#58665e] mb-10">
             We handle all common wildlife species found in southeastern PA and Delaware. Each
             animal requires a different approach — we have the training and equipment for all of
             them.
@@ -226,10 +226,10 @@ export default function WildlifeControlPage() {
             {wildlifeSpecies.map((species) => (
               <div
                 key={species.name}
-                className="p-5 bg-gray-50 rounded-xl border border-gray-100"
+                className="p-5 bg-[#f7f6f0] rounded-xl border border-[#e9eddf]"
               >
-                <h3 className="font-bold text-gray-900 mb-2">{species.name}</h3>
-                <p className="text-sm text-gray-600">{species.desc}</p>
+                <h3 className="font-bold text-[#203d34] mb-2">{species.name}</h3>
+                <p className="text-sm text-[#58665e]">{species.desc}</p>
               </div>
             ))}
           </div>
@@ -237,9 +237,9 @@ export default function WildlifeControlPage() {
       </section>
 
       {/* Process */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#f7f6f0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">
+          <h2 className="text-3xl font-bold text-[#203d34] mb-10 text-center">
             Our Wildlife Control Process
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -250,11 +250,11 @@ export default function WildlifeControlPage() {
               { step: '4', title: 'Exclusion & Repair', desc: 'We seal all entry points and remove nesting materials to prevent future intrusions.' },
             ].map((item) => (
               <div key={item.step} className="text-center">
-                <div className="w-12 h-12 bg-green-700 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                <div className="w-12 h-12 bg-[#173f35] text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                   {item.step}
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-gray-600">{item.desc}</p>
+                <h3 className="font-bold text-[#203d34] mb-2">{item.title}</h3>
+                <p className="text-sm text-[#58665e]">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -266,7 +266,7 @@ export default function WildlifeControlPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              <h2 className="text-3xl font-bold text-[#203d34] mb-6">
                 Why Choose Absolute Pest Services for Wildlife Control?
               </h2>
               <div className="space-y-3">
@@ -279,8 +279,8 @@ export default function WildlifeControlPage() {
                   'Satisfaction guarantee — if wildlife returns, we do too',
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3">
-                    <CheckCircle size={18} className="text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">{item}</span>
+                    <CheckCircle size={18} className="text-[#66845d] mt-0.5 flex-shrink-0" />
+                    <span className="text-[#3f5049]">{item}</span>
                   </div>
                 ))}
               </div>
@@ -301,16 +301,16 @@ export default function WildlifeControlPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#f7f6f0]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-[#203d34] mb-8 text-center">
             Frequently Asked Questions
           </h2>
           <div className="space-y-6">
             {faqSchema.mainEntity.map((faq) => (
-              <div key={faq.name} className="bg-white rounded-xl p-6 border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-3">{faq.name}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+              <div key={faq.name} className="bg-white rounded-xl p-6 border border-[#e9eddf]">
+                <h3 className="font-bold text-[#203d34] mb-3">{faq.name}</h3>
+                <p className="text-[#58665e] text-sm leading-relaxed">
                   {faq.acceptedAnswer.text}
                 </p>
               </div>

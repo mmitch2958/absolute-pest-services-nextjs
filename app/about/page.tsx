@@ -16,15 +16,15 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <main>
-      <section className="bg-gradient-to-br from-green-900 to-gray-900 text-white py-16">
+      <section className="bg-gradient-to-br from-[#0a221c] to-[#203d34] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-green-300 mb-4" aria-label="Breadcrumb">
+          <nav className="text-sm text-[#c3d6bd] mb-4" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
             <span className="mx-2">/</span>
             <span className="text-white">About Us</span>
           </nav>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">About Absolute Pest Services</h1>
-          <p className="text-xl text-green-100 max-w-3xl">
+          <p className="text-xl text-[#e9eddf] max-w-3xl">
             Licensed, insured, and locally owned pest control serving Chester County PA, Delaware County PA, and New Castle County DE since 2004.
           </p>
         </div>
@@ -33,13 +33,13 @@ export default function AboutPage() {
       <section className="py-16 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="prose prose-lg max-w-none">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Mission</h2>
-            <p className="text-gray-700 mb-6">
+            <h2 className="text-2xl font-bold text-[#203d34] mb-4">Our Mission</h2>
+            <p className="text-[#3f5049] mb-6">
               At Absolute Pest Services, our mission is simple: protect your home, family, and business from pests using safe, proven, and environmentally responsible methods. We combine local expertise with professional-grade treatments to deliver lasting results.
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Why Choose Us</h2>
-            <ul className="list-disc list-inside text-gray-700 space-y-2 mb-6">
+            <h2 className="text-2xl font-bold text-[#203d34] mb-4">Why Choose Us</h2>
+            <ul className="list-disc list-inside text-[#3f5049] space-y-2 mb-6">
               <li>Licensed and insured in Pennsylvania and Delaware</li>
               <li>Same-day and emergency service available</li>
               <li>Eco-friendly treatment options</li>
@@ -47,32 +47,32 @@ export default function AboutPage() {
               <li>Family-owned and locally operated since 2004</li>
             </ul>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Service Area</h2>
-            <p className="text-gray-700 mb-6">
+            <h2 className="text-2xl font-bold text-[#203d34] mb-4">Service Area</h2>
+            <p className="text-[#3f5049] mb-6">
               We proudly serve Chester County PA, Delaware County PA, Montgomery County PA, New Castle County DE, and surrounding communities. Our trucks are local and our technicians know the pest pressures specific to our region.
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Contact Us</h2>
-            <p className="text-gray-700 mb-2">
-              <strong>Main:</strong> <a href="tel:6108693000" className="text-green-700 hover:underline">610-869-3000</a>
+            <h2 className="text-2xl font-bold text-[#203d34] mb-4">Contact Us</h2>
+            <p className="text-[#3f5049] mb-2">
+              <strong>Main:</strong> <a href="tel:6108693000" className="text-[#173f35] hover:underline">610-869-3000</a>
             </p>
-            <p className="text-gray-700 mb-2">
-              <strong>Cell:</strong> <a href="tel:4846432225" className="text-green-700 hover:underline">484-643-2225</a>
+            <p className="text-[#3f5049] mb-2">
+              <strong>Cell:</strong> <a href="tel:4846432225" className="text-[#173f35] hover:underline">484-643-2225</a>
             </p>
-            <p className="text-gray-700 mb-6">
-              <strong>Delaware:</strong> <a href="tel:6103254000" className="text-green-700 hover:underline">610-325-4000</a>
+            <p className="text-[#3f5049] mb-6">
+              <strong>Delaware:</strong> <a href="tel:6103254000" className="text-[#173f35] hover:underline">610-325-4000</a>
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
                 href="/request-service"
-                className="inline-block bg-green-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-800 transition-colors"
+                className="inline-block bg-[#173f35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#0f2b23] transition-colors"
               >
                 Request Service
               </Link>
               <Link
                 href="/contact"
-                className="inline-block border-2 border-green-700 text-green-700 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors"
+                className="inline-block border-2 border-[#173f35] text-[#173f35] px-6 py-3 rounded-lg font-semibold hover:bg-[#eef1e7] transition-colors"
               >
                 Contact Us
               </Link>

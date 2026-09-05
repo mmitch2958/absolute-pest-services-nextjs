@@ -138,9 +138,9 @@ export default function PestControlPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
 
-      <section className="bg-gradient-to-br from-green-900 to-slate-900 py-16 text-white">
+      <section className="bg-gradient-to-br from-[#0a221c] to-slate-900 py-16 text-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <nav className="mb-4 text-sm text-green-300" aria-label="Breadcrumb">
+          <nav className="mb-4 text-sm text-[#c3d6bd]" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
             <span className="mx-2">/</span>
             <span>Pest Control</span>
@@ -148,19 +148,19 @@ export default function PestControlPage() {
 
           <div className="grid gap-10 lg:grid-cols-[1.1fr_420px] lg:items-start">
             <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-green-100">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#e9eddf]">
                 <Bug className="h-3.5 w-3.5" />
                 General insect control for common home pests
               </div>
               <h1 className="max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">
                 Pest control for ants, spiders, roaches, and the insects that keep showing up.
               </h1>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-green-50/90">
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-[#eef1e7]/90">
                 Absolute Pest Services helps homeowners across Chester County and nearby Delaware County handle common pest problems quickly, clearly, and without making the process harder than it needs to be.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a href="tel:484-643-2225" className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-green-900 hover:bg-green-50">
+                <a href="tel:484-643-2225" className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-[#0a221c] hover:bg-[#eef1e7]">
                   <Phone className="h-5 w-5" />
                   Call 484-643-2225
                 </a>
@@ -175,7 +175,7 @@ export default function PestControlPage() {
                   "Free estimates",
                   "Licensed and insured",
                 ].map((item) => (
-                  <div key={item} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-green-50">
+                  <div key={item} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-[#eef1e7]">
                     {item}
                   </div>
                 ))}
@@ -201,52 +201,52 @@ export default function PestControlPage() {
       <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <h2 className="text-3xl font-bold text-gray-900">A better fit for everyday pest problems</h2>
-            <p className="mt-4 text-lg leading-8 text-gray-600">
+            <h2 className="text-3xl font-bold text-[#203d34]">A better fit for everyday pest problems</h2>
+            <p className="mt-4 text-lg leading-8 text-[#58665e]">
               Not every homeowner needs a specialty service page. This page is built for general pest issues where the problem is urgent, annoying, or simply unclear and you just need a local pro to take a look.
             </p>
           </div>
 
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {benefits.map((benefit) => (
-              <div key={benefit.title} className="rounded-xl border border-gray-200 bg-gray-50 p-6">
-                <Sparkles className="h-5 w-5 text-green-700" />
-                <h3 className="mt-4 text-lg font-bold text-gray-900">{benefit.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-gray-600">{benefit.text}</p>
+              <div key={benefit.title} className="rounded-xl border border-[#e1e5dc] bg-[#f7f6f0] p-6">
+                <Sparkles className="h-5 w-5 text-[#173f35]" />
+                <h3 className="mt-4 text-lg font-bold text-[#203d34]">{benefit.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-[#58665e]">{benefit.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-gray-50 py-16">
+      <section className="bg-[#f7f6f0] py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900">Common pests we handle</h2>
-              <p className="mt-4 text-lg leading-8 text-gray-600">
+              <h2 className="text-3xl font-bold text-[#203d34]">Common pests we handle</h2>
+              <p className="mt-4 text-lg leading-8 text-[#58665e]">
                 If it crawls, bites, stings, or keeps coming back inside, there is a good chance we can help. These are some of the pests homeowners ask us about most often.
               </p>
               <div className="mt-8 grid gap-3 sm:grid-cols-2">
                 {coveredPests.map((pest) => (
-                  <div key={pest} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-800">
-                    <CheckCircle className="h-4 w-4 text-green-700" />
+                  <div key={pest} className="flex items-center gap-3 rounded-xl border border-[#e1e5dc] bg-white px-4 py-3 text-sm font-medium text-[#1a332b]">
+                    <CheckCircle className="h-4 w-4 text-[#173f35]" />
                     {pest}
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-6">
-              <div className="flex items-center gap-3 text-green-800">
+            <div className="rounded-2xl border border-[#e1e5dc] bg-white p-6">
+              <div className="flex items-center gap-3 text-[#0f2b23]">
                 <ShieldCheck className="h-5 w-5" />
-                <h3 className="text-lg font-bold text-gray-900">Why homeowners call APS</h3>
+                <h3 className="text-lg font-bold text-[#203d34]">Why homeowners call APS</h3>
               </div>
-              <div className="mt-5 space-y-4 text-sm leading-6 text-gray-600">
+              <div className="mt-5 space-y-4 text-sm leading-6 text-[#58665e]">
                 <p>We keep the process simple: identify the issue, recommend the right treatment, and help you get service scheduled without a lot of back-and-forth.</p>
                 <p>For ads and lead forms, this page is designed to work well when someone knows they need pest control but has not narrowed it down to a specialty service yet.</p>
               </div>
-              <div className="mt-6 rounded-xl bg-green-50 p-4 text-sm text-green-900">
+              <div className="mt-6 rounded-xl bg-[#eef1e7] p-4 text-sm text-[#0a221c]">
                 Good fit for ant problems, spider issues, roach sightings, stink bugs, fleas, ticks, mosquitoes, and other common insect concerns.
               </div>
             </div>
@@ -257,14 +257,14 @@ export default function PestControlPage() {
       <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
-              <div className="flex items-center gap-3 text-green-800">
+            <div className="rounded-2xl border border-[#e1e5dc] bg-[#f7f6f0] p-6">
+              <div className="flex items-center gap-3 text-[#0f2b23]">
                 <Home className="h-5 w-5" />
-                <h2 className="text-xl font-bold text-gray-900">Areas we commonly serve</h2>
+                <h2 className="text-xl font-bold text-[#203d34]">Areas we commonly serve</h2>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 {serviceAreas.map((area) => (
-                  <div key={area} className="rounded-lg bg-white px-4 py-3 text-sm font-medium text-gray-700">
+                  <div key={area} className="rounded-lg bg-white px-4 py-3 text-sm font-medium text-[#3f5049]">
                     {area}
                   </div>
                 ))}
@@ -272,25 +272,25 @@ export default function PestControlPage() {
             </div>
 
             <div>
-              <h2 className="text-3xl font-bold text-gray-900">Frequently asked questions</h2>
+              <h2 className="text-3xl font-bold text-[#203d34]">Frequently asked questions</h2>
               <div className="mt-8 space-y-4">
                 {faqSchema.mainEntity.map((item) => (
-                  <div key={item.name} className="rounded-xl border border-gray-200 bg-gray-50 p-5">
-                    <h3 className="text-lg font-bold text-gray-900">{item.name}</h3>
-                    <p className="mt-2 text-sm leading-6 text-gray-600">{item.acceptedAnswer.text}</p>
+                  <div key={item.name} className="rounded-xl border border-[#e1e5dc] bg-[#f7f6f0] p-5">
+                    <h3 className="text-lg font-bold text-[#203d34]">{item.name}</h3>
+                    <p className="mt-2 text-sm leading-6 text-[#58665e]">{item.acceptedAnswer.text}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-8 rounded-2xl bg-green-900 p-6 text-white">
+              <div className="mt-8 rounded-2xl bg-[#0a221c] p-6 text-white">
                 <div className="flex items-center gap-3">
-                  <Star className="h-5 w-5 text-green-300" />
+                  <Star className="h-5 w-5 text-[#c3d6bd]" />
                   <h3 className="text-lg font-bold">Need service now?</h3>
                 </div>
-                <p className="mt-3 text-sm leading-6 text-green-50/90">
+                <p className="mt-3 text-sm leading-6 text-[#eef1e7]/90">
                   Call now for the fastest response, or submit the form and we will follow up quickly with the next best step.
                 </p>
-                <a href="tel:484-643-2225" className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-green-900 hover:bg-green-50">
+                <a href="tel:484-643-2225" className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-[#0a221c] hover:bg-[#eef1e7]">
                   <Phone className="h-5 w-5" />
                   484-643-2225
                 </a>

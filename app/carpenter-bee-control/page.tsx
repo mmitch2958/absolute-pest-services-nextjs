@@ -85,15 +85,15 @@ const breadcrumbSchema = {
 
 export default function CarpenterBeeControlPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f7f6f0]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-gray-800 to-gray-900 text-white py-20">
+      <section className="relative bg-gradient-to-br from-[#1a332b] to-[#203d34] text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-gray-400 mb-6" aria-label="Breadcrumb">
+          <nav className="text-sm text-[#8b978f] mb-6" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
             <span className="mx-2">/</span>
             <span className="text-white">Carpenter Bee Control</span>
@@ -101,21 +101,21 @@ export default function CarpenterBeeControlPage() {
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">
             Carpenter Bees Are Drilling Into PA &amp; DE Homes Right Now
           </h1>
-          <p className="text-xl text-gray-300 max-w-3xl">
+          <p className="text-xl text-[#c7d0cb] max-w-3xl">
             Spring has arrived, and so have the carpenter bees. Learn how to identify them,
             spot the damage early, and protect your home before the holes multiply.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
               href="/carpenter-bee-treatment"
-              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-white px-8 py-4 text-lg font-semibold rounded-xl"
+              className="inline-flex items-center gap-2 bg-[#66845d] hover:bg-[#9fb896] text-white px-8 py-4 text-lg font-semibold rounded-xl"
             >
               <Calendar className="h-5 w-5" />
               Schedule Free Quote
             </Link>
             <a
               href="tel:484-643-2225"
-              className="inline-flex items-center gap-2 border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-4 text-lg font-semibold rounded-xl transition-colors"
+              className="inline-flex items-center gap-2 border-2 border-white text-white hover:bg-white hover:text-[#203d34] px-8 py-4 text-lg font-semibold rounded-xl transition-colors"
             >
               <Phone className="h-5 w-5" />
               484-643-2225
@@ -125,33 +125,33 @@ export default function CarpenterBeeControlPage() {
       </section>
 
       {/* Sub-page Navigation */}
-      <section className="bg-white border-b border-gray-200">
+      <section className="bg-white border-b border-[#e1e5dc]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Link
               href="/carpenter-bees"
-              className="group flex items-start gap-4 p-5 bg-gray-50 hover:bg-green-50 rounded-xl border border-gray-200 hover:border-green-300 transition-all"
+              className="group flex items-start gap-4 p-5 bg-[#f7f6f0] hover:bg-[#eef1e7] rounded-xl border border-[#e1e5dc] hover:border-[#c3d6bd] transition-all"
             >
-              <div className="w-12 h-12 bg-gray-900 group-hover:bg-green-700 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors">
+              <div className="w-12 h-12 bg-[#203d34] group-hover:bg-[#173f35] rounded-lg flex items-center justify-center flex-shrink-0 transition-colors">
                 <AlertTriangle className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900 group-hover:text-green-700 transition-colors">Complete Homeowner Guide</h3>
-                <p className="text-sm text-gray-600 mt-1">
+                <h3 className="font-bold text-[#203d34] group-hover:text-[#173f35] transition-colors">Complete Homeowner Guide</h3>
+                <p className="text-sm text-[#58665e] mt-1">
                   Identification, damage signs, season timeline, and DIY vs. professional comparison.
                 </p>
               </div>
             </Link>
             <Link
               href="/carpenter-bee-treatment"
-              className="group flex items-start gap-4 p-5 bg-gray-50 hover:bg-green-50 rounded-xl border border-gray-200 hover:border-green-300 transition-all"
+              className="group flex items-start gap-4 p-5 bg-[#f7f6f0] hover:bg-[#eef1e7] rounded-xl border border-[#e1e5dc] hover:border-[#c3d6bd] transition-all"
             >
-              <div className="w-12 h-12 bg-amber-500 group-hover:bg-green-700 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors">
+              <div className="w-12 h-12 bg-[#66845d] group-hover:bg-[#173f35] rounded-lg flex items-center justify-center flex-shrink-0 transition-colors">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900 group-hover:text-green-700 transition-colors">Treatment Service &amp; 10% Off</h3>
-                <p className="text-sm text-gray-600 mt-1">
+                <h3 className="font-bold text-[#203d34] group-hover:text-[#173f35] transition-colors">Treatment Service &amp; 10% Off</h3>
+                <p className="text-sm text-[#58665e] mt-1">
                   Our 4-step treatment process, pricing, service areas, and the spring discount (code CBT26).
                 </p>
               </div>
@@ -163,20 +163,20 @@ export default function CarpenterBeeControlPage() {
       {/* What Are Carpenter Bees */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">What Are Carpenter Bees?</h2>
+          <h2 className="text-3xl font-bold text-[#1a332b] mb-6">What Are Carpenter Bees?</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <p className="text-lg text-gray-600 mb-4">
+              <p className="text-lg text-[#58665e] mb-4">
                 Carpenter bees are large, solitary bees common throughout southeastern Pennsylvania and
                 northeastern Delaware. Unlike bumblebees, they don&apos;t live in colonies — each female
                 bores into wood to create a nest gallery where she lays her eggs.
               </p>
-              <p className="text-lg text-gray-600 mb-4">
+              <p className="text-lg text-[#58665e] mb-4">
                 They&apos;re often mistaken for bumblebees, but there&apos;s one easy way to tell them apart:{' '}
                 <strong>look at the abdomen</strong>. A carpenter bee&apos;s abdomen is shiny, black, and
                 hairless on top. A bumblebee&apos;s abdomen is fully covered in fuzzy hair.
               </p>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-[#58665e]">
                 Despite their intimidating size (¾ to 1 inch long), carpenter bees are generally
                 docile. The males — the ones that hover near your face and buzz aggressively — can&apos;t
                 sting at all. The females rarely sting unless directly handled.
@@ -195,15 +195,15 @@ export default function CarpenterBeeControlPage() {
       </section>
 
       {/* Comparison Table */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#f7f6f0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-[#1a332b] mb-8 text-center">
             Carpenter Bee vs. Bumblebee vs. Honeybee
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full bg-white rounded-xl shadow-sm overflow-hidden">
               <thead>
-                <tr className="bg-green-700 text-white">
+                <tr className="bg-[#173f35] text-white">
                   <th className="px-6 py-4 text-left font-semibold">Feature</th>
                   <th className="px-6 py-4 text-left font-semibold">Carpenter Bee</th>
                   <th className="px-6 py-4 text-left font-semibold">Bumblebee</th>
@@ -218,17 +218,17 @@ export default function CarpenterBeeControlPage() {
                   ['Nesting', 'Drills into wood', 'Underground colonies', 'Hive (wax comb)'],
                   ['Behavior', 'Solitary', 'Social (colony)', 'Social (colony)'],
                 ].map(([feature, cb, bb, hb], i) => (
-                  <tr key={feature} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                    <td className="px-6 py-4 font-semibold text-gray-800">{feature}</td>
-                    <td className="px-6 py-4 text-gray-600">{cb}</td>
-                    <td className="px-6 py-4 text-gray-600">{bb}</td>
-                    <td className="px-6 py-4 text-gray-600">{hb}</td>
+                  <tr key={feature} className={i % 2 === 0 ? 'bg-[#f7f6f0]' : 'bg-white'}>
+                    <td className="px-6 py-4 font-semibold text-[#1a332b]">{feature}</td>
+                    <td className="px-6 py-4 text-[#58665e]">{cb}</td>
+                    <td className="px-6 py-4 text-[#58665e]">{bb}</td>
+                    <td className="px-6 py-4 text-[#58665e]">{hb}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="mt-4 text-sm text-gray-500 text-center">
+          <p className="mt-4 text-sm text-[#6b7b72] text-center">
             The species found in the PA/DE region is the{' '}
             <strong>Eastern carpenter bee (<em>Xylocopa virginica</em>)</strong>, the only
             species commonly encountered in this area.
@@ -239,8 +239,8 @@ export default function CarpenterBeeControlPage() {
       {/* Where They Bore */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Where Do Carpenter Bees Bore?</h2>
-          <p className="text-lg text-gray-600 mb-6">
+          <h2 className="text-3xl font-bold text-[#1a332b] mb-6">Where Do Carpenter Bees Bore?</h2>
+          <p className="text-lg text-[#58665e] mb-6">
             Carpenter bees target <strong>unpainted, unfinished, or weathered wood</strong>.
             Painted wood is rarely attacked. They prefer softwoods like pine, cedar, and redwood.
           </p>
@@ -250,14 +250,14 @@ export default function CarpenterBeeControlPage() {
               'Porch columns and overhead overhangs', 'Wooden siding and shingles',
               'Window and door frames', 'Fence posts', 'Outdoor furniture', 'Shed walls and outbuildings',
             ].map((location) => (
-              <div key={location} className="flex items-center gap-2 text-gray-700">
-                <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0" />
+              <div key={location} className="flex items-center gap-2 text-[#3f5049]">
+                <CheckCircle className="w-5 h-5 text-[#173f35] flex-shrink-0" />
                 {location}
               </div>
             ))}
           </div>
-          <div className="p-6 bg-amber-50 border border-amber-200 rounded-xl">
-            <p className="text-lg text-amber-800">
+          <div className="p-6 bg-[#eef1e7] border border-[#d7ded3] rounded-xl">
+            <p className="text-lg text-[#173f35]">
               <strong>Important:</strong> Carpenter bees do NOT eat wood. The tunnels — called galleries — start
               as a perfectly round ½-inch entry hole, go in about 1–2 inches, then turn 90° to follow the wood grain.
               A single gallery can run 6–12 inches long.
@@ -267,9 +267,9 @@ export default function CarpenterBeeControlPage() {
       </section>
 
       {/* Signs of Infestation */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#f7f6f0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Signs You Have Carpenter Bees</h2>
+          <h2 className="text-3xl font-bold text-[#1a332b] mb-6">Signs You Have Carpenter Bees</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {[
               { title: 'Perfectly round holes (~½ inch diameter)', desc: 'The signature mark of carpenter bees in exterior wood surfaces.' },
@@ -279,14 +279,14 @@ export default function CarpenterBeeControlPage() {
               { title: 'Large bees hovering near wood', desc: 'Males patrolling territory, females entering and exiting holes.' },
               { title: 'Woodpecker damage nearby', desc: 'Woodpeckers hammer into galleries to eat larvae, creating additional destruction.' },
             ].map(({ title, desc }) => (
-              <div key={title} className="bg-white rounded-2xl p-6 border border-gray-100">
+              <div key={title} className="bg-white rounded-2xl p-6 border border-[#e9eddf]">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 bg-[#173f35] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <AlertTriangle className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800 mb-1">{title}</h3>
-                    <p className="text-gray-600 text-sm">{desc}</p>
+                    <h3 className="font-semibold text-[#1a332b] mb-1">{title}</h3>
+                    <p className="text-[#58665e] text-sm">{desc}</p>
                   </div>
                 </div>
               </div>
@@ -307,8 +307,8 @@ export default function CarpenterBeeControlPage() {
       {/* Why Dangerous */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Why Carpenter Bees Are Dangerous</h2>
-          <p className="text-lg text-gray-600 mb-8">One hole in your fascia board might seem like a minor cosmetic issue. It&apos;s not.</p>
+          <h2 className="text-3xl font-bold text-[#1a332b] mb-6">Why Carpenter Bees Are Dangerous</h2>
+          <p className="text-lg text-[#58665e] mb-8">One hole in your fascia board might seem like a minor cosmetic issue. It&apos;s not.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             {[
               'Moisture intrusion — open tunnels let water in, accelerating rot',
@@ -316,23 +316,23 @@ export default function CarpenterBeeControlPage() {
               'Woodpecker damage — dramatically worsens the situation',
               'Secondary pest infestations — mites, beetles, other wood-destroying insects',
             ].map((item) => (
-              <div key={item} className="flex items-center gap-2 text-gray-700">
+              <div key={item} className="flex items-center gap-2 text-[#3f5049]">
                 <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
                 {item}
               </div>
             ))}
           </div>
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-8">
-            <h3 className="text-xl font-bold text-gray-800 mb-6 text-center">The Cost Reality</h3>
+          <div className="bg-[#eef1e7] border border-[#dbe6d6] rounded-2xl p-8">
+            <h3 className="text-xl font-bold text-[#1a332b] mb-6 text-center">The Cost Reality</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-white rounded-xl p-6 border border-green-200">
-                <h4 className="font-semibold text-green-700 mb-4">If Treated Early</h4>
-                <p className="text-3xl font-bold text-green-700">Hundreds of dollars</p>
-                <p className="text-gray-600 mt-2">Professional carpenter bee treatment</p>
+              <div className="bg-white rounded-xl p-6 border border-[#dbe6d6]">
+                <h4 className="font-semibold text-[#173f35] mb-4">If Treated Early</h4>
+                <p className="text-3xl font-bold text-[#173f35]">Hundreds of dollars</p>
+                <p className="text-[#58665e] mt-2">Professional carpenter bee treatment</p>
               </div>
               <div className="bg-white rounded-xl p-6 border border-red-200">
                 <h4 className="font-semibold text-red-600 mb-4">If Left Untreated for Years</h4>
-                <ul className="space-y-2 text-gray-700">
+                <ul className="space-y-2 text-[#3f5049]">
                   <li>Single fascia board replacement: $500–$1,500+</li>
                   <li>Deck post or structural beam repair: $1,000–$5,000+</li>
                   <li>Extensive multi-year damage: $3,000–$10,000+</li>
@@ -344,13 +344,13 @@ export default function CarpenterBeeControlPage() {
       </section>
 
       {/* Season Timeline */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#f7f6f0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Carpenter Bee Season in PA &amp; DE</h2>
+          <h2 className="text-3xl font-bold text-[#1a332b] mb-6">Carpenter Bee Season in PA &amp; DE</h2>
           <div className="overflow-x-auto">
             <table className="w-full bg-white rounded-xl shadow-sm overflow-hidden">
               <thead>
-                <tr className="bg-green-700 text-white">
+                <tr className="bg-[#173f35] text-white">
                   <th className="px-6 py-4 text-left font-semibold">Timeframe</th>
                   <th className="px-6 py-4 text-left font-semibold">What&apos;s Happening</th>
                 </tr>
@@ -364,28 +364,28 @@ export default function CarpenterBeeControlPage() {
                   ['Late July – September', 'New adult bees emerge from tunnels and begin feeding on nectar.'],
                   ['October – March', 'Adults overwinter inside existing galleries. No activity during cold months.'],
                 ].map(([time, event], i) => (
-                  <tr key={time} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                    <td className="px-6 py-4 font-semibold text-gray-800 whitespace-nowrap">{time}</td>
-                    <td className="px-6 py-4 text-gray-600">{event}</td>
+                  <tr key={time} className={i % 2 === 0 ? 'bg-[#f7f6f0]' : 'bg-white'}>
+                    <td className="px-6 py-4 font-semibold text-[#1a332b] whitespace-nowrap">{time}</td>
+                    <td className="px-6 py-4 text-[#58665e]">{event}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <div className="mt-8 p-6 bg-green-50 border border-green-200 rounded-xl">
-            <h3 className="text-xl font-bold text-green-700 mb-3">Why Spring Is the Critical Treatment Window</h3>
-            <p className="text-gray-700 mb-3">
+          <div className="mt-8 p-6 bg-[#eef1e7] border border-[#dbe6d6] rounded-xl">
+            <h3 className="text-xl font-bold text-[#173f35] mb-3">Why Spring Is the Critical Treatment Window</h3>
+            <p className="text-[#3f5049] mb-3">
               <strong>April and May are the ideal months for treatment.</strong> At this point,
               overwintered adults are concentrated in known galleries — before they mate and start new tunnels.
             </p>
-            <ul className="space-y-2 text-gray-700">
+            <ul className="space-y-2 text-[#3f5049]">
               {[
                 'Killing one female in spring prevents 6–8 new bees from that gallery this summer.',
                 'Treating early means fewer galleries to address and a smaller overall infestation.',
                 'Every week of delay means more eggs laid in more holes.',
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0 mt-0.5" />
+                  <CheckCircle className="w-5 h-5 text-[#173f35] flex-shrink-0 mt-0.5" />
                   {item}
                 </li>
               ))}
@@ -397,7 +397,7 @@ export default function CarpenterBeeControlPage() {
       {/* DIY vs Pro */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">DIY vs. Professional Treatment</h2>
+          <h2 className="text-3xl font-bold text-[#1a332b] mb-6">DIY vs. Professional Treatment</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
               <h3 className="text-xl font-semibold text-red-700 mb-4">Why DIY Often Falls Short</h3>
@@ -409,15 +409,15 @@ export default function CarpenterBeeControlPage() {
                   'Insecticidal dust requires proper application and safety equipment',
                   'Can\'t safely reach second-story eaves and soffits',
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-gray-700">
+                  <li key={item} className="flex items-start gap-2 text-[#3f5049]">
                     <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                     {item}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="bg-green-50 border border-green-200 rounded-2xl p-6">
-              <h3 className="text-xl font-semibold text-green-700 mb-4">The APS Approach</h3>
+            <div className="bg-[#eef1e7] border border-[#dbe6d6] rounded-2xl p-6">
+              <h3 className="text-xl font-semibold text-[#173f35] mb-4">The APS Approach</h3>
               <ul className="space-y-3">
                 {[
                   'Correct species identification before any treatment begins',
@@ -426,8 +426,8 @@ export default function CarpenterBeeControlPage() {
                   'Licensed technicians with proper safety equipment',
                   'Return to seal 1–2 weeks post-treatment for best results',
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-gray-700">
-                    <CheckCircle className="w-4 h-4 text-green-700 flex-shrink-0 mt-0.5" />
+                  <li key={item} className="flex items-start gap-2 text-[#3f5049]">
+                    <CheckCircle className="w-4 h-4 text-[#173f35] flex-shrink-0 mt-0.5" />
                     {item}
                   </li>
                 ))}
@@ -440,7 +440,7 @@ export default function CarpenterBeeControlPage() {
       {/* Form Section */}
       <section
         id="contact-form"
-        className="bg-green-50 border-y border-green-100 py-12 sm:py-16"
+        className="bg-[#eef1e7] border-y border-[#e9eddf] py-12 sm:py-16"
         aria-labelledby="cbc-form-heading"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -448,12 +448,12 @@ export default function CarpenterBeeControlPage() {
             <div className="lg:pt-4">
               <h2
                 id="cbc-form-heading"
-                className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
+                className="text-3xl sm:text-4xl font-bold text-[#203d34] mb-4 leading-tight"
               >
                 Get a Free Carpenter Bee Estimate<br />
-                <span className="text-green-700">Spring Special — 10% Off with CBT26</span>
+                <span className="text-[#173f35]">Spring Special — 10% Off with CBT26</span>
               </h2>
-              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+              <p className="text-[#58665e] text-lg mb-6 leading-relaxed">
                 Spring is the critical treatment window. Book your free quote before carpenter
                 bees start new tunnels this season.
               </p>
@@ -463,8 +463,8 @@ export default function CarpenterBeeControlPage() {
                   'Licensed & insured in PA & DE',
                   'Free estimate, no commitment',
                 ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-gray-700">
-                    <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
+                  <li key={item} className="flex items-center gap-3 text-[#3f5049]">
+                    <span className="w-5 h-5 bg-[#66845d] rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
                     {item}
                   </li>
                 ))}
@@ -486,27 +486,27 @@ export default function CarpenterBeeControlPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-green-700">
+      <section className="py-16 bg-[#173f35]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-white rounded-xl p-4 mb-6 inline-block border-2 border-amber-400">
-            <p className="text-sm font-bold text-amber-500 uppercase tracking-wide mb-0.5">Spring Special</p>
-            <p className="text-2xl font-bold text-green-700">10% OFF with code CBT26</p>
+          <div className="bg-white rounded-xl p-4 mb-6 inline-block border-2 border-[#9fb896]">
+            <p className="text-sm font-bold text-[#66845d] uppercase tracking-wide mb-0.5">Spring Special</p>
+            <p className="text-2xl font-bold text-[#173f35]">10% OFF with code CBT26</p>
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">Ready to Protect Your Home?</h2>
-          <p className="text-xl text-green-100 mb-8">
+          <p className="text-xl text-[#e9eddf] mb-8">
             Don&apos;t wait for the damage to get worse. Carpenter bees are active right now.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="#contact-form"
-              className="inline-flex items-center gap-2 bg-white text-green-700 hover:bg-green-50 font-bold px-8 py-4 rounded-xl text-lg"
+              className="inline-flex items-center gap-2 bg-white text-[#173f35] hover:bg-[#eef1e7] font-bold px-8 py-4 rounded-xl text-lg"
             >
               <Calendar className="h-5 w-5" />
               Get Free Estimate ↓
             </a>
             <a
               href="tel:484-643-2225"
-              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold px-8 py-4 rounded-xl text-lg"
+              className="inline-flex items-center gap-2 bg-[#66845d] hover:bg-[#9fb896] text-white font-bold px-8 py-4 rounded-xl text-lg"
             >
               <Phone className="h-5 w-5" />
               484-643-2225

@@ -145,25 +145,25 @@ export default function TermiteTreatmentPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      <section className="bg-gradient-to-br from-amber-900 to-gray-900 text-white py-16">
+      <section className="bg-gradient-to-br from-[#0a221c] to-[#203d34] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-amber-300 mb-4" aria-label="Breadcrumb">
+          <nav className="text-sm text-[#c3d6bd] mb-4" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
             <span className="mx-2">/</span>
             <span>Termite Treatment</span>
           </nav>
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">Termite Treatment</h1>
-          <p className="text-xl text-gray-300 max-w-2xl mb-8">
+          <p className="text-xl text-[#c7d0cb] max-w-2xl mb-8">
             Protect your home from the most destructive pest in America. Termites cause $5 billion
             in property damage annually in the US — and homeowners insurance typically does not
             cover it.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <a href="tel:484-643-2225" className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-bold px-6 py-3 rounded-lg">
+            <a href="tel:484-643-2225" className="inline-flex items-center gap-2 bg-[#58665e] hover:bg-[#66845d] text-white font-bold px-6 py-3 rounded-lg">
               <Phone size={18} />
               Call 484-643-2225
             </a>
-            <a href="#contact-form" className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold px-6 py-3 rounded-lg">
+            <a href="#contact-form" className="inline-flex items-center gap-2 bg-white hover:bg-[#f7f6f0] text-[#173f35] border-2 border-[#173f35] font-bold px-6 py-3 rounded-lg">
               Free Termite Quote ↓
             </a>
           </div>
@@ -173,23 +173,23 @@ export default function TermiteTreatmentPage() {
       {/* Form Section */}
       <section
         id="contact-form"
-        className="bg-green-50 border-b border-green-100 py-12 sm:py-16"
+        className="bg-[#eef1e7] border-b border-[#e9eddf] py-12 sm:py-16"
         aria-labelledby="termite-form-heading"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
             <div className="lg:pt-4">
-              <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full mb-4">
+              <div className="inline-flex items-center gap-2 bg-[#e9eddf] text-[#173f35] text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full mb-4">
                 🚨 Every day termites stay is more damage
               </div>
               <h2
                 id="termite-form-heading"
-                className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
+                className="text-3xl sm:text-4xl font-bold text-[#203d34] mb-4 leading-tight"
               >
                 Get a Free Termite Quote<br />
-                <span className="text-green-700">Today — No Commitment</span>
+                <span className="text-[#173f35]">Today — No Commitment</span>
               </h2>
-              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+              <p className="text-[#58665e] text-lg mb-6 leading-relaxed">
                 Termites silently destroy your home from the inside. A free quote by our
                 licensed specialists will tell you exactly what you’re dealing with — and what
                 it costs to fix it.
@@ -202,22 +202,22 @@ export default function TermiteTreatmentPage() {
                   'Same-day service available',
                   '5.0 ⭐ rated by 40+ customers',
                 ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-gray-700">
-                    <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
+                  <li key={item} className="flex items-center gap-3 text-[#3f5049]">
+                    <span className="w-5 h-5 bg-[#66845d] rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
                     {item}
                   </li>
                 ))}
               </ul>
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
-                <p className="text-sm text-gray-500 mb-1">Prefer to call?</p>
+              <div className="bg-white rounded-xl border border-[#e1e5dc] p-4">
+                <p className="text-sm text-[#6b7b72] mb-1">Prefer to call?</p>
                 <a
                   href="tel:484-643-2225"
-                  className="text-2xl font-bold text-green-700 hover:text-green-800 flex items-center gap-2"
+                  className="text-2xl font-bold text-[#173f35] hover:text-[#0f2b23] flex items-center gap-2"
                 >
                   <Phone size={22} />
                   484-643-2225
                 </a>
-                <p className="text-xs text-gray-400 mt-1">Mon–Fri 7am–6pm · Sat 8am–4pm · 24/7 emergency</p>
+                <p className="text-xs text-[#8b978f] mt-1">Mon–Fri 7am–6pm · Sat 8am–4pm · 24/7 emergency</p>
               </div>
             </div>
             <div>
@@ -237,39 +237,39 @@ export default function TermiteTreatmentPage() {
 
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Termite Treatment Options</h2>
+          <h2 className="text-3xl font-bold text-[#203d34] mb-4">Termite Treatment Options</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
                 title: 'Termidor® Liquid Barrier',
-                color: 'bg-amber-50 border-amber-100',
+                color: 'bg-[#eef1e7] border-[#e9eddf]',
                 badge: 'Most Popular',
                 desc: 'We create a continuous chemical barrier around your home\'s foundation. Subterranean termites contact the Termidor zone and carry it back to the colony, eliminating it from within.',
                 benefits: ['5-10 year protection', 'Undetectable to termites', 'Eliminates entire colony', 'Gold standard treatment'],
               },
               {
                 title: 'Bait Station System',
-                color: 'bg-gray-50 border-gray-100',
+                color: 'bg-[#f7f6f0] border-[#e9eddf]',
                 badge: 'Ongoing Monitoring',
                 desc: 'Bait stations are installed around your home\'s perimeter. Termites feed on the bait and carry it back to the colony. Stations are monitored quarterly for ongoing protection.',
                 benefits: ['Quarterly monitoring', 'Minimal chemical use', 'Ideal for prevention', 'Annual service plan'],
               },
               {
                 title: 'Wood Treatment',
-                color: 'bg-green-50 border-green-100',
+                color: 'bg-[#eef1e7] border-[#e9eddf]',
                 badge: 'Supplemental',
                 desc: 'Direct application to infested or vulnerable wood with borate-based treatments. Penetrates and protects wood from both termites and wood-decay fungi.',
                 benefits: ['Protects exposed wood', 'Long-lasting formula', 'Crawl space treatment', 'New construction'],
               },
             ].map(item => (
               <div key={item.title} className={`p-6 rounded-2xl border ${item.color}`}>
-                <span className="text-xs font-semibold bg-white px-2 py-1 rounded-full border border-gray-200 text-gray-600 mb-3 inline-block">{item.badge}</span>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-                <p className="text-gray-700 text-sm mb-4">{item.desc}</p>
+                <span className="text-xs font-semibold bg-white px-2 py-1 rounded-full border border-[#e1e5dc] text-[#58665e] mb-3 inline-block">{item.badge}</span>
+                <h3 className="text-xl font-bold text-[#203d34] mb-3">{item.title}</h3>
+                <p className="text-[#3f5049] text-sm mb-4">{item.desc}</p>
                 <ul className="space-y-1">
                   {item.benefits.map(b => (
-                    <li key={b} className="flex items-center gap-2 text-sm text-gray-700">
-                      <CheckCircle size={14} className="text-green-600 flex-shrink-0" />
+                    <li key={b} className="flex items-center gap-2 text-sm text-[#3f5049]">
+                      <CheckCircle size={14} className="text-[#66845d] flex-shrink-0" />
                       {b}
                     </li>
                   ))}
@@ -280,11 +280,11 @@ export default function TermiteTreatmentPage() {
         </div>
       </section>
 
-      <section className="py-16 bg-amber-50">
+      <section className="py-16 bg-[#eef1e7]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Warning Signs of Termites</h2>
+              <h2 className="text-3xl font-bold text-[#203d34] mb-6">Warning Signs of Termites</h2>
               <div className="space-y-4">
                 {[
                   { title: 'Mud tubes', desc: 'Pencil-width tubes on foundation walls — termite highways from soil to wood.' },
@@ -294,18 +294,18 @@ export default function TermiteTreatmentPage() {
                   { title: 'Frass (termite droppings)', desc: 'Dry wood termites leave tiny wood-colored pellet piles near infested wood.' },
                 ].map(item => (
                   <div key={item.title} className="flex gap-3">
-                    <div className="w-2 h-2 bg-amber-600 rounded-full mt-2 flex-shrink-0" />
-                    <div className="text-gray-700"><span className="font-semibold">{item.title}</span> — {item.desc}</div>
+                    <div className="w-2 h-2 bg-[#58665e] rounded-full mt-2 flex-shrink-0" />
+                    <div className="text-[#3f5049]"><span className="font-semibold">{item.title}</span> — {item.desc}</div>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <a href="#contact-form" className="flex items-center gap-3 bg-amber-700 hover:bg-amber-800 text-white font-bold px-6 py-4 rounded-xl w-full justify-center mb-3">
+              <a href="#contact-form" className="flex items-center gap-3 bg-[#285748] hover:bg-[#173f35] text-white font-bold px-6 py-4 rounded-xl w-full justify-center mb-3">
                 <Phone size={20} />
                 Schedule Free Quote ↓
               </a>
-              <a href="tel:484-643-2225" className="flex items-center gap-2 justify-center text-amber-700 hover:text-amber-800 font-medium text-sm">
+              <a href="tel:484-643-2225" className="flex items-center gap-2 justify-center text-[#285748] hover:text-[#173f35] font-medium text-sm">
                 Or call 484-643-2225
               </a>
             </div>
@@ -315,12 +315,12 @@ export default function TermiteTreatmentPage() {
 
       <section className="py-16 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold text-[#203d34] mb-8 text-center">Frequently Asked Questions</h2>
           <div className="space-y-6">
             {faqSchema.mainEntity.map((faq) => (
-              <div key={faq.name} className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-3">{faq.name}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{faq.acceptedAnswer.text}</p>
+              <div key={faq.name} className="bg-[#f7f6f0] rounded-xl p-6 border border-[#e9eddf]">
+                <h3 className="font-bold text-[#203d34] mb-3">{faq.name}</h3>
+                <p className="text-[#58665e] text-sm leading-relaxed">{faq.acceptedAnswer.text}</p>
               </div>
             ))}
           </div>

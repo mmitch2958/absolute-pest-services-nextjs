@@ -42,7 +42,7 @@ function StarRating({ rating }: { rating: number }) {
         <Star
           key={i}
           size={14}
-          className={i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}
+          className={i < rating ? 'text-[#173f35] fill-yellow-400' : 'text-[#c7d0cb]'}
         />
       ))}
     </div>
@@ -51,7 +51,7 @@ function StarRating({ rating }: { rating: number }) {
 
 export default function GoogleReviews() {
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16 bg-[#f7f6f0]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section header */}
@@ -64,23 +64,23 @@ export default function GoogleReviews() {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            <span className="text-lg font-semibold text-gray-500">Google Reviews</span>
+            <span className="text-lg font-semibold text-[#6b7b72]">Google Reviews</span>
           </div>
 
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">
+          <h2 className="text-3xl font-bold text-[#203d34] mb-3">
             What Our Customers Are Saying
           </h2>
 
           {/* Aggregate rating display */}
-          <div className="inline-flex items-center gap-3 bg-white rounded-full px-6 py-3 shadow-sm border border-gray-100 mb-3">
-            <span className="text-3xl font-bold text-gray-900">5.0</span>
+          <div className="inline-flex items-center gap-3 bg-white rounded-full px-6 py-3 shadow-sm border border-[#e9eddf] mb-3">
+            <span className="text-3xl font-bold text-[#203d34]">5.0</span>
             <div>
               <div className="flex gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={18} className="text-yellow-400 fill-yellow-400" />
+                  <Star key={i} size={18} className="text-[#173f35] fill-yellow-400" />
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-0.5">Based on Google Reviews</p>
+              <p className="text-xs text-[#6b7b72] mt-0.5">Based on Google Reviews</p>
             </div>
           </div>
 
@@ -102,18 +102,18 @@ export default function GoogleReviews() {
           {reviews.map((review) => (
             <div
               key={review.name}
-              className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm flex flex-col"
+              className="bg-white rounded-xl p-6 border border-[#e9eddf] shadow-sm flex flex-col"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   {/* Avatar circle with initials */}
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-green-800 font-bold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-[#e9eddf] flex items-center justify-center flex-shrink-0">
+                    <span className="text-[#0f2b23] font-bold text-sm">
                       {review.name.charAt(0)}
                     </span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm">{review.name}</p>
+                    <p className="font-semibold text-[#203d34] text-sm">{review.name}</p>
                   </div>
                 </div>
                 {/* Google G mark */}
@@ -125,7 +125,7 @@ export default function GoogleReviews() {
                 </svg>
               </div>
               <StarRating rating={review.rating} />
-              <p className="text-gray-600 text-sm leading-relaxed mt-3 flex-1">
+              <p className="text-[#58665e] text-sm leading-relaxed mt-3 flex-1">
                 &ldquo;{review.text}&rdquo;
               </p>
             </div>
@@ -133,16 +133,16 @@ export default function GoogleReviews() {
         </div>
 
         {/* Leave a review CTA */}
-        <div className="bg-white rounded-2xl border border-green-100 p-8 text-center shadow-sm">
+        <div className="bg-white rounded-2xl border border-[#e9eddf] p-8 text-center shadow-sm">
           <div className="flex justify-center gap-1 mb-3">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} size={22} className="text-yellow-400 fill-yellow-400" />
+              <Star key={i} size={22} className="text-[#173f35] fill-yellow-400" />
             ))}
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
+          <h3 className="text-xl font-bold text-[#203d34] mb-2">
             Happy with Our Service?
           </h3>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+          <p className="text-[#58665e] mb-6 max-w-md mx-auto">
             Your review helps other homeowners in Chester &amp; Delaware County find trusted pest
             control. It only takes 60 seconds and means a lot to our small, family-owned team.
           </p>
@@ -160,7 +160,7 @@ export default function GoogleReviews() {
             </svg>
             Leave Us a Google Review
           </a>
-          <p className="text-xs text-gray-400 mt-3">Opens Google — no account needed on mobile</p>
+          <p className="text-xs text-[#8b978f] mt-3">Opens Google — no account needed on mobile</p>
         </div>
 
       </div>

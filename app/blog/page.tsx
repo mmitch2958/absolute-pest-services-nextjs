@@ -105,7 +105,7 @@ async function getPublishedPosts(): Promise<DbPost[]> {
 
 function CategoryBadge({ category }: { category: string }) {
   return (
-    <span className="text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full">
+    <span className="text-xs font-semibold text-[#173f35] bg-[#eef1e7] px-2 py-1 rounded-full">
       {category}
     </span>
   )
@@ -113,7 +113,7 @@ function CategoryBadge({ category }: { category: string }) {
 
 function DateLabel({ dateStr }: { dateStr: string }) {
   return (
-    <span className="text-xs text-gray-400">
+    <span className="text-xs text-[#8b978f]">
       {new Date(dateStr).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
     </span>
   )
@@ -128,15 +128,15 @@ export default async function BlogPage() {
 
   return (
     <>
-      <section className="bg-gradient-to-br from-gray-800 to-gray-900 text-white py-16">
+      <section className="bg-gradient-to-br from-[#1a332b] to-[#203d34] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-gray-400 mb-4" aria-label="Breadcrumb">
+          <nav className="text-sm text-[#8b978f] mb-4" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
             <span className="mx-2">/</span>
             <span>Blog</span>
           </nav>
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">Pest Control Blog</h1>
-          <p className="text-xl text-gray-300 max-w-2xl">
+          <p className="text-xl text-[#c7d0cb] max-w-2xl">
             Expert advice, seasonal guides, and tips for PA &amp; DE homeowners dealing with pest and
             wildlife issues.
           </p>
@@ -151,10 +151,10 @@ export default async function BlogPage() {
             {dbPosts.map((post) => (
               <article
                 key={post.id}
-                className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-white border border-[#e9eddf] rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
               >
                 <Link href={`/blog/${post.slug}`} className="block">
-                  <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-green-800 to-gray-700">
+                  <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-[#0f2b23] to-[#3f5049]">
                     {post.featured_image ? (
                       <Image
                         src={post.featured_image}
@@ -174,9 +174,9 @@ export default async function BlogPage() {
                       <CategoryBadge category={post.category} />
                       <DateLabel dateStr={post.published_at ?? post.created_at} />
                     </div>
-                    <h2 className="font-bold text-gray-900 text-lg mb-3 leading-tight">{post.title}</h2>
-                    <p className="text-gray-600 text-sm mb-4 leading-relaxed">{post.excerpt}</p>
-                    <span className="text-green-700 text-sm font-medium">Read more →</span>
+                    <h2 className="font-bold text-[#203d34] text-lg mb-3 leading-tight">{post.title}</h2>
+                    <p className="text-[#58665e] text-sm mb-4 leading-relaxed">{post.excerpt}</p>
+                    <span className="text-[#173f35] text-sm font-medium">Read more →</span>
                   </div>
                 </Link>
               </article>
@@ -186,9 +186,9 @@ export default async function BlogPage() {
             {filteredStatic.map((post) => (
               <article
                 key={post.slug}
-                className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-white border border-[#e9eddf] rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
               >
-                <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-green-800 to-gray-700">
+                <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-[#0f2b23] to-[#3f5049]">
                   <Image
                     src={post.imageUrl}
                     alt={post.imageAlt}
@@ -202,9 +202,9 @@ export default async function BlogPage() {
                     <CategoryBadge category={post.category} />
                     <DateLabel dateStr={post.date} />
                   </div>
-                  <h2 className="font-bold text-gray-900 text-lg mb-3 leading-tight">{post.title}</h2>
-                  <p className="text-gray-600 text-sm mb-4 leading-relaxed">{post.excerpt}</p>
-                  <span className="text-green-700 text-sm font-medium">Read more →</span>
+                  <h2 className="font-bold text-[#203d34] text-lg mb-3 leading-tight">{post.title}</h2>
+                  <p className="text-[#58665e] text-sm mb-4 leading-relaxed">{post.excerpt}</p>
+                  <span className="text-[#173f35] text-sm font-medium">Read more →</span>
                 </div>
               </article>
             ))}
@@ -213,13 +213,13 @@ export default async function BlogPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-green-50 border-t border-green-100">
+      <section className="py-12 bg-[#eef1e7] border-t border-[#e9eddf]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Have a Pest Emergency?</h2>
-          <p className="text-gray-600 mb-6">Don&rsquo;t wait — call us now for same-day service.</p>
+          <h2 className="text-2xl font-bold text-[#203d34] mb-4">Have a Pest Emergency?</h2>
+          <p className="text-[#58665e] mb-6">Don&rsquo;t wait — call us now for same-day service.</p>
           <a
             href="tel:484-643-2225"
-            className="inline-flex items-center gap-3 bg-green-700 hover:bg-green-800 text-white font-bold px-8 py-4 rounded-xl"
+            className="inline-flex items-center gap-3 bg-[#173f35] hover:bg-[#0f2b23] text-white font-bold px-8 py-4 rounded-xl"
           >
             <Phone size={20} />
             484-643-2225

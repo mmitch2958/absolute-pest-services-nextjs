@@ -208,21 +208,21 @@ export default function WaspRemovalPage() {
       />
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-green-900 to-gray-900 text-white py-16">
+      <section className="bg-gradient-to-br from-[#0a221c] to-[#203d34] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-green-300 mb-4" aria-label="Breadcrumb">
+          <nav className="text-sm text-[#c3d6bd] mb-4" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
             <span className="mx-2">/</span>
             <span>Wasp &amp; Hornet Removal</span>
           </nav>
-          <div className="inline-flex items-center gap-2 bg-yellow-500 text-gray-900 text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full mb-4">
+          <div className="inline-flex items-center gap-2 bg-[#eef1e7] text-[#173f35] text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full mb-4">
             <AlertTriangle size={12} />
             Same-Day Emergency Service Available
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">
             Wasp &amp; Hornet Removal Services
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mb-8">
+          <p className="text-xl text-[#c7d0cb] max-w-2xl mb-8">
             Safe, professional nest removal for wasps, hornets, and yellow jackets throughout
             Chester &amp; Delaware Counties PA and New Castle County DE. Don&rsquo;t risk a
             dangerous DIY attempt — we handle it safely.
@@ -230,14 +230,14 @@ export default function WaspRemovalPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <a
               href="tel:484-643-2225"
-              className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold px-6 py-3 rounded-lg"
+              className="inline-flex items-center gap-2 bg-[#66845d] hover:bg-[#7fa073] text-white font-bold px-6 py-3 rounded-lg"
             >
               <Phone size={18} />
               Call 484-643-2225
             </a>
             <a
               href="#contact-form"
-              className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg"
+              className="inline-flex items-center gap-2 bg-white hover:bg-[#f7f6f0] text-[#173f35] border-2 border-[#173f35] font-bold px-6 py-3 rounded-lg"
             >
               Get Free Estimate ↓
             </a>
@@ -246,15 +246,15 @@ export default function WaspRemovalPage() {
       </section>
 
       {/* Trust Badges */}
-      <section className="bg-green-800 py-6">
+      <section className="bg-[#0f2b23] py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {trustBadges.map((badge) => (
               <div key={badge.label} className="flex items-center gap-3 text-white">
-                <badge.icon size={24} className="text-yellow-400 flex-shrink-0" />
+                <badge.icon size={24} className="text-[#173f35] flex-shrink-0" />
                 <div>
                   <p className="font-semibold text-sm">{badge.label}</p>
-                  <p className="text-xs text-green-200">{badge.sub}</p>
+                  <p className="text-xs text-[#dbe6d6]">{badge.sub}</p>
                 </div>
               </div>
             ))}
@@ -267,10 +267,10 @@ export default function WaspRemovalPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold text-[#203d34] mb-4">
                 Why Professional Wasp Removal Matters
               </h2>
-              <div className="space-y-4 text-gray-600">
+              <div className="space-y-4 text-[#58665e]">
                 <p>
                   Wasp and hornet stings are painful — and for people with allergies, they can be
                   life-threatening. A single nest can house hundreds to thousands of stinging
@@ -287,9 +287,9 @@ export default function WaspRemovalPage() {
                   in a single visit.
                 </p>
               </div>
-              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+              <div className="mt-6 p-4 bg-[#eef1e7] border border-[#dbe6d6] rounded-xl">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle size={20} className="text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle size={20} className="text-[#0f2b23] flex-shrink-0 mt-0.5" />
                   <p className="text-sm text-yellow-800 font-medium">
                     If you or someone nearby is allergic to stings, treat any active wasp or
                     hornet nest as an emergency. Call us immediately at{' '}
@@ -314,12 +314,12 @@ export default function WaspRemovalPage() {
       </section>
 
       {/* Stinging Pests Grid */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#f7f6f0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl font-bold text-[#203d34] mb-4">
             Stinging Insects We Remove
           </h2>
-          <p className="text-lg text-gray-600 mb-10">
+          <p className="text-lg text-[#58665e] mb-10">
             Different stinging insects require different treatment approaches. We correctly
             identify the species before treatment to ensure safe, effective removal every time.
           </p>
@@ -327,10 +327,10 @@ export default function WaspRemovalPage() {
             {stingingPests.map((pest) => (
               <div
                 key={pest.name}
-                className="p-5 bg-white rounded-xl border border-gray-100 shadow-sm"
+                className="p-5 bg-white rounded-xl border border-[#e9eddf] shadow-sm"
               >
-                <h3 className="font-bold text-gray-900 mb-2">{pest.name}</h3>
-                <p className="text-sm text-gray-600">{pest.desc}</p>
+                <h3 className="font-bold text-[#203d34] mb-2">{pest.name}</h3>
+                <p className="text-sm text-[#58665e]">{pest.desc}</p>
               </div>
             ))}
           </div>
@@ -340,7 +340,7 @@ export default function WaspRemovalPage() {
       {/* Process */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">
+          <h2 className="text-3xl font-bold text-[#203d34] mb-10 text-center">
             Our Wasp Removal Process
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -367,11 +367,11 @@ export default function WaspRemovalPage() {
               },
             ].map((item) => (
               <div key={item.step} className="text-center">
-                <div className="w-12 h-12 bg-green-700 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                <div className="w-12 h-12 bg-[#173f35] text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                   {item.step}
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-gray-600">{item.desc}</p>
+                <h3 className="font-bold text-[#203d34] mb-2">{item.title}</h3>
+                <p className="text-sm text-[#58665e]">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -379,25 +379,25 @@ export default function WaspRemovalPage() {
       </section>
 
       {/* Service Areas */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#f7f6f0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">
+          <h2 className="text-3xl font-bold text-[#203d34] mb-4 text-center">
             Wasp Removal Service Areas
           </h2>
-          <p className="text-lg text-gray-600 mb-10 text-center max-w-2xl mx-auto">
+          <p className="text-lg text-[#58665e] mb-10 text-center max-w-2xl mx-auto">
             We provide same-day wasp and hornet removal throughout southeastern Pennsylvania
             and Delaware.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {serviceAreas.map((area) => (
-              <div key={area.county} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-                <h3 className="font-bold text-green-800 mb-3 text-sm uppercase tracking-wide">
+              <div key={area.county} className="bg-white rounded-xl p-5 border border-[#e9eddf] shadow-sm">
+                <h3 className="font-bold text-[#0f2b23] mb-3 text-sm uppercase tracking-wide">
                   {area.county}
                 </h3>
                 <ul className="space-y-1">
                   {area.cities.map((city) => (
-                    <li key={city} className="text-sm text-gray-600 flex items-center gap-2">
-                      <span className="w-1 h-1 bg-green-500 rounded-full flex-shrink-0" />
+                    <li key={city} className="text-sm text-[#58665e] flex items-center gap-2">
+                      <span className="w-1 h-1 bg-[#7fa073] rounded-full flex-shrink-0" />
                       {city}
                     </li>
                   ))}
@@ -405,9 +405,9 @@ export default function WaspRemovalPage() {
               </div>
             ))}
           </div>
-          <p className="text-center mt-8 text-sm text-gray-500">
+          <p className="text-center mt-8 text-sm text-[#6b7b72]">
             Don&rsquo;t see your city?{' '}
-            <Link href="/service-areas" className="text-green-700 hover:text-green-800 font-medium">
+            <Link href="/service-areas" className="text-[#173f35] hover:text-[#0f2b23] font-medium">
               View all service areas →
             </Link>
           </p>
@@ -417,14 +417,14 @@ export default function WaspRemovalPage() {
       {/* FAQ */}
       <section className="py-16 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-[#203d34] mb-8 text-center">
             Frequently Asked Questions
           </h2>
           <div className="space-y-6">
             {faqSchema.mainEntity.map((faq) => (
-              <div key={faq.name} className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-3">{faq.name}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+              <div key={faq.name} className="bg-[#f7f6f0] rounded-xl p-6 border border-[#e9eddf]">
+                <h3 className="font-bold text-[#203d34] mb-3">{faq.name}</h3>
+                <p className="text-[#58665e] text-sm leading-relaxed">
                   {faq.acceptedAnswer.text}
                 </p>
               </div>
@@ -434,12 +434,12 @@ export default function WaspRemovalPage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="py-16 bg-green-900 text-white">
+      <section className="py-16 bg-[#0a221c] text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
             Same-Day Emergency Wasp Removal Available
           </h2>
-          <p className="text-lg text-green-200 mb-8 max-w-xl mx-auto">
+          <p className="text-lg text-[#dbe6d6] mb-8 max-w-xl mx-auto">
             Don&rsquo;t wait until someone gets stung. Our technicians serve Chester County,
             Delaware County, Montgomery County PA, and New Castle County DE — often with
             same-day availability.
@@ -447,14 +447,14 @@ export default function WaspRemovalPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="tel:484-643-2225"
-              className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-8 py-4 rounded-xl text-lg"
+              className="inline-flex items-center gap-2 bg-white hover:bg-[#f7f6f0] text-[#173f35] border-2 border-[#173f35] font-bold px-8 py-4 rounded-xl text-lg"
             >
               <Phone size={22} />
               Call 484-643-2225
             </a>
             <Link
               href="/request-service"
-              className="inline-flex items-center gap-2 bg-white hover:bg-gray-100 text-green-900 font-bold px-8 py-4 rounded-xl text-lg"
+              className="inline-flex items-center gap-2 bg-white hover:bg-[#e9eddf] text-[#0a221c] font-bold px-8 py-4 rounded-xl text-lg"
             >
               Request Service Online
             </Link>

@@ -160,11 +160,11 @@ export default function SummerPestSpecialPage() {
             priority
             className="object-cover opacity-30"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-green-950/90 via-slate-950/88 to-amber-950/70" />
+          <div className="absolute inset-0 bg-gradient-to-br from-green-950/90 via-slate-950/88 to-[#071612]/70" />
         </div>
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-          <nav className="mb-4 text-sm text-green-200" aria-label="Breadcrumb">
+          <nav className="mb-4 text-sm text-[#dbe6d6]" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">
               Home
             </Link>
@@ -174,7 +174,7 @@ export default function SummerPestSpecialPage() {
 
           <div className="grid gap-10 lg:grid-cols-[1.1fr_420px] lg:items-start">
             <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-100">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#e9eddf]">
                 <SunMedium className="h-3.5 w-3.5" />
                 Summer Pest Special
               </div>
@@ -193,7 +193,7 @@ export default function SummerPestSpecialPage() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="tel:484-643-2225"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-green-900 hover:bg-green-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-[#0a221c] hover:bg-[#eef1e7]"
                 >
                   <Phone className="h-5 w-5" />
                   Call 484-643-2225
@@ -237,14 +237,14 @@ export default function SummerPestSpecialPage() {
       <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-800">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#eef1e7] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#173f35]">
               <Clock3 className="h-3.5 w-3.5" />
               Seasonal demand page
             </div>
-            <h2 className="mt-4 text-3xl font-bold text-gray-900">
+            <h2 className="mt-4 text-3xl font-bold text-[#203d34]">
               A cleaner landing page for summer demand
             </h2>
-            <p className="mt-4 text-lg leading-8 text-gray-600">
+            <p className="mt-4 text-lg leading-8 text-[#58665e]">
               This page is built for high-intent homeowners who know they need
               help now, but may not know whether the problem belongs on a wasp
               page, an ant page, or a broader pest-control page.
@@ -255,13 +255,13 @@ export default function SummerPestSpecialPage() {
             {reasons.map((reason) => (
               <div
                 key={reason.title}
-                className="rounded-xl border border-gray-200 bg-gray-50 p-6"
+                className="rounded-xl border border-[#e1e5dc] bg-[#f7f6f0] p-6"
               >
-                <Sparkles className="h-5 w-5 text-green-700" />
-                <h3 className="mt-4 text-lg font-bold text-gray-900">
+                <Sparkles className="h-5 w-5 text-[#173f35]" />
+                <h3 className="mt-4 text-lg font-bold text-[#203d34]">
                   {reason.title}
                 </h3>
-                <p className="mt-2 text-sm leading-6 text-gray-600">
+                <p className="mt-2 text-sm leading-6 text-[#58665e]">
                   {reason.body}
                 </p>
               </div>
@@ -270,14 +270,14 @@ export default function SummerPestSpecialPage() {
         </div>
       </section>
 
-      <section className="bg-gray-50 py-16">
+      <section className="bg-[#f7f6f0] py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr]">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900">
+              <h2 className="text-3xl font-bold text-[#203d34]">
                 Common summer pest problems we help with
               </h2>
-              <p className="mt-4 text-lg leading-8 text-gray-600">
+              <p className="mt-4 text-lg leading-8 text-[#58665e]">
                 Summer service calls come in fast. This page is meant to catch
                 the kinds of problems homeowners want solved quickly, even when
                 they are not sure which exact service page they need.
@@ -287,24 +287,24 @@ export default function SummerPestSpecialPage() {
                 {coveredPests.map((pest) => (
                   <div
                     key={pest}
-                    className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-800"
+                    className="flex items-center gap-3 rounded-xl border border-[#e1e5dc] bg-white px-4 py-3 text-sm font-medium text-[#1a332b]"
                   >
-                    <CheckCircle2 className="h-4 w-4 text-green-700" />
+                    <CheckCircle2 className="h-4 w-4 text-[#173f35]" />
                     {pest}
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-6">
-              <div className="flex items-center gap-3 text-green-800">
+            <div className="rounded-2xl border border-[#e1e5dc] bg-white p-6">
+              <div className="flex items-center gap-3 text-[#0f2b23]">
                 <ShieldCheck className="h-5 w-5" />
-                <h3 className="text-lg font-bold text-gray-900">
+                <h3 className="text-lg font-bold text-[#203d34]">
                   Why this page should convert well
                 </h3>
               </div>
 
-              <div className="mt-5 space-y-4 text-sm leading-6 text-gray-600">
+              <div className="mt-5 space-y-4 text-sm leading-6 text-[#58665e]">
                 <p>
                   It matches broad summer intent without forcing people into the
                   wrong service bucket too early.
@@ -320,7 +320,7 @@ export default function SummerPestSpecialPage() {
                 </p>
               </div>
 
-              <div className="mt-6 rounded-xl bg-green-50 p-4 text-sm text-green-900">
+              <div className="mt-6 rounded-xl bg-[#eef1e7] p-4 text-sm text-[#0a221c]">
                 Strong fit for ant pressure, seasonal wasp activity, carpenter
                 bee issues, recurring spider sightings, and mixed household
                 insect symptoms.
@@ -333,11 +333,11 @@ export default function SummerPestSpecialPage() {
       <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
-              <h2 className="text-3xl font-bold text-gray-900">
+            <div className="rounded-2xl border border-[#e1e5dc] bg-[#f7f6f0] p-6">
+              <h2 className="text-3xl font-bold text-[#203d34]">
                 Service areas this page supports well
               </h2>
-              <p className="mt-4 text-lg leading-8 text-gray-600">
+              <p className="mt-4 text-lg leading-8 text-[#58665e]">
                 The offer and language on this page fit the core service area we
                 are already prioritizing in Chester County and nearby Delaware
                 County.
@@ -347,7 +347,7 @@ export default function SummerPestSpecialPage() {
                 {serviceAreas.map((area) => (
                   <div
                     key={area}
-                    className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800"
+                    className="rounded-xl border border-[#e1e5dc] bg-white px-4 py-3 text-sm font-semibold text-[#1a332b]"
                   >
                     {area}
                   </div>
@@ -366,15 +366,15 @@ export default function SummerPestSpecialPage() {
 
               <div className="mt-8 space-y-4 text-sm leading-6 text-slate-200">
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-green-300" />
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-[#c3d6bd]" />
                   <p>Good fit for urgent summer pest questions and fast estimate requests.</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-green-300" />
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-[#c3d6bd]" />
                   <p>Works well for broad search traffic when visitors do not yet know the exact pest.</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-green-300" />
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-[#c3d6bd]" />
                   <p>Keeps the request form front and center for paid traffic.</p>
                 </div>
               </div>

@@ -144,7 +144,7 @@ export default function BatRemovalPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      <section className="bg-gradient-to-br from-purple-900 to-gray-900 text-white py-16">
+      <section className="bg-gradient-to-br from-purple-900 to-[#203d34] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="text-sm text-purple-300 mb-4" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
@@ -152,7 +152,7 @@ export default function BatRemovalPage() {
             <span>Bat Removal</span>
           </nav>
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">Bat Removal Services</h1>
-          <p className="text-xl text-gray-300 max-w-2xl mb-8">
+          <p className="text-xl text-[#c7d0cb] max-w-2xl mb-8">
             Licensed bat exclusion for homes and businesses in PA & DE. We follow all state
             wildlife regulations, using only humane exclusion methods to safely remove bat colonies
             from your property.
@@ -162,7 +162,7 @@ export default function BatRemovalPage() {
               <Phone size={18} />
               Call 484-643-2225
             </a>
-            <a href="#contact-form" className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg">
+            <a href="#contact-form" className="inline-flex items-center gap-2 bg-white hover:bg-[#f7f6f0] text-[#173f35] border-2 border-[#173f35] font-bold px-6 py-3 rounded-lg">
               Get Free Estimate ↓
             </a>
           </div>
@@ -174,8 +174,8 @@ export default function BatRemovalPage() {
           <div className="bg-white rounded-2xl p-6 border border-purple-200 flex gap-4">
             <div className="text-3xl">⚠️</div>
             <div>
-              <h2 className="font-bold text-gray-900 mb-2">Important: Bat Exclusion Seasons</h2>
-              <p className="text-gray-700">
+              <h2 className="font-bold text-[#203d34] mb-2">Important: Bat Exclusion Seasons</h2>
+              <p className="text-[#3f5049]">
                 Bat exclusion is ONLY legal during specific windows in PA & DE: <strong>August 1 – October 31</strong> and{' '}
                 <strong>April 1 – May 14</strong>. Performing exclusion during summer (when pups cannot fly) traps
                 babies inside and is illegal. We strictly follow these regulations and will schedule your exclusion
@@ -188,7 +188,7 @@ export default function BatRemovalPage() {
 
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">Our Bat Exclusion Process</h2>
+          <h2 className="text-3xl font-bold text-[#203d34] mb-10 text-center">Our Bat Exclusion Process</h2>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {[
               { step: '1', title: 'Inspection', desc: 'We identify all bat entry points, assess colony size, and check for guano accumulation.' },
@@ -199,19 +199,19 @@ export default function BatRemovalPage() {
             ].map(item => (
               <div key={item.step} className="text-center">
                 <div className="w-10 h-10 bg-purple-700 text-white rounded-full flex items-center justify-center font-bold mx-auto mb-3">{item.step}</div>
-                <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
-                <p className="text-xs text-gray-600">{item.desc}</p>
+                <h3 className="font-semibold text-[#203d34] mb-1">{item.title}</h3>
+                <p className="text-xs text-[#58665e]">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#f7f6f0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Signs of Bats in Your Home</h2>
+              <h2 className="text-3xl font-bold text-[#203d34] mb-6">Signs of Bats in Your Home</h2>
               <div className="space-y-4">
                 {[
                   { title: 'Scratching sounds at night', desc: 'Especially around dusk and dawn when bats are most active.' },
@@ -222,7 +222,7 @@ export default function BatRemovalPage() {
                 ].map(item => (
                   <div key={item.title} className="flex gap-3">
                     <CheckCircle size={18} className="text-purple-600 mt-0.5 flex-shrink-0" />
-                    <div className="text-gray-700"><span className="font-semibold">{item.title}</span> — {item.desc}</div>
+                    <div className="text-[#3f5049]"><span className="font-semibold">{item.title}</span> — {item.desc}</div>
                   </div>
                 ))}
               </div>
@@ -244,12 +244,12 @@ export default function BatRemovalPage() {
 
       <section className="py-16 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold text-[#203d34] mb-8 text-center">Frequently Asked Questions</h2>
           <div className="space-y-6">
             {faqSchema.mainEntity.map((faq) => (
-              <div key={faq.name} className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-3">{faq.name}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{faq.acceptedAnswer.text}</p>
+              <div key={faq.name} className="bg-[#f7f6f0] rounded-xl p-6 border border-[#e9eddf]">
+                <h3 className="font-bold text-[#203d34] mb-3">{faq.name}</h3>
+                <p className="text-[#58665e] text-sm leading-relaxed">{faq.acceptedAnswer.text}</p>
               </div>
             ))}
           </div>

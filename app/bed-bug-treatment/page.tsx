@@ -122,7 +122,7 @@ export default function BedBugTreatmentPage() {
       />
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-red-900 to-gray-900 text-white py-16">
+      <section className="bg-gradient-to-br from-red-900 to-[#203d34] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="text-sm text-red-300 mb-4" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
@@ -130,7 +130,7 @@ export default function BedBugTreatmentPage() {
             <span>Bed Bug Treatment</span>
           </nav>
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">Bed Bug Treatment</h1>
-          <p className="text-xl text-gray-300 max-w-2xl mb-8">
+          <p className="text-xl text-[#c7d0cb] max-w-2xl mb-8">
             Complete bed bug elimination for homes and apartments in PA & DE. We use proven heat
             and chemical treatment methods to eliminate all life stages — eggs, nymphs, and adults.
           </p>
@@ -139,7 +139,7 @@ export default function BedBugTreatmentPage() {
               <Phone size={18} />
               Call 484-643-2225
             </a>
-            <a href="#contact-form" className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg">
+            <a href="#contact-form" className="inline-flex items-center gap-2 bg-white hover:bg-[#f7f6f0] text-[#173f35] border-2 border-[#173f35] font-bold px-6 py-3 rounded-lg">
               Get Free Estimate ↓
             </a>
           </div>
@@ -149,7 +149,7 @@ export default function BedBugTreatmentPage() {
       {/* Form Section */}
       <section
         id="contact-form"
-        className="bg-green-50 border-b border-green-100 py-12 sm:py-16"
+        className="bg-[#eef1e7] border-b border-[#e9eddf] py-12 sm:py-16"
         aria-labelledby="bed-bug-form-heading"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -160,12 +160,12 @@ export default function BedBugTreatmentPage() {
               </div>
               <h2
                 id="bed-bug-form-heading"
-                className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
+                className="text-3xl sm:text-4xl font-bold text-[#203d34] mb-4 leading-tight"
               >
                 Get a Free Bed Bug Quote<br />
-                <span className="text-green-700">Today — No Commitment</span>
+                <span className="text-[#173f35]">Today — No Commitment</span>
               </h2>
-              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+              <p className="text-[#58665e] text-lg mb-6 leading-relaxed">
                 Bed bug populations double every 16 days. The sooner we treat, the easier and more
                 affordable it is. Get a free quote from our licensed specialists today.
               </p>
@@ -177,22 +177,22 @@ export default function BedBugTreatmentPage() {
                   'Same-day service available',
                   '5.0 ⭐ rated by 40+ customers',
                 ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-gray-700">
-                    <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
+                  <li key={item} className="flex items-center gap-3 text-[#3f5049]">
+                    <span className="w-5 h-5 bg-[#66845d] rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
                     {item}
                   </li>
                 ))}
               </ul>
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
-                <p className="text-sm text-gray-500 mb-1">Prefer to call?</p>
+              <div className="bg-white rounded-xl border border-[#e1e5dc] p-4">
+                <p className="text-sm text-[#6b7b72] mb-1">Prefer to call?</p>
                 <a
                   href="tel:484-643-2225"
-                  className="text-2xl font-bold text-green-700 hover:text-green-800 flex items-center gap-2"
+                  className="text-2xl font-bold text-[#173f35] hover:text-[#0f2b23] flex items-center gap-2"
                 >
                   <Phone size={22} />
                   484-643-2225
                 </a>
-                <p className="text-xs text-gray-400 mt-1">Mon–Fri 7am–6pm · Sat 8am–4pm · 24/7 emergency</p>
+                <p className="text-xs text-[#8b978f] mt-1">Mon–Fri 7am–6pm · Sat 8am–4pm · 24/7 emergency</p>
               </div>
             </div>
             <div>
@@ -213,21 +213,21 @@ export default function BedBugTreatmentPage() {
       {/* Treatment Methods */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Bed Bug Treatment Methods</h2>
-          <p className="text-lg text-gray-600 mb-10">
+          <h2 className="text-3xl font-bold text-[#203d34] mb-4">Our Bed Bug Treatment Methods</h2>
+          <p className="text-lg text-[#58665e] mb-10">
             We offer two proven treatment approaches. Our technicians will recommend the right method
             based on your infestation level, property type, and budget.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="p-8 bg-red-50 rounded-2xl border border-red-100">
               <div className="w-12 h-12 bg-red-700 text-white rounded-xl flex items-center justify-center text-2xl mb-4">🔥</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Heat Treatment</h3>
-              <p className="text-gray-700 mb-4">
+              <h3 className="text-xl font-bold text-[#203d34] mb-3">Heat Treatment</h3>
+              <p className="text-[#3f5049] mb-4">
                 We raise the temperature throughout the treatment area to 120°F+, which kills all
                 bed bug life stages — including eggs — in a single treatment. Most effective for
                 heavily infested homes.
               </p>
-              <ul className="space-y-2 text-sm text-gray-700">
+              <ul className="space-y-2 text-sm text-[#3f5049]">
                 {['Kills 100% of all life stages', 'No chemical residue', 'Single treatment in most cases', 'No need to discard furniture'].map(item => (
                   <li key={item} className="flex items-start gap-2">
                     <CheckCircle size={14} className="text-red-600 mt-0.5 flex-shrink-0" />
@@ -236,18 +236,18 @@ export default function BedBugTreatmentPage() {
                 ))}
               </ul>
             </div>
-            <div className="p-8 bg-gray-50 rounded-2xl border border-gray-100">
-              <div className="w-12 h-12 bg-gray-700 text-white rounded-xl flex items-center justify-center text-2xl mb-4">🧪</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Chemical Treatment</h3>
-              <p className="text-gray-700 mb-4">
+            <div className="p-8 bg-[#f7f6f0] rounded-2xl border border-[#e9eddf]">
+              <div className="w-12 h-12 bg-[#3f5049] text-white rounded-xl flex items-center justify-center text-2xl mb-4">🧪</div>
+              <h3 className="text-xl font-bold text-[#203d34] mb-3">Chemical Treatment</h3>
+              <p className="text-[#3f5049] mb-4">
                 We apply EPA-registered insecticides to all harboring areas with a residual effect
                 that continues working for weeks. Best for lower-level infestations or as a
                 follow-up to heat treatment.
               </p>
-              <ul className="space-y-2 text-sm text-gray-700">
+              <ul className="space-y-2 text-sm text-[#3f5049]">
                 {['Lower cost than heat treatment', '2-3 visit program', 'Targeted application', 'Residual protection'].map(item => (
                   <li key={item} className="flex items-start gap-2">
-                    <CheckCircle size={14} className="text-gray-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle size={14} className="text-[#58665e] mt-0.5 flex-shrink-0" />
                     {item}
                   </li>
                 ))}
@@ -258,12 +258,12 @@ export default function BedBugTreatmentPage() {
       </section>
 
       {/* Signs of Bed Bugs */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#f7f6f0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Signs You Have Bed Bugs</h2>
-              <div className="space-y-4 text-gray-700">
+              <h2 className="text-3xl font-bold text-[#203d34] mb-6">Signs You Have Bed Bugs</h2>
+              <div className="space-y-4 text-[#3f5049]">
                 {[
                   { title: 'Blood stains on sheets', desc: 'Small rusty-red spots from crushed bugs or feeding.' },
                   { title: 'Dark fecal spots', desc: 'Tiny dark dots on mattress seams, headboards, and baseboards.' },
@@ -283,7 +283,7 @@ export default function BedBugTreatmentPage() {
                 <Phone size={20} />
                 Schedule Free Quote ↓
               </a>
-              <Link href="/service-areas" className="flex justify-center text-gray-600 hover:text-gray-900 text-sm">
+              <Link href="/service-areas" className="flex justify-center text-[#58665e] hover:text-[#203d34] text-sm">
                 View our service areas →
               </Link>
             </div>
@@ -294,12 +294,12 @@ export default function BedBugTreatmentPage() {
       {/* FAQ */}
       <section className="py-16 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold text-[#203d34] mb-8 text-center">Frequently Asked Questions</h2>
           <div className="space-y-6">
             {faqSchema.mainEntity.map((faq) => (
-              <div key={faq.name} className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-3">{faq.name}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{faq.acceptedAnswer.text}</p>
+              <div key={faq.name} className="bg-[#f7f6f0] rounded-xl p-6 border border-[#e9eddf]">
+                <h3 className="font-bold text-[#203d34] mb-3">{faq.name}</h3>
+                <p className="text-[#58665e] text-sm leading-relaxed">{faq.acceptedAnswer.text}</p>
               </div>
             ))}
           </div>

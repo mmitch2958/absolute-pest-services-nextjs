@@ -46,23 +46,23 @@ export default function RodentsPage() {
       />
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-gray-800 to-gray-900 text-white py-16">
+      <section className="bg-gradient-to-br from-[#1a332b] to-[#203d34] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-gray-400 mb-4" aria-label="Breadcrumb">
+          <nav className="text-sm text-[#8b978f] mb-4" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
             <span className="mx-2">/</span>
             <span>Rodent Control</span>
           </nav>
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">Rodent Control</h1>
-          <p className="text-xl text-gray-300 max-w-2xl mb-8">
+          <p className="text-xl text-[#c7d0cb] max-w-2xl mb-8">
             Mice and rats pose serious health and property risks. Our rodent control program
             eliminates active infestations and seals entry points to keep rodents out permanently.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <a href="tel:484-643-2225" className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-500 text-white font-bold px-6 py-3 rounded-lg">
+            <a href="tel:484-643-2225" className="inline-flex items-center gap-2 bg-[#58665e] hover:bg-[#6b7b72] text-white font-bold px-6 py-3 rounded-lg">
               <Phone size={18} />Call 484-643-2225
             </a>
-            <a href="#contact-form" className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg">
+            <a href="#contact-form" className="inline-flex items-center gap-2 bg-white hover:bg-[#f7f6f0] text-[#173f35] border-2 border-[#173f35] font-bold px-6 py-3 rounded-lg">
               Request Service ↓
             </a>
           </div>
@@ -71,27 +71,27 @@ export default function RodentsPage() {
 
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-10">Our Rodent Control Approach</h2>
+          <h2 className="text-3xl font-bold text-[#203d34] mb-10">Our Rodent Control Approach</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { title: 'Inspection & Assessment', desc: 'We locate entry points, nesting sites, and runways. Understanding how rodents are entering is essential to eliminating them.' },
               { title: 'Treatment & Elimination', desc: 'We use a combination of trapping and rodenticide bait stations to quickly reduce the active population.' },
               { title: 'Exclusion & Prevention', desc: 'We seal all entry points with steel wool, hardware cloth, and caulk. A rat can enter through a gap the size of a quarter.' },
             ].map(item => (
-              <div key={item.title} className="p-6 bg-gray-50 rounded-xl border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-3">{item.title}</h3>
-                <p className="text-gray-600 text-sm">{item.desc}</p>
+              <div key={item.title} className="p-6 bg-[#f7f6f0] rounded-xl border border-[#e9eddf]">
+                <h3 className="font-bold text-[#203d34] mb-3">{item.title}</h3>
+                <p className="text-[#58665e] text-sm">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#f7f6f0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Signs of a Rodent Infestation</h2>
+              <h2 className="text-3xl font-bold text-[#203d34] mb-6">Signs of a Rodent Infestation</h2>
               <div className="space-y-3">
                 {[
                   'Droppings near food, in drawers, or along walls',
@@ -102,16 +102,16 @@ export default function RodentsPage() {
                   'Tracks or footprints in dusty areas',
                 ].map(item => (
                   <div key={item} className="flex items-start gap-3">
-                    <CheckCircle size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700 text-sm">{item}</span>
+                    <CheckCircle size={16} className="text-[#66845d] mt-0.5 flex-shrink-0" />
+                    <span className="text-[#3f5049] text-sm">{item}</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-              <h3 className="font-bold text-gray-900 text-xl mb-4">Why Rodent Control Matters</h3>
-              <p className="text-gray-600 mb-4 text-sm">Rodents are not just a nuisance — they&rsquo;re a health risk and a property risk:</p>
-              <ul className="space-y-2 text-sm text-gray-700 mb-6">
+            <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#e9eddf]">
+              <h3 className="font-bold text-[#203d34] text-xl mb-4">Why Rodent Control Matters</h3>
+              <p className="text-[#58665e] mb-4 text-sm">Rodents are not just a nuisance — they&rsquo;re a health risk and a property risk:</p>
+              <ul className="space-y-2 text-sm text-[#3f5049] mb-6">
                 {[
                   'Carry diseases including hantavirus, salmonella, and leptospirosis',
                   'Chew electrical wiring, causing fire hazards',
@@ -124,7 +124,7 @@ export default function RodentsPage() {
                   </li>
                 ))}
               </ul>
-              <a href="#contact-form" className="flex items-center gap-3 bg-gray-800 hover:bg-gray-900 text-white font-bold px-6 py-4 rounded-xl w-full justify-center">
+              <a href="#contact-form" className="flex items-center gap-3 bg-[#1a332b] hover:bg-[#203d34] text-white font-bold px-6 py-4 rounded-xl w-full justify-center">
                 <Phone size={20} />
                 Request Free Quote ↓
               </a>
@@ -136,7 +136,7 @@ export default function RodentsPage() {
       {/* Form Section */}
       <section
         id="contact-form"
-        className="bg-green-50 border-b border-green-100 py-12 sm:py-16"
+        className="bg-[#eef1e7] border-b border-[#e9eddf] py-12 sm:py-16"
         aria-labelledby="rodents-form-heading"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -144,12 +144,12 @@ export default function RodentsPage() {
             <div className="lg:pt-4">
               <h2
                 id="rodents-form-heading"
-                className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
+                className="text-3xl sm:text-4xl font-bold text-[#203d34] mb-4 leading-tight"
               >
                 Get a Free Rodent Quote<br />
-                <span className="text-green-700">Same-Day Service Available</span>
+                <span className="text-[#173f35]">Same-Day Service Available</span>
               </h2>
-              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+              <p className="text-[#58665e] text-lg mb-6 leading-relaxed">
                 Rodents reproduce fast — one pair can become 1,000+ in a year. Act now before
                 your problem gets worse.
               </p>
@@ -160,8 +160,8 @@ export default function RodentsPage() {
                   'Free estimate, no commitment required',
                   'Same-day service available',
                 ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-gray-700">
-                    <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
+                  <li key={item} className="flex items-center gap-3 text-[#3f5049]">
+                    <span className="w-5 h-5 bg-[#66845d] rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
                     {item}
                   </li>
                 ))}
@@ -178,26 +178,26 @@ export default function RodentsPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-16 bg-white border-t border-gray-100">
+      <section className="py-16 bg-white border-t border-[#e9eddf]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-[#203d34] mb-8 text-center">
             Frequently Asked Questions — Rodent Control
           </h2>
           <div className="space-y-4">
             {faqs.map((faq) => (
               <details
                 key={faq.q}
-                className="group bg-gray-50 border border-gray-200 rounded-xl overflow-hidden"
+                className="group bg-[#f7f6f0] border border-[#e1e5dc] rounded-xl overflow-hidden"
               >
-                <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer list-none font-semibold text-gray-900 text-base hover:bg-gray-100 transition-colors">
+                <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer list-none font-semibold text-[#203d34] text-base hover:bg-[#e9eddf] transition-colors">
                   <span>{faq.q}</span>
-                  <span className="flex-shrink-0 text-green-700 group-open:rotate-180 transition-transform">
+                  <span className="flex-shrink-0 text-[#173f35] group-open:rotate-180 transition-transform">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
                       <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </span>
                 </summary>
-                <div className="px-5 pb-5 text-gray-700 text-sm leading-relaxed border-t border-gray-100 pt-4">
+                <div className="px-5 pb-5 text-[#3f5049] text-sm leading-relaxed border-t border-[#e9eddf] pt-4">
                   {faq.a}
                 </div>
               </details>

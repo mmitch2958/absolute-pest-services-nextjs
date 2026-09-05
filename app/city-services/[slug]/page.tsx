@@ -109,9 +109,9 @@ export default async function CityServicePage({
       />
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-green-900 to-gray-900 text-white py-16">
+      <section className="bg-gradient-to-br from-[#0a221c] to-[#203d34] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-green-300 mb-4" aria-label="Breadcrumb">
+          <nav className="text-sm text-[#c3d6bd] mb-4" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
             <span className="mx-2">/</span>
             <Link href="/service-areas" className="hover:text-white">Service Areas</Link>
@@ -125,7 +125,7 @@ export default async function CityServicePage({
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">
             {service.h1Template.replace('{city}', city.name).replace('{state}', city.state)}
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mb-8">
+          <p className="text-xl text-[#c7d0cb] max-w-2xl mb-8">
             {service.longDesc} Serving {city.name}
             {city.county ? `, ${city.county}` : ''}, {city.state}.
             Licensed and insured. Same-day service available.
@@ -133,14 +133,14 @@ export default async function CityServicePage({
           <div className="flex flex-col sm:flex-row gap-4">
             <a
               href="tel:484-643-2225"
-              className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white font-bold px-6 py-3 rounded-lg"
+              className="inline-flex items-center gap-2 bg-[#66845d] hover:bg-[#7fa073] text-white font-bold px-6 py-3 rounded-lg"
             >
               <Phone size={18} />
               Call 484-643-2225
             </a>
             <Link
               href="/request-service"
-              className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg"
+              className="inline-flex items-center gap-2 bg-white hover:bg-[#f7f6f0] text-[#173f35] border-2 border-[#173f35] font-bold px-6 py-3 rounded-lg"
             >
               Request Service Online
             </Link>
@@ -155,15 +155,15 @@ export default async function CityServicePage({
             <div className="lg:col-span-2">
               {detailedContent ? (
                 /* Lando's detailed city content */
-                <div className="prose max-w-none text-gray-700">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                <div className="prose max-w-none text-[#3f5049]">
+                  <h2 className="text-2xl font-bold text-[#203d34] mb-4">
                     {service.name} in {city.name}, {city.state}
                   </h2>
                   {detailedContent.split('\n\n').map((paragraph, i) => {
                     if (paragraph.startsWith('###') || paragraph.startsWith('**')) {
                       const title = paragraph.replace(/^###\s*/, '').replace(/\*\*/g, '')
                       return (
-                        <h3 key={i} className="text-xl font-bold text-gray-900 mt-6 mb-3">
+                        <h3 key={i} className="text-xl font-bold text-[#203d34] mt-6 mb-3">
                           {title}
                         </h3>
                       )
@@ -178,22 +178,22 @@ export default async function CityServicePage({
               ) : (
                 /* Generated content */
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  <h2 className="text-2xl font-bold text-[#203d34] mb-4">
                     {service.title} in {city.name}, {city.state}
                   </h2>
-                  <p className="text-gray-700 mb-4 leading-relaxed">
+                  <p className="text-[#3f5049] mb-4 leading-relaxed">
                     Absolute Pest Services provides professional {service.name.toLowerCase()} for
                     homes and businesses in {city.name}
                     {city.county ? `, ${city.county}` : ''}, {city.state}.
                     Our licensed technicians are fully equipped to handle {service.name.toLowerCase()}
                     throughout the area.
                   </p>
-                  <p className="text-gray-700 mb-4 leading-relaxed">
+                  <p className="text-[#3f5049] mb-4 leading-relaxed">
                     {service.longDesc}
                   </p>
-                  <p className="text-gray-700 mb-6 leading-relaxed">
+                  <p className="text-[#3f5049] mb-6 leading-relaxed">
                     We offer free estimates and same-day service when available. Call{' '}
-                    <a href="tel:484-643-2225" className="text-green-700 font-semibold">
+                    <a href="tel:484-643-2225" className="text-[#173f35] font-semibold">
                       484-643-2225
                     </a>{' '}
                     or request service online to get started.
@@ -202,7 +202,7 @@ export default async function CityServicePage({
               )}
 
               {/* Why choose us */}
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 mt-8">
+              <h2 className="text-2xl font-bold text-[#203d34] mb-4 mt-8">
                 Why Choose Absolute Pest Services in {city.name}?
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
@@ -214,23 +214,23 @@ export default async function CityServicePage({
                   'Family & pet safe methods',
                   'Satisfaction guarantee',
                 ].map((item) => (
-                  <div key={item} className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle size={16} className="text-green-600 flex-shrink-0" />
+                  <div key={item} className="flex items-center gap-2 text-[#3f5049]">
+                    <CheckCircle size={16} className="text-[#66845d] flex-shrink-0" />
                     <span className="text-sm">{item}</span>
                   </div>
                 ))}
               </div>
 
               {/* FAQs */}
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+              <h2 className="text-2xl font-bold text-[#203d34] mb-6">Frequently Asked Questions</h2>
               <div className="space-y-4">
                 {service.faqs.map((faq) => (
                   <div
                     key={faq.q}
-                    className="p-5 bg-gray-50 rounded-xl border border-gray-100"
+                    className="p-5 bg-[#f7f6f0] rounded-xl border border-[#e9eddf]"
                   >
-                    <h3 className="font-bold text-gray-900 mb-2">{faq.q}</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">{faq.a}</p>
+                    <h3 className="font-bold text-[#203d34] mb-2">{faq.q}</h3>
+                    <p className="text-[#58665e] text-sm leading-relaxed">{faq.a}</p>
                   </div>
                 ))}
               </div>
@@ -239,26 +239,26 @@ export default async function CityServicePage({
             {/* Sidebar */}
             <div className="lg:col-span-1">
               {/* CTA Card */}
-              <div className="bg-green-50 rounded-2xl p-6 border border-green-100 sticky top-20">
-                <h3 className="font-bold text-gray-900 text-lg mb-4">
+              <div className="bg-[#eef1e7] rounded-2xl p-6 border border-[#e9eddf] sticky top-20">
+                <h3 className="font-bold text-[#203d34] text-lg mb-4">
                   Get {service.name} in {city.name}
                 </h3>
                 <a
                   href="tel:484-643-2225"
-                  className="flex items-center gap-3 bg-green-700 hover:bg-green-800 text-white font-bold px-4 py-4 rounded-xl w-full justify-center mb-3"
+                  className="flex items-center gap-3 bg-[#173f35] hover:bg-[#0f2b23] text-white font-bold px-4 py-4 rounded-xl w-full justify-center mb-3"
                 >
                   <Phone size={18} />
                   484-643-2225
                 </a>
                 <Link
                   href="/request-service"
-                  className="flex items-center gap-2 justify-center bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-4 py-3 rounded-xl w-full mb-4"
+                  className="flex items-center gap-2 justify-center bg-white hover:bg-[#f7f6f0] text-[#173f35] border-2 border-[#173f35] font-bold px-4 py-3 rounded-xl w-full mb-4"
                 >
                   Request Service Online
                 </Link>
                 <Link
                   href="/blog"
-                  className="flex items-center gap-2 justify-center border border-green-300 text-green-700 hover:bg-green-100 font-medium px-4 py-2 rounded-lg w-full text-sm"
+                  className="flex items-center gap-2 justify-center border border-[#c3d6bd] text-[#173f35] hover:bg-[#e9eddf] font-medium px-4 py-2 rounded-lg w-full text-sm"
                 >
                   View Our Blog
                 </Link>
@@ -266,7 +266,7 @@ export default async function CityServicePage({
 
               {/* Other services */}
               <div className="mt-6">
-                <h3 className="font-bold text-gray-900 mb-3">
+                <h3 className="font-bold text-[#203d34] mb-3">
                   More Services in {city.name}
                 </h3>
                 <div className="space-y-2">
@@ -274,7 +274,7 @@ export default async function CityServicePage({
                     <Link
                       key={s.slug}
                       href={`/city-services/${s.slug}-${city.cityServiceSlug}`}
-                      className="block text-sm text-green-700 hover:text-green-800 hover:underline"
+                      className="block text-sm text-[#173f35] hover:text-[#0f2b23] hover:underline"
                     >
                       {s.name} in {city.name}
                     </Link>
@@ -285,13 +285,13 @@ export default async function CityServicePage({
               {/* Nearby cities */}
               {nearbyCities.length > 0 && (
                 <div className="mt-6">
-                  <h3 className="font-bold text-gray-900 mb-3">Nearby Areas</h3>
+                  <h3 className="font-bold text-[#203d34] mb-3">Nearby Areas</h3>
                   <div className="space-y-2">
                     {nearbyCities.map((nearbyCity) => (
                       <Link
                         key={nearbyCity.slug}
                         href={`/city-services/${service.slug}-${nearbyCity.cityServiceSlug}`}
-                        className="block text-sm text-gray-600 hover:text-green-700 hover:underline"
+                        className="block text-sm text-[#58665e] hover:text-[#173f35] hover:underline"
                       >
                         {service.name} in {nearbyCity.name}, {nearbyCity.state}
                       </Link>

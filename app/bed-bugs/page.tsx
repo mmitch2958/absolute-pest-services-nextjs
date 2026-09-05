@@ -46,7 +46,7 @@ export default function BedBugsPage() {
       />
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-red-900 to-gray-900 text-white py-16">
+      <section className="bg-gradient-to-br from-red-900 to-[#203d34] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="text-sm text-red-300 mb-4" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
@@ -54,7 +54,7 @@ export default function BedBugsPage() {
             <span>Bed Bugs</span>
           </nav>
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">Bed Bug Control</h1>
-          <p className="text-xl text-gray-300 max-w-2xl mb-8">
+          <p className="text-xl text-[#c7d0cb] max-w-2xl mb-8">
             Bed bug infestations are stressful and fast-growing. Our licensed technicians eliminate
             bed bugs completely using proven heat and chemical treatment methods.
           </p>
@@ -62,7 +62,7 @@ export default function BedBugsPage() {
             <a href="tel:484-643-2225" className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white font-bold px-6 py-3 rounded-lg">
               <Phone size={18} />Call 484-643-2225
             </a>
-            <a href="#contact-form" className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg">
+            <a href="#contact-form" className="inline-flex items-center gap-2 bg-white hover:bg-[#f7f6f0] text-[#173f35] border-2 border-[#173f35] font-bold px-6 py-3 rounded-lg">
               Get Free Quote ↓
             </a>
           </div>
@@ -72,7 +72,7 @@ export default function BedBugsPage() {
       {/* Form Section */}
       <section
         id="contact-form"
-        className="bg-green-50 border-b border-green-100 py-12 sm:py-16"
+        className="bg-[#eef1e7] border-b border-[#e9eddf] py-12 sm:py-16"
         aria-labelledby="bed-bugs-form-heading"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -83,12 +83,12 @@ export default function BedBugsPage() {
               </div>
               <h2
                 id="bed-bugs-form-heading"
-                className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight"
+                className="text-3xl sm:text-4xl font-bold text-[#203d34] mb-4 leading-tight"
               >
                 Get a Free Bed Bug Quote<br />
-                <span className="text-green-700">Today — No Commitment</span>
+                <span className="text-[#173f35]">Today — No Commitment</span>
               </h2>
-              <p className="text-gray-600 text-lg mb-6 leading-relaxed">
+              <p className="text-[#58665e] text-lg mb-6 leading-relaxed">
                 Bed bugs double in population every 16 days. Act now — the sooner we treat,
                 the easier and more affordable it is.
               </p>
@@ -100,22 +100,22 @@ export default function BedBugsPage() {
                   'Same-day service available',
                   '5.0 ⭐ rated by 40+ customers',
                 ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-gray-700">
-                    <span className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
+                  <li key={item} className="flex items-center gap-3 text-[#3f5049]">
+                    <span className="w-5 h-5 bg-[#66845d] rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs">✓</span>
                     {item}
                   </li>
                 ))}
               </ul>
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
-                <p className="text-sm text-gray-500 mb-1">Prefer to call?</p>
+              <div className="bg-white rounded-xl border border-[#e1e5dc] p-4">
+                <p className="text-sm text-[#6b7b72] mb-1">Prefer to call?</p>
                 <a
                   href="tel:484-643-2225"
-                  className="text-2xl font-bold text-green-700 hover:text-green-800 flex items-center gap-2"
+                  className="text-2xl font-bold text-[#173f35] hover:text-[#0f2b23] flex items-center gap-2"
                 >
                   <Phone size={22} />
                   484-643-2225
                 </a>
-                <p className="text-xs text-gray-400 mt-1">Mon–Fri 7am–6pm · Sat 8am–4pm · 24/7 emergency</p>
+                <p className="text-xs text-[#8b978f] mt-1">Mon–Fri 7am–6pm · Sat 8am–4pm · 24/7 emergency</p>
               </div>
             </div>
             <div>
@@ -132,26 +132,26 @@ export default function BedBugsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">About Bed Bugs</h2>
-              <p className="text-gray-700 mb-4">
+              <h2 className="text-3xl font-bold text-[#203d34] mb-6">About Bed Bugs</h2>
+              <p className="text-[#3f5049] mb-4">
                 Bed bugs (<em>Cimex lectularius</em>) are small, oval, reddish-brown insects that
                 feed exclusively on blood. They don&rsquo;t fly, but move quickly across floors,
                 walls, and ceilings. Females deposit up to 5 eggs per day in tight cracks and
                 crevices — making early treatment critical.
               </p>
-              <p className="text-gray-700 mb-4">
+              <p className="text-[#3f5049] mb-4">
                 Despite their name, bed bugs are found in more than just beds. They hide in sofas,
                 luggage, clothing, electrical outlets, and behind baseboards. They spread easily
                 between hotel rooms, apartments, and homes.
               </p>
-              <p className="text-gray-700">
+              <p className="text-[#3f5049]">
                 The population in the US has resurged dramatically since the 1990s. Pennsylvania
                 cities including Philadelphia, Pittsburgh, and surrounding suburbs consistently
                 rank among the most affected in national surveys.
               </p>
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Bed Bug Services</h2>
+              <h2 className="text-3xl font-bold text-[#203d34] mb-6">Our Bed Bug Services</h2>
               <div className="space-y-4">
                 {[
                   { title: 'Free Quote', desc: 'We thoroughly inspect mattresses, furniture, walls, and all harboring areas.' },
@@ -159,11 +159,11 @@ export default function BedBugsPage() {
                   { title: 'Chemical Treatment', desc: '2-3 visit program using EPA-registered insecticides with residual protection.' },
                   { title: 'Follow-Up Monitoring', desc: 'We schedule follow-up visits to ensure complete elimination.' },
                 ].map(item => (
-                  <div key={item.title} className="flex gap-3 p-4 bg-gray-50 rounded-lg">
+                  <div key={item.title} className="flex gap-3 p-4 bg-[#f7f6f0] rounded-lg">
                     <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0" />
                     <div>
-                      <span className="font-semibold text-gray-900">{item.title}</span>
-                      <p className="text-sm text-gray-600 mt-1">{item.desc}</p>
+                      <span className="font-semibold text-[#203d34]">{item.title}</span>
+                      <p className="text-sm text-[#58665e] mt-1">{item.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -179,26 +179,26 @@ export default function BedBugsPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-16 bg-white border-t border-gray-100">
+      <section className="py-16 bg-white border-t border-[#e9eddf]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-[#203d34] mb-8 text-center">
             Frequently Asked Questions — Bed Bug Treatment
           </h2>
           <div className="space-y-4">
             {faqs.map((faq) => (
               <details
                 key={faq.q}
-                className="group bg-gray-50 border border-gray-200 rounded-xl overflow-hidden"
+                className="group bg-[#f7f6f0] border border-[#e1e5dc] rounded-xl overflow-hidden"
               >
-                <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer list-none font-semibold text-gray-900 text-base hover:bg-gray-100 transition-colors">
+                <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer list-none font-semibold text-[#203d34] text-base hover:bg-[#e9eddf] transition-colors">
                   <span>{faq.q}</span>
-                  <span className="flex-shrink-0 text-green-700 group-open:rotate-180 transition-transform">
+                  <span className="flex-shrink-0 text-[#173f35] group-open:rotate-180 transition-transform">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
                       <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </span>
                 </summary>
-                <div className="px-5 pb-5 text-gray-700 text-sm leading-relaxed border-t border-gray-100 pt-4">
+                <div className="px-5 pb-5 text-[#3f5049] text-sm leading-relaxed border-t border-[#e9eddf] pt-4">
                   {faq.a}
                 </div>
               </details>

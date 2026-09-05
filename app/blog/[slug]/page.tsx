@@ -80,35 +80,35 @@ export default async function BlogPostPage(
   return (
     <>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-gray-800 to-gray-900 text-white py-16">
+      <section className="bg-gradient-to-br from-[#1a332b] to-[#203d34] text-white py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-gray-400 mb-6" aria-label="Breadcrumb">
+          <nav className="text-sm text-[#8b978f] mb-6" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
             <span className="mx-2">/</span>
             <Link href="/blog" className="hover:text-white">Blog</Link>
             <span className="mx-2">/</span>
-            <span className="text-gray-300 truncate">{post.title}</span>
+            <span className="text-[#c7d0cb] truncate">{post.title}</span>
           </nav>
 
           <div className="mb-4 flex items-center gap-3">
-            <span className="text-xs font-semibold text-green-400 bg-green-400/10 px-3 py-1 rounded-full border border-green-400/20">
+            <span className="text-xs font-semibold text-[#9fb896] bg-[#9fb896]/10 px-3 py-1 rounded-full border border-[#9fb896]/20">
               {post.category}
             </span>
-            <span className="text-sm text-gray-400">{formattedDate}</span>
+            <span className="text-sm text-[#8b978f]">{formattedDate}</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-bold leading-tight mb-4">{post.title}</h1>
-          <p className="text-gray-300 text-lg">{post.excerpt}</p>
+          <p className="text-[#c7d0cb] text-lg">{post.excerpt}</p>
 
           {post.author && (
-            <p className="mt-4 text-sm text-gray-400">By <span className="text-white font-medium">{post.author}</span></p>
+            <p className="mt-4 text-sm text-[#8b978f]">By <span className="text-white font-medium">{post.author}</span></p>
           )}
         </div>
       </section>
 
       {/* Featured image */}
       {post.featured_image && (
-        <div className="relative w-full h-64 sm:h-96 bg-gray-100">
+        <div className="relative w-full h-64 sm:h-96 bg-[#e9eddf]">
           <Image
             src={post.featured_image}
             alt={post.title}
@@ -138,9 +138,9 @@ export default async function BlogPostPage(
 
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
-            <div className="mt-10 pt-6 border-t border-gray-100 flex flex-wrap gap-2">
+            <div className="mt-10 pt-6 border-t border-[#e9eddf] flex flex-wrap gap-2">
               {post.tags.map((tag) => (
-                <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                <span key={tag} className="text-xs bg-[#e9eddf] text-[#58665e] px-3 py-1 rounded-full">
                   {tag}
                 </span>
               ))}
@@ -148,8 +148,8 @@ export default async function BlogPostPage(
           )}
 
           {/* Back link */}
-          <div className="mt-10 pt-6 border-t border-gray-100">
-            <Link href="/blog" className="text-green-700 font-medium hover:text-green-800 text-sm">
+          <div className="mt-10 pt-6 border-t border-[#e9eddf]">
+            <Link href="/blog" className="text-[#173f35] font-medium hover:text-[#0f2b23] text-sm">
               ← Back to all posts
             </Link>
           </div>
@@ -157,13 +157,13 @@ export default async function BlogPostPage(
       </section>
 
       {/* CTA */}
-      <section className="py-12 bg-green-50 border-t border-green-100">
+      <section className="py-12 bg-[#eef1e7] border-t border-[#e9eddf]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Have a Pest Problem?</h2>
-          <p className="text-gray-600 mb-6">Call us now — same-day service available in PA &amp; DE.</p>
+          <h2 className="text-2xl font-bold text-[#203d34] mb-4">Have a Pest Problem?</h2>
+          <p className="text-[#58665e] mb-6">Call us now — same-day service available in PA &amp; DE.</p>
           <a
             href="tel:484-643-2225"
-            className="inline-flex items-center gap-3 bg-green-700 hover:bg-green-800 text-white font-bold px-8 py-4 rounded-xl"
+            className="inline-flex items-center gap-3 bg-[#173f35] hover:bg-[#0f2b23] text-white font-bold px-8 py-4 rounded-xl"
           >
             <Phone size={20} />
             484-643-2225

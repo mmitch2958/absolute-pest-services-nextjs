@@ -126,52 +126,52 @@ const serviceAreas = [
 
 export default function CarpenterBeeTreatmentPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f7f6f0]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-green-800 to-green-900 text-white py-20">
+      <section className="relative bg-gradient-to-br from-[#0f2b23] to-[#0a221c] text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-green-300 mb-6" aria-label="Breadcrumb">
+          <nav className="text-sm text-[#c3d6bd] mb-6" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>
             <span className="mx-2">/</span>
             <span className="text-white">Carpenter Bee Treatment</span>
           </nav>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 bg-green-700 text-white text-sm font-semibold px-4 py-2 rounded-full mb-4">
+              <div className="inline-flex items-center gap-2 bg-[#173f35] text-white text-sm font-semibold px-4 py-2 rounded-full mb-4">
                 ☀️ Summer 2026 Service
               </div>
               <h1 className="text-4xl sm:text-5xl font-bold mb-4">
                 Professional Carpenter Bee Treatment for PA &amp; DE Homes
               </h1>
-              <p className="text-xl text-green-100 mb-8">
+              <p className="text-xl text-[#e9eddf] mb-8">
                 Expert inspection, treatment, and prevention — protecting your home from carpenter
                 bee damage, season after season.
               </p>
               {/* Coupon */}
-              <div className="bg-white text-gray-900 rounded-xl p-6 mb-8 border-2 border-amber-400">
-                <p className="text-sm font-semibold text-amber-500 uppercase tracking-wide mb-1">🌸 Spring Special</p>
-                <p className="text-3xl font-bold text-green-700 mb-1">10% OFF Carpenter Bee Treatment</p>
-                <p className="text-lg text-gray-600">
+              <div className="bg-white text-[#203d34] rounded-xl p-6 mb-8 border-2 border-[#9fb896]">
+                <p className="text-sm font-semibold text-[#66845d] uppercase tracking-wide mb-1">🌸 Spring Special</p>
+                <p className="text-3xl font-bold text-[#173f35] mb-1">10% OFF Carpenter Bee Treatment</p>
+                <p className="text-lg text-[#58665e]">
                   Use coupon code:{' '}
-                  <span className="font-mono font-bold text-green-700 text-xl">CBT26</span>
+                  <span className="font-mono font-bold text-[#173f35] text-xl">CBT26</span>
                 </p>
-                <p className="text-sm text-gray-500 mt-1">Valid for new customers booking treatment in PA & DE.</p>
+                <p className="text-sm text-[#6b7b72] mt-1">Valid for new customers booking treatment in PA & DE.</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
                 <a
                   href="#contact-form"
-                  className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-white px-8 py-4 text-lg font-semibold rounded-xl"
+                  className="inline-flex items-center gap-2 bg-[#66845d] hover:bg-[#9fb896] text-white px-8 py-4 text-lg font-semibold rounded-xl"
                 >
                   <Calendar className="h-5 w-5" />
                   Get Free Estimate ↓
                 </a>
                 <a
                   href="tel:484-643-2225"
-                  className="inline-flex items-center gap-2 border-2 border-white text-white hover:bg-white hover:text-green-900 px-8 py-4 text-lg font-semibold rounded-xl transition-colors"
+                  className="inline-flex items-center gap-2 border-2 border-white text-white hover:bg-white hover:text-[#0a221c] px-8 py-4 text-lg font-semibold rounded-xl transition-colors"
                 >
                   <Phone className="h-5 w-5" />
                   484-643-2225
@@ -196,20 +196,20 @@ export default function CarpenterBeeTreatmentPage() {
       {/* Treatment Process */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">How APS Treats Carpenter Bees</h2>
-          <p className="text-lg text-gray-600 text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-3xl font-bold text-[#1a332b] mb-4 text-center">How APS Treats Carpenter Bees</h2>
+          <p className="text-lg text-[#58665e] text-center max-w-2xl mx-auto mb-12">
             Our carpenter bee treatment is designed to eliminate the current infestation and prevent future damage.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {steps.map(({ step, title, desc, warning }) => (
-              <div key={step} className="bg-gray-50 rounded-2xl p-6">
-                <div className="w-12 h-12 bg-green-700 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">
+              <div key={step} className="bg-[#f7f6f0] rounded-2xl p-6">
+                <div className="w-12 h-12 bg-[#173f35] text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">
                   {step}
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-3">{title}</h3>
-                <p className="text-gray-600 text-sm mb-3">{desc}</p>
+                <h3 className="text-xl font-bold text-[#1a332b] mb-3">{title}</h3>
+                <p className="text-[#58665e] text-sm mb-3">{desc}</p>
                 {warning && (
-                  <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 p-3 rounded-lg">
+                  <p className="text-sm text-[#285748] bg-[#eef1e7] border border-[#d7ded3] p-3 rounded-lg">
                     {warning}
                   </p>
                 )}
@@ -229,9 +229,9 @@ export default function CarpenterBeeTreatmentPage() {
       </section>
 
       {/* What Makes APS Different */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#f7f6f0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">What Makes APS Different</h2>
+          <h2 className="text-3xl font-bold text-[#1a332b] mb-10 text-center">What Makes APS Different</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[
               {
@@ -251,14 +251,14 @@ export default function CarpenterBeeTreatmentPage() {
                 desc: 'Our treatment plans span the full carpenter bee season (spring through late summer), not just a single visit. We treat overwintered adults in April/May and newly emerged adults in July/August.',
               },
             ].map(({ title, desc }) => (
-              <div key={title} className="bg-white rounded-2xl p-6 border border-gray-100">
+              <div key={title} className="bg-white rounded-2xl p-6 border border-[#e9eddf]">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-[#173f35] rounded-full flex items-center justify-center flex-shrink-0">
                     <CheckCircle className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-800 mb-2">{title}</h3>
-                    <p className="text-gray-600 text-sm">{desc}</p>
+                    <h3 className="font-bold text-[#1a332b] mb-2">{title}</h3>
+                    <p className="text-[#58665e] text-sm">{desc}</p>
                   </div>
                 </div>
               </div>
@@ -270,24 +270,24 @@ export default function CarpenterBeeTreatmentPage() {
       {/* Service Areas */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Service Areas</h2>
-          <p className="text-lg text-gray-600 mb-8">
+          <h2 className="text-3xl font-bold text-[#1a332b] mb-6">Service Areas</h2>
+          <p className="text-lg text-[#58665e] mb-8">
             APS provides carpenter bee treatment throughout southeastern Pennsylvania and northeastern Delaware.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {serviceAreas.map(({ region, areas }) => (
               <div key={region}>
-                <h3 className="text-xl font-bold text-green-700 mb-4">{region}</h3>
+                <h3 className="text-xl font-bold text-[#173f35] mb-4">{region}</h3>
                 {areas.map(({ county, towns }) => (
                   <div key={county} className="mb-4">
-                    <h4 className="font-semibold text-gray-800 mb-1">{county}</h4>
-                    <p className="text-gray-600 text-sm">{towns}</p>
+                    <h4 className="font-semibold text-[#1a332b] mb-1">{county}</h4>
+                    <p className="text-[#58665e] text-sm">{towns}</p>
                   </div>
                 ))}
               </div>
             ))}
           </div>
-          <p className="mt-6 text-gray-500 text-sm flex items-center gap-2">
+          <p className="mt-6 text-[#6b7b72] text-sm flex items-center gap-2">
             <MapPin className="w-4 h-4" />
             Don&apos;t see your town listed? We likely still serve your area. Call us to confirm.
           </p>
@@ -295,10 +295,10 @@ export default function CarpenterBeeTreatmentPage() {
       </section>
 
       {/* Pricing */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#f7f6f0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Pricing &amp; Estimates</h2>
-          <p className="text-lg text-gray-600 mb-6">Every carpenter bee infestation is different. The cost of treatment depends on:</p>
+          <h2 className="text-3xl font-bold text-[#1a332b] mb-6">Pricing &amp; Estimates</h2>
+          <p className="text-lg text-[#58665e] mb-6">Every carpenter bee infestation is different. The cost of treatment depends on:</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             {[
               { label: 'Number of gallery locations', desc: 'How many boring sites need treatment' },
@@ -307,21 +307,21 @@ export default function CarpenterBeeTreatmentPage() {
               { label: 'Wood condition', desc: 'Whether damage requires repair or just treatment' },
             ].map(({ label, desc }) => (
               <div key={label} className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-700 flex-shrink-0 mt-0.5" />
+                <CheckCircle className="w-5 h-5 text-[#173f35] flex-shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-gray-800">{label}</strong>
-                  <p className="text-gray-600 text-sm">{desc}</p>
+                  <strong className="text-[#1a332b]">{label}</strong>
+                  <p className="text-[#58665e] text-sm">{desc}</p>
                 </div>
               </div>
             ))}
           </div>
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
-            <h3 className="text-xl font-bold text-gray-800 mb-2">We provide free estimates.</h3>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-[#eef1e7] border border-[#dbe6d6] rounded-2xl p-8 text-center">
+            <h3 className="text-xl font-bold text-[#1a332b] mb-2">We provide free estimates.</h3>
+            <p className="text-[#58665e] mb-6">
               Call us or contact us online to schedule an inspection. We&apos;ll assess your situation,
               explain our recommended treatment plan, and provide a clear estimate before any work begins.
             </p>
-            <p className="text-lg text-gray-700 font-medium">
+            <p className="text-lg text-[#3f5049] font-medium">
               <strong>The bottom line:</strong> Professional carpenter bee treatment is a fraction of the
               cost of repairing structural damage from years of untreated infestation. Acting now saves money later.
             </p>
@@ -330,35 +330,35 @@ export default function CarpenterBeeTreatmentPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-green-700">
+      <section className="py-16 bg-[#173f35]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-white rounded-xl p-6 mb-8 inline-block border-2 border-amber-400">
-            <p className="text-sm font-semibold text-amber-500 uppercase tracking-wide mb-1">Spring Special</p>
-            <p className="text-2xl font-bold text-green-700">10% OFF with code CBT26</p>
+          <div className="bg-white rounded-xl p-6 mb-8 inline-block border-2 border-[#9fb896]">
+            <p className="text-sm font-semibold text-[#66845d] uppercase tracking-wide mb-1">Spring Special</p>
+            <p className="text-2xl font-bold text-[#173f35]">10% OFF with code CBT26</p>
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">Ready to Get Started?</h2>
-          <p className="text-xl text-green-100 mb-8">
+          <p className="text-xl text-[#e9eddf] mb-8">
             Don&apos;t wait for the damage to get worse. Carpenter bees are active right now in PA &amp; DE,
             and every day counts.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/request-service"
-              className="inline-flex items-center gap-2 bg-white text-green-700 hover:bg-green-50 font-bold px-8 py-4 text-lg rounded-xl"
+              className="inline-flex items-center gap-2 bg-white text-[#173f35] hover:bg-[#eef1e7] font-bold px-8 py-4 text-lg rounded-xl"
             >
               <Calendar className="h-5 w-5" />
               Get Free Estimate
             </Link>
             <a
               href="tel:484-643-2225"
-              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold px-8 py-4 text-lg rounded-xl"
+              className="inline-flex items-center gap-2 bg-[#66845d] hover:bg-[#9fb896] text-white font-bold px-8 py-4 text-lg rounded-xl"
             >
               <Phone className="h-5 w-5" />
               484-643-2225
             </a>
           </div>
-          <p className="mt-6 text-green-200 text-sm">Same-day and next-day appointments available during peak season.</p>
-          <p className="mt-2 text-green-200 text-sm">
+          <p className="mt-6 text-[#dbe6d6] text-sm">Same-day and next-day appointments available during peak season.</p>
+          <p className="mt-2 text-[#dbe6d6] text-sm">
             Also see:{' '}
             <Link href="/carpenter-bee-control" className="underline hover:text-white">
               Carpenter Bee Identification &amp; Info →
