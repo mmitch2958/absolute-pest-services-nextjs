@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { FileText, ExternalLink, Loader2 } from 'lucide-react';
+import { FileText, ExternalLink, Loader2, ClipboardList } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -64,6 +64,16 @@ const emptyForm: ClientFormData = {
   status: 'active',
   notes: '',
   reviewOptOut: false,
+};
+interface ClientJob {
+  id: number;
+  jobDate: string;
+  servicedArea: string;
+  siteLocation: string;
+  status: string;
+  amount: string | null;
+  employeeName: string | null;
+  invoice: { id: number; invoiceNumber: string; status: string; total: string } | null;
 };
 
 function ClientModal({
@@ -328,6 +338,9 @@ export default function ClientsPage() {
   const [loadingInvoices, setLoadingInvoices] = useState<Record<number, boolean>>({});
   const [showInvoicePanel, setShowInvoicePanel] = useState(false);
   const [selectedClientForInvoices, setSelectedClientForInvoices] = useState<Client | null>(null);
+  const [panelTab, setPanelTab] = useState<'jobs' | 'invoices'>('invoices');
+  const [clientJobs, setClientJobs] = useState<Record<number, ClientJob[]>>({});
+  const [loadingJobs, setLoadingJobs] = useState<Record<number, boolean>>({});
 
   async function fetchInvoicesForClient(clientId: number) {
     if (clientInvoices[clientId]) return; // already loaded
@@ -341,10 +354,27 @@ export default function ClientsPage() {
     }
   }
 
-  function openClientInvoices(client: Client) {
+  async function fetchJobsForClient(clientId: number) {
+    if (clientJobs[clientId]) return; // already loaded
+    setLoadingJobs(prev => ({ ...prev, [clientId]: true }));
+    try {
+      const res = await fetch(`/api/admin/clients/${clientId}/job-logs`);
+      const data = await res.json();
+      setClientJobs(prev => ({ ...prev, [clientId]: data.jobLogs || [] }));
+    } catch {} finally {
+      setLoadingJobs(prev => ({ ...prev, [clientId]: false }));
+    }
+  }
+
+  function openClientPanel(client: Client, tab: 'jobs' | 'invoices') {
     setSelectedClientForInvoices(client);
+    setPanelTab(tab);
     setShowInvoicePanel(true);
-    fetchInvoicesForClient(client.id);
+    if (tab === 'invoices') {
+      fetchInvoicesForClient(client.id);
+    } else {
+      fetchJobsForClient(client.id);
+    }
   }
 
   function getClientOutstanding(clientId: number): string {
@@ -520,7 +550,13 @@ export default function ClientsPage() {
                     <td className="px-4 py-3">{statusBadge(client.status)}</td>
                     <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <button
-                        onClick={() => openClientInvoices(client)}
+                        onClick={() => openClientPanel(client, 'jobs')}
+                        className="text-purple-600 hover:text-purple-800 text-xs font-medium mr-3 inline-flex items-center gap-1"
+                      >
+                        <ClipboardList className="w-3 h-3" />Jobs
+                      </button>
+                      <button
+                        onClick={() => openClientPanel(client, 'invoices')}
                         className="text-blue-600 hover:text-blue-800 text-xs font-medium mr-3 inline-flex items-center gap-1"
                       >
                         <FileText className="w-3 h-3" />Invoices
@@ -593,10 +629,21 @@ export default function ClientsPage() {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl my-8">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Invoices — {selectedClientForInvoices.name}</h2>
-                <p className="text-xs text-gray-500">
-                  Outstanding: ${getClientOutstanding(selectedClientForInvoices.id)}
-                </p>
+                <h2 className="text-lg font-semibold text-gray-900">{selectedClientForInvoices.name}</h2>
+                <div className="flex gap-2 mt-1">
+                  <button
+                    onClick={() => { setPanelTab('jobs'); fetchJobsForClient(selectedClientForInvoices.id); }}
+                    className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${panelTab === 'jobs' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                  >
+                    Jobs
+                  </button>
+                  <button
+                    onClick={() => { setPanelTab('invoices'); fetchInvoicesForClient(selectedClientForInvoices.id); }}
+                    className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${panelTab === 'invoices' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                  >
+                    Invoices {panelTab === 'invoices' && <span className="opacity-75">· Outstanding: ${getClientOutstanding(selectedClientForInvoices.id)}</span>}
+                  </button>
+                </div>
               </div>
               <button
                 onClick={() => { setShowInvoicePanel(false); setSelectedClientForInvoices(null); }}
@@ -608,7 +655,63 @@ export default function ClientsPage() {
               </button>
             </div>
             <div className="p-6">
-              {loadingInvoices[selectedClientForInvoices.id] ? (
+              {panelTab === 'jobs' ? (
+                loadingJobs[selectedClientForInvoices.id] ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                  </div>
+                ) : (clientJobs[selectedClientForInvoices.id] || []).length === 0 ? (
+                  <div className="text-center py-8 text-gray-400">
+                    <ClipboardList className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm">No job logs found for this client</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {(clientJobs[selectedClientForInvoices.id] || []).map((job: ClientJob) => {
+                      const jobStatusColors: Record<string, string> = {
+                        scheduled: 'bg-blue-100 text-blue-700',
+                        in_progress: 'bg-yellow-100 text-yellow-700',
+                        completed: 'bg-green-100 text-green-700',
+                        invoiced: 'bg-orange-100 text-orange-700',
+                        paid: 'bg-purple-100 text-purple-700',
+                        cancelled: 'bg-gray-100 text-gray-500',
+                      };
+                      return (
+                        <div
+                          key={job.id}
+                          className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {job.servicedArea}{job.siteLocation ? ` — ${job.siteLocation}` : ''}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(job.jobDate).toLocaleDateString()}
+                              {job.employeeName ? ` · ${job.employeeName}` : ''}
+                            </p>
+                            {job.invoice ? (
+                              <a
+                                href={`/admin/invoices/${job.invoice.id}/preview`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-green-700 font-medium hover:text-green-900 inline-flex items-center gap-1 mt-1"
+                              >
+                                {job.invoice.invoiceNumber} <ExternalLink className="w-3 h-3" />
+                              </a>
+                            ) : null}
+                          </div>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${jobStatusColors[job.status] || 'bg-gray-100 text-gray-700'}`}>
+                              {job.status}
+                            </span>
+                            <span className="text-sm font-bold text-gray-900">${parseFloat(job.amount || '0').toFixed(2)}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )
+              ) : loadingInvoices[selectedClientForInvoices.id] ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
                 </div>

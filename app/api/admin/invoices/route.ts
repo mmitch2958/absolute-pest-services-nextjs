@@ -6,6 +6,8 @@ import {
   dueDateFor,
   generateInvoiceNumber,
   newViewToken,
+  createInvoiceForJobLog,
+  InvoiceCreationError,
   type LineItemInput,
 } from '@/lib/invoices'
 
@@ -25,6 +27,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const clientId = searchParams.get('clientId')
+    const jobLogId = searchParams.get('jobLogId')
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
     const limit = Math.min(200, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)))
     const offset = (page - 1) * limit
@@ -42,6 +45,7 @@ export async function GET(request: NextRequest) {
       JOIN clients c ON c.id = i.client_id
       WHERE (${status}::text IS NULL OR i.status = ${status})
         AND (${clientId ? Number(clientId) : null}::int IS NULL OR i.client_id = ${clientId ? Number(clientId) : null})
+        AND (${jobLogId ? Number(jobLogId) : null}::int IS NULL OR i.job_log_id = ${jobLogId ? Number(jobLogId) : null})
       ORDER BY i.created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `) as any[]
@@ -85,49 +89,20 @@ export async function POST(request: NextRequest) {
 
     // ---- Mode 1: From job log ----
     if (jobLogId) {
-      const jl = (await sql`
-        SELECT j.id, j.client_id, j.customer_name, j.amount, j.work_performed,
-               j.serviced_area, j.site_address, j.site_location, j.job_date,
-               j.materials, fe.name AS technician_name,
-               c.property_type
-        FROM job_logs j
-        LEFT JOIN field_employees fe ON fe.id = j.employee_id
-        LEFT JOIN clients c ON c.id = j.client_id
-        WHERE j.id = ${Number(jobLogId)}
-        LIMIT 1
-      `) as any[]
-
-      if (jl.length === 0) {
-        return NextResponse.json({ error: 'Job log not found' }, { status: 404 })
-      }
-      const job = jl[0]
-      if (!job.client_id) {
-        return NextResponse.json({
-          error: 'This job log has no linked client. Open it in admin and link a client first, or create the invoice manually.',
-        }, { status: 400 })
-      }
-
-      resolvedJobLogId = job.id
-      resolvedClientId = job.client_id
-      propertyType = job.property_type || 'residential'
-
-      // Allow caller to override line items (e.g. tech edits the amount); else build a single line from the job
-      if (Array.isArray(lineItemsOverride) && lineItemsOverride.length > 0) {
-        items = lineItemsOverride
-      } else {
-        items = [{
-          description: `${job.serviced_area} — ${job.site_location}`.trim(),
-          quantity: 1,
-          unitRate: job.amount ?? '0',
-          taxRate: taxRate ?? 0,
-          jobLogId: job.id,
-          serviceDate: job.job_date,
-          technicianName: job.technician_name,
-          serviceType: job.serviced_area,
-          serviceAddress: job.site_address,
-          servicedArea: job.serviced_area,
-          materials: job.materials,
-        }]
+      try {
+        const invoice = await createInvoiceForJobLog({
+          jobLogId: Number(jobLogId),
+          userId,
+          taxRate: taxRate ?? null,
+          notes: notes ?? null,
+          lineItemsOverride: Array.isArray(lineItemsOverride) ? lineItemsOverride : null,
+        })
+        return NextResponse.json({ invoice }, { status: 201 })
+      } catch (err: any) {
+        if (err instanceof InvoiceCreationError) {
+          return NextResponse.json({ error: err.message }, { status: err.status })
+        }
+        throw err
       }
     }
     // ---- Mode 3: New client ----

@@ -27,6 +27,8 @@ interface JobLog {
 
 interface Employee { id: number; name: string; }
 
+interface ClientOption { id: number; name: string; }
+
 interface JobLogInvoice {
   id: number;
   invoiceNumber: string;
@@ -75,15 +77,18 @@ function formatMaterials(materials: any): string | null {
   return null;
 }
 
-function RowDetail({ log, employees, onStatusChange, onDelete, onInvoiceGenerated }: {
+function RowDetail({ log, employees, clients, onStatusChange, onClientChange, onDelete, onInvoiceGenerated }: {
   log: JobLog;
   employees: Employee[];
+  clients: ClientOption[];
   onStatusChange: (id: number, status: string) => Promise<void>;
+  onClientChange: (id: number, clientId: number | null) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
   onInvoiceGenerated: (invoiceId: number) => void;
 }) {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [clientSaving, setClientSaving] = useState(false);
   const [adminNotes, setAdminNotes] = useState(log.admin_notes || '');
   const [notesSaving, setNotesSaving] = useState(false);
   const [showInvoicePrompt, setShowInvoicePrompt] = useState(false);
@@ -261,6 +266,26 @@ function RowDetail({ log, employees, onStatusChange, onDelete, onInvoiceGenerate
         )}
 
         <div>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1"><User className="w-3 h-3" />Linked Client</p>
+          <select
+            value={log.client_id ?? ''}
+            disabled={clientSaving}
+            onChange={(e) => {
+              const v = e.target.value;
+              setClientSaving(true);
+              onClientChange(log.id, v === '' ? null : parseInt(v, 10)).finally(() => setClientSaving(false));
+            }}
+            className="w-full text-sm border border-slate-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-green-500/50"
+          >
+            <option value="">— No linked client —</option>
+            {clients.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          <p className="text-xs text-slate-400 mt-1">Linking a client lets invoices from this job appear in the client&apos;s account.</p>
+        </div>
+
+        <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Update Status</p>
           <div className="flex flex-wrap gap-1.5">
             {validStatuses.map(s => (
@@ -316,6 +341,7 @@ function RowDetail({ log, employees, onStatusChange, onDelete, onInvoiceGenerate
 export default function JobLogsPage() {
   const [logs, setLogs] = useState<JobLog[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [clients, setClients] = useState<ClientOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -349,6 +375,18 @@ export default function JobLogsPage() {
 
   useEffect(() => { fetchLogs(); }, []);
 
+  // Fetch clients once for the link-client selector
+  useEffect(() => {
+    async function fetchClients() {
+      try {
+        const res = await fetch('/api/admin/clients?limit=200');
+        const data = await res.json();
+        setClients(data.clients || []);
+      } catch {}
+    }
+    fetchClients();
+  }, []);
+
   // Fetch invoices for all expanded or invoiced logs to show invoice column
   useEffect(() => {
     async function fetchInvoicesForLogs() {
@@ -378,6 +416,17 @@ export default function JobLogsPage() {
     });
     if (!res.ok) throw new Error('Update failed');
     setLogs(prev => prev.map(l => l.id === id ? { ...l, status } : l));
+  }
+
+  async function handleClientChange(id: number, clientId: number | null) {
+    const res = await fetch(`/api/admin/job-logs/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId }),
+    });
+    if (!res.ok) throw new Error('Client link failed');
+    const client = clients.find(c => c.id === clientId);
+    setLogs(prev => prev.map(l => l.id === id ? { ...l, client_id: clientId, client_name: client?.name ?? null } : l));
   }
 
   async function handleDelete(id: number) {
@@ -565,7 +614,9 @@ export default function JobLogsPage() {
                   <RowDetail
                     log={log}
                     employees={employees}
+                    clients={clients}
                     onStatusChange={handleStatusChange}
+                    onClientChange={handleClientChange}
                     onDelete={handleDelete}
                     onInvoiceGenerated={handleInvoiceGenerated}
                   />

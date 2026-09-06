@@ -20,7 +20,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (isNaN(jobId)) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
 
     const body = await request.json();
-    const { status, adminNotes } = body;
+    const { status, adminNotes, clientId } = body;
 
     const validStatuses = ['scheduled', 'in_progress', 'completed', 'invoiced', 'paid', 'cancelled'];
 
@@ -28,15 +28,38 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
 
-    if (status !== undefined && adminNotes !== undefined) {
-      await sql`UPDATE job_logs SET status = ${status}, admin_notes = ${adminNotes} WHERE id = ${jobId}`;
-    } else if (status !== undefined) {
-      await sql`UPDATE job_logs SET status = ${status} WHERE id = ${jobId}`;
-    } else if (adminNotes !== undefined) {
-      await sql`UPDATE job_logs SET admin_notes = ${adminNotes} WHERE id = ${jobId}`;
+    // Build dynamic update set
+    const updates: Record<string, any> = {};
+    if (status !== undefined) updates.status = status;
+    if (adminNotes !== undefined) updates.admin_notes = adminNotes;
+    if (clientId !== undefined) {
+      // Accept a client id (number or numeric string) or null/'' to unlink
+      if (clientId === null || clientId === '') {
+        updates.client_id = null;
+      } else {
+        const cid = typeof clientId === 'number' ? clientId : parseInt(String(clientId), 10);
+        if (isNaN(cid)) {
+          return NextResponse.json({ error: 'Invalid clientId' }, { status: 400 });
+        }
+        const [client] = await sql`SELECT id FROM clients WHERE id = ${cid} LIMIT 1`;
+        if (!client) {
+          return NextResponse.json({ error: 'Client not found' }, { status: 404 });
+        }
+        updates.client_id = cid;
+      }
     }
 
-    const [updated] = await sql`SELECT * FROM job_logs WHERE id = ${jobId}`;
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+    }
+
+    const cols = Object.keys(updates);
+    const vals = Object.values(updates);
+    const setClause = cols.map((c, i) => `${c} = $${i + 1}`).join(', ');
+    const query = `UPDATE job_logs SET ${setClause} WHERE id = $${cols.length + 1} RETURNING *`;
+    const result = await sql.query(query, [...vals, jobId]);
+
+    const updated = result && result.length > 0 ? result[0] : null;
     return NextResponse.json({ success: true, log: updated });
   } catch (err) {
     console.error('[admin/job-logs/:id] PATCH error:', err);
