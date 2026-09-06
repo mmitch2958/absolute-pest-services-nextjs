@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Pencil, Trash2, Building2, Home, UserCheck, Filter, CheckCircle2, Clock } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2, Home, UserCheck, Filter, CheckCircle2, Clock, Eye, FileText, ClipboardList, Loader2, X } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,8 +28,147 @@ const clientFormSchema = insertClientSchema.extend({
 
 type ClientFormData = z.infer<typeof clientFormSchema>;
 
+function invoiceStatusBadgeClass(status: string): string {
+  switch (status.toLowerCase()) {
+    case 'sent': return 'bg-blue-100 text-blue-800';
+    case 'viewed': return 'bg-purple-100 text-purple-800';
+    case 'paid': return 'bg-green-100 text-green-800';
+    case 'overdue': return 'bg-red-100 text-red-800';
+    case 'void': return 'bg-gray-100 text-gray-800';
+    default: return 'bg-yellow-100 text-yellow-800';
+  }
+}
+
+function safeFormatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return "—";
+  try {
+    return new Date(String(dateStr)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch {
+    return "—";
+  }
+}
+
+function ClientJobsPanel({ clientId }: { clientId: number }) {
+  const { data, isLoading } = useQuery<{ success: boolean; jobLogs: any[] }>({
+    queryKey: [`/api/clients/${clientId}/job-logs`],
+  });
+  const jobs = data?.jobLogs || [];
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8" data-testid={`loading-client-jobs-${clientId}`}>
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+  if (jobs.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground" data-testid={`empty-client-jobs-${clientId}`}>
+        <ClipboardList className="w-10 h-10 mx-auto mb-3 opacity-40" />
+        <p>No job logs linked to this client yet.</p>
+        <p className="text-sm">Jobs logged in the field for this customer will appear here.</p>
+      </div>
+    );
+  }
+  return (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Date</TableHead>
+            <TableHead>Location</TableHead>
+            <TableHead>Work Performed</TableHead>
+            <TableHead>Area</TableHead>
+            <TableHead className="text-right">Amount</TableHead>
+            <TableHead>Status</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {jobs.map((job) => (
+            <TableRow key={job.id} data-testid={`row-client-job-${job.id}`}>
+              <TableCell className="whitespace-nowrap">{safeFormatDate(job.jobDate)}</TableCell>
+              <TableCell>{job.siteLocation}</TableCell>
+              <TableCell className="max-w-xs truncate" title={job.workPerformed}>{job.workPerformed}</TableCell>
+              <TableCell>{job.servicedArea}</TableCell>
+              <TableCell className="text-right">${Number(job.amount ?? 0).toFixed(2)}</TableCell>
+              <TableCell><Badge variant="outline">{job.status}</Badge></TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+function ClientInvoicesPanel({ clientId }: { clientId: number }) {
+  const [, setLocation] = useLocation();
+  const { data, isLoading } = useQuery<{ success: boolean; invoices: any[] }>({
+    queryKey: [`/api/clients/${clientId}/invoices`],
+  });
+  const invoices = data?.invoices || [];
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8" data-testid={`loading-client-invoices-${clientId}`}>
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+  if (invoices.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground" data-testid={`empty-client-invoices-${clientId}`}>
+        <FileText className="w-10 h-10 mx-auto mb-3 opacity-40" />
+        <p>No invoices for this client yet.</p>
+        <p className="text-sm">Invoices created from this client’s job logs will appear here.</p>
+      </div>
+    );
+  }
+  return (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Invoice #</TableHead>
+            <TableHead>Issued</TableHead>
+            <TableHead>Due</TableHead>
+            <TableHead className="text-right">Total</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="w-[60px]"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {invoices.map((invoice) => (
+            <TableRow key={invoice.id} data-testid={`row-client-invoice-${invoice.id}`}>
+              <TableCell className="font-medium">#{invoice.invoiceNumber}</TableCell>
+              <TableCell className="whitespace-nowrap">{safeFormatDate(invoice.issueDate)}</TableCell>
+              <TableCell className="whitespace-nowrap">{safeFormatDate(invoice.dueDate)}</TableCell>
+              <TableCell className="text-right">${Number(invoice.total ?? 0).toFixed(2)}</TableCell>
+              <TableCell>
+                <Badge variant="outline" className={invoiceStatusBadgeClass(invoice.status)}>{invoice.status}</Badge>
+              </TableCell>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLocation(`/admin/invoices/${invoice.id}`)}
+                  data-testid={`button-view-invoice-${invoice.id}`}
+                  title="View invoice"
+                >
+                  <Eye className="w-4 h-4" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
 export function ClientManagement() {
+  const [, setLocation] = useLocation();
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [detailClient, setDetailClient] = useState<Client | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [filterType, setFilterType] = useState<"all" | "pending" | "prospect" | "client">("all");
   const [filterPropertyType, setFilterPropertyType] = useState<"all" | "residential" | "commercial">("all");
@@ -210,6 +351,10 @@ export function ClientManagement() {
     if (confirm("Are you sure you want to delete this client?")) {
       deleteClientMutation.mutate(id);
     }
+  };
+
+  const handleOpenDetails = (client: Client) => {
+    setDetailClient(client);
   };
 
   const handleDialogClose = () => {
@@ -607,9 +752,15 @@ export function ClientManagement() {
                     <TableRow key={client.id} data-testid={`row-client-${client.id}`}>
                       <TableCell>
                         <div>
-                          <div className="font-medium" data-testid={`text-client-name-${client.id}`}>
+                          <button
+                            type="button"
+                            className="font-medium text-left underline-offset-4 hover:underline"
+                            onClick={() => handleOpenDetails(client)}
+                            data-testid={`link-client-details-${client.id}`}
+                            title="View jobs & invoices"
+                          >
                             {client.name}
-                          </div>
+                          </button>
                           <div className="text-sm text-muted-foreground" data-testid={`text-client-email-${client.id}`}>
                             {client.email}
                           </div>
@@ -689,6 +840,54 @@ export function ClientManagement() {
           )}
         </CardContent>
       </Card>
+
+      {detailClient && (
+        <Card data-testid="client-detail-panel">
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="w-5 h-5" />
+                  {detailClient.name}
+                </CardTitle>
+                <CardDescription>
+                  Jobs and invoices linked to this client
+                </CardDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setDetailClient(null)}
+                data-testid="button-close-client-details"
+                title="Close details"
+              >
+                <X className="w-4 h-4" />
+                <span className="sr-only">Close</span>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="jobs">
+              <TabsList>
+                <TabsTrigger value="jobs" className="flex items-center gap-1.5" data-testid="tab-client-jobs">
+                  <ClipboardList className="w-4 h-4" />
+                  Jobs
+                </TabsTrigger>
+                <TabsTrigger value="invoices" className="flex items-center gap-1.5" data-testid="tab-client-invoices">
+                  <FileText className="w-4 h-4" />
+                  Invoices
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="jobs" className="mt-4">
+                <ClientJobsPanel clientId={detailClient.id} />
+              </TabsContent>
+              <TabsContent value="invoices" className="mt-4">
+                <ClientInvoicesPanel clientId={detailClient.id} />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

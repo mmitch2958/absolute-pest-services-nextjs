@@ -1206,6 +1206,7 @@ var init_sms = __esm({
 
 // server/index.ts
 import express2 from "express";
+import path4 from "path";
 
 // server/routes.ts
 import { createServer } from "http";
@@ -4396,14 +4397,18 @@ import autoTable from "jspdf-autotable";
 import path from "path";
 import fs from "fs";
 async function registerRoutes(app2) {
+  const isProduction = process.env.NODE_ENV === "production";
+  if (isProduction) {
+    app2.set("trust proxy", 1);
+  }
   app2.use(session({
     secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false,
-      // Set to true in production with HTTPS
+      secure: isProduction,
       httpOnly: true,
+      sameSite: "lax",
       maxAge: 24 * 60 * 60 * 1e3
       // 24 hours
     }
@@ -4834,6 +4839,36 @@ Description: ${validatedData.description}`,
       });
     }
   });
+  let cachedReviewData = null;
+  const REVIEW_CACHE_TTL = 36e5;
+  app2.get("/api/google-reviews", async (req, res) => {
+    try {
+      if (cachedReviewData && Date.now() - cachedReviewData.fetchedAt < REVIEW_CACHE_TTL) {
+        return res.json(cachedReviewData);
+      }
+      const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+      const placeId = "ChIJAAAAAAAAAAARN46yHZs0fVk";
+      if (!apiKey) {
+        return res.json({ reviewCount: 29, rating: 5, fetchedAt: Date.now() });
+      }
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=user_ratings_total,rating&key=${apiKey}`
+      );
+      const data = await response.json();
+      if (data.result) {
+        cachedReviewData = {
+          reviewCount: data.result.user_ratings_total || 29,
+          rating: data.result.rating || 5,
+          fetchedAt: Date.now()
+        };
+        return res.json(cachedReviewData);
+      }
+      res.json({ reviewCount: 29, rating: 5, fetchedAt: Date.now() });
+    } catch (error) {
+      console.error("Error fetching Google review count:", error);
+      res.json({ reviewCount: 29, rating: 5, fetchedAt: Date.now() });
+    }
+  });
   app2.post("/api/contact", async (req, res) => {
     try {
       const captchaToken = req.body.captchaToken;
@@ -5081,6 +5116,26 @@ Message: ${validatedData.message}` : ""}`,
       res.json({ success: true, project });
     } catch (error) {
       console.error("Error fetching project:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+  app2.get("/api/clients/:clientId/job-logs", requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const jobLogs2 = await storage.getJobLogs({ clientId });
+      res.json({ success: true, jobLogs: jobLogs2 });
+    } catch (error) {
+      console.error("Error fetching client job logs:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+  app2.get("/api/clients/:clientId/invoices", requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const invoices2 = await storage.listInvoices({ clientId });
+      res.json({ success: true, invoices: invoices2 });
+    } catch (error) {
+      console.error("Error fetching client invoices:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });
@@ -5370,13 +5425,22 @@ Message: ${validatedData.message}` : ""}`,
           ]
         }
       });
+      console.log(`RSS Syndication: Fetching feed from ${feedUrl}`);
       const feed = await parser.parseURL(feedUrl);
+      console.log(`RSS Syndication: Found ${feed.items?.length || 0} items in feed "${feed.title || "Untitled"}"`);
       const results = {
         imported: 0,
         skipped: 0,
         errors: 0,
         details: []
       };
+      if (!feed.items || feed.items.length === 0) {
+        return res.json({
+          success: true,
+          message: "Feed was fetched successfully but contained no articles.",
+          results
+        });
+      }
       for (const item of feed.items) {
         try {
           const slug = item.title?.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim() || "";
@@ -5473,236 +5537,291 @@ Message: ${validatedData.message}` : ""}`,
       });
     }
   });
-  app2.post("/api/admin/blog/generate-post", requireAdmin, async (req, res) => {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      res.status(503).json({ success: false, message: "OPENAI_API_KEY is not configured on the server." });
-      return;
-    }
-    const { topic } = req.body;
-    if (!topic || typeof topic !== "string" || topic.trim().length < 3) {
-      res.status(400).json({ success: false, message: "A topic (string, min 3 chars) is required." });
-      return;
-    }
-    const systemPrompt = `You are an expert content writer for a pest control company called Absolute Pest Services, serving Pennsylvania, Delaware, and Maryland. Write a comprehensive, SEO-friendly blog post. Return ONLY valid JSON with this exact structure:
-{
-  "title": "SEO-optimized blog post title (60 chars or less)",
-  "excerpt": "A compelling 1-2 sentence excerpt for the blog card/preview (max 200 chars)",
-  "content": "Full HTML blog post content (600+ words) with proper h2/h3 headings, paragraphs, lists, and bold text. Make it informative and local to the service area.",
-  "metaDescription": "SEO meta description (max 160 chars)",
-  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
-  "category": "One relevant category like 'Pest Prevention', 'Wildlife', 'Termites', 'Bed Bugs', 'Rodents', 'General Pest'"
-}`;
-    const userPrompt = `Write a blog post about: ${topic.trim()}. Include practical tips homeowners can use, signs they have the pest problem, and why to call a professional.`;
+  app2.post("/api/admin/blog/research-topics", requireAdmin, async (req, res) => {
     try {
-      const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      const currentMonth = (/* @__PURE__ */ new Date()).getMonth();
+      const season = currentMonth >= 2 && currentMonth <= 4 ? "spring" : currentMonth >= 5 && currentMonth <= 7 ? "summer" : currentMonth >= 8 && currentMonth <= 10 ? "fall" : "winter";
+      const allTopics = [
+        // Insect/Pest specific
+        {
+          id: 1,
+          title: "10 Warning Signs You Have a Bed Bug Infestation",
+          category: "Insect Control",
+          type: "pest",
+          searchVolume: 12500,
+          description: "Homeowners want to identify bed bugs before infestations spread. Covers signs, detection tips, and when to call professionals.",
+          keywords: ["bed bugs", "bed bug signs", "bed bug infestation", "bed bug identification"]
+        },
+        {
+          id: 2,
+          title: "Ant Prevention Tips: Keep Your Chester County Home Ant-Free",
+          category: "Insect Control",
+          type: "pest",
+          searchVolume: 9800,
+          description: "Spring is prime ant season. Practical prevention tips for common Pennsylvania ant species including carpenter ants.",
+          keywords: ["ant prevention", "carpenter ants", "ant control", "Chester County pest control"]
+        },
+        {
+          id: 3,
+          title: "Tick Season Alert: Protecting Your Family in Southeastern PA",
+          category: "Insect Control",
+          type: "pest",
+          searchVolume: 15200,
+          description: "Ticks are a major concern for families with pets and children. Covers Lyme disease prevention and yard treatments.",
+          keywords: ["tick prevention", "Lyme disease", "tick control", "yard ticks"]
+        },
+        {
+          id: 4,
+          title: "Why You're Seeing More Spiders in Your Home (And What to Do)",
+          category: "Insect Control",
+          type: "pest",
+          searchVolume: 8400,
+          description: "Homeowners notice spider increases at certain times. Explains spider behavior and safe removal methods.",
+          keywords: ["spider control", "spiders in house", "spider prevention", "common spiders PA"]
+        },
+        // Wildlife prevention
+        {
+          id: 5,
+          title: "How to Keep Mice Out of Your Garage This Winter",
+          category: "Wildlife Prevention",
+          type: "wildlife",
+          searchVolume: 11e3,
+          description: "Garages are prime entry points for mice. Covers exclusion techniques, sealing entry points, and prevention.",
+          keywords: ["mice prevention", "garage mice", "mouse control", "rodent exclusion"]
+        },
+        {
+          id: 6,
+          title: "Bat Exclusion 101: Safely Removing Bats from Your Attic",
+          category: "Wildlife Prevention",
+          type: "wildlife",
+          searchVolume: 7200,
+          description: "Bats are protected species in PA. Explains legal, safe exclusion methods and why DIY removal is risky.",
+          keywords: ["bat exclusion", "bats in attic", "bat removal", "Pennsylvania bat control"]
+        },
+        {
+          id: 7,
+          title: "Squirrel Problems? How to Protect Your Home from Damage",
+          category: "Wildlife Prevention",
+          type: "wildlife",
+          searchVolume: 6800,
+          description: "Squirrels cause significant home damage. Covers identification of entry points and professional exclusion.",
+          keywords: ["squirrel control", "squirrels in attic", "wildlife damage", "squirrel removal"]
+        },
+        // Seasonal
+        {
+          id: 8,
+          title: `${season.charAt(0).toUpperCase() + season.slice(1)} Pest Prep: What Chester County Homeowners Need to Know`,
+          category: "Seasonal Tips",
+          type: "seasonal",
+          searchVolume: 5500,
+          description: `Season-specific pest preparation guide for Southeastern Pennsylvania homeowners. Covers ${season} pest trends and prevention.`,
+          keywords: [`${season} pests`, "Chester County", "pest prevention", "seasonal pest control"]
+        },
+        // Product/Service
+        {
+          id: 9,
+          title: "Why Professional Termite Inspection Is Worth Every Penny",
+          category: "Services",
+          type: "product",
+          searchVolume: 8900,
+          description: "Termites cause billions in damage annually. Explains inspection process, costs vs. damage costs, and early detection value.",
+          keywords: ["termite inspection", "termite damage", "termite prevention", "professional pest control"]
+        },
+        {
+          id: 10,
+          title: "Quarterly Pest Control Plans: Are They Right for Your Home?",
+          category: "Services",
+          type: "product",
+          searchVolume: 7600,
+          description: "Compares DIY vs. professional quarterly pest control. Covers costs, benefits, and what's included in professional service.",
+          keywords: ["quarterly pest control", "pest control plan", "recurring pest service", "pest control cost"]
+        }
+      ];
+      const shuffled = allTopics.sort(() => Math.random() - 0.5);
+      res.json({ success: true, topics: shuffled });
+    } catch (error) {
+      console.error("Error researching topics:", error);
+      res.status(500).json({ success: false, message: "Failed to research topics" });
+    }
+  });
+  app2.post("/api/admin/blog/generate-image", requireAdmin, async (req, res) => {
+    try {
+      const { title, category } = req.body;
+      if (!title) {
+        return res.status(400).json({ success: false, message: "Title is required" });
+      }
+      const openaiApiKey = process.env.OPENAI_API_KEY;
+      if (!openaiApiKey) {
+        return res.status(500).json({ success: false, message: "OpenAI API key not configured" });
+      }
+      const imagePrompt = `Professional photograph for a pest control blog article about: ${title}. 
+        Realistic style, high quality, showing a clean suburban home exterior or interior with subtle pest control context. 
+        Warm lighting, professional photography style suitable for a business blog. 
+        No text or words in the image. 
+        Aspect ratio 16:9 for web use.`;
+      const response = await fetch("https://api.openai.com/v1/images/generations", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openaiApiKey}`
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-          ],
-          temperature: 0.8,
-          max_tokens: 2e3
+          model: "dall-e-3",
+          prompt: imagePrompt,
+          n: 1,
+          size: "1792x1024"
         })
       });
-      if (!openaiRes.ok) {
-        const errBody = await openaiRes.text();
-        console.error("OpenAI API error:", errBody);
-        res.status(502).json({ success: false, message: "OpenAI API error: " + errBody });
-        return;
+      const data = await response.json();
+      if (data.error) {
+        console.error("OpenAI image generation error:", data.error);
+        return res.status(500).json({ success: false, message: "Image generation failed: " + data.error.message });
       }
-      const data = await openaiRes.json();
-      const raw = data.choices?.[0]?.message?.content?.trim() || "";
-      let parsed;
-      try {
-        const jsonStr = raw.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
-        parsed = JSON.parse(jsonStr);
-      } catch (parseErr) {
-        console.error("Failed to parse OpenAI response as JSON:", raw.slice(0, 200));
-        res.status(502).json({ success: false, message: "Failed to parse AI response. Please try again." });
-        return;
+      const imageUrl = data.data?.[0]?.url;
+      if (!imageUrl) {
+        return res.status(500).json({ success: false, message: "No image URL returned" });
       }
-      if (!parsed.title || !parsed.content || !parsed.excerpt) {
-        res.status(502).json({ success: false, message: "AI response missing required fields." });
-        return;
+      const imageResponse = await fetch(imageUrl);
+      const arrayBuffer = await imageResponse.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const base64 = buffer.toString("base64");
+      const dataUrl = `data:image/png;base64,${base64}`;
+      res.json({ success: true, imageUrl: dataUrl });
+    } catch (error) {
+      console.error("Error generating image:", error);
+      res.status(500).json({ success: false, message: "Failed to generate image" });
+    }
+  });
+  app2.post("/api/admin/blog/generate-articles", requireAdmin, async (req, res) => {
+    try {
+      const { topicIds, topics } = req.body;
+      if (!topics || !Array.isArray(topics) || topics.length === 0) {
+        return res.status(400).json({ success: false, message: "Topics array is required" });
       }
-      const slug = parsed.title.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim().slice(0, 80);
+      const openaiApiKey = process.env.OPENAI_API_KEY;
+      if (!openaiApiKey) {
+        return res.status(500).json({ success: false, message: "OpenAI API key not configured" });
+      }
+      const generatedArticles = [];
+      const baseUrl = process.env.REPLIT_DOMAINS?.split(",")[0] ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}` : "https://absolutepestservices.com";
+      for (let i = 0; i < topics.length && i < 6; i++) {
+        const topic = topics[i];
+        try {
+          const articlePrompt = `Write a 600-800 word blog article for a pest control company serving Chester County, Pennsylvania. 
+          
+Title: ${topic.title}
+Category: ${topic.category}
+Target Keywords: ${topic.keywords?.join(", ") || topic.title}
+
+Requirements:
+- Write in HTML format with <h2> and <h3> headings
+- Include practical tips homeowners can use
+- Mention Chester County or Southeastern PA naturally
+- Include a call-to-action to contact Absolute Pest Services
+- Use professional but approachable tone
+- Structure: Introduction, 3-4 main points with tips, Conclusion with CTA
+
+Return the article as JSON with fields:
+- content: the HTML article body
+- excerpt: a 150-200 word summary for meta description
+- suggestedTags: array of 3-5 relevant tags`;
+          const chatResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${openaiApiKey}`
+            },
+            body: JSON.stringify({
+              model: "gpt-4o",
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a professional content writer for a pest control company. You write SEO-optimized blog articles in JSON format."
+                },
+                {
+                  role: "user",
+                  content: articlePrompt
+                }
+              ],
+              response_format: { type: "json_object" },
+              max_tokens: 2e3,
+              temperature: 0.7
+            })
+          });
+          const chatData = await chatResponse.json();
+          if (chatData.error) {
+            console.error("OpenAI article generation error:", chatData.error);
+            continue;
+          }
+          const articleContent = JSON.parse(chatData.choices[0].message.content);
+          let imageUrl = "";
+          try {
+            const imageResponse = await fetch("https://api.openai.com/v1/images/generations", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${openaiApiKey}`
+              },
+              body: JSON.stringify({
+                model: "dall-e-3",
+                prompt: `Professional photograph for a pest control blog article about: ${topic.title}. Realistic style, high quality, showing relevant pest control context. Warm lighting, professional photography. No text in image.`,
+                n: 1,
+                size: "1792x1024"
+              })
+            });
+            const imageData = await imageResponse.json();
+            if (imageData.data?.[0]?.url) {
+              const imgResponse = await fetch(imageData.data[0].url);
+              const arrayBuffer = await imgResponse.arrayBuffer();
+              const buffer = Buffer.from(arrayBuffer);
+              const base64 = buffer.toString("base64");
+              imageUrl = `data:image/png;base64,${base64}`;
+            }
+          } catch (imgError) {
+            console.error("Image generation failed for article:", topic.title, imgError);
+          }
+          const slug = topic.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+          const blogPost = await storage.createBlogPost({
+            title: topic.title,
+            slug: `${slug}-${Date.now()}`,
+            // Add timestamp to ensure uniqueness
+            content: articleContent.content || "",
+            excerpt: articleContent.excerpt || topic.description,
+            author: "AI Generated",
+            featuredImage: imageUrl || null,
+            category: topic.category,
+            tags: articleContent.suggestedTags || topic.keywords || [],
+            isPublished: false,
+            // Draft by default for review
+            metaTitle: topic.title,
+            metaDescription: articleContent.excerpt?.substring(0, 160) || topic.description
+          });
+          generatedArticles.push({
+            id: blogPost.id,
+            title: blogPost.title,
+            slug: blogPost.slug,
+            featuredImage: blogPost.featuredImage,
+            status: "created"
+          });
+        } catch (articleError) {
+          console.error("Error generating article for topic:", topic.title, articleError);
+          generatedArticles.push({
+            title: topic.title,
+            status: "error",
+            error: articleError instanceof Error ? articleError.message : "Unknown error"
+          });
+        }
+      }
       res.json({
         success: true,
-        post: {
-          title: parsed.title.slice(0, 120),
-          slug,
-          excerpt: parsed.excerpt.slice(0, 400),
-          content: parsed.content,
-          author: "Absolute Pest Services",
-          featuredImage: null,
-          category: parsed.category || "General Pest",
-          tags: Array.isArray(parsed.tags) ? parsed.tags.slice(0, 8) : [],
-          metaTitle: parsed.title.slice(0, 60),
-          metaDescription: (parsed.metaDescription || parsed.excerpt).slice(0, 160),
-          isPublished: false
-        }
+        message: `Generated ${generatedArticles.filter((a) => a.status === "created").length} articles`,
+        articles: generatedArticles
       });
     } catch (error) {
-      console.error("Error generating blog post:", error);
-      res.status(500).json({ success: false, message: "Internal server error generating blog post." });
+      console.error("Error generating articles:", error);
+      res.status(500).json({ success: false, message: "Failed to generate articles" });
     }
   });
-  async function getGa4Report(body) {
-    const r = await fetch(`${process.env.MATON_API_URL || "https://api.maton.io/v1"}/analytics/reports:batchGet`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.MATON_API_KEY || "fnVPNNiVTI09Xj4wswkIHoRLr2xNW_pDzaFr1LA4K6eDEgcpL_EKTWx4fzSurIca89tF3WOWPTCCQKV-USBntFxclZ7wfjIHv_Q"}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
-    });
-    return r.json().catch(() => ({}));
-  }
-  app2.get("/api/reports/weekly-growth", async (req, res) => {
-    const END = /* @__PURE__ */ new Date();
-    const START = new Date(END.getTime() - 30 * 24 * 60 * 60 * 1e3);
-    const fmt = (d) => d.toISOString().slice(0, 10);
-    const dateRange = { startDate: fmt(START), endDate: fmt(END) };
-    try {
-      const [overviewData, pagesData, convData] = await Promise.all([
-        getGa4Report({
-          dateRanges: [dateRange],
-          metrics: [
-            { name: "sessions" },
-            { name: "activeUsers" },
-            { name: "newUsers" },
-            { name: "screenPageViews" },
-            { name: "bounceRate" },
-            { name: "averageSessionDurationSeconds" }
-          ]
-        }),
-        getGa4Report({
-          dateRanges: [dateRange],
-          dimensions: [{ name: "pagePath" }],
-          metrics: [{ name: "sessions" }, { name: "screenPageViews" }],
-          orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
-          limit: 10
-        }),
-        getGa4Report({
-          dateRanges: [dateRange],
-          dimensions: [{ name: "eventName" }],
-          metrics: [{ name: "eventCount" }],
-          dimensionFilter: {
-            filter: {
-              fieldName: "eventName",
-              stringFilter: {
-                matchType: "IN_LIST",
-                values: ["form_submit", "phone_click", "cta_click"]
-              }
-            }
-          },
-          limit: 10
-        })
-      ]);
-      const ga4Totals = overviewData?.reports?.[0]?.data?.totals?.[0]?.metricValues || [];
-      const sessions = parseFloat(ga4Totals[0]?.value || "0");
-      const users2 = parseFloat(ga4Totals[1]?.value || "0");
-      const newUsers = parseFloat(ga4Totals[2]?.value || "0");
-      const pageviews = parseFloat(ga4Totals[3]?.value || "0");
-      const bounce = parseFloat(ga4Totals[4]?.value || "0");
-      const avgDur = parseFloat(ga4Totals[5]?.value || "0");
-      const topPages = (pagesData?.reports?.[0]?.data?.rows || []).map((r) => ({
-        page: r.dimensionValues?.[0]?.value || "",
-        sessions: parseFloat(r.metricValues?.[0]?.value || "0"),
-        views: parseFloat(r.metricValues?.[1]?.value || "0")
-      }));
-      const conversions = (convData?.reports?.[0]?.data?.rows || []).map((r) => ({
-        event: r.dimensionValues?.[0]?.value || "",
-        count: parseFloat(r.metricValues?.[0]?.value || "0")
-      }));
-      const period = `${fmt(START)} to ${fmt(END)}`;
-      const html = buildWeeklyGrowthHtml({ period, sessions, users: users2, newUsers, pageviews, bounce, avgDur, topPages, conversions });
-      const outDir = path.join(process.cwd(), "generated-reports");
-      if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
-      const filename = `weekly-growth-${fmt(/* @__PURE__ */ new Date())}.html`;
-      fs.writeFileSync(path.join(outDir, filename), html);
-      res.setHeader("Content-Type", "text/html");
-      res.send(html);
-    } catch (error) {
-      console.error("Error generating weekly growth report:", error);
-      res.status(500).json({ success: false, message: "Failed to generate report." });
-    }
-  });
-  function buildWeeklyGrowthHtml(data) {
-    const fmtNum = (n) => n.toLocaleString();
-    const pctFmt = (n) => `${n.toFixed(1)}%`;
-    const durFmt = (s) => {
-      const m = Math.floor(s / 60), sec = Math.round(s % 60);
-      return `${m}m ${sec}s`;
-    };
-    const rows = data.topPages.map(
-      (p) => `<tr><td>${p.page}</td><td>${fmtNum(p.sessions)}</td><td>${fmtNum(p.views)}</td></tr>`
-    ).join("");
-    const convRows = data.conversions.map(
-      (c) => `<tr><td><code>${c.event}</code></td><td>${fmtNum(c.count)}</td></tr>`
-    ).join("");
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Weekly Growth Report \u2014 Absolute Pest Services</title>
-<style>
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; margin: 0; padding: 24px; color: #1e293b; }
-  .container { max-width: 960px; margin: 0 auto; }
-  h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-  .subtitle { color: #64748b; margin-bottom: 24px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
-  .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-  .card .label { font-size: .75rem; color: #64748b; text-transform: uppercase; letter-spacing: .04em; }
-  .card .value { font-size: 1.75rem; font-weight: 700; color: #0f172a; margin-top: 4px; }
-  .card .sub { font-size: .75rem; color: #94a3b8; }
-  table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 24px; }
-  th { background: #f1f5f9; text-align: left; padding: 12px 16px; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: #64748b; }
-  td { padding: 10px 16px; border-top: 1px solid #f1f5f9; font-size: .875rem; }
-  tr:hover td { background: #fafafa; }
-  h2 { font-size: 1.1rem; color: #334155; margin: 0 0 12px; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .7rem; font-weight: 600; background: #dcfce7; color: #166534; }
-  .footer { text-align: center; color: #94a3b8; font-size: .75rem; margin-top: 40px; }
-</style>
-</head>
-<body>
-<div class="container">
-  <h1>\u{1F4CA} Weekly Growth Report</h1>
-  <p class="subtitle">Absolute Pest Services \u2014 ${data.period}</p>
-
-  <div class="grid">
-    <div class="card"><div class="label">Sessions</div><div class="value">${fmtNum(data.sessions)}</div></div>
-    <div class="card"><div class="label">Users</div><div class="value">${fmtNum(data.users)}</div></div>
-    <div class="card"><div class="label">New Users</div><div class="value">${fmtNum(data.newUsers)}</div></div>
-    <div class="card"><div class="label">Pageviews</div><div class="value">${fmtNum(data.pageviews)}</div></div>
-    <div class="card"><div class="label">Bounce Rate</div><div class="value">${pctFmt(data.bounce)}</div></div>
-    <div class="card"><div class="label">Avg. Duration</div><div class="value">${durFmt(data.avgDur)}</div></div>
-  </div>
-
-  <h2>Top Pages</h2>
-  <table>
-    <thead><tr><th>Page</th><th>Sessions</th><th>Views</th></tr></thead>
-    <tbody>${rows || "<tr><td colspan=3>No data</td></tr>"}</tbody>
-  </table>
-
-  <h2>Conversion Events</h2>
-  <table>
-    <thead><tr><th>Event</th><th>Count</th></tr></thead>
-    <tbody>${convRows || "<tr><td colspan=2>No data</td></tr>"}</tbody>
-  </table>
-
-  <div class="footer">Generated ${(/* @__PURE__ */ new Date()).toLocaleString()} \xB7 Absolute Pest Services Growth Pipeline</div>
-</div>
-</body>
-</html>`;
-  }
   const requireFieldAuth = (req, res, next) => {
     if (!req.session.fieldEmployeeId) {
       return res.status(401).json({ success: false, message: "Field authentication required" });
@@ -5801,10 +5920,19 @@ Message: ${validatedData.message}` : ""}`,
       const allClients = await storage.getClients();
       res.json({
         success: true,
-        clients: allClients.map((c) => ({ id: c.id, name: c.name, address: c.address }))
+        clients: allClients.map((c) => ({ id: c.id, name: c.name, address: c.address, phone: c.phone ?? null, email: c.email ?? null }))
       });
     } catch (error) {
       console.error("Error fetching clients for field:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+  app2.get("/api/field/site-locations", requireFieldAuth, async (req, res) => {
+    try {
+      const sites = await storage.getSiteLocations();
+      res.json({ success: true, sites });
+    } catch (error) {
+      console.error("Error fetching site locations for field:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   });
@@ -6143,7 +6271,9 @@ Message: ${validatedData.message}` : ""}`,
               address: req.body.newCustomerAddress || req.body.siteAddress || null,
               propertyType: req.body.propertyType || "residential",
               clientType: "prospect",
-              status: "pending"
+              status: "pending",
+              phone: req.body.phone || null,
+              email: req.body.email || null
             });
             resolvedClientId = newClient.id;
           } catch (e) {
@@ -6174,6 +6304,26 @@ Message: ${validatedData.message}` : ""}`,
         res.status(400).json({ success: false, message: "Invalid job log data", errors: error.errors });
       } else {
         console.error("Error creating job log:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+  });
+  app2.post("/api/field/site-locations", requireFieldAuth, async (req, res) => {
+    try {
+      const data = insertSiteLocationSchema.parse({
+        name: req.body.name,
+        customerId: req.body.customerId || null,
+        customerName: req.body.customerName,
+        phone: req.body.phone || null,
+        contactEmail: req.body.contactEmail || null
+      });
+      const site = await storage.createSiteLocation(data);
+      res.json({ success: true, site });
+    } catch (error) {
+      if (error instanceof z2.ZodError) {
+        res.status(400).json({ success: false, message: "Invalid data", errors: error.errors });
+      } else {
+        console.error("Error creating site location:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
       }
     }
@@ -6227,6 +6377,28 @@ Message: ${validatedData.message}` : ""}`,
       if (amount !== void 0) updates.amount = String(amount);
       if (materials !== void 0) updates.materials = materials || null;
       const updated = await storage.updateJobLog(id, updates);
+      if (req.body.customerPhone !== void 0 || req.body.customerEmail !== void 0) {
+        if (existing?.clientId) {
+          const clientUpdates = {};
+          if (req.body.customerPhone !== void 0) clientUpdates.phone = req.body.customerPhone || null;
+          if (req.body.customerEmail !== void 0) clientUpdates.email = req.body.customerEmail || null;
+          await storage.updateClient(existing.clientId, clientUpdates);
+        }
+      }
+      if (req.body.sitePhone !== void 0 || req.body.siteContactEmail !== void 0) {
+        if (existing) {
+          const sites = await storage.getSiteLocations();
+          const site = sites.find(
+            (s) => s.name === existing.siteLocation && (existing.clientId ? s.customerId === existing.clientId : s.customerName === existing.customerName)
+          );
+          if (site) {
+            const siteUpdates = {};
+            if (req.body.sitePhone !== void 0) siteUpdates.phone = req.body.sitePhone || null;
+            if (req.body.siteContactEmail !== void 0) siteUpdates.contactEmail = req.body.siteContactEmail || null;
+            await storage.updateSiteLocation(site.id, siteUpdates);
+          }
+        }
+      }
       res.json({ success: true, jobLog: updated });
     } catch (error) {
       console.error("Error updating field job log:", error);
@@ -6319,13 +6491,17 @@ Message: ${validatedData.message}` : ""}`,
   app2.patch("/api/admin/job-logs/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const allowed = ["siteLocation", "servicedArea", "workPerformed", "customerName", "jobDate", "status"];
+      const allowed = ["siteLocation", "servicedArea", "workPerformed", "customerName", "jobDate", "status", "clientId"];
       const updates = {};
       for (const key of allowed) {
         if (req.body[key] !== void 0) updates[key] = req.body[key];
       }
       if (updates.jobDate && typeof updates.jobDate === "string") {
         updates.jobDate = new Date(updates.jobDate);
+      }
+      if (updates.clientId !== void 0) {
+        const cid = updates.clientId;
+        updates.clientId = cid === null || cid === "" ? null : typeof cid === "number" ? cid : parseInt(cid, 10);
       }
       const existingJobLog = await storage.getJobLogById(id);
       const oldStatus = existingJobLog?.status;
@@ -7264,6 +7440,11 @@ Message: ${validatedData.message}` : ""}`,
         new Date(dueDate),
         userId
       );
+      try {
+        await storage.updateJobLog(jobLogId, { status: "invoiced" });
+      } catch (statusErr) {
+        console.error("Error marking job log invoiced:", statusErr);
+      }
       const lineItems = await storage.getLineItemsByInvoice(invoice.id);
       const statusLogs = await storage.getInvoiceStatusLog(invoice.id);
       res.status(201).json({
@@ -8835,6 +9016,526 @@ Description: ${description}`,
       res.status(500).json({ success: false, message: "Sync failed", error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
+  const MARKETING_DATA_DIR = path.join(process.cwd(), "data", "marketing");
+  if (!fs.existsSync(MARKETING_DATA_DIR)) {
+    fs.mkdirSync(MARKETING_DATA_DIR, { recursive: true });
+  }
+  const findLatestDataFile = (prefix) => {
+    try {
+      const files = fs.readdirSync(MARKETING_DATA_DIR).filter((f) => f.startsWith(prefix) && f.endsWith(".json")).sort().reverse();
+      return files.length > 0 ? path.join(MARKETING_DATA_DIR, files[0]) : null;
+    } catch {
+      return null;
+    }
+  };
+  const saveMarketingData = (prefix, data) => {
+    const timestamp2 = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-");
+    const filePath = path.join(MARKETING_DATA_DIR, `${prefix}${timestamp2}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    const files = fs.readdirSync(MARKETING_DATA_DIR).filter((f) => f.startsWith(prefix) && f.endsWith(".json")).sort().reverse();
+    files.slice(5).forEach((f) => {
+      try {
+        fs.unlinkSync(path.join(MARKETING_DATA_DIR, f));
+      } catch {
+      }
+    });
+  };
+  function getFBToken() {
+    try {
+      const content = fs.readFileSync("/tmp/fb_token.txt", "utf8").trim();
+      if (content) return content;
+    } catch {
+    }
+    try {
+      const envContent = fs.readFileSync("/run/secrets/FB_PAGE_ACCESS_TOKEN", "utf8").trim();
+      if (envContent) return envContent;
+    } catch {
+    }
+    return process.env.FB_PAGE_ACCESS_TOKEN;
+  }
+  async function fetchFacebookData() {
+    const pageId = process.env.FB_PAGE_ID;
+    const token = getFBToken();
+    if (!pageId || !token) return null;
+    try {
+      const pageRes = await fetch(
+        `https://graph.facebook.com/v19.0/${pageId}?fields=name,category,fan_count,followers_count&access_token=${token}`
+      );
+      const pageData = await pageRes.json();
+      if (pageData.error) {
+        console.error("Facebook API error (page):", pageData.error.message);
+        return null;
+      }
+      let engagement = {
+        post_count_7d: 0,
+        total_likes: 0,
+        total_comments: 0,
+        total_shares: 0,
+        page_impressions_unique: 0,
+        page_post_engagements: 0,
+        page_fan_adds_unique: 0
+      };
+      try {
+        const insightsRes = await fetch(
+          `https://graph.facebook.com/v19.0/${pageId}/insights?metric=page_impressions_unique,page_post_engagements,page_fan_adds_unique&period=week&access_token=${token}`
+        );
+        const insightsData = await insightsRes.json();
+        if (insightsData.data) {
+          for (const metric of insightsData.data) {
+            const val = metric.values?.[metric.values.length - 1]?.value || 0;
+            if (metric.name === "page_impressions_unique") engagement.page_impressions_unique = val;
+            if (metric.name === "page_post_engagements") engagement.page_post_engagements = val;
+            if (metric.name === "page_fan_adds_unique") engagement.page_fan_adds_unique = val;
+          }
+        }
+      } catch (e) {
+        console.error("Facebook insights fetch error:", e);
+      }
+      const postsRes = await fetch(
+        `https://graph.facebook.com/v19.0/${pageId}/posts?fields=message,created_time,likes.summary(true),comments.summary(true),shares&limit=10&access_token=${token}`
+      );
+      const postsData = await postsRes.json();
+      const recentPosts = (postsData.data || []).map((p) => {
+        const likes = p.likes?.summary?.total_count || 0;
+        const comments = p.comments?.summary?.total_count || 0;
+        const shares = p.shares?.count || 0;
+        engagement.total_likes += likes;
+        engagement.total_comments += comments;
+        engagement.total_shares += shares;
+        return {
+          message: p.message || "(No text)",
+          created_at: p.created_time,
+          likes,
+          comments,
+          shares
+        };
+      });
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1e3);
+      engagement.post_count_7d = recentPosts.filter((p) => new Date(p.created_at) >= sevenDaysAgo).length;
+      const result = {
+        fetched_at: (/* @__PURE__ */ new Date()).toISOString(),
+        platform: "facebook",
+        page_id: pageId,
+        status: "live",
+        account_metrics: {
+          page_name: pageData.name || "Absolute Pest Services",
+          category: pageData.category || "Pest Control Service",
+          fan_count: pageData.fan_count || 0,
+          followers_count: pageData.followers_count || 0
+        },
+        engagement_7d: engagement,
+        recent_posts: recentPosts
+      };
+      saveMarketingData("facebook_metrics_", result);
+      return result;
+    } catch (error) {
+      console.error("Facebook fetch error:", error);
+      return null;
+    }
+  }
+  async function fetchInstagramData() {
+    const pageId = process.env.FB_PAGE_ID;
+    const token = getFBToken();
+    if (!pageId || !token) return null;
+    try {
+      const igAccountRes = await fetch(
+        `https://graph.facebook.com/v19.0/${pageId}?fields=instagram_business_account&access_token=${token}`
+      );
+      const igAccountData = await igAccountRes.json();
+      const igId = igAccountData.instagram_business_account?.id;
+      if (!igId) {
+        console.log("No Instagram business account linked to this Facebook page");
+        return null;
+      }
+      const profileRes = await fetch(
+        `https://graph.facebook.com/v19.0/${igId}?fields=username,name,followers_count,media_count&access_token=${token}`
+      );
+      const profile = await profileRes.json();
+      if (profile.error) {
+        console.error("Instagram API error:", profile.error.message);
+        return null;
+      }
+      let engagement = { impressions: 0, reach: 0, profile_views: 0 };
+      try {
+        const insightsRes = await fetch(
+          `https://graph.facebook.com/v19.0/${igId}/insights?metric=impressions,reach,profile_views&period=day&metric_type=total_value&access_token=${token}`
+        );
+        const insightsData = await insightsRes.json();
+        if (insightsData.data) {
+          for (const metric of insightsData.data) {
+            const val = metric.total_value?.value || metric.values?.[metric.values.length - 1]?.value || 0;
+            if (metric.name === "impressions") engagement.impressions = val;
+            if (metric.name === "reach") engagement.reach = val;
+            if (metric.name === "profile_views") engagement.profile_views = val;
+          }
+        }
+      } catch (e) {
+        console.error("Instagram insights fetch error:", e);
+      }
+      const mediaRes = await fetch(
+        `https://graph.facebook.com/v19.0/${igId}/media?fields=caption,timestamp,like_count,comments_count,media_type,permalink&limit=10&access_token=${token}`
+      );
+      const mediaData = await mediaRes.json();
+      const recentPosts = (mediaData.data || []).map((m) => ({
+        caption: m.caption || "",
+        timestamp: m.timestamp,
+        like_count: m.like_count || 0,
+        comment_count: m.comments_count || 0,
+        media_type: m.media_type || "IMAGE",
+        permalink: m.permalink || ""
+      }));
+      const result = {
+        fetched_at: (/* @__PURE__ */ new Date()).toISOString(),
+        platform: "instagram",
+        status: "live",
+        account_metrics: {
+          username: profile.username || "",
+          name: profile.name || "",
+          followers_count: profile.followers_count || 0,
+          media_count: profile.media_count || 0
+        },
+        engagement_7d: engagement,
+        recent_posts: recentPosts
+      };
+      saveMarketingData("instagram_metrics_", result);
+      return result;
+    } catch (error) {
+      console.error("Instagram fetch error:", error);
+      return null;
+    }
+  }
+  const GA4_PROPERTY_ID = "507471089";
+  const MATON_GATEWAY = "https://gateway.maton.ai";
+  async function fetchGA4Data() {
+    const apiKey = process.env.MATON_API_KEY;
+    if (!apiKey) return null;
+    try {
+      const headers = { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" };
+      const baseUrl = `${MATON_GATEWAY}/google-analytics-data/v1beta/properties/${GA4_PROPERTY_ID}:runReport`;
+      const [totalsRes, pagesRes, sourcesRes] = await Promise.all([
+        fetch(baseUrl, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            dateRanges: [{ startDate: "7daysAgo", endDate: "today" }],
+            metrics: [{ name: "sessions" }, { name: "totalUsers" }, { name: "screenPageViews" }]
+          })
+        }),
+        fetch(baseUrl, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            dateRanges: [{ startDate: "7daysAgo", endDate: "today" }],
+            dimensions: [{ name: "pagePath" }],
+            metrics: [{ name: "screenPageViews" }],
+            orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
+            limit: 20
+          })
+        }),
+        fetch(baseUrl, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            dateRanges: [{ startDate: "7daysAgo", endDate: "today" }],
+            dimensions: [{ name: "sessionDefaultChannelGroup" }],
+            metrics: [{ name: "sessions" }, { name: "totalUsers" }, { name: "screenPageViews" }]
+          })
+        })
+      ]);
+      const [totalsData, pagesData, sourcesData] = await Promise.all([
+        totalsRes.json(),
+        pagesRes.json(),
+        sourcesRes.json()
+      ]);
+      const totals = {
+        sessions: parseInt(totalsData.rows?.[0]?.metricValues?.[0]?.value || "0"),
+        users: parseInt(totalsData.rows?.[0]?.metricValues?.[1]?.value || "0"),
+        pageviews: parseInt(totalsData.rows?.[0]?.metricValues?.[2]?.value || "0")
+      };
+      const top_pages = (pagesData.rows || []).map((row) => ({
+        page_path: row.dimensionValues[0].value,
+        pageviews: parseInt(row.metricValues[0].value)
+      }));
+      const traffic_sources = {};
+      for (const row of sourcesData.rows || []) {
+        const channel = row.dimensionValues[0].value;
+        const key = channel.toLowerCase().replace(/[\s-]+/g, "_");
+        traffic_sources[key] = {
+          sessions: parseInt(row.metricValues[0].value),
+          users: parseInt(row.metricValues[1].value),
+          pageviews: parseInt(row.metricValues[2].value)
+        };
+      }
+      const result = {
+        fetched_at: (/* @__PURE__ */ new Date()).toISOString(),
+        property_id: GA4_PROPERTY_ID,
+        date_range: "last_7_days",
+        totals,
+        top_pages,
+        traffic_sources,
+        row_count: pagesData.rowCount || top_pages.length
+      };
+      saveMarketingData("ga4_overview_", result);
+      return result;
+    } catch (error) {
+      console.error("GA4 fetch error:", error);
+      return null;
+    }
+  }
+  const GOOGLE_ADS_CUSTOMER_ID = "6800190976";
+  const GOOGLE_ADS_API_VERSION = "v23";
+  async function fetchGoogleAdsData() {
+    const apiKey = process.env.MATON_API_KEY;
+    if (!apiKey) return null;
+    try {
+      const headers = { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" };
+      const searchUrl = `${MATON_GATEWAY}/google-ads/${GOOGLE_ADS_API_VERSION}/customers/${GOOGLE_ADS_CUSTOMER_ID}/googleAds:search`;
+      const campaignRes = await fetch(searchUrl, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          query: `SELECT campaign.name, campaign.status, metrics.cost_micros, metrics.clicks, metrics.impressions, metrics.conversions FROM campaign WHERE segments.date DURING LAST_7_DAYS ORDER BY metrics.cost_micros DESC`
+        })
+      });
+      if (!campaignRes.ok) {
+        console.error(`Google Ads API error: ${campaignRes.status}`);
+        return null;
+      }
+      const campaignData = await campaignRes.json();
+      if (campaignData.error) {
+        console.error("Google Ads API error:", campaignData.error);
+        return null;
+      }
+      const campaigns = (campaignData.results || []).map((r) => ({
+        campaign_name: r.campaign?.name || "Unknown",
+        campaign_status: r.campaign?.status || "UNKNOWN",
+        cost_micros: parseInt(r.metrics?.costMicros || "0"),
+        spend_usd: parseInt(r.metrics?.costMicros || "0") / 1e6,
+        clicks: parseInt(r.metrics?.clicks || "0"),
+        impressions: parseInt(r.metrics?.impressions || "0"),
+        conversions: parseFloat(r.metrics?.conversions || "0")
+      })).filter((c) => c.campaign_status !== "REMOVED");
+      const result = {
+        fetched_at: (/* @__PURE__ */ new Date()).toISOString(),
+        customer_id: GOOGLE_ADS_CUSTOMER_ID,
+        campaign_count: campaigns.length,
+        campaigns
+      };
+      saveMarketingData("ads_campaigns_", result);
+      try {
+        const termsRes = await fetch(searchUrl, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            query: `SELECT search_term_view.search_term, metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions FROM search_term_view WHERE segments.date DURING LAST_7_DAYS ORDER BY metrics.clicks DESC LIMIT 50`
+          })
+        });
+        if (termsRes.ok) {
+          const termsData = await termsRes.json();
+          const search_terms = (termsData.results || []).map((r) => ({
+            search_term: r.searchTermView?.searchTerm || "",
+            clicks: parseInt(r.metrics?.clicks || "0"),
+            impressions: parseInt(r.metrics?.impressions || "0"),
+            cost_micros: parseInt(r.metrics?.costMicros || "0"),
+            spend_usd: parseInt(r.metrics?.costMicros || "0") / 1e6,
+            conversions: parseFloat(r.metrics?.conversions || "0")
+          }));
+          const termsResult = {
+            fetched_at: (/* @__PURE__ */ new Date()).toISOString(),
+            customer_id: GOOGLE_ADS_CUSTOMER_ID,
+            campaign_id: "all",
+            term_count: search_terms.length,
+            search_terms
+          };
+          saveMarketingData("ads_search_terms_", termsResult);
+        }
+      } catch (e) {
+        console.error("Google Ads search terms fetch error:", e);
+      }
+      return result;
+    } catch (error) {
+      console.error("Google Ads fetch error:", error);
+      return null;
+    }
+  }
+  app2.get("/api/admin/marketing/ads-campaigns", requireAdmin, async (req, res) => {
+    const filePath = findLatestDataFile("ads_campaigns_");
+    if (filePath) {
+      try {
+        const raw = fs.readFileSync(filePath, "utf-8");
+        const data = JSON.parse(raw);
+        const fetchedAt = new Date(data.fetched_at).getTime();
+        if (Date.now() - fetchedAt < 60 * 60 * 1e3) {
+          return res.json({ success: true, data, lastFetched: data.fetched_at });
+        }
+      } catch {
+      }
+    }
+    try {
+      const data = await fetchGoogleAdsData();
+      res.json({ success: true, data: data || null, lastFetched: data?.fetched_at || null });
+    } catch (err) {
+      console.error("Ads campaigns endpoint error:", err);
+      res.status(500).json({ success: false, message: "Failed to fetch ads data" });
+    }
+  });
+  app2.get("/api/admin/marketing/ads-search-terms", requireAdmin, async (req, res) => {
+    const filePath = findLatestDataFile("ads_search_terms_");
+    if (filePath) {
+      try {
+        const raw = fs.readFileSync(filePath, "utf-8");
+        const data = JSON.parse(raw);
+        const fetchedAt = new Date(data.fetched_at).getTime();
+        if (Date.now() - fetchedAt < 60 * 60 * 1e3) {
+          return res.json({ success: true, data, lastFetched: data.fetched_at });
+        }
+      } catch {
+      }
+    }
+    try {
+      await fetchGoogleAdsData();
+      const filePath2 = findLatestDataFile("ads_search_terms_");
+      if (filePath2) {
+        const raw = fs.readFileSync(filePath2, "utf-8");
+        const data = JSON.parse(raw);
+        return res.json({ success: true, data, lastFetched: data.fetched_at });
+      }
+      res.json({ success: true, data: null, lastFetched: null });
+    } catch (err) {
+      console.error("Ads search terms endpoint error:", err);
+      res.status(500).json({ success: false, message: "Failed to fetch search terms data" });
+    }
+  });
+  app2.get("/api/admin/marketing/ga4-overview", requireAdmin, async (req, res) => {
+    const filePath = findLatestDataFile("ga4_overview_");
+    if (filePath) {
+      try {
+        const raw = fs.readFileSync(filePath, "utf-8");
+        const data = JSON.parse(raw);
+        const fetchedAt = new Date(data.fetched_at).getTime();
+        if (Date.now() - fetchedAt < 60 * 60 * 1e3) {
+          return res.json({ success: true, data, lastFetched: data.fetched_at });
+        }
+      } catch {
+      }
+    }
+    try {
+      const data = await fetchGA4Data();
+      if (data) {
+        res.json({ success: true, data, lastFetched: data.fetched_at });
+      } else {
+        res.json({ success: true, data: null, lastFetched: null });
+      }
+    } catch (err) {
+      console.error("GA4 overview endpoint error:", err);
+      res.status(500).json({ success: false, message: "Failed to fetch GA4 data" });
+    }
+  });
+  app2.get("/api/admin/marketing/facebook", requireAdmin, async (req, res) => {
+    const filePath = findLatestDataFile("facebook_metrics_");
+    if (filePath) {
+      try {
+        const raw = fs.readFileSync(filePath, "utf-8");
+        const data = JSON.parse(raw);
+        const fetchedAt = new Date(data.fetched_at).getTime();
+        if (Date.now() - fetchedAt < 60 * 60 * 1e3) {
+          return res.json({ success: true, data, lastFetched: data.fetched_at });
+        }
+      } catch {
+      }
+    }
+    try {
+      const data = await fetchFacebookData();
+      if (data) {
+        res.json({ success: true, data, lastFetched: data.fetched_at });
+      } else {
+        res.json({ success: true, data: null, lastFetched: null });
+      }
+    } catch (err) {
+      console.error("Facebook marketing endpoint error:", err);
+      res.status(500).json({ success: false, message: "Failed to fetch Facebook data" });
+    }
+  });
+  app2.get("/api/admin/marketing/instagram", requireAdmin, async (req, res) => {
+    const filePath = findLatestDataFile("instagram_metrics_");
+    if (filePath) {
+      try {
+        const raw = fs.readFileSync(filePath, "utf-8");
+        const data = JSON.parse(raw);
+        const fetchedAt = new Date(data.fetched_at).getTime();
+        if (Date.now() - fetchedAt < 60 * 60 * 1e3) {
+          return res.json({ success: true, data, lastFetched: data.fetched_at });
+        }
+      } catch {
+      }
+    }
+    try {
+      const data = await fetchInstagramData();
+      if (data) {
+        res.json({ success: true, data, lastFetched: data.fetched_at });
+      } else {
+        res.json({ success: true, data: null, lastFetched: null });
+      }
+    } catch (err) {
+      console.error("Instagram marketing endpoint error:", err);
+      res.status(500).json({ success: false, message: "Failed to fetch Instagram data" });
+    }
+  });
+  app2.post("/api/admin/marketing/connect-social", requireAdmin, async (req, res) => {
+    try {
+      if (req.body?.token) {
+        try {
+          fs.writeFileSync("/tmp/fb_token.txt", req.body.token.trim());
+        } catch {
+        }
+      }
+      const [fb, ig] = await Promise.all([fetchFacebookData(), fetchInstagramData()]);
+      res.json({
+        success: true,
+        message: fb ? "Facebook connected successfully" : "Facebook connection failed \u2014 check FB_PAGE_ACCESS_TOKEN and FB_PAGE_ID secrets",
+        facebook: fb ? "connected" : "unavailable",
+        instagram: ig ? "connected" : "unavailable"
+      });
+    } catch (err) {
+      console.error("Social connect error:", err);
+      res.status(500).json({ success: false, message: "Failed to connect social accounts" });
+    }
+  });
+  app2.post("/api/admin/marketing/refresh-social", requireAdmin, async (req, res) => {
+    try {
+      const [fb, ig] = await Promise.all([fetchFacebookData(), fetchInstagramData()]);
+      res.json({
+        success: true,
+        message: "Social data refreshed",
+        facebook: fb ? "updated" : "unavailable",
+        instagram: ig ? "updated" : "unavailable"
+      });
+    } catch (err) {
+      console.error("Social refresh error:", err);
+      res.status(500).json({ success: false, message: "Failed to refresh social data" });
+    }
+  });
+  app2.post("/api/admin/marketing/refresh-all", requireAdmin, async (req, res) => {
+    try {
+      const [ga4, ads, fb, ig] = await Promise.all([
+        fetchGA4Data(),
+        fetchGoogleAdsData(),
+        fetchFacebookData(),
+        fetchInstagramData()
+      ]);
+      res.json({
+        success: true,
+        message: "All marketing data refreshed",
+        ga4: ga4 ? "updated" : "unavailable",
+        google_ads: ads ? "updated" : "unavailable",
+        facebook: fb ? "updated" : "unavailable",
+        instagram: ig ? "updated" : "unavailable"
+      });
+    } catch (err) {
+      console.error("Marketing refresh error:", err);
+      res.status(500).json({ success: false, message: "Failed to refresh marketing data" });
+    }
+  });
   seedAdminUser();
   seedFieldMaterials();
   seedServiceRates();
@@ -9038,10 +9739,8 @@ var vite_config_default = defineConfig({
         ]
       },
       workbox: {
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        navigateFallback: "index.html",
-        navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
           {
             urlPattern: /\/api\/field\/.*/i,
@@ -9101,6 +9800,595 @@ var vite_config_default = defineConfig({
 
 // server/vite.ts
 import { nanoid } from "nanoid";
+
+// server/seo-meta.ts
+var BASE_URL = "https://absolutepestservices.com";
+var DEFAULT_META = {
+  title: "Pest Control PA & DE | Absolute Pest Services",
+  description: "Licensed pest control in Chester County PA, Delaware County PA & New Castle County DE. Wildlife removal, termite treatment, bed bug control & bat removal. Call 484-643-2225.",
+  canonical: BASE_URL + "/",
+  h1: "Professional Pest Control in PA & Delaware"
+};
+var ROUTE_META = {
+  // ── Homepage ──────────────────────────────────────────────────────────────
+  "/": { ...DEFAULT_META },
+  // ── Static / service pages ────────────────────────────────────────────────
+  "/termites": {
+    title: "Termite Treatment Chester County PA | Absolute Pest",
+    description: "Licensed termite exterminators in Chester County, PA. Serving West Chester, Kennett Square, Malvern & all of Chester County. Protect your home \u2014 call 484-643-2225.",
+    canonical: BASE_URL + "/termites",
+    h1: "Termite Treatment in Chester County, PA"
+  },
+  "/bed-bugs": {
+    title: "Bed Bug Exterminator Chester County PA | Absolute Pest",
+    description: "Professional bed bug exterminator in Chester County, PA. Heat & chemical treatment options. Same-day service available. Licensed & insured. Call 484-643-2225.",
+    canonical: BASE_URL + "/bed-bugs",
+    h1: "Bed Bug Exterminator in Chester County, PA"
+  },
+  "/rodents": {
+    title: "Mouse & Rat Exterminator Chester County PA | Absolute Pest",
+    description: "Professional rodent control in Chester County, PA. Mouse & rat extermination, exclusion & prevention. Serving West Chester, Kennett Square & all Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/rodents",
+    h1: "Mouse & Rat Exterminator in Chester County, PA"
+  },
+  "/wildlife": {
+    title: "Wildlife Removal Chester County PA | Absolute Pest Services",
+    description: "Humane wildlife removal in Chester County, PA. Expert raccoon removal, squirrel control, groundhog removal & more. Licensed PA wildlife operators. Call 484-643-2225.",
+    canonical: BASE_URL + "/wildlife",
+    h1: "Wildlife Removal in Chester County, PA"
+  },
+  "/wildlife-control": {
+    title: "Wildlife Control Services | Absolute Pest Services PA & DE",
+    description: "Humane wildlife control in PA & DE. Expert removal of raccoons, squirrels, groundhogs, skunks & more. Licensed wildlife control operators. Call 484-643-2225.",
+    canonical: BASE_URL + "/wildlife-control"
+  },
+  "/bed-bug-treatment": {
+    title: "Bed Bug Treatment | Absolute Pest Services PA & DE",
+    description: "Professional bed bug treatment in PA & DE. Heat & chemical treatments available. Same-day service. Call 484-643-2225.",
+    canonical: BASE_URL + "/bed-bug-treatment"
+  },
+  "/termite-treatment": {
+    title: "Termite Treatment | Absolute Pest Services PA & DE",
+    description: "Expert termite inspection and treatment in PA & DE. Protect your home from termite damage. Call 484-643-2225.",
+    canonical: BASE_URL + "/termite-treatment"
+  },
+  "/bat-removal": {
+    title: "Bat Removal Services | Absolute Pest Services PA & DE",
+    description: "Safe, humane bat removal in PA & DE. Licensed & insured. We handle bat exclusion, guano cleanup & prevention. Call 484-643-2225.",
+    canonical: BASE_URL + "/bat-removal"
+  },
+  "/request-service": {
+    title: "Request Pest Control Service | Absolute Pest Services PA & DE",
+    description: "Request pest control service from Absolute Pest Services. Serving PA & DE. Same-day service available. Call 484-643-2225.",
+    canonical: BASE_URL + "/request-service"
+  },
+  "/blog": {
+    title: "Pest Control Tips & News | Absolute Pest Services Blog",
+    description: "Pest control tips, seasonal alerts, and expert advice from the team at Absolute Pest Services. Serving Chester County, PA and surrounding areas.",
+    canonical: BASE_URL + "/blog"
+  },
+  // ── Service area index ────────────────────────────────────────────────────
+  "/service-areas": {
+    title: "Pest Control Service Areas PA & DE | Absolute Pest Services",
+    description: "Absolute Pest Services covers Chester County, Delaware County, Montgomery County PA and New Castle County DE. Licensed & insured. Find your city and schedule service today.",
+    canonical: BASE_URL + "/service-areas",
+    h1: "Pest Control Service Areas in PA & Delaware"
+  },
+  // ── County-level service area pages ──────────────────────────────────────
+  "/service-areas/chester-county-pa": {
+    title: "Chester County PA Pest Control | Absolute Pest Services",
+    description: "Expert pest control in Chester County, PA \u2014 West Grove, Kennett Square, Oxford, Avondale & more. Licensed, insured, 5-star rated. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/chester-county-pa",
+    h1: "Pest Control Services in Chester County, PA"
+  },
+  "/service-areas/delaware-county-pa": {
+    title: "Delaware County PA Pest Control | Absolute Pest Services",
+    description: "Expert pest control in Delaware County, PA \u2014 Media, Newtown Square, Chester, Aston & more. Licensed, insured, 24/7 emergency service. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/delaware-county-pa",
+    h1: "Pest Control Services in Delaware County, PA"
+  },
+  "/service-areas/new-castle-county-de": {
+    title: "New Castle County DE Pest Control | Absolute Pest Services",
+    description: "Expert pest control in New Castle County, DE \u2014 Hockessin, Newark, Wilmington & more. Licensed, insured, 24/7 emergency service. Call 302-235-1975.",
+    canonical: BASE_URL + "/service-areas/new-castle-county-de",
+    h1: "Pest Control Services in New Castle County, DE"
+  },
+  "/service-areas/montgomery-county-pa": {
+    title: "Montgomery County PA Pest Control | Absolute Pest Services",
+    description: "Expert pest control in Montgomery County, PA \u2014 Norristown, King of Prussia, Collegeville, Pottstown & more. Licensed, insured. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/montgomery-county-pa",
+    h1: "Pest Control Services in Montgomery County, PA"
+  },
+  // ── City-level service area pages — Pennsylvania ─────────────────────────
+  "/service-areas/avondale-pa": {
+    title: "Avondale PA Pest Control Services | Absolute Pest Services",
+    description: "Avondale, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/avondale-pa"
+  },
+  "/service-areas/chadds-ford-pa": {
+    title: "Chadds Ford PA Pest Control | Absolute Pest Services",
+    description: "Chadds Ford, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/chadds-ford-pa"
+  },
+  "/service-areas/coatesville-pa": {
+    title: "Coatesville PA Pest Control | Absolute Pest Services",
+    description: "Coatesville, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/coatesville-pa"
+  },
+  "/service-areas/cochranville-pa": {
+    title: "Cochranville PA Pest Control | Absolute Pest Services",
+    description: "Cochranville, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/cochranville-pa"
+  },
+  "/service-areas/collegeville-pa": {
+    title: "Collegeville PA Pest Control | Absolute Pest Services",
+    description: "Collegeville PA pest control: wildlife removal, termite treatment, and rodent control near Ursinus College and Perkiomen Creek. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/collegeville-pa"
+  },
+  "/service-areas/downingtown-pa": {
+    title: "Downingtown PA Pest Control | Absolute Pest Services",
+    description: "Downingtown PA pest control: wildlife removal, termite treatment, bed bug control near Marsh Creek State Park and East Brandywine. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/downingtown-pa"
+  },
+  "/service-areas/exton-pa": {
+    title: "Exton PA Pest Control | Absolute Pest Services",
+    description: "Exton PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination near the PA Turnpike. Serving Exton, Lionville & Uwchlan. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/exton-pa"
+  },
+  "/service-areas/glen-mills-pa": {
+    title: "Glen Mills PA Pest Control Services | Absolute Pest Services",
+    description: "Glen Mills, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/glen-mills-pa"
+  },
+  "/service-areas/kennett-square-pa": {
+    title: "Kennett Square PA Pest Control | Absolute Pest Services",
+    description: "Kennett Square, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/kennett-square-pa"
+  },
+  "/service-areas/king-of-prussia-pa": {
+    title: "King of Prussia PA Pest Control | Absolute Pest Services",
+    description: "King of Prussia PA pest control: commercial and residential wildlife removal, termite treatment, and rodent control near Valley Forge. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/king-of-prussia-pa"
+  },
+  "/service-areas/landenberg-pa": {
+    title: "Landenberg PA Pest Control Services | Absolute Pest Services",
+    description: "Landenberg, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/landenberg-pa"
+  },
+  "/service-areas/lincoln-university-pa": {
+    title: "Lincoln University PA Pest Control | Absolute Pest Services",
+    description: "Lincoln University, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/lincoln-university-pa"
+  },
+  "/service-areas/malvern-pa": {
+    title: "Malvern PA Pest Control Services | Absolute Pest Services",
+    description: "Malvern PA pest control: wildlife removal, termite treatment, bed bug control along the Paoli Pike corridor. Serving Malvern, Frazer, and Great Valley. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/malvern-pa"
+  },
+  "/service-areas/norristown-pa": {
+    title: "Norristown PA Pest Control Services | Absolute Pest",
+    description: "Norristown PA pest control: rodent control, wildlife removal & termite treatment in Montgomery County. Trusted local experts. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/norristown-pa"
+  },
+  "/service-areas/oxford-pa": {
+    title: "Oxford PA Pest Control Services | Absolute Pest Services",
+    description: "Oxford, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/oxford-pa"
+  },
+  "/service-areas/pottstown-pa": {
+    title: "Pottstown PA Pest Control Services | Absolute Pest Services",
+    description: "Pottstown PA pest control: rodent control, wildlife removal, and termite treatment in Montgomery County's industrial heritage corridor. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/pottstown-pa"
+  },
+  "/service-areas/west-chester-pa": {
+    title: "West Chester PA Pest Control | Absolute Pest Services",
+    description: "West Chester PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving West Chester Borough & surrounding townships. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/west-chester-pa"
+  },
+  "/service-areas/west-grove-pa": {
+    title: "West Grove PA Pest Control Services | Absolute Pest Services",
+    description: "West Grove, PA pest control: wildlife removal, termite treatment, bed bug control & rodent extermination. Serving Chester County. Licensed & insured. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/west-grove-pa"
+  },
+  // ── City-level service area pages — Delaware ─────────────────────────────
+  "/service-areas/hockessin-de": {
+    title: "Hockessin DE Pest Control Services | Absolute Pest Services",
+    description: "Hockessin DE pest control: wildlife removal, termite treatment, and rodent control in heavily wooded Northern Delaware. Serving Kennett Pike corridor. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/hockessin-de"
+  },
+  "/service-areas/newark-de": {
+    title: "Newark DE Pest Control Services | Absolute Pest Services",
+    description: "Newark DE pest control: bed bug treatment, wildlife removal & termite control near the University of Delaware. Serving New Castle County. Call 302-235-1975.",
+    canonical: BASE_URL + "/service-areas/newark-de"
+  },
+  "/service-areas/wilmington-de": {
+    title: "Wilmington DE Pest Control Services | Absolute Pest Services",
+    description: "Wilmington DE pest control: rodent control, wildlife removal, termite treatment near the Brandywine River. Delaware's largest city pest experts. Call 484-643-2225.",
+    canonical: BASE_URL + "/service-areas/wilmington-de"
+  },
+  // ── City Services — General Pest Control (15 cities) ─────────────────────
+  "/city-services/pest-control-avondale-pa": {
+    title: "Pest Control in Avondale, PA | Absolute Pest Services",
+    description: "Expert pest control in Avondale, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-avondale-pa"
+  },
+  "/city-services/pest-control-chadds-ford-pa": {
+    title: "Pest Control in Chadds Ford, PA | Absolute Pest Services",
+    description: "Expert pest control in Chadds Ford, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-chadds-ford-pa"
+  },
+  "/city-services/pest-control-coatesville-pa": {
+    title: "Pest Control in Coatesville, PA | Absolute Pest Services",
+    description: "Expert pest control in Coatesville, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-coatesville-pa"
+  },
+  "/city-services/pest-control-cochranville-pa": {
+    title: "Pest Control in Cochranville, PA | Absolute Pest Services",
+    description: "Expert pest control in Cochranville, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-cochranville-pa"
+  },
+  "/city-services/pest-control-downingtown-pa": {
+    title: "Pest Control in Downingtown, PA | Absolute Pest Services",
+    description: "Expert pest control in Downingtown, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-downingtown-pa"
+  },
+  "/city-services/pest-control-exton-pa": {
+    title: "Pest Control in Exton, PA | Absolute Pest Services",
+    description: "Expert pest control in Exton, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-exton-pa"
+  },
+  "/city-services/pest-control-glen-mills-pa": {
+    title: "Pest Control in Glen Mills, PA | Absolute Pest Services",
+    description: "Expert pest control in Glen Mills, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-glen-mills-pa"
+  },
+  "/city-services/pest-control-hockessin-de": {
+    title: "Pest Control in Hockessin, DE | Absolute Pest Services",
+    description: "Expert pest control in Hockessin, DE. Licensed & insured. Serving New Castle County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-hockessin-de"
+  },
+  "/city-services/pest-control-kennett-square-pa": {
+    title: "Pest Control in Kennett Square, PA | Absolute Pest Services",
+    description: "Expert pest control in Kennett Square, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-kennett-square-pa"
+  },
+  "/city-services/pest-control-landenberg-pa": {
+    title: "Pest Control in Landenberg, PA | Absolute Pest Services",
+    description: "Expert pest control in Landenberg, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-landenberg-pa"
+  },
+  "/city-services/pest-control-lincoln-university-pa": {
+    title: "Pest Control in Lincoln University, PA | Absolute Pest Services",
+    description: "Expert pest control in Lincoln University, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-lincoln-university-pa"
+  },
+  "/city-services/pest-control-newark-de": {
+    title: "Pest Control in Newark, DE | Absolute Pest Services",
+    description: "Expert pest control in Newark, DE. Licensed & insured. Serving New Castle County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-newark-de"
+  },
+  "/city-services/pest-control-oxford-pa": {
+    title: "Pest Control in Oxford, PA | Absolute Pest Services",
+    description: "Expert pest control in Oxford, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-oxford-pa"
+  },
+  "/city-services/pest-control-west-grove-pa": {
+    title: "Pest Control in West Grove, PA | Absolute Pest Services",
+    description: "Expert pest control in West Grove, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-west-grove-pa"
+  },
+  "/city-services/pest-control-wilmington-de": {
+    title: "Pest Control in Wilmington, DE | Absolute Pest Services",
+    description: "Expert pest control in Wilmington, DE. Licensed & insured. Serving New Castle County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/pest-control-wilmington-de"
+  },
+  // ── City Services — Termite Control (15 cities) ───────────────────────────
+  "/city-services/termite-control-avondale-pa": {
+    title: "Termite Control in Avondale, PA | Absolute Pest Services",
+    description: "Expert termite control in Avondale, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-avondale-pa"
+  },
+  "/city-services/termite-control-chadds-ford-pa": {
+    title: "Termite Control in Chadds Ford, PA | Absolute Pest Services",
+    description: "Expert termite control in Chadds Ford, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-chadds-ford-pa"
+  },
+  "/city-services/termite-control-coatesville-pa": {
+    title: "Termite Control in Coatesville, PA | Absolute Pest Services",
+    description: "Expert termite control in Coatesville, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-coatesville-pa"
+  },
+  "/city-services/termite-control-cochranville-pa": {
+    title: "Termite Control in Cochranville, PA | Absolute Pest Services",
+    description: "Expert termite control in Cochranville, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-cochranville-pa"
+  },
+  "/city-services/termite-control-downingtown-pa": {
+    title: "Termite Control in Downingtown, PA | Absolute Pest Services",
+    description: "Expert termite control in Downingtown, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-downingtown-pa"
+  },
+  "/city-services/termite-control-exton-pa": {
+    title: "Termite Control in Exton, PA | Absolute Pest Services",
+    description: "Expert termite control in Exton, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-exton-pa"
+  },
+  "/city-services/termite-control-glen-mills-pa": {
+    title: "Termite Control in Glen Mills, PA | Absolute Pest Services",
+    description: "Expert termite control in Glen Mills, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-glen-mills-pa"
+  },
+  "/city-services/termite-control-hockessin-de": {
+    title: "Termite Control in Hockessin, DE | Absolute Pest Services",
+    description: "Expert termite control in Hockessin, DE. Licensed & insured. Serving New Castle County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-hockessin-de"
+  },
+  "/city-services/termite-control-kennett-square-pa": {
+    title: "Termite Control in Kennett Square, PA | Absolute Pest Services",
+    description: "Expert termite control in Kennett Square, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-kennett-square-pa"
+  },
+  "/city-services/termite-control-landenberg-pa": {
+    title: "Termite Control in Landenberg, PA | Absolute Pest Services",
+    description: "Expert termite control in Landenberg, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-landenberg-pa"
+  },
+  "/city-services/termite-control-lincoln-university-pa": {
+    title: "Termite Control in Lincoln University, PA | Absolute Pest Services",
+    description: "Expert termite control in Lincoln University, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-lincoln-university-pa"
+  },
+  "/city-services/termite-control-newark-de": {
+    title: "Termite Control in Newark, DE | Absolute Pest Services",
+    description: "Expert termite control in Newark, DE. Licensed & insured. Serving New Castle County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-newark-de"
+  },
+  "/city-services/termite-control-oxford-pa": {
+    title: "Termite Control in Oxford, PA | Absolute Pest Services",
+    description: "Expert termite control in Oxford, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-oxford-pa"
+  },
+  "/city-services/termite-control-west-grove-pa": {
+    title: "Termite Control in West Grove, PA | Absolute Pest Services",
+    description: "Expert termite control in West Grove, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-west-grove-pa"
+  },
+  "/city-services/termite-control-wilmington-de": {
+    title: "Termite Control in Wilmington, DE | Absolute Pest Services",
+    description: "Expert termite control in Wilmington, DE. Licensed & insured. Serving New Castle County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/termite-control-wilmington-de"
+  },
+  // ── City Services — Wildlife Control (15 cities) ─────────────────────────
+  "/city-services/wildlife-control-avondale-pa": {
+    title: "Wildlife Control in Avondale, PA | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Avondale, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-avondale-pa"
+  },
+  "/city-services/wildlife-control-chadds-ford-pa": {
+    title: "Wildlife Control in Chadds Ford, PA | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Chadds Ford, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-chadds-ford-pa"
+  },
+  "/city-services/wildlife-control-coatesville-pa": {
+    title: "Wildlife Control in Coatesville, PA | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Coatesville, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-coatesville-pa"
+  },
+  "/city-services/wildlife-control-cochranville-pa": {
+    title: "Wildlife Control in Cochranville, PA | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Cochranville, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-cochranville-pa"
+  },
+  "/city-services/wildlife-control-downingtown-pa": {
+    title: "Wildlife Control in Downingtown, PA | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Downingtown, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-downingtown-pa"
+  },
+  "/city-services/wildlife-control-exton-pa": {
+    title: "Wildlife Control in Exton, PA | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Exton, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-exton-pa"
+  },
+  "/city-services/wildlife-control-glen-mills-pa": {
+    title: "Wildlife Control in Glen Mills, PA | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Glen Mills, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-glen-mills-pa"
+  },
+  "/city-services/wildlife-control-hockessin-de": {
+    title: "Wildlife Control in Hockessin, DE | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Hockessin, DE. Licensed & insured. Serving New Castle County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-hockessin-de"
+  },
+  "/city-services/wildlife-control-kennett-square-pa": {
+    title: "Wildlife Control in Kennett Square, PA | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Kennett Square, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-kennett-square-pa"
+  },
+  "/city-services/wildlife-control-landenberg-pa": {
+    title: "Wildlife Control in Landenberg, PA | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Landenberg, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-landenberg-pa"
+  },
+  "/city-services/wildlife-control-lincoln-university-pa": {
+    title: "Wildlife Control in Lincoln University, PA | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Lincoln University, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-lincoln-university-pa"
+  },
+  "/city-services/wildlife-control-newark-de": {
+    title: "Wildlife Control in Newark, DE | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Newark, DE. Licensed & insured. Serving New Castle County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-newark-de"
+  },
+  "/city-services/wildlife-control-oxford-pa": {
+    title: "Wildlife Control in Oxford, PA | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Oxford, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-oxford-pa"
+  },
+  "/city-services/wildlife-control-west-grove-pa": {
+    title: "Wildlife Control in West Grove, PA | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in West Grove, PA. Licensed & insured. Serving Chester County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-west-grove-pa"
+  },
+  "/city-services/wildlife-control-wilmington-de": {
+    title: "Wildlife Control in Wilmington, DE | Absolute Pest Services",
+    description: "Expert wildlife & rodent control in Wilmington, DE. Licensed & insured. Serving New Castle County. Call 484-643-2225 for fast service.",
+    canonical: BASE_URL + "/city-services/wildlife-control-wilmington-de"
+  },
+  // ── City Services — Ant & Wasp Control (15 cities) ───────────────────────
+  "/city-services/ant-wasp-control-avondale-pa": {
+    title: "Ant & Wasp Control in Avondale, PA | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Avondale, PA. Licensed & insured. Serving Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-avondale-pa"
+  },
+  "/city-services/ant-wasp-control-chadds-ford-pa": {
+    title: "Ant & Wasp Control in Chadds Ford, PA | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Chadds Ford, PA. Licensed & insured. Serving Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-chadds-ford-pa"
+  },
+  "/city-services/ant-wasp-control-coatesville-pa": {
+    title: "Ant & Wasp Control in Coatesville, PA | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Coatesville, PA. Licensed & insured. Serving Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-coatesville-pa"
+  },
+  "/city-services/ant-wasp-control-cochranville-pa": {
+    title: "Ant & Wasp Control in Cochranville, PA | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Cochranville, PA. Licensed & insured. Serving Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-cochranville-pa"
+  },
+  "/city-services/ant-wasp-control-downingtown-pa": {
+    title: "Ant & Wasp Control in Downingtown, PA | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Downingtown, PA. Licensed & insured. Serving Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-downingtown-pa"
+  },
+  "/city-services/ant-wasp-control-exton-pa": {
+    title: "Ant & Wasp Control in Exton, PA | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Exton, PA. Licensed & insured. Serving Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-exton-pa"
+  },
+  "/city-services/ant-wasp-control-glen-mills-pa": {
+    title: "Ant & Wasp Control in Glen Mills, PA | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Glen Mills, PA. Licensed & insured. Serving Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-glen-mills-pa"
+  },
+  "/city-services/ant-wasp-control-hockessin-de": {
+    title: "Ant & Wasp Control in Hockessin, DE | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Hockessin, DE. Licensed & insured. Serving New Castle County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-hockessin-de"
+  },
+  "/city-services/ant-wasp-control-kennett-square-pa": {
+    title: "Ant & Wasp Control in Kennett Square, PA | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Kennett Square, PA. Licensed & insured. Serving Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-kennett-square-pa"
+  },
+  "/city-services/ant-wasp-control-landenberg-pa": {
+    title: "Ant & Wasp Control in Landenberg, PA | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Landenberg, PA. Licensed & insured. Serving Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-landenberg-pa"
+  },
+  "/city-services/ant-wasp-control-lincoln-university-pa": {
+    title: "Ant & Wasp Control in Lincoln University, PA | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Lincoln University, PA. Licensed & insured. Serving Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-lincoln-university-pa"
+  },
+  "/city-services/ant-wasp-control-newark-de": {
+    title: "Ant & Wasp Control in Newark, DE | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Newark, DE. Licensed & insured. Serving New Castle County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-newark-de"
+  },
+  "/city-services/ant-wasp-control-oxford-pa": {
+    title: "Ant & Wasp Control in Oxford, PA | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Oxford, PA. Licensed & insured. Serving Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-oxford-pa"
+  },
+  "/city-services/ant-wasp-control-west-grove-pa": {
+    title: "Ant & Wasp Control in West Grove, PA | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in West Grove, PA. Licensed & insured. Serving Chester County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-west-grove-pa"
+  },
+  "/city-services/ant-wasp-control-wilmington-de": {
+    title: "Ant & Wasp Control in Wilmington, DE | Absolute Pest Services",
+    description: "Expert ant, wasp, hornet & carpenter bee control in Wilmington, DE. Licensed & insured. Serving New Castle County. Call 484-643-2225.",
+    canonical: BASE_URL + "/city-services/ant-wasp-control-wilmington-de"
+  },
+  // ── Legal / Trust pages ────────────────────────────────────────────────────
+  "/privacy-policy": {
+    title: "Privacy Policy | Absolute Pest Services",
+    description: "Privacy Policy for Absolute Pest Services. Learn how we collect, use, and protect your information when you contact us for pest control services in PA & DE.",
+    canonical: BASE_URL + "/privacy-policy",
+    h1: "Privacy Policy"
+  },
+  "/about": {
+    title: "About Absolute Pest Services | Chester County PA",
+    description: "Absolute Pest Services is a licensed, insured pest control company serving Chester County PA, Delaware County PA, Montgomery County PA, and New Castle County DE. 5-star rated.",
+    canonical: BASE_URL + "/about",
+    h1: "About Absolute Pest Services"
+  },
+  "/contact": {
+    title: "Contact Absolute Pest Services | Call 484-643-2225",
+    description: "Contact Absolute Pest Services for pest control in Chester County PA and Delaware. Call 484-643-2225, text, or request service online. 24/7 emergency service available.",
+    canonical: BASE_URL + "/contact",
+    h1: "Contact Absolute Pest Services"
+  }
+};
+function getRouteMeta(pathname) {
+  const normalised = pathname === "/" ? "/" : pathname.replace(/\/+$/, "");
+  if (ROUTE_META[normalised]) return ROUTE_META[normalised];
+  return {
+    ...DEFAULT_META,
+    canonical: BASE_URL + normalised
+  };
+}
+function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function injectSeoMeta(html, meta) {
+  const safeTitle = escapeHtml(meta.title);
+  const safeDesc = escapeHtml(meta.description);
+  const canonicalUrl = meta.canonical || BASE_URL + "/";
+  let result = html;
+  result = result.replace(
+    /<title>[^<]*<\/title>/,
+    `<title>${safeTitle}</title>`
+  );
+  result = result.replace(
+    /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/,
+    `<meta name="description" content="${safeDesc}" />`
+  );
+  result = result.replace(
+    /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/,
+    `<link rel="canonical" href="${canonicalUrl}" />`
+  );
+  result = result.replace(
+    /(<meta\s+property="og:title"\s+content=")[^"]*(")/,
+    `$1${safeTitle}$2`
+  );
+  result = result.replace(
+    /(<meta\s+property="og:description"\s+content=")[^"]*(")/,
+    `$1${safeDesc}$2`
+  );
+  result = result.replace(
+    /(<meta\s+property="og:url"\s+content=")[^"]*(")/,
+    `$1${canonicalUrl}$2`
+  );
+  result = result.replace(
+    /(<meta\s+name="twitter:title"\s+content=")[^"]*(")/,
+    `$1${safeTitle}$2`
+  );
+  result = result.replace(
+    /(<meta\s+name="twitter:description"\s+content=")[^"]*(")/,
+    `$1${safeDesc}$2`
+  );
+  if (meta.h1) {
+    const safeH1 = escapeHtml(meta.h1);
+    result = result.replace(
+      /<div id="root"><\/div>/,
+      `<div id="root"><h1>${safeH1}</h1></div>`
+    );
+  }
+  return result;
+}
+
+// server/vite.ts
 var viteLogger = createLogger();
 function log(message, source = "express") {
   const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
@@ -9146,7 +10434,10 @@ async function setupVite(app2, server) {
         `src="/src/main.tsx?v=${nanoid()}"`
       );
       const page = await vite.transformIndexHtml(url, template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      const pathname = url.split("?")[0];
+      const meta = getRouteMeta(pathname);
+      const seoPage = injectSeoMeta(page, meta);
+      res.status(200).set({ "Content-Type": "text/html" }).end(seoPage);
     } catch (e) {
       vite.ssrFixStacktrace(e);
       next(e);
@@ -9161,8 +10452,14 @@ function serveStatic(app2) {
     );
   }
   app2.use(express.static(distPath));
-  app2.use("*", (_req, res) => {
-    res.sendFile(path3.resolve(distPath, "index.html"));
+  const indexPath = path3.resolve(distPath, "index.html");
+  const baseHtml = fs2.readFileSync(indexPath, "utf-8");
+  app2.use("*", (req, res) => {
+    const pathname = (req.originalUrl || req.url || "/").split("?")[0];
+    const meta = getRouteMeta(pathname);
+    const html = injectSeoMeta(baseHtml, meta);
+    res.setHeader("Content-Type", "text/html");
+    res.send(html);
   });
 }
 
@@ -9409,8 +10706,10 @@ function getUTCHourForLocalTime(hour, timezone) {
 
 // server/index.ts
 var app = express2();
-app.use(express2.json());
-app.use(express2.urlencoded({ extended: false }));
+app.use(express2.json({ limit: "10mb" }));
+app.use(express2.urlencoded({ extended: false, limit: "10mb" }));
+var publicPath = path4.resolve(process.cwd(), "public");
+app.use("/uploads", express2.static(path4.join(publicPath, "uploads")));
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
@@ -9418,17 +10717,8 @@ app.get("/api/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
 app.use((req, res, next) => {
-  if (req.method === "GET" && req.path === "/") {
-    const acceptHeader = req.headers["accept"] || "";
-    if (!acceptHeader.includes("text/html")) {
-      return res.status(200).send("OK");
-    }
-  }
-  next();
-});
-app.use((req, res, next) => {
   const start = Date.now();
-  const path4 = req.path;
+  const path5 = req.path;
   let capturedJsonResponse = void 0;
   const originalResJson = res.json;
   res.json = function(bodyJson, ...args) {
@@ -9437,8 +10727,8 @@ app.use((req, res, next) => {
   };
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path4.startsWith("/api")) {
-      let logLine = `${req.method} ${path4} ${res.statusCode} in ${duration}ms`;
+    if (path5.startsWith("/api")) {
+      let logLine = `${req.method} ${path5} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }

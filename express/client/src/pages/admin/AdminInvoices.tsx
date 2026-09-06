@@ -33,7 +33,9 @@ interface Invoice {
   issueDate: string;
   dueDate: string;
   total: string;
+  clientId?: number;
   clientName?: string;
+  client?: { id: number; name: string } | null;
 }
 
 function safeFormat(dateStr: string | null | undefined, fmt: string): string {
@@ -52,15 +54,30 @@ export default function AdminInvoices() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [clientFilter, setClientFilter] = useState<number | null>(null);
+
+  const clientParam = (() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const raw = params.get('clientId');
+      const n = raw ? parseInt(raw, 10) : NaN;
+      return Number.isFinite(n) && n > 0 ? n : null;
+    } catch {
+      return null;
+    }
+  })();
 
   useEffect(() => {
-    loadInvoices();
-  }, []);
+    setClientFilter(clientParam);
+    loadInvoices(clientParam);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientParam]);
 
-  const loadInvoices = async () => {
+  const loadInvoices = async (clientId: number | null = null) => {
     try {
       setLoading(true);
-      const res = await apiRequest('GET', '/api/admin/invoices');
+      const url = clientId ? `/api/admin/invoices?clientId=${clientId}` : '/api/admin/invoices';
+      const res = await apiRequest('GET', url);
       const data = await res.json();
       if (data.success) {
         setInvoices(data.invoices);
@@ -86,7 +103,7 @@ export default function AdminInvoices() {
           title: "Success",
           description: "Invoice marked as paid",
         });
-        loadInvoices();
+        loadInvoices(clientFilter);
       }
     } catch (error) {
       toast({
@@ -107,7 +124,7 @@ export default function AdminInvoices() {
           title: "Success",
           description: "Invoice sent to customer",
         });
-        loadInvoices();
+        loadInvoices(clientFilter);
       }
     } catch (error) {
       toast({
@@ -134,10 +151,13 @@ export default function AdminInvoices() {
     return status !== 'paid' && new Date(dueDate) < new Date();
   };
 
+  const resolveClientName = (invoice: Invoice): string =>
+    invoice.clientName || invoice.client?.name || '';
+
   const filteredInvoices = invoices.filter(invoice => {
     const matchesSearch = searchTerm === '' ||
       invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (invoice.clientName && invoice.clientName.toLowerCase().includes(searchTerm.toLowerCase()));
+      (resolveClientName(invoice) && resolveClientName(invoice).toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === 'all' || invoice.status.toLowerCase() === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -155,6 +175,16 @@ export default function AdminInvoices() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Invoices</h1>
           <p className="text-muted-foreground mt-1">Manage and track all customer invoices</p>
+          {clientFilter && (
+            <button
+              type="button"
+              className="mt-1 text-sm text-muted-foreground underline underline-offset-2"
+              onClick={() => setLocation('/admin/invoices')}
+              title="Clear client filter"
+            >
+              Filtered by client — click to clear
+            </button>
+          )}
         </div>
         <Button onClick={() => setLocation('/admin/invoices/new')}>
           <Plus className="h-4 w-4 mr-2" />
@@ -280,8 +310,8 @@ export default function AdminInvoices() {
                         </Badge>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        {invoice.clientName && (
-                          <span className="font-medium">{invoice.clientName}</span>
+                        {resolveClientName(invoice) && (
+                          <span className="font-medium">{resolveClientName(invoice)}</span>
                         )}
                         <span>Issued: {safeFormat(invoice.issueDate, 'MMM d, yyyy')}</span>
                         <span>Due: {safeFormat(invoice.dueDate, 'MMM d, yyyy')}</span>

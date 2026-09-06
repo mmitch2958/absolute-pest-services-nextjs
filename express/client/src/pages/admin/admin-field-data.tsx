@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus, Pencil, Trash2, Users, Building2, Home, MapPin, Loader2, ClipboardList, MapPinned, Settings2, DollarSign } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Building2, Home, MapPin, Loader2, ClipboardList, MapPinned, Settings2, DollarSign, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { displayDateTime } from "@/lib/utils";
 
@@ -672,6 +673,7 @@ function ServicedAreasSection() {
 
 function JobLogsSection() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [editId, setEditId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({ siteLocation: "", servicedArea: "", workPerformed: "" });
 
@@ -683,9 +685,26 @@ function JobLogsSection() {
     },
   });
 
+  const { data: clientsData } = useQuery<{ success: boolean; clients: any[] }>({
+    queryKey: ["/api/clients"],
+    select: (d: any) => ({ success: d.success, clients: d.clients as any[] }),
+  });
+
+  const { data: invoicesData } = useQuery<{ success: boolean; invoices: any[] }>({
+    queryKey: ["/api/admin/invoices"],
+  });
+
   const logs = data?.jobLogs || [];
   const employees = data?.employees || [];
   const employeeMap = new Map(employees.map((e: any) => [e.id, e.name]));
+  const clientMap = new Map((clientsData?.clients || []).map((c: any) => [c.id, c.name]));
+  const invoiceByJobLog = new Map<number, any>();
+  for (const inv of invoicesData?.invoices || []) {
+    const jobLogId = (inv as any).jobLogId;
+    if (jobLogId && !invoiceByJobLog.has(jobLogId)) {
+      invoiceByJobLog.set(jobLogId, inv);
+    }
+  }
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
@@ -708,6 +727,40 @@ function JobLogsSection() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/job-logs"] });
       toast({ title: "Job log deleted" });
+    },
+    onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
+  const linkClientMutation = useMutation({
+    mutationFn: async ({ id, clientId }: { id: number; clientId: number | null }) => {
+      const res = await apiRequest("PATCH", `/api/admin/job-logs/${id}`, { clientId });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/job-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({ title: "Client link updated" });
+    },
+    onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
+  const createInvoiceMutation = useMutation({
+    mutationFn: async (jobLogId: number) => {
+      const due = new Date();
+      due.setDate(due.getDate() + 30);
+      const res = await apiRequest("POST", `/api/admin/invoices/from-job/${jobLogId}`, {
+        dueDate: due.toISOString(),
+      });
+      return res.json();
+    },
+    onSuccess: (result: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/job-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({
+        title: "Invoice created",
+        description: `Draft invoice #${result?.invoice?.invoiceNumber || ""} created — view it under Invoices or on the client's record.`,
+      });
     },
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
@@ -741,10 +794,11 @@ function JobLogsSection() {
                 <TableRow>
                   <TableHead>Date & Time</TableHead>
                   <TableHead>Technician</TableHead>
-                  <TableHead>Customer</TableHead>
+                  <TableHead>Client</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Area</TableHead>
                   <TableHead>Work Performed</TableHead>
+                  <TableHead>Invoice</TableHead>
                   <TableHead className="w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -753,7 +807,44 @@ function JobLogsSection() {
                   <TableRow key={log.id}>
                     <TableCell className="whitespace-nowrap">{displayDateTime(log.createdAt)}</TableCell>
                     <TableCell>{employeeMap.get(log.employeeId) || "Unknown"}</TableCell>
-                    <TableCell>{log.customerName}</TableCell>
+                    <TableCell data-testid={`cell-job-client-${log.id}`}>
+                      {editId === log.id ? (
+                        <Select
+                          value={log.clientId ? String(log.clientId) : "none"}
+                          onValueChange={(val) => {
+                            const cid = val === "none" ? null : parseInt(val, 10);
+                            if (cid !== (log.clientId ?? null)) {
+                              linkClientMutation.mutate({ id: log.id, clientId: cid });
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="min-w-[150px]">
+                            <SelectValue placeholder="Link client" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">— Not linked —</SelectItem>
+                            {(clientsData?.clients || []).map((c: any) => (
+                              <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : log.clientId && clientMap.get(log.clientId) ? (
+                        <button
+                          type="button"
+                          className="text-left underline-offset-4 hover:underline"
+                          onClick={() => setLocation("/admin/clients")}
+                          title="Open client management"
+                          data-testid={`link-job-client-${log.id}`}
+                        >
+                          {clientMap.get(log.clientId)}
+                        </button>
+                      ) : (
+                        <div>
+                          <div className="text-sm">{log.customerName}</div>
+                          <div className="text-xs text-muted-foreground">Not linked to client</div>
+                        </div>
+                      )}
+                    </TableCell>
                     {editId === log.id ? (
                       <>
                         <TableCell>
@@ -764,6 +855,13 @@ function JobLogsSection() {
                         </TableCell>
                         <TableCell>
                           <Textarea value={editForm.workPerformed} onChange={e => setEditForm({ ...editForm, workPerformed: e.target.value })} className="min-w-[200px] min-h-[60px]" />
+                        </TableCell>
+                        <TableCell>
+                          {invoiceByJobLog.get(log.id) ? (
+                            <span className="text-xs">#{invoiceByJobLog.get(log.id)!.invoiceNumber}</span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col gap-1">
@@ -777,6 +875,35 @@ function JobLogsSection() {
                         <TableCell>{log.siteLocation}</TableCell>
                         <TableCell>{log.servicedArea}</TableCell>
                         <TableCell className="max-w-xs truncate">{log.workPerformed}</TableCell>
+                        <TableCell data-testid={`cell-job-invoice-${log.id}`}>
+                          {invoiceByJobLog.get(log.id) ? (
+                            <button
+                              type="button"
+                              className="inline-flex items-center gap-1 text-xs underline-offset-4 hover:underline"
+                              onClick={() => setLocation(`/admin/invoices/${invoiceByJobLog.get(log.id)!.id}`)}
+                              title="View invoice"
+                              data-testid={`link-job-invoice-${log.id}`}
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              #{invoiceByJobLog.get(log.id)!.invoiceNumber}
+                            </button>
+                          ) : log.status === "completed" && log.clientId ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs"
+                              disabled={createInvoiceMutation.isPending}
+                              onClick={() => createInvoiceMutation.mutate(log.id)}
+                              title="Create invoice from this job"
+                              data-testid={`button-invoice-job-${log.id}`}
+                            >
+                              <FileText className="w-3 h-3 mr-1" />
+                              Invoice
+                            </Button>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
                             <Button size="icon" variant="ghost" onClick={() => startEdit(log)}><Pencil className="w-4 h-4" /></Button>

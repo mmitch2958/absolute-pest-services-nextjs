@@ -869,6 +869,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GET /api/clients/:clientId/job-logs — Job logs linked to a client (admin client detail)
+  app.get("/api/clients/:clientId/job-logs", requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const jobLogs = await storage.getJobLogs({ clientId });
+      res.json({ success: true, jobLogs });
+    } catch (error) {
+      console.error("Error fetching client job logs:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // GET /api/clients/:clientId/invoices — Invoices for a client (admin client detail)
+  app.get("/api/clients/:clientId/invoices", requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const invoices = await storage.listInvoices({ clientId });
+      res.json({ success: true, invoices });
+    } catch (error) {
+      console.error("Error fetching client invoices:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
   app.get("/api/clients/:clientId/projects", requireAdmin, async (req, res) => {
     try {
       const clientId = parseInt(req.params.clientId);
@@ -2432,13 +2456,17 @@ Return the article as JSON with fields:
   app.patch("/api/admin/job-logs/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const allowed = ["siteLocation", "servicedArea", "workPerformed", "customerName", "jobDate", "status"];
+      const allowed = ["siteLocation", "servicedArea", "workPerformed", "customerName", "jobDate", "status", "clientId"];
       const updates: any = {};
       for (const key of allowed) {
         if (req.body[key] !== undefined) updates[key] = req.body[key];
       }
       if (updates.jobDate && typeof updates.jobDate === "string") {
         updates.jobDate = new Date(updates.jobDate);
+      }
+      if (updates.clientId !== undefined) {
+        const cid = updates.clientId;
+        updates.clientId = cid === null || cid === "" ? null : typeof cid === "number" ? cid : parseInt(cid, 10);
       }
       
       // Get the existing job log to check status change
@@ -3564,6 +3592,13 @@ Return the article as JSON with fields:
         new Date(dueDate),
         userId
       );
+
+      // Mark the job log as invoiced so it shows as billed across the portal
+      try {
+        await storage.updateJobLog(jobLogId, { status: "invoiced" } as any);
+      } catch (statusErr) {
+        console.error("Error marking job log invoiced:", statusErr);
+      }
 
       const lineItems = await storage.getLineItemsByInvoice(invoice.id);
       const statusLogs = await storage.getInvoiceStatusLog(invoice.id);
