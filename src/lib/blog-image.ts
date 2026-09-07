@@ -11,6 +11,15 @@ const MIME_TO_EXT: Record<string, string> = {
   'image/webp': 'webp',
 };
 
+export function getBlogImageStorageClient(): Client {
+  const bucketId = process.env.BLOG_IMAGE_BUCKET_ID;
+  if (!bucketId) {
+    throw new Error('BLOG_IMAGE_BUCKET_ID is not configured');
+  }
+
+  return new Client({ bucketId });
+}
+
 function safeSlug(slugHint: string): string {
   return slugHint
     .toLowerCase()
@@ -45,7 +54,7 @@ async function writeImageToStorage(buffer: Buffer, mimeType: string, slugHint: s
   const ext = imageExtension(mimeType, sourceUrl);
   const filename = `${Date.now()}-${safeSlug(slugHint)}.${ext}`;
   const objectName = `blog-images/${filename}`;
-  const result = await new Client().uploadFromBytes(objectName, buffer, { compress: false });
+  const result = await getBlogImageStorageClient().uploadFromBytes(objectName, buffer, { compress: false });
 
   if (!result.ok) {
     throw new Error(`Image upload failed: ${result.error.message}`);

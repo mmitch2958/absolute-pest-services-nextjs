@@ -1,5 +1,5 @@
-import { Client } from '@replit/object-storage';
 import { NextResponse } from 'next/server';
+import { getBlogImageStorageClient } from '@/lib/blog-image';
 
 const CONTENT_TYPES: Record<string, string> = {
   avif: 'image/avif',
@@ -26,7 +26,7 @@ export async function GET(
   }
 
   try {
-    const result = await new Client().downloadAsBytes(`blog-images/${filename}`);
+    const result = await getBlogImageStorageClient().downloadAsBytes(`blog-images/${filename}`);
     if (!result.ok) {
       return NextResponse.json({ error: 'Image not found' }, { status: 404 });
     }
