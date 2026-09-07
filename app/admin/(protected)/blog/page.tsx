@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import NextImage from 'next/image';
-import { Search, Plus, X, Loader2, Globe, FileText, Sparkles, ImageIcon, Bot, CheckCircle2, AlertCircle, Clock, PenLine, Trash2, Rss } from 'lucide-react';
+import { Search, Plus, X, Loader2, Globe, FileText, Sparkles, ImageIcon, Bot, CheckCircle2, AlertCircle, Clock, PenLine, Trash2, Rss, RefreshCw } from 'lucide-react';
 
 interface BlogPost {
   id: number;
@@ -777,6 +777,249 @@ function BatchCreateModal({ onClose, onComplete }: { onClose: () => void; onComp
   );
 }
 
+// ─── Bulk image regeneration modal ────────────────────────────────────────────
+
+type BulkImageMode = 'missing' | 'selected';
+type BulkImageStatus = 'queued' | 'generating' | 'saved' | 'error';
+
+interface BulkImageItem {
+  id: number;
+  title: string;
+  status: BulkImageStatus;
+  source?: string;
+  message?: string;
+}
+
+function BulkImageModal({
+  mode,
+  ids,
+  onClose,
+  onComplete,
+}: {
+  mode: BulkImageMode;
+  ids: number[];
+  onClose: () => void;
+  onComplete: () => void;
+}) {
+  const [phase, setPhase] = useState<'confirm' | 'running' | 'done' | 'error'>('confirm');
+  const [items, setItems] = useState<BulkImageItem[]>([]);
+  const [savedCount, setSavedCount] = useState(0);
+  const [failedCount, setFailedCount] = useState(0);
+  const [fatalError, setFatalError] = useState('');
+
+  function updateItem(id: number, patch: Partial<BulkImageItem>) {
+    setItems(current => current.map(item => item.id === id ? { ...item, ...patch } : item));
+  }
+
+  function handleEvent(event: any) {
+    if (event.type === 'start') {
+      setItems((event.posts ?? []).map((post: { id: number; title: string }) => ({
+        ...post,
+        status: 'queued' as const,
+      })));
+    } else if (event.type === 'item_start') {
+      updateItem(event.id, { status: 'generating' });
+    } else if (event.type === 'item_success') {
+      updateItem(event.id, { status: 'saved', source: event.source });
+    } else if (event.type === 'item_error') {
+      updateItem(event.id, { status: 'error', message: event.message });
+    } else if (event.type === 'complete') {
+      setSavedCount(event.savedCount ?? 0);
+      setFailedCount(event.failedCount ?? 0);
+      setPhase('done');
+      onComplete();
+    } else if (event.type === 'fatal') {
+      setFatalError(event.message || 'Bulk image regeneration failed');
+      setPhase('error');
+    }
+  }
+
+  async function startRegeneration() {
+    setPhase('running');
+    setFatalError('');
+
+    try {
+      const response = await fetch('/api/admin/blog/bulk-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode, ids }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Unable to start image regeneration');
+      }
+      if (!response.body) throw new Error('No progress stream was returned');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let receivedTerminalEvent = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const event = JSON.parse(line.slice(6));
+            if (event.type === 'complete' || event.type === 'fatal') {
+              receivedTerminalEvent = true;
+            }
+            handleEvent(event);
+          } catch {
+            // Ignore malformed progress lines and continue processing the job.
+          }
+        }
+      }
+
+      if (!receivedTerminalEvent) {
+        throw new Error('The regeneration connection ended before the batch completed. Completed images were still saved.');
+      }
+    } catch (error: any) {
+      setFatalError(error.message || 'Bulk image regeneration failed');
+      setPhase('error');
+    }
+  }
+
+  const completedCount = items.filter(item => item.status === 'saved' || item.status === 'error').length;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="w-5 h-5 text-orange-600" />
+            <h2 className="text-lg font-semibold text-gray-900">
+              {mode === 'missing' ? 'Regenerate Missing Images' : 'Regenerate Selected Images'}
+            </h2>
+          </div>
+          {phase !== 'running' && (
+            <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+
+        <div className="p-6 overflow-y-auto">
+          {phase === 'confirm' && (
+            <div className="text-center py-6">
+              <ImageIcon className="w-12 h-12 text-orange-500 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                {mode === 'missing'
+                  ? 'Find and repair every missing image?'
+                  : `Regenerate images for ${ids.length} selected post${ids.length !== 1 ? 's' : ''}?`}
+              </h3>
+              <p className="text-sm text-gray-500 max-w-lg mx-auto mb-6">
+                {mode === 'missing'
+                  ? 'This finds posts with no image or an old broken local image path. Valid external and App Storage images will not be changed.'
+                  : 'Existing images on the selected posts will be replaced. Each successful image is saved immediately, while failures remain available to retry.'}
+              </p>
+              <div className="flex justify-center gap-3">
+                <button onClick={onClose} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button onClick={startRegeneration}
+                  className="inline-flex items-center gap-2 px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-semibold">
+                  <RefreshCw className="w-4 h-4" />
+                  Start Regeneration
+                </button>
+              </div>
+            </div>
+          )}
+
+          {phase === 'running' && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <p className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <Loader2 className="w-4 h-4 text-orange-500 animate-spin" />
+                  Generating and saving images…
+                </p>
+                <span className="text-xs text-gray-500">{completedCount} of {items.length || '—'} complete</span>
+              </div>
+              {items.length === 0 ? (
+                <div className="py-10 text-center text-sm text-gray-400">Finding posts that need images…</div>
+              ) : (
+                <div className="space-y-2">
+                  {items.map(item => (
+                    <div key={item.id} className={`flex items-start gap-3 p-3 rounded-xl border ${
+                      item.status === 'saved' ? 'bg-green-50 border-green-200' :
+                      item.status === 'error' ? 'bg-red-50 border-red-200' :
+                      item.status === 'generating' ? 'bg-orange-50 border-orange-200' :
+                      'bg-gray-50 border-gray-200'
+                    }`}>
+                      {item.status === 'saved' ? <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" /> :
+                        item.status === 'error' ? <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" /> :
+                        item.status === 'generating' ? <Loader2 className="w-4 h-4 text-orange-500 animate-spin mt-0.5 shrink-0" /> :
+                        <Clock className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />}
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
+                        <p className={`text-xs mt-0.5 ${item.status === 'error' ? 'text-red-600' : item.status === 'saved' ? 'text-green-700' : 'text-gray-500'}`}>
+                          {item.status === 'queued' ? 'Waiting…' :
+                            item.status === 'generating' ? 'Generating image…' :
+                            item.status === 'saved' ? `Saved${item.source ? ` via ${item.source}` : ''}` :
+                            item.message || 'Image generation failed'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-4">
+                Keep this window open until the batch finishes. Successful posts save as they complete.
+              </p>
+            </div>
+          )}
+
+          {phase === 'done' && (
+            <div className="text-center py-6">
+              <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Image regeneration finished</h3>
+              <p className="text-sm text-gray-600 mb-6">
+                {savedCount} image{savedCount !== 1 ? 's' : ''} saved
+                {failedCount > 0 ? ` · ${failedCount} failed and can be retried` : ''}.
+              </p>
+              {items.length === 0 && (
+                <p className="text-sm text-gray-500 bg-gray-50 rounded-lg px-4 py-3 mb-5">
+                  No posts with missing or legacy image paths were found.
+                </p>
+              )}
+              {items.some(item => item.status === 'error') && (
+                <div className="text-left space-y-2 mb-6">
+                  {items.filter(item => item.status === 'error').map(item => (
+                    <div key={item.id} className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm font-medium text-red-800">{item.title}</p>
+                      <p className="text-xs text-red-600 mt-0.5">{item.message}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button onClick={onClose} className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-semibold">
+                Done
+              </button>
+            </div>
+          )}
+
+          {phase === 'error' && (
+            <div className="text-center py-8">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Unable to regenerate images</h3>
+              <p className="text-sm text-red-600 mb-6">{fatalError}</p>
+              <button onClick={onClose} className="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">
+                Close
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function BlogPage() {
@@ -787,6 +1030,11 @@ export default function BlogPage() {
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [showRssModal, setShowRssModal] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const [selectedPostIds, setSelectedPostIds] = useState<Set<number>>(new Set());
+  const [bulkImageRequest, setBulkImageRequest] = useState<{ mode: BulkImageMode; ids: number[] } | null>(null);
+  const [showBulkDelete, setShowBulkDelete] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkDeleteError, setBulkDeleteError] = useState('');
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -820,7 +1068,10 @@ export default function BlogPage() {
       const res = await fetch(`/api/admin/blog?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
-      setPosts(data.posts || []);
+      const nextPosts = data.posts || [];
+      setPosts(nextPosts);
+      const visibleIds = new Set<number>(nextPosts.map((post: BlogPost) => post.id));
+      setSelectedPostIds(current => new Set([...current].filter(id => visibleIds.has(id))));
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   }, [search]);
@@ -855,6 +1106,47 @@ export default function BlogPage() {
     await fetchData();
   }
 
+  function togglePostSelection(id: number) {
+    setSelectedPostIds(current => {
+      const next = new Set(current);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAllVisible() {
+    setSelectedPostIds(current => {
+      const allSelected = posts.length > 0 && posts.every(post => current.has(post.id));
+      if (allSelected) return new Set();
+      return new Set(posts.map(post => post.id));
+    });
+  }
+
+  async function handleBulkDelete() {
+    setBulkDeleting(true);
+    setBulkDeleteError('');
+
+    try {
+      const response = await fetch('/api/admin/blog/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [...selectedPostIds] }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Bulk delete failed');
+
+      setSelectedPostIds(new Set());
+      setShowBulkDelete(false);
+      await fetchData();
+    } catch (error: any) {
+      setBulkDeleteError(error.message || 'Bulk delete failed');
+    } finally {
+      setBulkDeleting(false);
+    }
+  }
+
+  const allVisibleSelected = posts.length > 0 && posts.every(post => selectedPostIds.has(post.id));
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -887,11 +1179,52 @@ export default function BlogPage() {
         </div>
       </div>
 
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 p-3 bg-white border border-gray-200 rounded-xl">
+        <button
+          onClick={() => setBulkImageRequest({ mode: 'missing', ids: [] })}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition-colors"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Regenerate All Missing Images
+        </button>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm text-gray-500 mr-1">
+            {selectedPostIds.size} selected
+          </span>
+          <button
+            onClick={() => setBulkImageRequest({ mode: 'selected', ids: [...selectedPostIds] })}
+            disabled={selectedPostIds.size === 0}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-orange-700 border border-orange-200 bg-white hover:bg-orange-50 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ImageIcon className="w-4 h-4" />
+            Regenerate Selected
+          </button>
+          <button
+            onClick={() => { setBulkDeleteError(''); setShowBulkDelete(true); }}
+            disabled={selectedPostIds.size === 0}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-700 border border-red-200 bg-white hover:bg-red-50 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete Selected
+          </button>
+        </div>
+      </div>
+
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="w-12 px-4 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={allVisibleSelected}
+                    onChange={toggleSelectAllVisible}
+                    aria-label="Select all visible blog posts"
+                    className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                  />
+                </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">Title</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide hidden sm:table-cell">Author</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide hidden md:table-cell">Category</th>
@@ -902,12 +1235,21 @@ export default function BlogPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-gray-400"><Loader2 className="w-6 h-6 animate-spin inline" /></td></tr>
+                <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-400"><Loader2 className="w-6 h-6 animate-spin inline" /></td></tr>
               ) : posts.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-gray-400">No blog posts found</td></tr>
+                <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-400">No blog posts found</td></tr>
               ) : (
                 posts.map(p => (
-                  <tr key={p.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={p.id} className={`${selectedPostIds.has(p.id) ? 'bg-green-50/60' : 'hover:bg-gray-50'} transition-colors`}>
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedPostIds.has(p.id)}
+                        onChange={() => togglePostSelection(p.id)}
+                        aria-label={`Select ${p.title}`}
+                        className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                      />
+                    </td>
                     <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate">{p.title}</td>
                     <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{p.author}</td>
                     <td className="px-4 py-3 text-gray-600 hidden md:table-cell capitalize">{p.category}</td>
@@ -944,6 +1286,50 @@ export default function BlogPage() {
       )}
       {showBatchModal && (
         <BatchCreateModal onClose={() => setShowBatchModal(false)} onComplete={fetchData} />
+      )}
+      {bulkImageRequest && (
+        <BulkImageModal
+          mode={bulkImageRequest.mode}
+          ids={bulkImageRequest.ids}
+          onClose={() => setBulkImageRequest(null)}
+          onComplete={fetchData}
+        />
+      )}
+      {showBulkDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+              <Trash2 className="w-6 h-6 text-red-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Delete selected blog posts?</h2>
+            <p className="text-sm text-gray-600 mb-5">
+              You are about to permanently delete {selectedPostIds.size} blog post{selectedPostIds.size !== 1 ? 's' : ''}.
+              This cannot be undone.
+            </p>
+            {bulkDeleteError && (
+              <div className="mb-4 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                {bulkDeleteError}
+              </div>
+            )}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowBulkDelete(false)}
+                disabled={bulkDeleting}
+                className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                disabled={bulkDeleting}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg disabled:opacity-50"
+              >
+                {bulkDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {bulkDeleting ? 'Deleting…' : `Delete ${selectedPostIds.size} Posts`}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
