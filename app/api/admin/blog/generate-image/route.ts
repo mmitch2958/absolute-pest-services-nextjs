@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { saveBase64ImageToDisk } from '@/lib/blog-image';
+import { saveImageUrlToDisk } from '@/lib/blog-image';
 import {
   BLOG_DALLE_MODEL,
   BLOG_IMAGE_PROMPT_MODEL,
@@ -84,7 +84,7 @@ async function tryGeminiOpenRouter(prompt: string, slugHint: string): Promise<st
     const raw: string | null = data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
     if (!raw) return null;
     if (raw.startsWith('data:')) {
-      return saveBase64ImageToDisk(raw, slugHint);
+      return saveImageUrlToDisk(raw, slugHint);
     }
     return raw;
   } catch (err: any) {
@@ -167,7 +167,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'All image providers failed. Check API keys and credits.' }, { status: 500 });
     }
 
-    return NextResponse.json({ imageUrl, source, prompt });
+    const persistedImageUrl = await saveImageUrlToDisk(imageUrl, slugHint);
+    return NextResponse.json({ imageUrl: persistedImageUrl, source, prompt });
   } catch (err: any) {
     console.error('[blog/generate-image]', err);
     return NextResponse.json({ error: err.message || 'Image generation failed' }, { status: 500 });

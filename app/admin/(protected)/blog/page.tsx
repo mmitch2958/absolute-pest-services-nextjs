@@ -146,7 +146,7 @@ function PostModal({ post, onSave, onClose, onDelete }: {
     }
   }
 
-  const fieldClass = "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-green-500";
+  const fieldClass = "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm !text-gray-900 placeholder-gray-400 !bg-white focus:outline-none focus:ring-2 focus:ring-green-500";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">

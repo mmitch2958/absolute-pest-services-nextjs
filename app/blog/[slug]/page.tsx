@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { Phone } from 'lucide-react'
 import { sql } from '@/lib/db'
+import { normalizeBlogHtml } from '@/lib/blog-content'
 
 export const dynamic = 'force-dynamic'
 
@@ -75,7 +76,8 @@ export default async function BlogPostPage(
 
   // Render content: if it looks like HTML, use dangerouslySetInnerHTML;
   // otherwise render as plain paragraphs split by newline.
-  const isHtml = /<[a-z][\s\S]*>/i.test(post.content)
+  const normalizedContent = normalizeBlogHtml(post.content)
+  const isHtml = /<[a-z][\s\S]*>/i.test(normalizedContent)
 
   return (
     <>
@@ -125,11 +127,11 @@ export default async function BlogPostPage(
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {isHtml ? (
             <div
-              className="prose prose-lg prose-green max-w-none"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              className="blog-content prose prose-lg prose-green max-w-none"
+              dangerouslySetInnerHTML={{ __html: normalizedContent }}
             />
           ) : (
-            <div className="prose prose-lg prose-green max-w-none">
+            <div className="blog-content prose prose-lg prose-green max-w-none">
               {post.content.split('\n').filter(Boolean).map((para, i) => (
                 <p key={i}>{para}</p>
               ))}

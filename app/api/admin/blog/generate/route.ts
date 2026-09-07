@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BLOG_TEXT_MODEL, getOpenAIClient, requireAdminJson, withTimeout } from '@/lib/admin-ai';
+import { normalizeBlogHtml } from '@/lib/blog-content';
 
 export async function POST(req: NextRequest) {
   const authError = await requireAdminJson();
@@ -58,7 +59,7 @@ Return ONLY valid JSON with this exact structure:
     }
 
     return NextResponse.json({
-      content: parsed.content,
+      content: normalizeBlogHtml(parsed.content),
       excerpt: parsed.excerpt,
       tags: Array.isArray(parsed.tags) ? parsed.tags : [],
       metaTitle: parsed.metaTitle || '',

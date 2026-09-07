@@ -54,3 +54,17 @@ body {
 .admin-portal textarea::placeholder {
   color: #9ca3af;
 }
+
+/* AI-generated blog HTML must remain readable on the white article surface. */
+.blog-content {
+  color: #3f5049 !important;
+}
+.blog-content :where(p, li, blockquote, td, th) {
+  color: #3f5049 !important;
+}
+.blog-content :where(h2, h3, h4, strong) {
+  color: #203d34 !important;
+}
+.blog-content a {
+  color: #173f35 !important;
+}
