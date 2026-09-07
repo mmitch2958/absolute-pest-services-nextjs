@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/admin-session';
 import { sql } from '@/lib/db';
+import { saveImageUrlToStorage } from '@/lib/blog-image';
 
 async function requireAdmin() {
   const session = await getAdminSession();
@@ -70,6 +71,9 @@ export async function POST(request: NextRequest) {
 
     const finalSlug = slug?.trim() || title.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const publishedAt = isPublished ? new Date() : null;
+    const persistentFeaturedImage = featuredImage?.trim()
+      ? await saveImageUrlToStorage(featuredImage.trim(), finalSlug)
+      : null;
 
     const result = await sql`
       INSERT INTO blog_posts (title, slug, excerpt, content, author, category, tags, is_published, published_at, meta_title, meta_description, featured_image)
@@ -81,7 +85,7 @@ export async function POST(request: NextRequest) {
         ${publishedAt},
         ${metaTitle?.trim() || null},
         ${metaDescription?.trim() || null},
-        ${featuredImage?.trim() || null}
+        ${persistentFeaturedImage}
       )
       RETURNING id, title, slug, excerpt, content, author, category, tags,
                 is_published::int as is_published,

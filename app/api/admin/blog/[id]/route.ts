@@ -3,7 +3,7 @@ import { getAdminSession } from '@/lib/admin-session';
 import { sql, db } from '@/lib/db';
 import { blogPosts } from '@/shared/schema';
 import { eq } from 'drizzle-orm';
-import { saveBase64ImageToDisk, isBase64DataUrl } from '@/lib/blog-image';
+import { saveImageUrlToStorage } from '@/lib/blog-image';
 
 async function requireAdmin() {
   const session = await getAdminSession();
@@ -88,11 +88,10 @@ export async function PATCH(
       updates.publishedAt = new Date();
     }
 
-    // If featuredImage is a base64 data URL, save to disk to avoid exceeding
-    // Neon HTTP driver's per-parameter size limit
-    if (typeof updates.featuredImage === 'string' && isBase64DataUrl(updates.featuredImage)) {
+    // Persist new image URLs before saving so temporary provider URLs never reach the database.
+    if (typeof updates.featuredImage === 'string') {
       const slugHint = (updates.slug as string | undefined) ?? `post-${postId}`;
-      updates.featuredImage = saveBase64ImageToDisk(updates.featuredImage, slugHint);
+      updates.featuredImage = await saveImageUrlToStorage(updates.featuredImage, slugHint);
     }
 
     // Always update updatedAt

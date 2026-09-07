@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { sql } from '@/lib/db';
-import { saveImageUrlToDisk } from '@/lib/blog-image';
+import { saveImageUrlToStorage } from '@/lib/blog-image';
 import { normalizeBlogHtml } from '@/lib/blog-content';
 import {
   BLOG_DALLE_MODEL,
@@ -68,7 +68,7 @@ async function generateHeroImage(
         const data = await res.json();
         const raw: string | null = data?.choices?.[0]?.message?.images?.[0]?.image_url?.url ?? null;
         if (raw) {
-          const url = await saveImageUrlToDisk(raw, slugHint);
+          const url = await saveImageUrlToStorage(raw, slugHint);
           return { url, source: 'gemini-2.5-flash' };
         }
       } else {
@@ -95,7 +95,7 @@ async function generateHeroImage(
       'DALL-E image generation',
     );
     const url = response.data?.[0]?.url ?? null;
-    if (url) return { url: await saveImageUrlToDisk(url, slugHint), source: 'dalle3' };
+    if (url) return { url: await saveImageUrlToStorage(url, slugHint), source: 'dalle3' };
   } catch (err: any) {
     console.warn('[ai-batch] DALL-E 3 failed:', err.message);
   }
@@ -113,7 +113,7 @@ async function generateHeroImage(
         const data = await res.json();
         const images = data?.images ?? data?.output?.images ?? data?.data?.images ?? [];
         const url: string | null = images[0]?.url ?? images[0] ?? null;
-        if (url) return { url: await saveImageUrlToDisk(url, slugHint), source: 'flux' };
+        if (url) return { url: await saveImageUrlToStorage(url, slugHint), source: 'flux' };
       }
     } catch (err: any) {
       console.warn('[ai-batch] FLUX error:', err.message);
