@@ -24,6 +24,14 @@ interface DbPost {
   created_at: string
 }
 
+interface SupportingImage {
+  id: number
+  image_url: string
+  alt_text: string
+  section_heading: string | null
+  sort_order: number
+}
+
 async function getPost(slug: string): Promise<DbPost | null> {
   try {
     const rows = await sql`
@@ -37,6 +45,56 @@ async function getPost(slug: string): Promise<DbPost | null> {
   } catch {
     return null
   }
+}
+
+async function getSupportingImages(postId: number): Promise<SupportingImage[]> {
+  try {
+    return await sql`
+      SELECT id, image_url, alt_text, section_heading, sort_order
+      FROM blog_post_images
+      WHERE post_id = ${postId}
+      ORDER BY sort_order ASC, id ASC
+      LIMIT 3
+    ` as SupportingImage[]
+  } catch {
+    // Keep articles available while the new table is being rolled out.
+    return []
+  }
+}
+
+function splitArticleHtml(html: string): string[] {
+  const headings = [...html.matchAll(/<h2\b/gi)]
+    .map(match => match.index ?? 0)
+    .filter((index, position, all) => position === 0 || index !== all[position - 1])
+
+  if (headings.length === 0) return [html]
+
+  const chunks: string[] = []
+  if (headings[0] > 0) chunks.push(html.slice(0, headings[0]))
+  headings.forEach((start, index) => {
+    chunks.push(html.slice(start, headings[index + 1] ?? html.length))
+  })
+  return chunks.filter(chunk => chunk.trim())
+}
+
+function ArticleImage({ image }: { image: SupportingImage }) {
+  return (
+    <figure className="blog-supporting-image">
+      <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-[#e9eddf]">
+        <Image
+          src={image.image_url}
+          alt={image.alt_text}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 92vw, 720px"
+          quality={72}
+        />
+      </div>
+      {image.section_heading && (
+        <figcaption>{image.section_heading}</figcaption>
+      )}
+    </figure>
+  )
 }
 
 export async function generateMetadata(
@@ -65,6 +123,7 @@ export default async function BlogPostPage(
   const post = await getPost(slug)
 
   if (!post) notFound()
+  const supportingImages = await getSupportingImages(post.id)
 
   const publishDate = post.published_at ?? post.created_at
   const formattedDate = new Date(publishDate).toLocaleDateString('en-US', {
@@ -78,6 +137,8 @@ export default async function BlogPostPage(
   // otherwise render as plain paragraphs split by newline.
   const normalizedContent = normalizeBlogHtml(post.content)
   const isHtml = /<[a-z][\s\S]*>/i.test(normalizedContent)
+  const articleChunks = isHtml ? splitArticleHtml(normalizedContent) : []
+  const plainParagraphs = isHtml ? [] : post.content.split('\n').filter(Boolean)
 
   return (
     <>
@@ -110,30 +171,43 @@ export default async function BlogPostPage(
 
       {/* Featured image */}
       {post.featured_image && (
-        <div className="relative w-full h-64 sm:h-96 bg-[#e9eddf]">
-          <Image
-            src={post.featured_image}
-            alt={post.title}
-            fill
-            className="object-cover"
-            priority
-            sizes="100vw"
-          />
-        </div>
+        <section className="bg-[#f8f5ec] pt-8 sm:pt-10">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="relative aspect-[16/9] overflow-hidden rounded-2xl sm:rounded-3xl bg-[#e9eddf] shadow-[0_18px_50px_rgba(32,61,52,0.12)]">
+              <Image
+                src={post.featured_image}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 1024px) 94vw, 960px"
+                quality={78}
+              />
+            </div>
+          </div>
+        </section>
       )}
 
       {/* Content */}
-      <section className="py-12 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-12 sm:py-16 bg-[#f8f5ec]">
+        <div className="max-w-[760px] mx-auto px-5 sm:px-8">
           {isHtml ? (
-            <div
-              className="blog-content prose prose-lg prose-green max-w-none"
-              dangerouslySetInnerHTML={{ __html: normalizedContent }}
-            />
+            articleChunks.map((chunk, index) => (
+              <div key={index}>
+                <div
+                  className="blog-content prose prose-lg prose-green max-w-none"
+                  dangerouslySetInnerHTML={{ __html: chunk }}
+                />
+                {supportingImages[index] && <ArticleImage image={supportingImages[index]} />}
+              </div>
+            ))
           ) : (
             <div className="blog-content prose prose-lg prose-green max-w-none">
-              {post.content.split('\n').filter(Boolean).map((para, i) => (
-                <p key={i}>{para}</p>
+              {plainParagraphs.map((para, index) => (
+                <div key={index}>
+                  <p>{para}</p>
+                  {supportingImages[index] && <ArticleImage image={supportingImages[index]} />}
+                </div>
               ))}
             </div>
           )}

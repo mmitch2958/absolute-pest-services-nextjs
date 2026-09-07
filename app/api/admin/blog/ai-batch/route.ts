@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { sql } from '@/lib/db';
 import { saveImageUrlToStorage } from '@/lib/blog-image';
 import { normalizeBlogHtml } from '@/lib/blog-content';
+import { generateSupportingBlogImages, replaceSupportingBlogImages } from '@/lib/blog-supporting-images';
 import {
   BLOG_DALLE_MODEL,
   BLOG_IMAGE_PROMPT_MODEL,
@@ -294,6 +295,23 @@ export async function POST(req: NextRequest) {
           const saved = rows[0] as { id: number; title: string; slug: string };
           savedPosts.push(saved);
 
+          let supportingImageCount = 0;
+          if (includeImages) {
+            send(ctrl, { type: 'post_supporting_images', index: i });
+            try {
+              const supportingImages = await generateSupportingBlogImages({
+                title: topic.title,
+                category: topic.category,
+                excerpt: contentData.excerpt ?? topic.angle,
+                content: normalizeBlogHtml(contentData.content),
+              });
+              await replaceSupportingBlogImages(saved.id, supportingImages);
+              supportingImageCount = supportingImages.length;
+            } catch (error: any) {
+              console.warn('[ai-batch] supporting images skipped:', error.message);
+            }
+          }
+
           send(ctrl, {
             type: 'post_saved',
             index: i,
@@ -302,6 +320,7 @@ export async function POST(req: NextRequest) {
             slug: saved.slug,
             hasImage: !!imageResult,
             imageSource: imageResult?.source ?? null,
+            supportingImageCount,
           });
 
         } catch (err: any) {

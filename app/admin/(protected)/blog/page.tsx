@@ -779,7 +779,7 @@ function BatchCreateModal({ onClose, onComplete }: { onClose: () => void; onComp
 
 // ─── Bulk image regeneration modal ────────────────────────────────────────────
 
-type BulkImageMode = 'missing' | 'selected';
+type BulkImageMode = 'missing' | 'selected' | 'supporting';
 type BulkImageStatus = 'queued' | 'generating' | 'saved' | 'error';
 
 interface BulkImageItem {
@@ -895,7 +895,11 @@ function BulkImageModal({
           <div className="flex items-center gap-2">
             <RefreshCw className="w-5 h-5 text-orange-600" />
             <h2 className="text-lg font-semibold text-gray-900">
-              {mode === 'missing' ? 'Regenerate Missing Images' : 'Regenerate Selected Images'}
+              {mode === 'missing'
+                ? 'Regenerate Missing Images'
+                : mode === 'supporting'
+                  ? 'Generate Article Images'
+                  : 'Regenerate Selected Images'}
             </h2>
           </div>
           {phase !== 'running' && (
@@ -912,12 +916,16 @@ function BulkImageModal({
               <h3 className="text-lg font-bold text-gray-900 mb-2">
                 {mode === 'missing'
                   ? 'Find and repair every missing image?'
-                  : `Regenerate images for ${ids.length} selected post${ids.length !== 1 ? 's' : ''}?`}
+                  : mode === 'supporting'
+                    ? `Generate supporting images for ${ids.length} selected post${ids.length !== 1 ? 's' : ''}?`
+                    : `Regenerate images for ${ids.length} selected post${ids.length !== 1 ? 's' : ''}?`}
               </h3>
               <p className="text-sm text-gray-500 max-w-lg mx-auto mb-6">
                 {mode === 'missing'
                   ? 'This finds posts with no image or an old broken local image path. Valid external and App Storage images will not be changed.'
-                  : 'Existing images on the selected posts will be replaced. Each successful image is saved immediately, while failures remain available to retry.'}
+                  : mode === 'supporting'
+                    ? 'This creates up to three smaller, relevant images from each article’s major sections. Existing supporting images will be replaced.'
+                    : 'Existing images on the selected posts will be replaced. Each successful image is saved immediately, while failures remain available to retry.'}
               </p>
               <div className="flex justify-center gap-3">
                 <button onClick={onClose} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">
@@ -937,7 +945,7 @@ function BulkImageModal({
               <div className="flex items-center justify-between mb-4">
                 <p className="flex items-center gap-2 text-sm font-medium text-gray-700">
                   <Loader2 className="w-4 h-4 text-orange-500 animate-spin" />
-                  Generating and saving images…
+                  {mode === 'supporting' ? 'Generating article images…' : 'Generating and saving images…'}
                 </p>
                 <span className="text-xs text-gray-500">{completedCount} of {items.length || '—'} complete</span>
               </div>
@@ -960,7 +968,7 @@ function BulkImageModal({
                         <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
                         <p className={`text-xs mt-0.5 ${item.status === 'error' ? 'text-red-600' : item.status === 'saved' ? 'text-green-700' : 'text-gray-500'}`}>
                           {item.status === 'queued' ? 'Waiting…' :
-                            item.status === 'generating' ? 'Generating image…' :
+                            item.status === 'generating' ? (mode === 'supporting' ? 'Generating section images…' : 'Generating image…') :
                             item.status === 'saved' ? `Saved${item.source ? ` via ${item.source}` : ''}` :
                             item.message || 'Image generation failed'}
                         </p>
@@ -978,7 +986,9 @@ function BulkImageModal({
           {phase === 'done' && (
             <div className="text-center py-6">
               <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Image regeneration finished</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                {mode === 'supporting' ? 'Article images finished' : 'Image regeneration finished'}
+              </h3>
               <p className="text-sm text-gray-600 mb-6">
                 {savedCount} image{savedCount !== 1 ? 's' : ''} saved
                 {failedCount > 0 ? ` · ${failedCount} failed and can be retried` : ''}.
@@ -1192,6 +1202,14 @@ export default function BlogPage() {
           <span className="text-sm text-gray-500 mr-1">
             {selectedPostIds.size} selected
           </span>
+          <button
+            onClick={() => setBulkImageRequest({ mode: 'supporting', ids: [...selectedPostIds] })}
+            disabled={selectedPostIds.size === 0}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-green-700 border border-green-200 bg-white hover:bg-green-50 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <Sparkles className="w-4 h-4" />
+            Generate Article Images
+          </button>
           <button
             onClick={() => setBulkImageRequest({ mode: 'selected', ids: [...selectedPostIds] })}
             disabled={selectedPostIds.size === 0}

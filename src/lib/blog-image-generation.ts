@@ -19,7 +19,12 @@ export interface GeneratedBlogImage {
   prompt: string;
 }
 
-async function buildAIImagePrompt(title: string, category: string, excerpt?: string): Promise<string> {
+async function buildAIImagePrompt(
+  title: string,
+  category: string,
+  excerpt?: string,
+  kind: 'hero' | 'supporting' = 'hero',
+): Promise<string> {
   const context = excerpt
     ? `Title: ${title}\nCategory: ${category}\nSummary: ${excerpt}`
     : `Title: ${title}\nCategory: ${category}`;
@@ -32,11 +37,12 @@ async function buildAIImagePrompt(title: string, category: string, excerpt?: str
         messages: [
           {
             role: 'system',
-            content: `You write photorealistic image generation prompts for pest control blog hero images.
+            content: `You write photorealistic image generation prompts for pest control blog ${kind === 'hero' ? 'hero' : 'editorial supporting'} images.
 Given the blog's title, category, and summary, write a single descriptive prompt that:
 - Depicts the specific pest, situation, or solution described in the article
 - Is set in a southeastern Pennsylvania residential/suburban context
 - Is wide landscape orientation (16:9)
+- ${kind === 'supporting' ? 'Focus tightly on this section and differ from a generic cover image' : 'Create a strong editorial cover composition'}
 - Has NO text, NO watermarks, NO logos, NO human faces
 - Is vivid, specific, and photorealistic — not generic
 Return ONLY the prompt, nothing else.`,
@@ -142,9 +148,11 @@ export async function generateBlogImage(
   title: string,
   category = 'General Pests',
   excerpt?: string,
+  options: { kind?: 'hero' | 'supporting'; slugSuffix?: string } = {},
 ): Promise<GeneratedBlogImage> {
-  const prompt = await buildAIImagePrompt(title, category, excerpt);
-  const slugHint = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const prompt = await buildAIImagePrompt(title, category, excerpt, options.kind);
+  const baseSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const slugHint = options.slugSuffix ? `${baseSlug}-${options.slugSuffix}` : baseSlug;
 
   const geminiImage = await tryGeminiOpenRouter(prompt);
   if (geminiImage) {

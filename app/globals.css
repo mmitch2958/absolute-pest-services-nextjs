@@ -55,16 +55,73 @@ body {
   color: #9ca3af;
 }
 
-/* AI-generated blog HTML must remain readable on the white article surface. */
+/* Editorial blog typography must remain readable even when AI HTML contains styling. */
 .blog-content {
   color: #3f5049 !important;
+  font-size: clamp(1.04rem, 0.99rem + 0.2vw, 1.16rem);
+  line-height: 1.82;
 }
 .blog-content :where(p, li, blockquote, td, th) {
   color: #3f5049 !important;
 }
+.blog-content p {
+  margin: 0 0 1.45rem !important;
+  text-indent: 1.35rem;
+}
+.blog-content :where(h2, h3, h4) + p,
+.blog-content p:first-child {
+  text-indent: 0;
+}
 .blog-content :where(h2, h3, h4, strong) {
   color: #203d34 !important;
 }
+.blog-content h2 {
+  margin: 3.25rem 0 1.15rem !important;
+  padding-top: 0.35rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.7rem, 1.45rem + 0.8vw, 2.2rem);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.blog-content h3 {
+  margin: 2.35rem 0 0.9rem !important;
+  font-size: clamp(1.25rem, 1.13rem + 0.4vw, 1.5rem);
+  line-height: 1.3;
+}
+.blog-content :where(ul, ol) {
+  margin: 1rem 0 1.8rem !important;
+  padding-left: 1.55rem !important;
+}
+.blog-content li {
+  margin-bottom: 0.65rem;
+}
 .blog-content a {
   color: #173f35 !important;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.blog-supporting-image {
+  margin: 2.7rem 0 3.1rem;
+}
+.blog-supporting-image figcaption {
+  margin-top: 0.7rem;
+  color: #6c786f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.86rem;
+  font-style: italic;
+  line-height: 1.45;
+  text-align: center;
+}
+@media (max-width: 640px) {
+  .blog-content {
+    line-height: 1.74;
+  }
+  .blog-content p {
+    margin-bottom: 1.25rem !important;
+    text-indent: 1rem;
+  }
+  .blog-supporting-image {
+    margin: 2.2rem 0 2.6rem;
+  }
 }
