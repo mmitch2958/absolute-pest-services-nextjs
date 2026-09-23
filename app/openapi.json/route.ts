@@ -12,7 +12,7 @@ export async function GET() {
       title: 'Absolute Pest Services Public API',
       version: '1.0.0',
       description:
-        'Public endpoints exposed by absolutepestservices.com. Lead capture is handled via the website form at /request-service (protected by Cloudflare Turnstile). For booking service, please call 484-643-2225 or use the contact form.',
+        'Public endpoints exposed by absolutepestservices.com for a local pest-control and humane wildlife-removal provider serving Chester County, Pennsylvania and northern Delaware. Lead capture is handled via the website form at /request-service (protected by Cloudflare Turnstile). Confirm address coverage, availability, timing, treatment, and price directly with the company.',
       contact: {
         name: 'Absolute Pest Services',
         url: `${SITE}/contact`,

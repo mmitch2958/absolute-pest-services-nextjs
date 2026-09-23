@@ -6,28 +6,39 @@ import Footer from '@/components/layout/Footer'
 import Analytics from '@/components/analytics/Analytics'
 import WebMCPProvider from '@/components/agent/WebMCPProvider'
 import StickyServiceCTA from '@/components/layout/StickyServiceCTA'
+import {
+  BUSINESS_NAME,
+  businessSchema,
+  websiteSchema,
+} from '@/lib/business-profile'
 
 const GTM_ID = 'GTM-K3VG6J2W'
-
 const inter = Inter({ subsets: ['latin'] })
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
 }
-
 export const metadata: Metadata = {
   metadataBase: new URL('https://absolutepestservices.com'),
   title: {
-    default: 'Absolute Pest Services - Professional Pest Control in PA & DE',
-    template: '%s',
+    default:
+      'Pest Control in Chester County PA & Northern Delaware | Absolute Pest Services',
+    template: `%s | ${BUSINESS_NAME}`,
   },
   description:
-    'Expert pest control in PA & DE. Humane wildlife control, bed bug treatment, termite protection & bat removal. Licensed, insured & available 24/7. Call 484-643-2225.',
+    'Local extermination, termite treatment, bed bug treatment, rodent control, and humane wildlife removal in Chester County, PA and northern Delaware. Call 484-643-2225.',
+  alternates: {
+    types: {
+      'text/plain': '/llms.txt',
+    },
+  },
   openGraph: {
     type: 'website',
-    siteName: 'Absolute Pest Services',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Absolute Pest Services' }],
+    siteName: BUSINESS_NAME,
+    title: 'Pest Control in Chester County PA & Northern Delaware',
+    description:
+      'Local pest control and humane wildlife removal for Chester County, PA and northern Delaware.',
     locale: 'en_US',
   },
   twitter: {
@@ -42,45 +53,20 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const organizationSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    '@id': 'https://absolutepestservices.com/#organization',
-    name: 'Absolute Pest Services',
-    url: 'https://absolutepestservices.com',
-    logo: 'https://absolutepestservices.com/images/absolute-wordmark.svg',
-    telephone: '+1-484-643-2225',
-    email: 'info@absolutepestservices.com',
-    sameAs: [
-      'https://www.facebook.com/absolutepestservices',
-      'https://www.google.com/maps/place/Absolute+Pest+Services',
-    ],
-  }
-
-  const websiteSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    '@id': 'https://absolutepestservices.com/#website',
-    url: 'https://absolutepestservices.com',
-    name: 'Absolute Pest Services',
-    publisher: {
-      '@id': 'https://absolutepestservices.com/#organization',
-    },
-    inLanguage: 'en-US',
-  }
-
   return (
     <html lang="en">
       <head>
-        {/* Performance preconnects */}
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        <link rel="ard" href="/.well-known/ard.json" type="application/json" />
+        <link
+          rel="ai-catalog"
+          href="/.well-known/ai-catalog.json"
+          type="application/json"
+        />
       </head>
       <body className={inter.className}>
-        {/* Google Tag Manager — plain <script> tag. Using next/script in Next 16's
-            root layout caused "Element type is invalid" runtime errors because Script
-            was resolving as a Promise. Inline scripts emit reliably this way. */}
         <script
           id="gtm-init"
           dangerouslySetInnerHTML={{
@@ -92,7 +78,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }}
         />
 
-        {/* Google Ads + GA4 (gtag) — separate from GTM */}
         <script
           id="gtag-loader"
           async
@@ -111,7 +96,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }}
         />
 
-        {/* Google Tag Manager (noscript) — fallback for users without JS */}
         <noscript>
           <iframe
             src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
@@ -121,54 +105,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
         </noscript>
 
-        {/* JSON-LD Structured Data — LocalBusiness + AggregateRating */}
+        {/* Keep one authoritative entity to avoid conflicting contact,
+            service-area, hours, and review claims. */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'PestControlBusiness',
-              name: 'Absolute Pest Services',
-              url: 'https://absolutepestservices.com',
-              telephone: '+1-610-869-3000',
-              priceRange: '$$',
-              address: {
-                '@type': 'PostalAddress',
-                addressRegion: 'PA',
-                addressLocality: 'Pennsylvania',
-                addressCountry: 'US',
-              },
-              areaServed: [
-                { '@type': 'State', name: 'Pennsylvania' },
-                { '@type': 'State', name: 'Delaware' },
-              ],
-              openingHoursSpecification: {
-                '@type': 'OpeningHoursSpecification',
-                dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-                opens: '08:00',
-                closes: '18:00',
-              },
-              aggregateRating: {
-                '@type': 'AggregateRating',
-                ratingValue: '4.8',
-                reviewCount: '247',
-              },
-              review: [
-                {
-                  '@type': 'Review',
-                  reviewRating: { '@type': 'Rating', ratingValue: '5' },
-                  author: { '@type': 'Person', name: 'Verified Customer' },
-                  reviewBody: 'Professional and thorough pest control service. Highly recommend for termite treatment.',
-                },
-              ],
-            }),
-          }}
-        />
-
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify([organizationSchema, websiteSchema]),
+            __html: JSON.stringify([businessSchema, websiteSchema]).replace(
+              /</g,
+              '\\u003c'
+            ),
           }}
         />
 
@@ -176,9 +121,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <main>{children}</main>
         <Footer />
         <StickyServiceCTA />
-        {/* Client-side analytics: phone click tracking + SPA pageview events */}
         <Analytics />
-        {/* WebMCP — exposes site tools to AI agents (no-op if browser doesn't support it) */}
         <WebMCPProvider />
       </body>
     </html>

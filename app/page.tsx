@@ -19,113 +19,20 @@ import {
 } from 'lucide-react'
 import GoogleReviews from '@/components/reviews/GoogleReviews'
 import ServiceRequestForm from '@/components/forms/ServiceRequestForm'
+import { homePageSchema } from '@/lib/business-profile'
 import styles from './home.module.css'
 
 export const metadata: Metadata = {
-  title: 'Absolute Pest Services - Professional Pest Control in PA & DE',
+  title: 'Pest Control in Chester County PA & Northern Delaware',
   description:
-    'Expert pest control in PA & DE. Humane wildlife control, bed bug treatment, termite protection & bat removal. Licensed, insured & available 24/7. Call 484-643-2225.',
+    'Local extermination, termite treatment, bed bug treatment, rodent control, and humane wildlife removal in Chester County, PA and northern Delaware. Call 484-643-2225.',
   alternates: {
     canonical: 'https://absolutepestservices.com/',
   },
   openGraph: {
     url: 'https://absolutepestservices.com/',
-    title: 'Absolute Pest Services - Professional Pest Control in PA & DE',
+    title: 'Pest Control in Chester County PA & Northern Delaware',
   },
-}
-
-const localBusinessSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'LocalBusiness',
-  '@id': 'https://absolutepestservices.com/#business',
-  name: 'Absolute Pest Services',
-  telephone: '484-643-2225',
-  email: 'info@absolutepestservices.com',
-  address: {
-    '@type': 'PostalAddress',
-    addressLocality: 'West Grove',
-    addressRegion: 'PA',
-    postalCode: '19390',
-    addressCountry: 'US',
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: 39.8221,
-    longitude: -75.8274,
-  },
-  url: 'https://absolutepestservices.com',
-  sameAs: [],
-  areaServed: [
-    { '@type': 'State', name: 'Pennsylvania' },
-    { '@type': 'State', name: 'Delaware' },
-  ],
-  priceRange: '$$',
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '5',
-    bestRating: '5',
-    worstRating: '1',
-    reviewCount: '47',
-  },
-  openingHoursSpecification: [
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      opens: '07:00',
-      closes: '19:00',
-    },
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Saturday'],
-      opens: '08:00',
-      closes: '17:00',
-    },
-  ],
-  hasOfferCatalog: {
-    '@type': 'OfferCatalog',
-    name: 'Pest Control Services',
-    itemListElement: [
-      {
-        '@type': 'Offer',
-        itemOffered: { '@type': 'Service', name: 'Wildlife Control' },
-      },
-      {
-        '@type': 'Offer',
-        itemOffered: { '@type': 'Service', name: 'Bed Bug Treatment' },
-      },
-      {
-        '@type': 'Offer',
-        itemOffered: { '@type': 'Service', name: 'Termite Treatment' },
-      },
-      {
-        '@type': 'Offer',
-        itemOffered: { '@type': 'Service', name: 'Bat Removal' },
-      },
-      {
-        '@type': 'Offer',
-        itemOffered: { '@type': 'Service', name: 'Rodent Control' },
-      },
-    ],
-  },
-}
-
-const homePageSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'WebPage',
-  '@id': 'https://absolutepestservices.com/#homepage',
-  url: 'https://absolutepestservices.com/',
-  name: 'Absolute Pest Services - Professional Pest Control in PA & DE',
-  isPartOf: {
-    '@id': 'https://absolutepestservices.com/#website',
-  },
-  about: {
-    '@id': 'https://absolutepestservices.com/#business',
-  },
-  primaryImageOfPage: {
-    '@type': 'ImageObject',
-    url: 'https://absolutepestservices.com/images/Hero1.jpg',
-  },
-  dateModified: '2026-05-27',
 }
 
 const services = [
@@ -190,26 +97,25 @@ export default function HomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([localBusinessSchema, homePageSchema]),
+          __html: JSON.stringify(homePageSchema).replace(/</g, '\\u003c'),
         }}
       />
 
       <section className={styles.hero} aria-labelledby="home-heading">
         <div className={styles.heroCopy}>
           <p className={styles.eyebrow}>
-            <span className={styles.dot} /> YOUR LOCAL PEST CONTROL TEAM · PA
-            &amp; DE
+            <span className={styles.dot} /> ABSOLUTE PEST SERVICES · LOCAL PA
+            &amp; DE TEAM
           </p>
           <h1 id="home-heading">
-            Your home.
-            <br />
-            Your peace
-            <br />
-            of <em>mind.</em>
+            Pest control for <br />
+            <em>Chester County</em> &amp; <br />
+            northern Delaware.
           </h1>
           <p className={styles.heroDescription}>
-            Pests don’t belong in your everyday life. We help you take your
-            space back with expert pest control and humane wildlife removal.
+            Local help for ants, termites, bed bugs, rodents, wasps, carpenter
+            bees, bats, and nuisance wildlife. We serve homes and businesses
+            across Chester County, PA and New Castle County, DE.
           </p>
           <div className={styles.heroActions}>
             <Link className={styles.primaryButton} href="#contact-form">

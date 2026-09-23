@@ -53,15 +53,18 @@ export default function AboutPage() {
             </p>
 
             <h2 className="text-2xl font-bold text-[#203d34] mb-4">Contact Us</h2>
-            <p className="text-[#3f5049] mb-2">
-              <strong>Main:</strong> <a href="tel:6108693000" className="text-[#173f35] hover:underline">610-869-3000</a>
-            </p>
-            <p className="text-[#3f5049] mb-2">
-              <strong>Cell:</strong> <a href="tel:4846432225" className="text-[#173f35] hover:underline">484-643-2225</a>
-            </p>
-            <p className="text-[#3f5049] mb-6">
-              <strong>Delaware:</strong> <a href="tel:6103254000" className="text-[#173f35] hover:underline">610-325-4000</a>
-            </p>
+          <p className="text-[#3f5049] mb-2">
+            <strong>Main:</strong>{' '}
+            <a href="tel:4846432225" className="text-[#173f35] hover:underline">
+              484-643-2225
+            </a>
+          </p>
+          <p className="text-[#3f5049] mb-6">
+            <strong>Northern Delaware:</strong>{' '}
+            <a href="tel:3022351975" className="text-[#173f35] hover:underline">
+              302-235-1975
+            </a>
+          </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
               <Link

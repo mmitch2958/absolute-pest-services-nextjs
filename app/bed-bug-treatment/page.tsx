@@ -76,12 +76,6 @@ const localBusinessSchema = {
     { '@type': 'State', name: 'Pennsylvania' },
     { '@type': 'State', name: 'Delaware' },
   ],
-  priceRange: '$$',
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '5.0',
-    reviewCount: '247',
-  },
 }
 
 const serviceSchema = {
@@ -102,7 +96,6 @@ const serviceSchema = {
     { '@type': 'State', name: 'Pennsylvania' },
     { '@type': 'State', name: 'Delaware' },
   ],
-  priceRange: '$$',
 }
 
 export default function BedBugTreatmentPage() {

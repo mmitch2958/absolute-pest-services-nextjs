@@ -25,8 +25,8 @@ async function sendOne(params: EmailParams): Promise<boolean> {
   try {
     await sgMail.send({ from: FROM_EMAIL, ...params });
     return true;
-  } catch (err: any) {
-    console.error(`[email] Failed to send to ${params.to}:`, err?.response?.body ?? err?.message ?? err);
+  } catch (err: unknown) {
+    console.error(`[email] Failed to send to ${params.to}:`, err);
     return false;
   }
 }
@@ -60,7 +60,6 @@ Name: ${data.name}
 Email: ${data.email}
 Phone: ${data.phone}
 Service: ${data.service}
-ZIP: ${data.zip}
 ${data.message ? `Message: ${data.message}` : ''}`;
 
   await Promise.all(
@@ -139,10 +138,14 @@ Questions? Reply to this email or call us.
 - Absolute Pest Services`;
 
   try {
-    const mail: any = { from: FROM_EMAIL, to: data.to, subject, html, text };
-    if (data.cc && data.cc.length > 0) {
-      mail.cc = data.cc;
-    }
+    const mail = {
+      from: FROM_EMAIL,
+      to: data.to,
+      subject,
+      html,
+      text,
+      ...(data.cc && data.cc.length > 0 ? { cc: data.cc } : {}),
+    };
     await sgMail.send(mail);
     if (data.ccInternal) {
       // Send a copy to office
@@ -154,9 +157,12 @@ Questions? Reply to this email or call us.
       });
     }
     return { success: true };
-  } catch (err: any) {
-    console.error('[email] sendInvoiceToCustomer failed:', err?.response?.body ?? err?.message ?? err);
-    return { success: false, error: err?.message || 'Email send failed' };
+  } catch (err: unknown) {
+    console.error('[email] sendInvoiceToCustomer failed:', err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Email send failed',
+    };
   }
 }
 

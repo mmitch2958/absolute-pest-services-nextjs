@@ -42,10 +42,8 @@ export default function ContactPage() {
                 <div className="flex items-start gap-4">
                   <Phone className="w-6 h-6 text-[#173f35] mt-0.5 shrink-0" />
                   <div>
-                    <p className="font-semibold text-[#203d34]">Phone — PA (Main)</p>
-                    <a href="tel:6108693000" className="text-[#173f35] hover:underline text-lg">610-869-3000</a>
-                    <br />
-                    <a href="tel:4846432225" className="text-[#173f35] hover:underline">484-643-2225</a>
+                  <p className="font-semibold text-[#203d34]">Phone — Main</p>
+                  <a href="tel:4846432225" className="text-[#173f35] hover:underline text-lg">484-643-2225</a>
                   </div>
                 </div>
 
@@ -53,9 +51,7 @@ export default function ContactPage() {
                   <Phone className="w-6 h-6 text-[#173f35] mt-0.5 shrink-0" />
                   <div>
                     <p className="font-semibold text-[#203d34]">Phone — Delaware</p>
-                    <a href="tel:6103254000" className="text-[#173f35] hover:underline text-lg">610-325-4000</a>
-                    <br />
-                    <a href="tel:3022351975" className="text-[#173f35] hover:underline">302-235-1975</a>
+                  <a href="tel:3022351975" className="text-[#173f35] hover:underline text-lg">302-235-1975</a>
                   </div>
                 </div>
 

@@ -113,6 +113,10 @@ const nextConfig: NextConfig = {
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           {
+            key: 'Content-Signal',
+            value: 'search=yes, ai-input=yes, ai-train=no',
+          },
+          {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains; preload',
           },
@@ -127,6 +131,9 @@ const nextConfig: NextConfig = {
             value: [
               '</.well-known/api-catalog>; rel="api-catalog"; type="application/linkset+json"',
               '</.well-known/agent-skills/index.json>; rel="https://agentskills.io/rels/index"; type="application/json"',
+              '</.well-known/ard.json>; rel="ard"; type="application/json"',
+              '</.well-known/ai-catalog.json>; rel="ai-catalog"; type="application/json"',
+              '</llms.txt>; rel="alternate"; type="text/plain"; title="LLM service guide"',
               '</openapi.json>; rel="service-desc"; type="application/json"',
               '</api/health>; rel="status"',
               '</sitemap.xml>; rel="sitemap"; type="application/xml"',
