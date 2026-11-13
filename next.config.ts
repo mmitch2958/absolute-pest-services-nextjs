@@ -119,6 +119,15 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Keep the Vercel-hosted test copy (new.absolutepestservices.com) out of
+        // search results. This must stay a host match: production hosts never
+        // match, so production pages are not affected. Do not replace this with a
+        // robots.txt Disallow - a blocked crawler cannot read a noindex header.
+        source: '/:path*',
+        has: [{ type: 'host', value: 'new.absolutepestservices.com' }],
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
         // RFC 8288 Link headers — agent discovery on the homepage and key pages
         source: '/((?!_next/|api/|admin/|field/).*)',
         headers: [
